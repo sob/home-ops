@@ -18,7 +18,7 @@ spec:
     fullnameOverride: flame
     image:
       repository: docker.io/pawelmalak/flame
-      tag: 2.3.0
+      tag: 2.3.1
     env:
       TZ: "${TIMEZONE}"
     service:
