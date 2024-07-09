@@ -5,7 +5,7 @@ talosVersion: v1.7.5
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
 kubernetesVersion: v1.30.2
 
-clusterName: "stone-metal"
+clusterName: "stone"
 endpoint: https://10.1.100.100:6443
 clusterPodNets:
   - "10.69.0.0/16"
@@ -21,10 +21,10 @@ cniConfig:
   name: none
 
 nodes:
-  - hostname: "stone-metal-01"
+  - hostname: "metal-01"
     ipAddress: "10.1.100.101"
     installDiskSelector:
-      serial: "18301DCB64A4"
+      model: "Micron_1100_MTFD"
     talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: true
     networkInterfaces:
@@ -39,10 +39,10 @@ nodes:
         mtu: 1500
         vip:
           ip: "10.1.100.100"
-  - hostname: "stone-metal-02"
+  - hostname: "metal-02"
     ipAddress: "10.1.100.102"
     installDiskSelector:
-      serial: "18291DCB4F0F"
+      model: "Micron_1100_MTFD"
     talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: true
     networkInterfaces:
@@ -57,10 +57,10 @@ nodes:
         mtu: 1500
         vip:
           ip: "10.1.100.100"
-  - hostname: "stone-metal-03"
+  - hostname: "metal-03"
     ipAddress: "10.1.100.103"
     installDiskSelector:
-      serial: "18301DCB64FD"
+      model: "Micron_1100_MTFD"
     talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: true
     networkInterfaces:
@@ -75,54 +75,6 @@ nodes:
         mtu: 1500
         vip:
           ip: "10.1.100.100"
-  - hostname: "stone-metal-04"
-    ipAddress: "10.1.100.104"
-    installDiskSelector:
-      serial: "S4P2NF0M400765R"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
-    controlPlane: false
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "94:c6:91:14:7d:20"
-        dhcp: false
-        addresses:
-          - "10.1.100.104/24"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.1.100.1"
-        mtu: 1500
-  - hostname: "stone-metal-05"
-    ipAddress: "10.1.100.105"
-    installDiskSelector:
-      serial: "21313G804237"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
-    controlPlane: false
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "94:c6:91:a5:7b:b4"
-        dhcp: false
-        addresses:
-          - "10.1.100.105/24"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.1.100.1"
-        mtu: 1500
-  - hostname: "stone-metal-06"
-    ipAddress: "10.1.100.106"
-    installDiskSelector:
-      serial: "211703A004FC"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
-    controlPlane: false
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "94:c6:91:a4:64:bc"
-        dhcp: false
-        addresses:
-          - "10.1.100.106/24"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.1.100.1"
-        mtu: 1500
 
 # Global patches
 patches:
