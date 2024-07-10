@@ -8,6 +8,7 @@ resources:
   - ./descheduler.yaml
   - ./emqx.yaml
   - ./external-secrets.yaml
+  - ./intel.yaml
   - ./jetstack.yaml
   - ./metrics-server.yaml
   - ./node-feature-discovery.yaml
