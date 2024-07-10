@@ -97,7 +97,9 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: sabnzbd
+        type: nfs
+        server: 10.1.0.226
+        path: /volume1/Data/sabnzbd
       logs:
         type: emptyDir
         globalMounts:
