@@ -5,10 +5,12 @@ resources:
   - ./bjw-s.yaml
   - ./cilium.yaml
   - ./coredns.yaml
+  - ./descheduler.yaml
   - ./emqx.yaml
   - ./external-secrets.yaml
   - ./jetstack.yaml
   - ./metrics-server.yaml
+  - ./node-feature-discovery.yaml
   - ./openebs.yaml
   - ./postfinance.yaml
   - ./prometheus-community.yaml
