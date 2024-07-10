@@ -5,6 +5,7 @@ resources:
   - ./bjw-s.yaml
   - ./cilium.yaml
   - ./coredns.yaml
+  - ./eqmx.yaml
   - ./external-secrets.yaml
   - ./jetstack.yaml
   - ./metrics-server.yaml
