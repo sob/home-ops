@@ -75,6 +75,38 @@ nodes:
         mtu: 1500
         vip:
           ip: "10.1.100.100"
+  - hostname: "metal-05"
+    ipAddress: "10.1.100.105"
+    installDiskSelector:
+      model: "21313G804237"
+    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "94:c6:91:a5:7b:b4"
+        dhcp: false
+        addresses:
+          - "10.1.100.105/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.1.100.1"
+        mtu: 1500
+  - hostname: "metal-06"
+    ipAddress: "10.1.100.106"
+    installDiskSelector:
+      model: "211703A004FC"
+    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "94:c6:91:a4:64:bc"
+        dhcp: false
+        addresses:
+          - "10.1.100.106/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.1.100.1"
+        mtu: 1500
 
 # Global patches
 patches:
