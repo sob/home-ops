@@ -27,7 +27,7 @@ spec:
       replicaCount: 2
       service:
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+          external-dns.alpha.kubernetes.io/hostname: internal.56kbps.io
           io.cilium/lb-ipam-ips: "10.1.100.200"
       ingressClassResource:
         name: internal
