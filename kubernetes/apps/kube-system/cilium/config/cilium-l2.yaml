@@ -21,4 +21,4 @@ metadata:
 spec:
   allowFirstLastIPs: "Yes"
   blocks:
-    - cidr: "10.1.100.0/24"
+    - cidr: "${SECRET_METAL_CIDR}"

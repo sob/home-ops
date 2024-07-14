@@ -64,7 +64,7 @@ spec:
     sources: ["ingress", "service"]
     txtOwnerId: stone
     txtPrefix: k8s.
-    domainFilters: ["56kbps.io"]
+    domainFilters: ["${SECRET_DOMAIN}"]
     serviceMonitor:
       enabled: true
     podAnnotations:

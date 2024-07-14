@@ -33,12 +33,12 @@ spec:
               repository: quay.io/minio/minio
               tag: RELEASE.2024-06-29T01-20-47Z@sha256:fce0a90a37bb2887c850b68b61a0ac8ac02ea218b58eaea96bb7ca69eb503e20
             env:
-              MINIO_API_CORS_ALLOW_ORIGIN: https://minio.56kbps.io,https://s3.56kbps.io
-              MINIO_BROWSER_REDIRECT_URL: https://minio.56kbps.io
+              MINIO_API_CORS_ALLOW_ORIGIN: https://minio.${SECRET_DOMAIN},https://s3.${SECRET_DOMAIN}
+              MINIO_BROWSER_REDIRECT_URL: https://minio.${SECRET_DOMAIN}
               MINIO_PROMETHEUS_JOB_ID: minio
-              MINIO_PROMETHEUS_URL: https://prometheus.56kbps.io
+              MINIO_PROMETHEUS_URL: https://prometheus.${SECRET_DOMAIN}
               MINIO_PROMETHEUS_AUTH_TYPE: public
-              MINIO_SERVER_URL: https://s3.56kbps.io
+              MINIO_SERVER_URL: https://s3.${SECRET_DOMAIN}
               MINIO_STORAGE_CLASS_RRS: EC:0
               MINIO_STORAGE_CLASS_STANDARD: EC:0
               MINIO_UPDATE: "off"
@@ -97,16 +97,16 @@ spec:
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         className: internal
         hosts:
-          - host: "{{ .Release.Name }}.56kbps.io"
+          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
-          - host: s3.56kbps.io
+          - host: s3.${SECRET_DOMAIN}
             paths:
               - path: /
                 service:

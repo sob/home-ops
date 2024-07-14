@@ -42,7 +42,7 @@ spec:
                 sabnzbd.default.svc,
                 sabnzbd.default.svc.cluster,
                 sabnzbd.default.svc.cluster.local,
-                sab.56kbps.io
+                sab.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -86,10 +86,10 @@ spec:
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         className: internal
         hosts:
-          - host: sab.56kbps.io
+          - host: sab.${SECRET_DOMAIN}
             paths:
               - path: /
                 service:
