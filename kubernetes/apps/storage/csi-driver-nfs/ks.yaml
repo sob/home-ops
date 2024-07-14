@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: "./kubernetes/apps/system/csi-driver-nfs/app"
+  path: "./kubernetes/apps/storage/csi-driver-nfs/app"
   prune: true
   sourceRef:
     kind: GitRepository

@@ -113,8 +113,11 @@ spec:
                   identifier: app
                   port: s3
     persistence:
+      data:
+        type: nfs
+        server: ${SECRET_NFS_SERVER}
+        path: ${SECRET_NFS_PATH_DATA}/minio/
       config:
-        enabled: true
-        existingClaim: config-minio-0
-        globalMounts:
-          - path: /config
+        type: nfs
+        server: ${SECRET_NFS_SERVER}
+        path: ${SECRET_NFS_PATH_CONFIG}/minio/

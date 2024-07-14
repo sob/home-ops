@@ -3,7 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: config-minio-0
-  namespace: default
+  namespace: storage
 spec:
   storageClassName: nfs-provision-csi
   accessModes:
