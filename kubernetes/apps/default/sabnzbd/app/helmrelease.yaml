@@ -98,8 +98,8 @@ spec:
     persistence:
       config:
         type: nfs
-        server: 10.1.0.226
-        path: /volume1/Data/sabnzbd
+        server: ${SECRET_NFS_SERVER}
+        path: ${SECRET_NFS_PATH_CONFIG}/sabnzbd
       logs:
         type: emptyDir
         globalMounts:
@@ -108,8 +108,8 @@ spec:
         type: emptyDir
       media:
         type: nfs
-        server: 10.1.0.226
-        path: /volume1/Media
+        server: ${SECRET_NFS_SERVER}
+        path: ${SECRET_NFS_PATH_MEDIA}
         globalMounts:
-          - path: /media/Downloads/sabnzbd
+          - path: /Downloads/sabnzbd
             subPath: Downloads/sabnzbd
