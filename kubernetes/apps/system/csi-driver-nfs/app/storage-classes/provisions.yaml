@@ -8,7 +8,7 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: 10.1.0.226
-  share: /volume1/Data
+  share: /volume1/kubernetes
 allowVolumeExpansion: true
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
