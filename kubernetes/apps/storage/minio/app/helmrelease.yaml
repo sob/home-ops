@@ -68,15 +68,15 @@ spec:
                 cpu: 100m
               limits:
                 memory: 2Gi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [10000]
-        seccompProfile: { type: RuntimeDefault }
+#    defaultPodOptions:
+#      securityContext:
+#        runAsNonRoot: true
+#        runAsUser: 568
+#        runAsGroup: 568
+#        fsGroup: 568
+#        fsGroupChangePolicy: OnRootMismatch
+#        supplementalGroups: [10000]
+#        seccompProfile: { type: RuntimeDefault }
     service:
       app:
         controller: minio
@@ -113,11 +113,9 @@ spec:
                   identifier: app
                   port: s3
     persistence:
-      data:
-        type: nfs
-        server: ${SECRET_NFS_SERVER}
-        path: ${SECRET_NFS_PATH_DATA}/minio/
       config:
         type: nfs
         server: ${SECRET_NFS_SERVER}
-        path: ${SECRET_NFS_PATH_CONFIG}/minio/
+        path: ${SECRET_NFS_PATH_DATA}/minio/
+        globalMounts:
+          - path: /data
