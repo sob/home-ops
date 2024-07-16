@@ -65,25 +65,26 @@ spec:
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
+                memory: 100Mi
                 cpu: 100m
               limits:
                 memory: 2Gi
-#    defaultPodOptions:
-#      securityContext:
-#        runAsNonRoot: true
-#        runAsUser: 568
-#        runAsGroup: 568
-#        fsGroup: 568
-#        fsGroupChangePolicy: OnRootMismatch
-#        supplementalGroups: [10000]
-#        seccompProfile: { type: RuntimeDefault }
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [10000]
+        seccompProfile: { type: RuntimeDefault }
     service:
       app:
         controller: minio
         ports:
           http:
             port: 9001
-          s3:
+          api:
             port: 9000
     serviceMonitor:
       app:
@@ -96,9 +97,9 @@ spec:
             scrapeTimeout: 10s
     ingress:
       app:
+        className: internal
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-        className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
