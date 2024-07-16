@@ -84,7 +84,7 @@ spec:
         ports:
           http:
             port: 9001
-          api:
+          s3:
             port: 9000
     serviceMonitor:
       app:
