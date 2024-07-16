@@ -115,6 +115,8 @@ spec:
                   port: s3
     persistence:
       config:
-        existingClaim: minio-data-0
+        type: nfs
+        server: ${SECRET_NFS_SERVER}
+        path: /volume1/minio
         globalMounts:
           - path: /data
