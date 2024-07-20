@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emqx-gatus-ep
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: emqx
+        group: infrastructure
+        url: tcp://eqmx.database.svc.cluster.local:5432
+        interval: 1m
+        ui:
+          hide-url: true
+          hide-hostname: true
+        conditions:
+          - "[CONNECTED] == true"
+        alerts:
+          - type: pushover
+      - name: emqx-console
+        group: infrastucture
+        url: https://eqmx.56kbps.io
+        interval: 1m
+        ui:
+          hide-url: false
+          hide-hostname: false
+        conditions:
+          - "[STATUS] == 200"
