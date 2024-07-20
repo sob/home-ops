@@ -10,6 +10,15 @@ data:
     endpoints:
       - name: "${APP}"
         group: guarded
+        url: "https://${GATUS_SUBDOMAIN:-${APP}}.${SECRET_DOMAIN}"
+        interval: 1m
+        ui:
+          hide-hostname: true
+          hide-url: false
+        conditions:
+          - "[STATUS] == 200"
+      - name: "${APP}-dns"
+        group: guarded
         url: 1.1.1.1
         interval: 1m
         ui:
