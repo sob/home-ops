@@ -10,7 +10,7 @@ data:
     endpoints:
       - name: emqx
         group: infrastructure
-        url: tcp://eqmx.database.svc.cluster.local:1883
+        url: tcp://emqx-lsiteners.database.svc.cluster.local:1883
         interval: 1m
         ui:
           hide-url: true
@@ -19,9 +19,9 @@ data:
           - "[CONNECTED] == true"
         alerts:
           - type: pushover
-      - name: emqx-console
+      - name: emqx-dashboard
         group: infrastructure
-        url: https://eqmx.database.svc.cluster.local
+        url: https://emqx-dashboard.database.svc.cluster.local
         interval: 1m
         ui:
           hide-url: false
