@@ -10,7 +10,7 @@ data:
     endpoints:
       - name: "${APP}"
         group: guarded
-        url: "https://${GATUS_SUBDOMAIN:-${APP}}"
+        url: "https://${GATUS_SUBDOMAIN:-${APP}}.${SECRET_DOMAIN}"
         interval: 1m
         ui:
           hide-hostname: false
