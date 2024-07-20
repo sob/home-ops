@@ -10,11 +10,13 @@ data:
     endpoints:
       - name: "${APP}"
         group: guarded
-        url: "https://${GATUS_SUBDOMAIN:-${APP}}.${SECRET_DOMAIN}"
+        url: "https://${GATUS_SUBDOMAIN:-${APP}}"
         interval: 1m
         ui:
-          hide-hostname: true
+          hide-hostname: false
           hide-url: false
+        client:
+          dns-resolver: tcp://10.1.0.1:53
         conditions:
           - "[STATUS] == 200"
       - name: "${APP}-dns"
