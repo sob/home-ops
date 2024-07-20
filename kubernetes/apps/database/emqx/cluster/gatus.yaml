@@ -10,7 +10,7 @@ data:
     endpoints:
       - name: emqx
         group: infrastructure
-        url: tcp://eqmx.database.svc.cluster.local:5432
+        url: tcp://eqmx.database.svc.cluster.local:1883
         interval: 1m
         ui:
           hide-url: true
@@ -20,8 +20,8 @@ data:
         alerts:
           - type: pushover
       - name: emqx-console
-        group: infrastucture
-        url: https://eqmx.56kbps.io
+        group: infrastructure
+        url: https://eqmx.database.svc.cluster.local
         interval: 1m
         ui:
           hide-url: false
