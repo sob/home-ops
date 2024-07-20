@@ -10,7 +10,7 @@ data:
     endpoints:
       - name: emqx
         group: infrastructure
-        url: tcp://emqx-lsiteners.database.svc.cluster.local:1883
+        url: tcp://emqx-listeners.database.svc.cluster.local:1883
         interval: 1m
         ui:
           hide-url: true
@@ -21,10 +21,12 @@ data:
           - type: pushover
       - name: emqx-dashboard
         group: infrastructure
-        url: https://emqx-dashboard.database.svc.cluster.local
+        url: https://emqx.${SECRET_DOMAIN}
         interval: 1m
         ui:
           hide-url: false
           hide-hostname: false
+        client:
+          dns-resolver: tcp://10.1.0.1:53
         conditions:
           - "[STATUS] == 200"
