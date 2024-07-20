@@ -9,5 +9,6 @@ resources:
   - ./overseerr/ks.yaml
   - ./plex/ks.yaml
   - ./radarr/ks.yaml
+  - ./recyclarr.yaml
   - ./sabnzbd/ks.yaml
   - ./sonarr.yaml
