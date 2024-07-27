@@ -1,0 +1,45 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: synology-csi
+  namespace: storage
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: synology-csi
+      version: 0.9.4
+      sourceRef:
+        kind: HelmRepository
+        name: synology-csi
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    clientInfoSecret:
+      create: false
+      name: synology-csi-client-info
+    storageClasses:
+      synology-csi-delete:
+        parameters:
+          dsm: ${SECRET_NAS_DOOM}
+          fsType: ext4
+          location: /volume1
+          protocol: iscsi
+      synology-csi-retain:
+        isDefault: true
+        parameters:
+          dsm: ${SECRET_NAS_DOOM}
+          fsType: ext4
+          location: /volume1
+          protocol: iscsi
