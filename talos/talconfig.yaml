@@ -5,15 +5,18 @@ talosVersion: v1.7.5
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
 kubernetesVersion: v1.30.2
 
-clusterName: "stone"
-endpoint: https://10.1.100.100:6443
+clusterName: &cluster "stone"
+endpoint: https://${CLUSTER_ENDPOINT_IP}:6443
+
 clusterPodNets:
   - "10.69.0.0/16"
 clusterSvcNets:
   - "10.96.0.0/16"
+
 additionalApiServerCertSans: &sans
-  - "10.1.100.100"
-  - 127.0.0.1 # KubePrism
+  - ${CLUSTER_ENDPOINT_IP}
+  - k8s.${INTERNAL_DOMAIN}
+
 additionalMachineCertSans: *sans
 
 # Disable built-in Flannel to use Cilium
@@ -21,11 +24,10 @@ cniConfig:
   name: none
 
 nodes:
-  - hostname: "metal-01"
+  - hostname: metal-01
     ipAddress: "10.1.100.101"
     installDiskSelector:
       model: "Micron_1100_MTFD"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -79,7 +81,6 @@ nodes:
     ipAddress: "10.1.100.104"
     installDiskSelector:
       serial: S4P2NF0M400765R
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
@@ -136,9 +137,21 @@ patches:
 
 # Controller patches
 controlPlane:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions: &extensions
+          - siderolabs/i915-ucode
+          - siderolabs/intel-ucode
+          - siderolabs/iscsi-tools
   patches:
     - "@./patches/controller/api-access.yaml"
     - "@./patches/controller/cluster.yaml"
     - "@./patches/controller/disable-admission-controller.yaml"
     - "@./patches/controller/etcd.yaml"
 
+worker:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions: *extensions
