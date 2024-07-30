@@ -1,3 +1,3 @@
 ---
-providerRegex: ^(metal-01|metal-02|metal-03|metal-05|metal-06)$
+providerRegex: ^(metal-01|metal-02|metal-03|metal-04|metal-05|metal-06)$
 bypassDnsResolution: true
