@@ -50,6 +50,16 @@ tasks:
       - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - talosctl --context {{.cluster}} --nodes {{.hostname}} get machineconfig >/dev/null 2>&1
 
+  tailscale:
+    desc: Configure tailscale extension on a node
+    dir: "{{.TALOS_DIR}}"
+    cmd: |
+      sops --decrypt {{.TALHELPER_ENV_FILE}} | \
+        envsubst | \
+          talosctl patch mc --patch-file {{.TALOS_DIR}}/patches/global/tailscale-config.yaml --nodes {{.hostname}}
+    requires:
+      vars: ["hostname"]
+
   upgrade:
     desc: Upgrade Talos on a node
     dir: "{{.TALOS_DIR}}"
