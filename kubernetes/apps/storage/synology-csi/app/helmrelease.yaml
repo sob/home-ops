@@ -43,3 +43,8 @@ spec:
           fsType: ext4
           location: /volume1
           protocol: iscsi
+    volumeSnapshotClasses:
+      synology-snapshotclass:
+        disabled: false
+        deletionPolicy: delete
+        isDefault: true
