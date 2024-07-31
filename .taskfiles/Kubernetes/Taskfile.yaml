@@ -30,7 +30,3 @@ tasks:
     preconditions:
       - msg: Missing kubeconform script
         sh: test -f {{.KUBECONFORM_SCRIPT}}
-
-  .reset:
-    internal: true
-    cmd: rm -rf {{.KUBERNETES_DIR}}
