@@ -46,5 +46,5 @@ spec:
     volumeSnapshotClasses:
       synology-snapshotclass:
         disabled: false
-        deletionPolicy: delete
+        deletionPolicy: Delete
         isDefault: true
