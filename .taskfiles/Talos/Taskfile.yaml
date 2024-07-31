@@ -56,9 +56,16 @@ tasks:
     cmd: |
       sops --decrypt {{.TALHELPER_ENV_FILE}} | \
         envsubst | \
-          talosctl patch mc --patch-file {{.TALOS_DIR}}/patches/global/tailscale-config.yaml --nodes {{.hostname}}
+          talosctl patch mc --patch-file {{.TALOS_DIR}}/patches/global/tailscale-config.yaml --nodes {{.hostname}} --mode {{.mode}}
+    vars:
+      cluster: '{{.cluster | default "stone"}}'
+      mode: '{{.mode | default "auto"}}'
     requires:
-      vars: ["hostname"]
+      vars: ["cluster", "hostname"]
+    preconditions:
+      - test -f {{.TALOS_DIR}}/patches/global/tailscale-config.yaml
+      - test -f {{.TALHELPER_ENV_FILE}}
+      - talosctl --context {{.cluster}}
 
   upgrade:
     desc: Upgrade Talos on a node
