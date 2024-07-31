@@ -8,16 +8,12 @@ vars:
   TALHELPER_SECRET_FILE: "{{.ROOT_DIR}}/talos/talsecret.sops.yaml"
   TALHELPER_CONFIG_FILE: "{{.ROOT_DIR}}/talos/talconfig.yaml"
   TALHELPER_ENV_FILE: "{{.ROOT_DIR}}/talos/talenv.sops.yaml"
-#  HELMFILE_FILE: "{{.ROOT_DIR}}/bootstrap/helmfile.yaml"
   TALOSCONFIG_FILE: "{{.TALHELPER_CLUSTER_DIR}}/talosconfig"
-
-#env:
-#  TALOSCONFIG: "{{.TALOSCONFIG_FILE}}"
 
 tasks:
 
   generate:
-    desc: Generate Talos configuration files with talhelper and encrypt with sops
+    desc: Generate Talos configuration files with talhelper
     dir: "{{.TALOS_DIR}}"
     cmds:
       - talhelper genconfig --config-file {{.TALHELPER_CONFIG_FILE}} --env-file "{{.TALHELPER_ENV_FILE}}" --out-dir {{.TALHELPER_CLUSTER_DIR}} --talos-mode metal --debug
@@ -26,6 +22,7 @@ tasks:
 
   apply-config:
     desc: Apply talos configuration to a node
+    dir: "{{.TALOS_DIR}}"
     prompt: Apply talos configuration {{.cluster}}-{{.hostname}}.yaml to {{.address}} on cluster {{.cluster}} ... continue?
     cmd: |
       talosctl --context {{.cluster}} apply-config --mode={{.mode}} --nodes {{.address}} --file {{.TALHELPER_CLUSTER_DIR}}/{{.cluster}}-{{.hostname}}.yaml {{if .insecure}}--insecure{{end}}
@@ -38,23 +35,24 @@ tasks:
     requires:
       vars: ["hostname"]
     preconditions:
-      - test -f {{.ROOT_DIR}}/talos/clusterconfig/talosconfig
-      - test -f {{.ROOT_DIR}}/talos/clusterconfig/{{.cluster}}-{{.hostname}}.yaml
+      - test -f {{.TALOSCONFIG_FILE}}
+      - test -f {{.TALHELPER_CLUSTER_DIR}}/{{.cluster}}-{{.hostname}}.yaml
 
   reset-node:
     desc: Reset a Talos node
+    dir: "{{.TALOS_DIR}}"
     prompt: Reset Talos '{{.hostname}}' node on the '{{.cluster}}' cluster ... continue?
     cmd: talosctl --context {{.cluster}} reset --nodes {{.hostname}} --graceful=false
     requires:
       vars: ["cluster", "hostname"]
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig/talosconfig
+      - test -f {{.TALOSCONFIG_FILE}}
       - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - talosctl --context {{.cluster}} --nodes {{.hostname}} get machineconfig >/dev/null 2>&1
 
   upgrade:
     desc: Upgrade Talos on a node
-    dir: "{{.ROOT_DIR}}/talos/"
+    dir: "{{.TALOS_DIR}}"
     cmds:
       - talosctl --nodes {{.node}} upgrade --image {{.image}} --wait=true --timeout=10m --preserve=true --reboot-mode={{.mode}}
       - talosctl --nodes {{.node}} health --wait-timeout=10m --server=false
@@ -72,7 +70,7 @@ tasks:
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the cluster
-    dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
+    dir: "{{.TALOS_DIR}}"
     cmd: talosctl --nodes {{.controller}} upgrade-k8s --to {{.to}}
     requires:
       vars: ["controller", "to"]
