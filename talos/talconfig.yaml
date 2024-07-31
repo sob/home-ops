@@ -6,7 +6,7 @@ talosVersion: v1.7.5
 kubernetesVersion: v1.30.2
 
 clusterName: &cluster "stone"
-endpoint: https://${CLUSTER_ENDPOINT_IP}:6443
+endpoint: https://10.1.100.100:6443
 
 clusterPodNets:
   - "10.69.0.0/16"
@@ -14,8 +14,7 @@ clusterSvcNets:
   - "10.96.0.0/16"
 
 additionalApiServerCertSans: &sans
-  - ${CLUSTER_ENDPOINT_IP}
-  - k8s.${INTERNAL_DOMAIN}
+  - 10.1.100.100
 
 additionalMachineCertSans: *sans
 
@@ -45,7 +44,6 @@ nodes:
     ipAddress: "10.1.100.102"
     installDiskSelector:
       model: "Micron_1100_MTFD"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -63,7 +61,6 @@ nodes:
     ipAddress: "10.1.100.103"
     installDiskSelector:
       model: "Micron_1100_MTFD"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -96,7 +93,6 @@ nodes:
     ipAddress: "10.1.100.105"
     installDiskSelector:
       serial: "21313G804237"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
@@ -110,9 +106,7 @@ nodes:
         mtu: 1500
   - hostname: "metal-06"
     ipAddress: "10.1.100.106"
-    installDiskSelector:
-      model: "211703A004FC"
-    talosImageURL: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403
+    installDisk: /dev/nvme0n1
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
@@ -134,13 +128,14 @@ patches:
   - "@./patches/global/kubelet.yaml"
   - "@./patches/global/openebs-local.yaml"
   - "@./patches/global/sysctl.yaml"
+  - "@./patches/global/tailscale-config.yaml"
 
 # Controller patches
 controlPlane:
   schematic:
     customization:
       systemExtensions:
-        officialExtensions: &extensions
+        officialExtensions:
           - siderolabs/i915-ucode
           - siderolabs/intel-ucode
           - siderolabs/iscsi-tools
@@ -149,9 +144,12 @@ controlPlane:
     - "@./patches/controller/cluster.yaml"
     - "@./patches/controller/disable-admission-controller.yaml"
     - "@./patches/controller/etcd.yaml"
-
 worker:
   schematic:
     customization:
       systemExtensions:
-        officialExtensions: *extensions
+        officialExtensions:
+          - siderolabs/i915-ucode
+          - siderolabs/intel-ucode
+          - siderolabs/iscsi-tools
+          - siderolabs/tailscale

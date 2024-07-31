@@ -12,5 +12,6 @@
         "vs-kubernetes.knownKubeconfigs": [
           "./kubeconfig"
       ]
-    }
+    },
+    "sops.configPath": "./.sops.yaml"
 }

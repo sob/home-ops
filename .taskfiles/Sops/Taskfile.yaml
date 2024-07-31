@@ -9,6 +9,42 @@ tasks:
     cmd: age-keygen --output {{.AGE_FILE}}
     status: ["test -f {{.AGE_FILE}}"]
 
+  unlock:
+    desc: Decrypt cluster-secrets.sops.yaml file
+    cmds:
+      - task: .decrypt-file
+        vars:
+          file: "{{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.sops.yaml"
+
+  lock:
+    desc: Encrypt cluster-secrtes.sops.yaml file
+    cmds:
+      - task: .encrypt-file
+        vars:
+          file: "{{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.sops.yaml"
+
+  decrypt:
+    desc: Decrypt all Kubernetes SOPS secrets
+    cmds:
+      - for: { var: file }
+        task: .decrypt-file
+        vars:
+          file: "{{.ITEM}}"
+    vars:
+      file:
+        sh: find "{{.KUBERNETES_DIR}}" -type f -name "*.sops.*" -exec sops filestatus {} | jq --exit-status '.encrypted' \;
+
+  .decrypt-file:
+    internal: true
+    cmd: sops --decrypt --in-place {{.file}}
+    requires:
+      vars: ["file"]
+    preconditions:
+      - msg: Missing SOPS config file
+        sh: test -f {{.SOPS_CONFIG_FILE}}
+      - msg: Missing SOPS age file
+        sh: test -f {{.AGE_FILE}}
+
   encrypt:
     desc: Encrypt all Kubernetes SOPS secrets
     cmds:
