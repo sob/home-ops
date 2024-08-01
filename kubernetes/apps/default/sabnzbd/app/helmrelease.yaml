@@ -97,9 +97,7 @@ spec:
                   port: http
     persistence:
       config:
-        type: nfs
-        server: ${SECRET_NFS_SERVER}
-        path: ${SECRET_NFS_PATH_CONFIG}/sabnzbd
+        existingClaim: sabnzbd
       logs:
         type: emptyDir
         globalMounts:
