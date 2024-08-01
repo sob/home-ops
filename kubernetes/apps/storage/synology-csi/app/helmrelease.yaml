@@ -47,4 +47,8 @@ spec:
       synology-snapshotclass:
         disabled: false
         deletionPolicy: Delete
+        isDefault: false
+      synology-csi-snapshot:
+        disabled: false
+        deletionPolicy: Delete
         isDefault: true
