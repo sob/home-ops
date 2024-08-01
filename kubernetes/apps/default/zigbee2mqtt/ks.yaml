@@ -26,7 +26,7 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: zigbee
-      VOLSYNC_CAPACITY: 2Gi
+      VOLSYNC_CAPACITY: 1Gi
       VOLSYNC_ACCESSMODES: ReadWriteMany
       VOLSYNC_STORAGECLASS: synology-csi-retain
       VOLSYNC_SNAPSHOTCLASS: synology-csi-snapshot
