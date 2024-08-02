@@ -8,15 +8,4 @@ spec:
   resources:
     requests:
       storage: 75Gi
-  storageClassName: nfs-provision-csi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: plex-config
-spec:
-  accessModes: ["ReadWriteOnce"]
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: nfs-provision-csi
+  storageClassName: synology-csi-retain
