@@ -44,10 +44,6 @@ spec:
           location: /volume1
           protocol: iscsi
     volumeSnapshotClasses:
-      synology-snapshotclass:
-        disabled: false
-        deletionPolicy: Delete
-        isDefault: false
       synology-csi-snapshot:
         disabled: false
         deletionPolicy: Delete
