@@ -87,6 +87,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/default
+          - name: media
+            orgId: 1
+            folder: "media"
+            type: file
+            disableDeletion: true
+            editable: false
+            options:
+              path: /var/lib/grafana/dashboards/media
     dashboards:
       media:
         unpackerr:
