@@ -4,7 +4,7 @@ metadata:
   name: &app speedtest-exporter
   namespace: flux-system
 spec:
-  targetNamespace: observabililty
+  targetNamespace: observability
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
