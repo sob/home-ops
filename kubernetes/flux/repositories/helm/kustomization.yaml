@@ -11,6 +11,7 @@ resources:
   - ./descheduler.yaml
   - ./emqx.yaml
   - ./external-secrets.yaml
+  - ./grafana.yaml
   - ./intel.yaml
   - ./jetstack.yaml
   - ./metrics-server.yaml
