@@ -12,7 +12,7 @@ spec:
   dependsOn:
     - name: sonarr
     - name: external-secrets-stores
-  path: ./kubernetes/apps/observabililty/exporters/sonarr-exporter/app
+  path: ./kubernetes/apps/observability/exporters/sonarr-exporter/app
   prune: true
   sourceRef:
     kind: GitRepository
