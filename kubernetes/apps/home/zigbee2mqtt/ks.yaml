@@ -6,14 +6,15 @@ metadata:
   name: &app zigbee2mqtt
   namespace: flux-system
 spec:
-  targetNamespace: default
+  targetNamespace: home
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
+    - name: volsync
     - name: emqx-cluster
     - name: external-secrets-stores
-  path: ./kubernetes/apps/default/zigbee2mqtt/app
+  path: ./kubernetes/apps/home/zigbee2mqtt/app
   prune: true
   sourceRef:
     kind: GitRepository
