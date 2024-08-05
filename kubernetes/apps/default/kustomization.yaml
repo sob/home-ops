@@ -19,4 +19,3 @@ resources:
   - ./tautulli/ks.yaml
   - ./unpackerr/ks.yaml
   - ./wizarr/ks.yaml
-  - ./zigbee2mqtt/ks.yaml
