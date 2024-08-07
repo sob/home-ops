@@ -87,6 +87,9 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          hajimari.io/icon: cbi:sabnzbd
+          hajimari.io/group: Media
+          hajimari.io/url: external
         className: internal
         hosts:
           - host: sab.${SECRET_DOMAIN}

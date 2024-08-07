@@ -12,6 +12,7 @@ resources:
   - ./emqx.yaml
   - ./external-secrets.yaml
   - ./grafana.yaml
+  - ./hajimari.yaml
   - ./intel.yaml
   - ./jetstack.yaml
   - ./metrics-server.yaml

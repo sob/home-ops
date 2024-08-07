@@ -92,6 +92,8 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          hajimari.io/icon: music-box-outline
+          hajimari.io/group: Downloads
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"

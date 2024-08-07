@@ -90,6 +90,9 @@ spec:
     ingress:
       app:
         annotations:
+          hajimari.io/icon: plex
+          hajimari.io/group: Media
+          hajimari.io/info: external
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
         className: external
