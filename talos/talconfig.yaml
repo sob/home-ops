@@ -118,6 +118,20 @@ nodes:
           - network: 0.0.0.0/0
             gateway: "10.1.100.1"
         mtu: 1500
+  - hostname: "metal-07"
+    ipAddress: "10.1.100.107"
+    installDisk: /dev/nvme0n1
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "48:21:0b:5d:8f:5f"
+        dhcp: false
+        addresses:
+          - "10.1.100.107/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.1.100.1"
+        mtu: 1500
 
 # Global patches
 patches:
