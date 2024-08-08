@@ -17,11 +17,25 @@ x-env-vars: &env-vars
   pgid: "{{.pgid}}"
   previous: "{{.previous}}"
   puid: "{{.puid}}"
+  ts: '{{.ts}}'
 
 vars:
   VOLSYNC_RESOURCES_DIR: "{{.ROOT_DIR}}/.taskfiles/volsync/resources"
-
+  debugPodTemplate: "{{.ROOT_DIR}}/.taskfiles/volsync/resources/DebugPod.tmpl.yaml"
+  ts: '{{now | date "150405"}}'
 tasks:
+  debug:
+    desc: Creates a debug pod for a given ReplicationSource (ex. task volsync:debug app=plex [ns=default])
+    silent: false
+    cmds:
+      - envsubst < <(cat {{.debugPodTemplate}}) | kubectl apply -f -
+    vars:
+      app: '{{ or .app (fail "ReplicationSource `app` is required") }}'
+      ns: '{{.ns | default "default"}}'
+    env: *env-vars
+    preconditions:
+      - sh: test -f {{.debugPodTemplate}}
+
   state-*:
     desc: Suspend or Resume Volsync
     summary: |
@@ -33,10 +47,9 @@ tasks:
       - kubectl --context {{.cluster}} -n {{.ns}} scale deployment volsync --replicas {{if eq "suspend" .state}}0{{else}}1{{end}}
     env: *env-vars
     vars:
-      ns: '{{.ns | default "volsync-system"}}'
+      ns: '{{.ns | default "storage"}}'
       state: '{{index .MATCH 0}}'
-    requires:
-      vars: ["cluster"]
+      cluster: '{{.cluster | default "admin@stone"}}'
 
   list:
     desc: List snapshots for an application
@@ -100,11 +113,12 @@ tasks:
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
     env: *env-vars
     requires:
-      vars: ["cluster", "app"]
+      vars: ["app"]
     vars:
       now: '{{now | date "150405"}}'
       ns: '{{.ns | default "default"}}'
       job: volsync-src-{{.app}}
+      cluster: '{{.cluster | default "admin@stone"}}'
       controller:
         sh: true && {{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh {{.app}} {{.ns}} {{.cluster}}
     preconditions:
@@ -143,6 +157,55 @@ tasks:
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh
 
+  nuke:
+    desc: Nuke all volsync custom resources
+    summary: Kill em all. Let Buddah sort em out
+    cmds:
+      - for: { var: contents }
+        cmd: |
+          {{- $items := (split "/" .ITEM) }}
+          echo "Processing {{.ITEM}}"
+          kubectl --context {{.cluster}} patch volumesnapshotcontents {{ $items._0 }} -p '{"metadata":{"finalizers": []}}' --type=merge
+          kubectl --context {{.cluster}} delete volumesnapshotcontents {{ $items._0 }} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+          echo "done!"
+      - for: { var: snaps }
+        cmd: |
+          {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch volumesnapshot -n {{ $items._0 }} {{ $items._1 }} -p '{"metadata":{"finalizers": []}}' --type=merge
+          kubectl --context {{.cluster}} delete volumesnapshot -n {{ $items._0 }} {{ $items._1 }} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - for: { var: src }
+        cmd: |
+          {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch replicationsources -n {{ $items._1 }} {{ $items._0 }} -p '{"metadata":{"finalizers": []}}' --type=merge
+          kubectl --context {{.cluster}} delete replicationsources -n {{ $items._1 }} {{ $items._0 }} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - for: { var: dest }
+        cmd: |
+          {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch replicationdestinations -n {{ $items._1 }} {{ $items._0 }} -p '{"metadata":{"finalizers": []}}' --type=merge
+          kubectl --context {{.cluster}} delete replicationdestinations -n {{ $items._1 }} {{ $items._0 }} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - for: { var: pvs }
+        cmd: |
+          {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch persistentvolumes -n {{ $items._1 }} {{ $items._0 }} -p '{"metadata":{"finalizers": []}}' --type=merge
+          kubectl --context {{.cluster}} delete persistentvolumes -n {{ $items._1 }} {{ $items._0 }} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - for: { var: pvcs }
+        cmd: |
+          kubectl --context {{.cluster}} patch persistentvolumeclaims {{.ITEM}} -p '{"metadata":{"finalizers": []}}' --type=merge
+          kubectl --context {{.cluster}} delete persistentvolumeclaims {{.ITEM}} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+    vars:
+      cluster: '{{.cluster | default "admin@stone"}}'
+      snaps:
+        sh: kubectl get volumesnapshot --all-namespaces --no-headers | awk '{print $1 "/" $2}'
+      src:
+        sh: kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2 "/" $1}'
+      dest:
+        sh: kubectl get replicationdestinations --all-namespaces --no-headers | awk '{print $2 "/" $1}'
+      contents:
+        sh: kubectl get volumesnapshotcontents --all-namespaces --no-headers | awk '{print $1}'
+      pvs:
+        sh: kubectl get persistentvolumes --all-namespaces --no-headers | grep dst-dest | awk '{print $1 "/default"}'
+      pvcs:
+        sh: kubectl get persistentvolumeclaims --all-namespaces --no-headers | grep dst-dest | awk '{print $2}'
   cleanup:
     desc: Delete volume populator PVCs in all namespaces
     summary: |
@@ -151,19 +214,21 @@ tasks:
       - for: { var: dest }
         cmd: |
           {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch pvc -n {{ $items._0 }} {{ $items._1 }} -p '{"metadata":{"finalizers": []}}' --type=merge
           kubectl --context {{.cluster}} delete pvc -n {{ $items._0 }} {{ $items._1 }}
       - for: { var: cache }
         cmd: |
           {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch pvc -n {{ $items._0 }} {{ $items._1 }} -p '{"metadata":{"finalizers": []}}' --type=merge
           kubectl --context {{.cluster}} delete pvc -n {{ $items._0 }} {{ $items._1 }}
       - for: { var: snaps }
         cmd: |
           {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch volumesnapshot -n {{ $items._0 }} {{ $items._1 }} -p '{"metadata":{"finalizers": []}}' --type=merge
           kubectl --context {{.cluster}} delete volumesnapshot -n {{ $items._0 }} {{ $items._1 }}
     env: *env-vars
-    requires:
-      vars: ["cluster"]
     vars:
+      cluster: '{{.cluster | default "admin@stone"}}'
       dest:
         sh: kubectl --context {{.cluster}} get pvc --all-namespaces --no-headers | grep "dst-dest" | awk '{print $1 "/" $2}'
       cache:
@@ -221,3 +286,16 @@ tasks:
       - flux --context {{.cluster}} -n {{.ns}} resume helmrelease {{.app}}
       - flux --context {{.cluster}} -n flux-system resume kustomization {{.app}}
     env: *env-vars
+
+  .nuke:
+    internal: true
+    silent: false
+    cmds:
+      - for: { var: kind }
+        cmd: |
+          {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} patch {{.kind}} -n {{ $items._0 }} {{ $items._1 }} -p '{"metadata":{"finalizers": []}}' --type=merge
+          kubectl --context {{.cluster}} delete {{.kind}} -n {{ $items._0 }} {{ $items._1 }}
+    vars:
+      kind:
+        sh: kubectl --context {{.cluster}} get {{.kind}} --all-namespaces --no-headers | awk '{print $1 "/" $2}'
