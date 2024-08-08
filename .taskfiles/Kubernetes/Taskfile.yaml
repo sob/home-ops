@@ -30,3 +30,23 @@ tasks:
     preconditions:
       - msg: Missing kubeconform script
         sh: test -f {{.KUBECONFORM_SCRIPT}}
+
+  sync-secrets:
+    desc: sync ExternalSecret resources from provider
+    summary: |
+      cluster: cluster to run command against (default: main)
+      ns: namespace to sync secret in (default: default)
+      secret: secret to sync (default: unset/all secrets)
+    cmd: |
+      {{ if eq .secret ""}}
+        kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers | awk '{print "-n "$1 " " $2}' | xargs -n3 -I {} kubectl --context {{.cluster}} annotate externalsecret {} force-sync=$(date +%s) --overwrite
+      {{ else }}
+        kubectl --context {{.cluster}} --namespace {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
+      {{ end }}
+    vars:
+      secret: '{{ .secret | default ""}}'
+      ns: '{{ .ns | default "default" }}'
+      cluster: '{{ .cluster | default "admin@stone" }}'
+      secrets:
+    preconditions:
+      - kubectl --context {{.cluster}} --namespace {{.ns}} get externalsecret {{.secret}}

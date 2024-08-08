@@ -57,14 +57,33 @@ tasks:
       - msg: Missing kubeconfig
         sh: test -f {{.KUBECONFIG_FILE}}
 
-  github-deploy-key:
+  helmrelease:
+    aliases: ["hr", "helm"]
+    desc: Force reconcile a helmrelease record
     cmds:
-      - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl --kubeconfig {{.KUBECONFIG_FILE}} apply --filename -
-      - sops --decrypt {{.GITHUB_DEPLOY_KEY_FILE}} | kubectl apply --kubeconfig {{.KUBECONFIG_FILE}} --server-side --filename -
+      - task: .reconcile
+        vars: { type: "helmrelease" }
+    requires:
+      vars: ["target"]
+
+  kustomization:
+    aliases: ["k"]
+    desc: Force reconcile a kustomization record
+    cmds:
+      - task: .reconcile
+        vars: { ns: "flux-system", type: "kustomization"}
+    requires:
+      vars: ["target"]
+    vars:
+      ns: "flux-system"
+      type: "kustomization"
+
+  .reconcile:
+    internal: true
+    cmd: flux reconcile --namespace {{.ns}} {{.type}} {{.target}} --with-source {{.CLI_ARGS}}
+    vars:
+      ns:
+        sh: kubectl get -A {{.type}} --no-headers --field-selector=metadata.name={{.target}} | awk '{print $1}'
     preconditions:
       - msg: Missing kubeconfig
-        sh: test -f {{.KUBECONFIG_FILE}}
-      - msg: Missing Sops Age key file
-        sh: test -f {{.AGE_FILE}}
-      - msg: Missing Github deploy key file
-        sh: test -f {{.GITHUB_DEPLOY_KEY_FILE}}
+        sh: test -f {{.KUBECONFIG}}
