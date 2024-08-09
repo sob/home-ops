@@ -43,7 +43,7 @@ spec:
             env:
               TZ: America/Chicago
               HOME_ASSISTANT_EXTERNAL_URL: https://hass.${SECRET_DOMAIN}
-              HOME_ASSISTANT_PURGE_KEEP_DAYS: 30
+              HOME_ASSISTANT_PURGE_KEEP_DAYS: 4000
               HOME_ASSISTANT_TRUSTED_PROXIES: ${CLUSTER_POD_CIDR}
               HOME_ASSISTANT_UNIT_SYSTEM: imperial
             envFrom: *envFrom
