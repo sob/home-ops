@@ -9,15 +9,15 @@ KUBERNETES_DIR=$1
 kustomize_args=("--load-restrictor=LoadRestrictionsNone")
 kustomize_config="kustomization.yaml"
 kubeconform_args=(
-    "-strict"
-    "-ignore-missing-schemas"
-    "-skip"
-    "Secret"
-    "-schema-location"
-    "default"
-    "-schema-location"
-    "https://kubernetes-schemas.pages.dev/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
-    "-verbose"
+  "-strict"
+  "-ignore-missing-schemas"
+  "-skip"
+  "Secret"
+  "-schema-location"
+  "default"
+  "-schema-location"
+  "https://kubernetes-schemas.pages.dev/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
+  "-verbose"
 )
 
 echo "=== Validating standalone manifests in ${KUBERNETES_DIR}/flux ==="
