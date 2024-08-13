@@ -31,22 +31,51 @@ tasks:
       - msg: Missing kubeconform script
         sh: test -f {{.KUBECONFORM_SCRIPT}}
 
-  sync-secrets:
-    desc: sync ExternalSecret resources from provider
+  mount:
+    desc: Mount a PVC to a temporary pod for a cluster
     summary: |
-      cluster: cluster to run command against (default: main)
-      ns: namespace to sync secret in (default: default)
-      secret: secret to sync (default: unset/all secrets)
+      args:
+        cluster: cluster to run command against (default: admin@stone)
+        ns: namespace the pvc is in (default: default)
+        claim: pvc to mount (required)
+    interactive: true
     cmd: |
-      {{ if eq .secret ""}}
-        kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers | awk '{print "-n "$1 " " $2}' | xargs -n3 -I {} kubectl --context {{.cluster}} annotate externalsecret {} force-sync=$(date +%s) --overwrite
-      {{ else }}
-        kubectl --context {{.cluster}} --namespace {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
-      {{ end }}
+      kubectl --context {{.cluster}} run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+        {
+          "apiVersion": "v1",
+          "spec": {
+            "containers": [
+              {
+                "name": "debug",
+                "image": "docker.io/library/alpine:3.20.2",
+                "command": ["/bin/sh"],
+                "stdin": true,
+                "stdinOnce": true,
+                "tty": true,
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/config"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "persistentVolumeClaim": {
+                  "claimName": "{{.claim}}"
+                }
+              }
+            ],
+            "restartPolicy": "Never"
+          }
+        }'
+    requires:
+      vars: ["claim"]
     vars:
-      secret: '{{ .secret | default ""}}'
-      ns: '{{ .ns | default "default" }}'
-      cluster: '{{ .cluster | default "admin@stone" }}'
-      secrets:
+      ns: '{{.ns | default "default"}}'
+      cluster: '{{.cluster | default "admin@stone"}}'
     preconditions:
-      - kubectl --context {{.cluster}} --namespace {{.ns}} get externalsecret {{.secret}}
+      - sh: "kubectl -n {{.ns}} get persistentvolumeclaims {{.claim}}"
+        msg: "PVC not found"

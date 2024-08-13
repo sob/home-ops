@@ -81,7 +81,7 @@ tasks:
       ns: Namespace the PVC is in (default: default)
       app: Application to unlock (required)
     cmds:
-      - $GOPATH/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container minio
@@ -94,7 +94,6 @@ tasks:
       ns: '{{.ns | default "default"}}'
       job: volsync-unlock-{{.app}}
     preconditions:
-      - test -f $GOPATH/bin/envsubst
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml
     silent: true
