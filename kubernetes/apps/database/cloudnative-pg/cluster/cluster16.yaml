@@ -5,7 +5,7 @@ kind: Cluster
 metadata:
   name: postgres16
 spec:
-  instances: 3
+  instances: 4
   imageName: ghcr.io/cloudnative-pg/postgresql:16.3-7
   primaryUpdateStrategy: unsupervised
   storage:
@@ -17,7 +17,8 @@ spec:
   postgresql:
     parameters:
       max_connections: "400"
-      shared_buffers: 256MB
+      max_slot_wal_keep_size: 10GB
+      shared_buffers: 512MB
   nodeMaintenanceWindow:
     inProgress: false
     reusePVC: true
@@ -48,14 +49,3 @@ spec:
         secretAccessKey:
           name: cloudnative-pg-secret
           key: aws-secret-access-key
-  # Note: previousCluster needs to be set to the name of the previous
-  # cluster when recovering from an existing cnpg cluster
-  bootstrap:
-    recovery:
-      source: &previousCluster postgres16-v5
-  # Note: externalClusters is needed when recovering from an existing cnpg cluster
-  externalClusters:
-    - name: *previousCluster
-      barmanObjectStore:
-        <<: *barmanObjectStore
-        serverName: *previousCluster
