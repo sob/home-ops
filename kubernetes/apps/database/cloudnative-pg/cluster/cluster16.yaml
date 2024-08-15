@@ -64,7 +64,7 @@ spec:
         s3Credentials:
           accessKeyId:
             key: cloudnative-pg-secret
-            name: aws-access-key-id
+            name: minio-access-key-id
           secretAccessKey:
             key: cloudnative-pg-secret
-            name: aws-secret-access-key
+            name: minio-secret-access-key
