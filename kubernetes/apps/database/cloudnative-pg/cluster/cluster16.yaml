@@ -38,10 +38,10 @@ spec:
         compression: bzip2
         maxParallel: 8
       destinationPath: s3://cloudnative-pg/
-      endpointURL: http://minio.storage.svc.cluster.local:9000
+      endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
       # Note: serverName version needs to be inclemented
       # when recovering from an existing cnpg cluster
-      serverName: &currentCluster postgres16-v6
+      serverName: &currentCluster postgres16-v1
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
@@ -49,3 +49,22 @@ spec:
         secretAccessKey:
           name: cloudnative-pg-secret
           key: aws-secret-access-key
+  bootstrap:
+    recovery:
+      source: &previousCluster postgres16-v5
+  externalClusters:
+    - name: *previousCluster
+      barmanObjectStore:
+        serverName: *previousCluster
+        wal:
+          compression: bzip2
+          maxParallel: 8
+        destinationPath: s3://cloudnative-pg/
+        endpointURL: http://minio.storage.svc.cluster.local:9000
+        s3Credentials:
+          accessKeyId:
+            key: cloudnative-pg-secret
+            name: aws-access-key-id
+          secretAccessKey:
+            key: cloudnative-pg-secret
+            name: aws-secret-access-key
