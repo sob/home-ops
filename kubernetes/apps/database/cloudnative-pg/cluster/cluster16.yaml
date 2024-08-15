@@ -63,8 +63,8 @@ spec:
         endpointURL: http://minio.storage.svc.cluster.local:9000
         s3Credentials:
           accessKeyId:
-            key: cloudnative-pg-secret
-            name: minio-access-key-id
+            name: cloudnative-pg-secret
+            key: minio-access-key-id
           secretAccessKey:
-            key: cloudnative-pg-secret
-            name: minio-secret-access-key
+            name: cloudnative-pg-secret
+            key: minio-secret-access-key
