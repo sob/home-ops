@@ -51,7 +51,7 @@ spec:
           key: aws-secret-access-key
   bootstrap:
     recovery:
-      source: &previousCluster postgres16-v5
+      source: &previousCluster postgres16-v6
   externalClusters:
     - name: *previousCluster
       barmanObjectStore:
