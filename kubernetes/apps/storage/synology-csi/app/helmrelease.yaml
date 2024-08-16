@@ -36,6 +36,7 @@ spec:
           fsType: ext4
           location: /volume1
           protocol: iscsi
+        reclaimPolicy: Delete
       synology-csi-retain:
         isDefault: true
         parameters:
@@ -43,6 +44,7 @@ spec:
           fsType: ext4
           location: /volume1
           protocol: iscsi
+        reclaimPolicy: Retain
     volumeSnapshotClasses:
       synology-csi-snapshot:
         disabled: false
