@@ -58,6 +58,7 @@ spec:
           location: /volume1
           protocol: iscsi
       synology-csi-retain:
+        isDefault: true
         reclaimPolicy: Retain
         parameters:
           dsm: ${SECRET_NAS_DOOM}
@@ -66,5 +67,6 @@ spec:
           protocol: iscsi
     volumeSnapshotClasses:
       synology-csi-snapshot:
+        disabled: false
         deletionPolicy: Delete
         isDefault: true
