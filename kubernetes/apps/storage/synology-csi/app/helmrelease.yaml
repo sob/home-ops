@@ -29,24 +29,6 @@ spec:
     clientInfoSecret:
       create: false
       name: synology-csi-client-info
-    storageClasses:
-      synology-csi-delete:
-        parameters:
-          dsm: ${SECRET_NAS_DOOM}
-          fsType: ext4
-          location: /volume1
-          protocol: iscsi
-        reclaimPolicy: Delete
-      synology-csi-retain:
-        isDefault: true
-        parameters:
-          dsm: ${SECRET_NAS_DOOM}
-          fsType: ext4
-          location: /volume1
-          protocol: iscsi
-        reclaimPolicy: Retain
-    volumeSnapshotClasses:
-      synology-csi-snapshot:
-        disabled: false
-        deletionPolicy: Delete
-        isDefault: true
+    installCSIDriver: false
+    storageClasses: {}
+    volumeSnapshotClasses: null
