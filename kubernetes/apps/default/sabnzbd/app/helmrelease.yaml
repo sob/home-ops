@@ -22,7 +22,9 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn: []
+  dependsOn:
+    - name: volsync
+      namespace: storage
   values:
     controllers:
       sabnzbd:
