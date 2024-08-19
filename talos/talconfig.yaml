@@ -166,4 +166,3 @@ worker:
           - siderolabs/i915-ucode
           - siderolabs/intel-ucode
           - siderolabs/iscsi-tools
-          - siderolabs/tailscale
