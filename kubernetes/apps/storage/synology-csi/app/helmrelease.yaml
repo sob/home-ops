@@ -45,7 +45,7 @@ spec:
       snapshotter:
         image: registry.k8s.io/sig-storage/csi-snapshotter
         tag: v6.2.2
-    installCSIDriver: false
+    installCSIDriver: true
     storageClasses:
       synology-csi-delete:
         reclaimPolicy: Delete
