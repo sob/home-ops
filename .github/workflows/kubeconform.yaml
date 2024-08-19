@@ -14,16 +14,12 @@ jobs:
   kubeconform:
     name: Kubeconform
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Setup Workflow Tools
-        run: brew install fluxcd/tap/flux kubeconform kustomize
-
-      - name: Run kubeconform
-        shell: bash
-        run: bash ./scripts/kubeconform.sh ${{ env.KUBERNETES_DIR }}
+      - name: Kubeconform
+        uses: userbradley/action-flux-kustomize-kubeconform@v1.0.0
+        with:
+          directory: "{{ env.KUBERNETES_DIR }}"
