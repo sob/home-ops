@@ -64,11 +64,12 @@ spec:
           http:
             port: 1880
     ingress:
-      main:
-        enabled: true
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         className: internal
         hosts:
-          - host: "{{ .Release.Name }}.${SECRET_DOMAIN_NAME}"
+          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:
