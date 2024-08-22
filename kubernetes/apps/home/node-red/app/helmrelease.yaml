@@ -82,3 +82,4 @@ spec:
           main:
             main:
               - path: /data
+                readOnly: false
