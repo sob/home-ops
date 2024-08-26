@@ -63,7 +63,7 @@ spec:
           readOnly: true
       topologySpreadConstraints:
         - maxSkew: 1
-          topologyKey: kuberneteds.io/hostname
+          topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: DoNotSchedule
   listenersServiceTemplate:
     metadata:
