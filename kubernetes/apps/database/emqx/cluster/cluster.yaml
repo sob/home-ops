@@ -42,22 +42,6 @@ spec:
       envFrom: &envFrom
         - secretRef:
             name: emqx-secret
-      extraContainers:
-        - name: init-mqtt
-          image: docker.io/library/python:3.12-alpine
-          env:
-            - name: X_EMQX_ADDRESS
-              value: emqx-dashboard.database.svc.cluster.local:18083
-          envFrom: *envFrom
-          command: ["python", "/init-mqtt.py"]
-          volumeMounts:
-            - name: init-mqtt
-              mountPath: /init-mqtt.py
-              subPath: init-mqtt.py
-      extraVolumes:
-        - name: init-mqtt
-          configMap:
-            name: emqx-init-mqtt-configmap
   listenersServiceTemplate:
     metadata:
       annotations:
