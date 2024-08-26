@@ -49,16 +49,16 @@ spec:
         - secretRef:
             name: emqx-secret
       extraVolumes:
-        - name: emqx-secrets
+        - name: emqx-secret
           secret:
-            secretName: emqx-secrets
+            secretName: emqx-secret
       extraVolumeMounts:
         - mountPath: "/secrets/init-user.json"
-          name: emqx-secrets
+          name: emqx-secret
           subPath: init-user.json
           readOnly: true
         - mountPath: "/secrets/acl.conf"
-          name: emqx-secrets
+          name: emqx-secret
           subPath: acl.conf
           readOnly: true
       topologySpreadConstraints:
