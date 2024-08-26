@@ -33,7 +33,6 @@ spec:
               tag: 1.4.7@sha256:28e0888aab7d0b3a40a05cb3f5e64f5a9822cae3e268165fce814dce13ae6cf0
             env:
               MQTT_ADDRESS: emqx-listeners.database.svc.cluster.local
-              MQTT_TOPIC: zigbee2mqtt/#
               MQTT_V5_PROTOCOL: true
               PROMETHEUS_PORT: &port 3321
               TZ: ${TIMEZONE}
