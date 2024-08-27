@@ -35,7 +35,7 @@ spec:
       redis:
         host: dragonfly.database.svc.cluster.local
     postgresql:
-      enabled: true
+      enabled: false
 
     server:
       autoscaling:
