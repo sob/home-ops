@@ -11,8 +11,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: cloudnative-pg
-    - name: dragonfly-operator
+    - name: cloudnative-pg-cluster
+    - name: dragonfly-cluster
     - name: external-secrets-stores
   path: ./kubernetes/apps/security/authentik/app
   prune: true
