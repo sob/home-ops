@@ -36,7 +36,6 @@ spec:
         host: dragonfly.database.svc.cluster.local
     postgresql:
       enabled: false
-
     server:
       autoscaling:
         enabled: true
