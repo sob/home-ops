@@ -25,6 +25,8 @@ spec:
   dependsOn:
     - name: volsync
       namespace: storage
+    - name: cloudnative-pg
+      namespace: database
   values:
     controllers:
       lidarr:
