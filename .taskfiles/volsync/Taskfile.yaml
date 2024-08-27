@@ -24,6 +24,7 @@ vars:
   debugPodTemplate: "{{.ROOT_DIR}}/.taskfiles/volsync/resources/DebugPod.tmpl.yaml"
   ts: '{{now | date "150405"}}'
 tasks:
+
   debug:
     desc: Creates a debug pod for a given ReplicationSource (ex. task volsync:debug app=plex [ns=default])
     silent: false
@@ -65,10 +66,11 @@ tasks:
       - kubectl --context {{.cluster}} -n {{.ns}} delete job {{.job}}
     env: *env-vars
     requires:
-      vars: ["cluster", "app"]
+      vars: ["app"]
     vars:
       ns: '{{.ns | default "default"}}'
       job: volsync-list-{{.app}}
+      cluster: '{{.cluster | default "admin@stone"}}'
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/list.tmpl.yaml
@@ -108,6 +110,7 @@ tasks:
       app: Application to snapshot (required)
     cmds:
       - kubectl --context {{.cluster}} -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.now}}"}}}'
+      - kubectl --context {{.cluster}} -n {{.ns}} patch replicationsources {{.app}}-r2 --type merge -p '{"spec":{"trigger":{"manual":"{{.now}}"}}}'
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
     env: *env-vars
