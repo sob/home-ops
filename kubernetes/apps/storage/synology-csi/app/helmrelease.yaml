@@ -42,6 +42,10 @@ spec:
       resizer:
         image: registry.k8s.io/sig-storage/csi-resizer
         tag: v1.8.0
+      plugin:
+        image: ghcr.io/sob/synology-csi
+        tag: v1.2.0-2
+        pull: Always
       snapshotter:
         image: registry.k8s.io/sig-storage/csi-snapshotter
         tag: v6.2.2
