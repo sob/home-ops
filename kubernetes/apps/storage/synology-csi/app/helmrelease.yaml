@@ -56,7 +56,7 @@ spec:
         parameters:
           dsm: ${SECRET_NAS_DOOM}
           fsType: ext4
-          location: /volume1/k8s
+          location: /volume1
           protocol: nfs
           mountPermissions: '0755'
         mountOptions:
