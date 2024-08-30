@@ -44,7 +44,7 @@ spec:
         tag: v1.8.0
       plugin:
         image: ghcr.io/sob/synology-csi
-        tag: v1.2.0
+        tag: v1.2.0-1
         pull: Always
       snapshotter:
         image: registry.k8s.io/sig-storage/csi-snapshotter
