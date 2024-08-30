@@ -69,3 +69,12 @@ spec:
         disabled: false
         deletionPolicy: Delete
         isDefault: true
+        parameters:
+          dsm: ${SECRET_NAS_DOOM}
+          fsType: ext4
+          location: /volume1
+          protocol: nfs
+          mountPermissions: '0755'
+        mountOptions:
+          - nfsvers=4.1
+          - nolock
