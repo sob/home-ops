@@ -25,5 +25,9 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    worker:
+      config:
+        core:
+          sources: ["pci", "system", "usb"]
     prometheus:
       enable: true
