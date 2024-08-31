@@ -25,12 +25,5 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    worker:
-      config:
-        core:
-          labelSources: ["custom", "pci", "system", "usb"]
-        sources:
-          usb:
-            deviceLabelFields: ["class", "vendor", "device"]
     prometheus:
       enable: true
