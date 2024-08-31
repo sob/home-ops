@@ -18,8 +18,11 @@ jobs:
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
+      - name: Setup flux-build tap
+        run: brew tap doodlescheduling/flux-build
+
       - name: Setup Workflow Tools
-        run: brew install fluxcd/tap/flux kubeconform kustomize
+        run: brew install fluxcd/tap/flux kubeconform kustomize flux-build
 
       - name: Run kubeconform
         shell: bash
