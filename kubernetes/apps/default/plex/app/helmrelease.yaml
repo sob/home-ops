@@ -92,14 +92,15 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Video
+          gethomepage.dev/group: Media
           gethomepage.dev/name: Plex
           gethomepage.dev/icon: plex.png
           gethomepage.dev/description: Media Server
           gethomepage.dev/href: https://plex.${SECRET_DOMAIN}
           gethomepage.dev/widget.type: plex
           gethomepage.dev/widget.url: http://plex.default.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ HOMEPAGE_VAR_PLEX_KEY }}"
+          gethomepage.dev/widget.key: "{{ HOMEPAGE_VAR_PLEX_TOKEN }}"
+          gethomepage.dev/widget.enableNowPlaying: "true"
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
         className: external
