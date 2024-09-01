@@ -6,7 +6,7 @@
         description: Home Assistant
         widget:
             type: homeassistant
-            url: http://home-assistant.default.svc.cluster.local.
+            url: http://home-assistant.home.svc.cluster.local.
             key: {{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}
 - Media:
     - Plex:
