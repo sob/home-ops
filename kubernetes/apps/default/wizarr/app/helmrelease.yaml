@@ -58,9 +58,9 @@ spec:
           gethomepage.dev/name: Wizarr
           gethomepage.dev/icon: wizarr.png
           gethomepage.dev/description: Plex Invite Management
-          # gethomepage.dev/widget.type: wizarr
-          # gethomepage.dev/widget.url: http://wizarr.media.svc.cluster.local:5690
-          # gethomepage.dev/widget.key:
+          gethomepage.dev/widget.type: wizarr
+          gethomepage.dev/widget.url: http://wizarr.default.svc.cluster.local
+          gethomepage.dev/widget.key: "{{ HOMEPAGE_VAR_WIZARR_KEY }}"
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
         hosts:
           - host: join.${SECRET_DOMAIN}
