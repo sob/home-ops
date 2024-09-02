@@ -87,7 +87,7 @@ spec:
           gethomepage.dev/href: https://requests.${SECRET_DOMAIN}
           gethomepage.dev/widget.type: overseerr
           gethomepage.dev/widget.url: http://overseerr.default.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ HOMEPAGE_VAR_OVERSEERR_TOKEN }}"
+          gethomepage.dev/widget.key: {{ HOMEPAGE_VAR_OVERSEERR_TOKEN }}
         className: external
         hosts:
           - host: requests.${SECRET_DOMAIN}
