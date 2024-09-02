@@ -19,3 +19,9 @@
       memory: true
       show: false
       showLabel: true
+- datetime:
+    text_size: l
+    format:
+      dateStyle: long
+      timeStyle: short
+      hourCycle: h23
