@@ -99,7 +99,7 @@ spec:
           gethomepage.dev/description: Automation
           gethomepage.dev/href: https://hass.${SECRET_DOMAIN}
           gethomepage.dev/widget.type: homeassistant
-          gethomepage.dev/widget.url: http://homeassistant.home.svc.cluster.local
+          gethomepage.dev/widget.url: http://home-assistant.home.svc.cluster.local
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}` }}"
         className: external
         hosts:
