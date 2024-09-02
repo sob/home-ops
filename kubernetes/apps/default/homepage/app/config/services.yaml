@@ -8,39 +8,6 @@
             type: homeassistant
             url: http://home-assistant.home.svc.cluster.local.
             key: {{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}
-- Media:
-    - Sonarr:
-        href: https://sonarr.${SECRET_DOMAIN}
-        icon: sonarr.png
-        description: TV Shows
-        widget:
-            type: sonarr
-            url: http://sonarr.default.svc.cluster.local.
-            key: {{HOMEPAGE_VAR_SONARR_TOKEN}}
-    - Radarr:
-        href: https://radarr.${SECRET_DOMAIN}
-        icon: radarr.png
-        description: Movies
-        widget:
-            type: radarr
-            url: http://radarr.default.svc.cluster.local.
-            key: {{HOMEPAGE_VAR_RADARR_TOKEN}}
-    - Lidarr:
-        href: https://lidarr.${SECRET_DOMAIN}
-        icon: lidarr.png
-        description: Music
-        widget:
-            type: lidarr
-            url: http://lidarr.default.svc.cluster.local.
-            key: {{HOMEPAGE_VAR_LIDARR_TOKEN}}
-    - Bazarr:
-        icon: bazarr.png
-        href: https://bazarr.${SECRET_DOMAIN}
-        description: Subtitles Management
-        widget:
-            type: bazarr
-            url: http://bazarr.default.svc.cluster.local.
-            key: {{HOMEPAGE_VAR_BAZARR_TOKEN}}
 - Calendar:
     - Agenda:
         widget:
