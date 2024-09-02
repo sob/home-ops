@@ -1,13 +1,4 @@
 ---
-- Home:
-    - HomeAssistant:
-        href: https://hass.${SECRET_DOMAIN}
-        icon: home-assistant.png
-        description: Home Assistant
-        widget:
-            type: homeassistant
-            url: http://home-assistant.home.svc.cluster.local.
-            key: {{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}
 - Calendar:
     - Agenda:
         widget:
