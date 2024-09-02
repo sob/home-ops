@@ -96,9 +96,16 @@ spec:
     ingress:
       app:
         annotations:
-          hajimari.io/icon: television-classic
-          hajimari.io/group: Downloads
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/name: Sonarr
+          gethomepage.dev/icon: sonarr.png
+          gethomepage.dev/description: TV Shows
+          gethomepage.dev/href: https://sonarr.${SECRET_DOMAIN}
+          gethomepage.dev/widget.type: sonarr
+          gethomepage.dev/widget.url: http://sonarr.default.svc.cluster.local
+          gethomepage.dev/widget.key: "{{ HOMEPAGE_VAR_SONARR_TOKEN }}"
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
