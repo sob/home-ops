@@ -7,8 +7,8 @@
           maxEvents: 5 # optional - defaults to 10
           integrations: # optional
             - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-              service_group: Media # group name where widget exists
+              service_group: Downloads # group name where widget exists
               service_name: Sonarr # service name for that widget
             - type: radarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-              service_group: Media # group name where widget exists
+              service_group: Downloads # group name where widget exists
               service_name: Radarr # service name for that widget
