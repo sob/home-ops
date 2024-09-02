@@ -97,6 +97,7 @@ spec:
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/icon: home-assistant.png
           gethomepage.dev/description: Automation
+          gethomepage.dev/app: home-assistant
           gethomepage.dev/href: https://hass.${SECRET_DOMAIN}
           gethomepage.dev/external: "true"
           gethomepage.dev/widget.type: homeassistant
