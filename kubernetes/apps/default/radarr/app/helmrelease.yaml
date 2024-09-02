@@ -105,7 +105,7 @@ spec:
           gethomepage.dev/href: https://radarr.${SECRET_DOMAIN}
           gethomepage.dev/widget.type: radarr
           gethomepage.dev/widget.url: http://radarr.default.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ HOMEPAGE_VAR_RADARR_TOKEN }}"
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_RADARR_TOKEN}}` }}"
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
