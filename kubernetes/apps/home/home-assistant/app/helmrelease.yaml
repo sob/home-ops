@@ -118,6 +118,8 @@ spec:
           gethomepage.dev/name: Home Assistant Configuration
           gethomepage.dev/icon: vscode.png
           gethomepage.dev/description: Visual Studio Code
+          gethomepage.dev/app: home-assistant
+          gethomepage.dev/podSelector: code-server
           gethomepage.dev/href: https://hass-code.${SECRET_DOMAIN}
           gethomepage.dev/siteMonitor: http://home-assistant.home.svc.cluster.local:12321
         className: internal
