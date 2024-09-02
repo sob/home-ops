@@ -98,7 +98,7 @@ spec:
           gethomepage.dev/icon: home-assistant.png
           gethomepage.dev/description: Automation
           gethomepage.dev/href: https://hass.${SECRET_DOMAIN}
-          gethomepage.dev/external: true
+          gethomepage.dev/external: "true"
           gethomepage.dev/widget.type: homeassistant
           gethomepage.dev/widget.url: http://home-assistant.home.svc.cluster.local
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}` }}"
