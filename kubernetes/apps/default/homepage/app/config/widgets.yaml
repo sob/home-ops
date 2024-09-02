@@ -7,3 +7,15 @@
 - greeting:
     text_size: xl
     text: What it do Nephew?
+- kubernetes:
+    cluster:
+      cpu: true
+      label: cluster
+      memory: true
+      show: true
+      showLabel: true
+    nodes:
+      cpu: true
+      memory: true
+      show: false
+      showLabel: true
