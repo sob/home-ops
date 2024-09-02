@@ -77,6 +77,8 @@ spec:
               - path: /
                 service:
                   identifier: app
+          - host: ${SECRET_DOMAIN}
+            paths: *paths
         className: external
     persistence:
       config:

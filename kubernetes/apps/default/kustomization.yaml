@@ -7,7 +7,6 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./bazarr/ks.yaml
-  - ./hajimari/ks.yaml
   - ./homepage/ks.yaml
   - ./ghostfolio/ks.yaml
   - ./lidarr/ks.yaml
