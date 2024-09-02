@@ -105,7 +105,7 @@ spec:
           gethomepage.dev/href: https://readarr.${SECRET_DOMAIN}
           gethomepage.dev/widget.type: readarr
           gethomepage.dev/widget.url: http://readarr.default.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ HOMEPAGE_VAR_READARR_TOKEN }}"
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_READARR_TOKEN}}` }}"
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
