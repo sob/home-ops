@@ -98,7 +98,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
+          gethomepage.dev/group: Downloads
           gethomepage.dev/name: Sonarr
           gethomepage.dev/icon: sonarr.png
           gethomepage.dev/description: TV Shows

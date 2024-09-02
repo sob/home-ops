@@ -92,6 +92,15 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Automation
+          gethomepage.dev/name: Home Assistant
+          gethomepage.dev/icon: homeassistant.png
+          gethomepage.dev/description: Automation
+          gethomepage.dev/href: https://hass.${SECRET_DOMAIN}
+          gethomepage.dev/widget.type: homeassistant
+          gethomepage.dev/widget.url: http://homeassistant.home.svc.cluster.local
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}` }}"
         className: external
         hosts:
           - host: hass.${SECRET_DOMAIN}
@@ -103,6 +112,12 @@ spec:
       code-server:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Automation
+          gethomepage.dev/name: Home Assistant Configuration
+          gethomepage.dev/icon: vscode.png
+          gethomepage.dev/description: Visual Studio Code
+          gethomepage.dev/href: https://hass-code.${SECRET_DOMAIN}
         className: internal
         hosts:
           - host: hass-code.${SECRET_DOMAIN}

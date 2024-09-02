@@ -90,9 +90,16 @@ spec:
     ingress:
       app:
         annotations:
-          hajimari.io/icon: cloud-sync-outline
-          hajimari.io/group: Downloads
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: Prowlarr
+          gethomepage.dev/icon: prowlarr.png
+          gethomepage.dev/description: Indexers
+          gethomepage.dev/href: https://prowlarr.${SECRET_DOMAIN}
+          gethomepage.dev/widget.type: prowlarr
+          gethomepage.dev/widget.url: http://prowlarr.default.svc.cluster.local
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_PROWLARR_TOKEN}}` }}"
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
