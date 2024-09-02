@@ -1,5 +1,1 @@
 ---
-- search:
-  provider: duckduckgo
-  focus: true
-  target: _blank
