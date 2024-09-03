@@ -44,14 +44,23 @@ spec:
         tag: v1.8.0
       plugin:
         image: ghcr.io/sob/synology-csi
-        tag: v1.2.0-2
+        tag: v1.2.0@sha256:320fc739a4ef698a66728e4d2bf3e45e96c3dff51e283c9b9302758114eb94b4
         pull: Always
       snapshotter:
         image: registry.k8s.io/sig-storage/csi-snapshotter
         tag: v6.2.2
     installCSIDriver: true
     storageClasses:
-      synology-csi-delete:
+      synology-csi:
+        reclaimPolicy: Delete
+        parameters:
+          dsm: ${SECRET_NAS_DOOM}
+          fsType: ext4
+          location: /volume1
+          protocol: iscsi
+        allowVolumeExpansion: true
+        isDefault: true
+      synology-nfs-delete:
         reclaimPolicy: Delete
         parameters:
           dsm: ${SECRET_NAS_DOOM}
@@ -63,7 +72,7 @@ spec:
           - nfsvers=4.1
           - nolock
         allowVolumeExpansion: true
-        isDefault: true
+        isDefault: false
     volumeSnapshotClasses:
       synology-csi-snapshot:
         disabled: false
@@ -73,8 +82,5 @@ spec:
           dsm: ${SECRET_NAS_DOOM}
           fsType: ext4
           location: /volume1
-          protocol: nfs
-          mountPermissions: '0755'
-        mountOptions:
-          - nfsvers=4.1
-          - nolock
+          protocol: iscsi
+        allowVolumeExpansion: true
