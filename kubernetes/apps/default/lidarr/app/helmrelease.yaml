@@ -122,6 +122,7 @@ spec:
       media:
         type: nfs
         server: ${SECRET_NFS_SERVER}
-        path: /volume1/Media
+        path: ${SECRET_NFS_PATH_MEDIA}
         globalMounts:
           - path: /media
+          - path: /Downloads
