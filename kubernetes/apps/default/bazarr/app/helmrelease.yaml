@@ -144,6 +144,7 @@ spec:
         path: ${SECRET_NFS_PATH_MEDIA}
         globalMounts:
           - path: /media
+          - path: /Downloads
       scripts:
         type: configMap
         name: bazarr-scripts
