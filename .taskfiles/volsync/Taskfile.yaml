@@ -267,8 +267,8 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml) | kubectl apply -f -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}}
-      - kubectl -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh volsync-dst-{{.job}} {{.ns}}
+      - kubectl -n {{.ns}} wait job/volsync-dst-{{.job}} --for condition=complete --timeout=120m
       - kubectl -n {{.ns}} delete replicationdestination {{.job}}
     env: *env-vars
     vars:
