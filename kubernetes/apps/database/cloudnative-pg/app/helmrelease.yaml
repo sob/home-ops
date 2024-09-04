@@ -23,9 +23,7 @@ spec:
       strategy: rollback
       retries: 3
   dependsOn:
-    - name: minio
-      namespace: storage
-    - name: csi-driver-nfs
+    - name: synology-csi
       namespace: storage
   values:
     crds:

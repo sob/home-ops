@@ -60,11 +60,11 @@ spec:
           compression: bzip2
           maxParallel: 8
         destinationPath: s3://cloudnative-pg/
-        endpointURL: http://minio.storage.svc.cluster.local:9000
+        endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
         s3Credentials:
           accessKeyId:
             name: cloudnative-pg-secret
-            key: minio-access-key-id
+            key: aws-access-key-id
           secretAccessKey:
             name: cloudnative-pg-secret
-            key: minio-secret-access-key
+            key: aws-secret-access-key
