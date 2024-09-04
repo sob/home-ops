@@ -28,6 +28,3 @@ spec:
       APP: *app
       GATUS_SUBDOMAIN: node-red
       VOLSYNC_CAPACITY: 1Gi
-      VOLSYNC_ACCESSMODES: ReadWriteOnce
-      VOLSYNC_STORAGECLASS: synology-csi-delete
-      VOLSYNC_SNAPSHOTCLASS: synology-csi-snapshot
