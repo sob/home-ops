@@ -30,15 +30,6 @@ spec:
   values:
     controllers:
       bazarr:
-        type: statefulset
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: "ReadWriteOnce"
-              size: 5Gi
-              storageClass: synology-csi-retain
-              globalMounts:
-                - path: /config
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
