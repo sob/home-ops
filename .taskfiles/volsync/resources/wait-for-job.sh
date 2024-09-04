@@ -2,7 +2,6 @@
 
 JOB=$1
 NAMESPACE="${2:-default}"
-CLUSTER="${3:-main}"
 
 [[ -z "${JOB}" ]] && echo "Job name not specified" && exit 1
 while true; do
