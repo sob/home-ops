@@ -107,7 +107,6 @@ spec:
           gethomepage.dev/widget.type: bazarr
           gethomepage.dev/widget.url: http://bazarr.default.svc.cluster.local
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_BAZARR_TOKEN}}` }}"
-
         className: internal
         hosts:
           - host: bazarr.${SECRET_DOMAIN}
