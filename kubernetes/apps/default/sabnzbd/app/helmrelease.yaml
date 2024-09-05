@@ -121,3 +121,4 @@ spec:
         path: ${SECRET_NFS_PATH_MEDIA}
         globalMounts:
           - path: /Downloads/sabnzbd
+            subPath: Downloads/sabnzbd
