@@ -14,6 +14,8 @@
   "rebaseWhen": "conflicted",
   "schedule": ["every weekend"],
   "ignorePaths": ["**/*.sops.*"],
+  "username": "stimpy-bot[bot]",
+  "gitAuthor": "stimpy-bot <101597957+stimpy-bot[bot]@users.noreply.github.com>",
   "flux": {
     "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
   },
