@@ -3,18 +3,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app zigbee2mqtt
+  name: &app home-assistant
   namespace: flux-system
 spec:
-  targetNamespace: home
+  targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
+    - name: external-secrets-stores
     - name: volsync
     - name: emqx-cluster
-    - name: external-secrets-stores
-  path: ./kubernetes/apps/home/zigbee2mqtt/app
+    - name: cloudnative-pg-cluster
+  path: ./kubernetes/apps/default/home-assistant/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -26,8 +27,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: zigbee
-      VOLSYNC_CAPACITY: 1Gi
-      VOLSYNC_ACCESSMODES: ReadWriteMany
-      VOLSYNC_STORAGECLASS: synology-csi-delete
-      VOLSYNC_SNAPSHOTCLASS: synology-csi-snapshot
+      GATUS_SUBDOMAIN: hass
+      VOLSYNC_CAPACITY: 5Gi

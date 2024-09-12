@@ -28,7 +28,7 @@ spec:
     keepHistory: false
   dependsOn:
     - name: home-assistant
-      namespace: home
+      namespace: default
   values:
     controllers:
       main:
