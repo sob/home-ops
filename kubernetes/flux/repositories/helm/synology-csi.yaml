@@ -6,4 +6,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
-  url: https://zebernst.github.io/synology-csi-talos
+  url: https://sob.github.io/synology-csi-talos
