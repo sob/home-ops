@@ -37,7 +37,7 @@ spec:
       nodeDriverRegistrar:
         image:
           repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
-          tag: v2.8.0
+          tag: v2.12.0
       provisioner:
         image:
           repository: registry.k8s.io/sig-storage/csi-provisioner
