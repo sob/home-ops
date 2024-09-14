@@ -45,7 +45,7 @@ spec:
       resizer:
         image:
           repository: registry.k8s.io/sig-storage/csi-resizer
-          tag: v1.8.0
+          tag: v1.12.0
       plugin:
         image:
           repository: ghcr.io/zebernst/synology-csi
