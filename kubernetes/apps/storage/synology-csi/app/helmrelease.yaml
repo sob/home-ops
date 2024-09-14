@@ -33,7 +33,7 @@ spec:
       attacher:
         image:
           repository: registry.k8s.io/sig-storage/csi-attacher
-          tag: v4.3.0
+          tag: v4.7.0
       nodeDriverRegistrar:
         image:
           repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
