@@ -1,3 +1,4 @@
+---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Renovate"
 
@@ -17,7 +18,7 @@ on:
         default: latest
         required: false
   schedule:
-    - cron: "0 * * * * " # Every hour
+    - cron: "0 * * * *" # Every hour
   push:
     branches: ["main"]
     paths:
@@ -29,7 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LOG_LEVEL: "${{ input.logLevel || 'debug' }}"
+  LOG_LEVEL: "${{ inputs.logLevel || 'debug' }}"
   RENOVATE_AUTODISCOVER: true
   RENOVATE_AUTODISCOVER_FILTER: "${{ github.repository }}"
   RENOVATE_DRY_RUN: "${{ inputs.dryRun == true }}"
