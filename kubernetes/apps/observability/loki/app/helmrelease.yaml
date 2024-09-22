@@ -27,7 +27,7 @@ spec:
       retries: 3
   dependsOn:
     - name: openebs
-      namespace: openebs-system
+      namespace: storage
   values:
     deploymentMode: SingleBinary
     loki:
