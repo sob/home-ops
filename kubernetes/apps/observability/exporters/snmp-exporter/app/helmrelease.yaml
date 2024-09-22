@@ -30,10 +30,10 @@ spec:
     serviceMonitor:
       enabled: true
       params:
-        - name: apcups
-          module: ["apcups"]
-          target: 10.1.0.124
-          auth: ["public_v2"]
+        - name: cyberpower
+          module: ["cyberpower"]
+          target: 10.1.0.197
+          auth: ["public_v1"]
       path: /snmp
       scrapeTimeout: 10s
       relabelings:
