@@ -138,10 +138,10 @@ tasks:
       app: Application to restore (required)
       previous: Previous number of snapshots to restore (default: 2)
     cmds:
-      - { task: .suspend, vars: *env-vars }
-      - { task: .wipe, vars: *env-vars }
+      #- { task: .suspend, vars: *env-vars }
+      # - { task: .wipe, vars: *env-vars }
       - { task: .restore, vars: *env-vars }
-      - { task: .resume, vars: *env-vars }
+      #- { task: .resume, vars: *env-vars }
     env: *env-vars
     requires:
       vars: ["app"]
@@ -151,11 +151,11 @@ tasks:
       controller:
         sh: "{{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh {{.app}} {{.ns}}"
       claim:
-        sh: kubectl -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
+        sh: kubectl -n {{.ns}} get replicationsources/{{.app}}-r2 -o jsonpath="{.spec.sourcePVC}"
       puid:
-        sh: kubectl -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
+        sh: kubectl -n {{.ns}} get replicationsources/{{.app}}-r2 -o jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
       pgid:
-        sh: kubectl -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
+        sh: kubectl -n {{.ns}} get replicationsources/{{.app}}-r2 -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
 
   nuke:
     desc: Nuke all volsync custom resources
@@ -206,6 +206,7 @@ tasks:
         sh: kubectl get persistentvolumes --all-namespaces --no-headers | grep dst-dest | awk '{print $1 "/default"}'
       pvcs:
         sh: kubectl get persistentvolumeclaims --all-namespaces --no-headers | grep dst-dest | awk '{print $2}'
+
   cleanup:
     desc: Delete volume populator PVCs in all namespaces
     summary: |
