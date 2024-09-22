@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: synology-csi
-      version: 0.9.5-pre.2
+      version: 0.9.5-pre.1
       sourceRef:
         kind: HelmRepository
         name: synology-csi
@@ -31,25 +31,20 @@ spec:
       name: synology-csi-client-info
     images:
       attacher:
-        image:
-          repository: registry.k8s.io/sig-storage/csi-attacher
-          tag: v4.7.0
+        image: registry.k8s.io/sig-storage/csi-attacher
+        tag: v4.7.0
       nodeDriverRegistrar:
-        image:
-          repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
-          tag: v2.12.0
+        image: registry.k8s.io/sig-storage/csi-node-driver-registrar
+        tag: v2.12.0
       provisioner:
-        image:
-          repository: registry.k8s.io/sig-storage/csi-provisioner
-          tag: v3.6.4
+        image: registry.k8s.io/sig-storage/csi-provisioner
+        tag: v3.6.4
       resizer:
-        image:
-          repository: registry.k8s.io/sig-storage/csi-resizer
-          tag: v1.12.0
+        image: registry.k8s.io/sig-storage/csi-resizer
+        tag: v1.12.0
       plugin:
-        image:
-          repository: ghcr.io/zebernst/synology-csi
-          tag: edge@sha256:a914a5eab78872ff06eabd8ff9d1965efb9dadee947dfa8aefcf6f3564227e78
+        image: ghcr.io/zebernst/synology-csi
+        tag: v1.2.0
         pull: Always
       snapshotter:
         image:
