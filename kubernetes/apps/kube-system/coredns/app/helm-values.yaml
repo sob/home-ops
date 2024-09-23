@@ -35,6 +35,17 @@ servers:
       - name: loop
       - name: reload
       - name: loadbalance
+  - zones:
+      - zone: ${SECRET_INTERNAL_DOMAIN}.
+        scheme: dns://
+        use_tcp: true
+    port: 5301
+    plugins:
+      - name: forward
+        parameters: . udp://${SECRET_METAL_GATEWAY}
+        configBlock: |-
+          policy sequential
+          health_check 5s
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -48,3 +59,10 @@ tolerations:
   - key: node-role.kubernetes.io/control-plane
     operator: Exists
     effect: NoSchedule
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: *app
