@@ -33,7 +33,7 @@ spec:
         - name: pdu
           module:
             - cyberpower
-          target: 10.1.0.197
+          target: rack-pdu.${SECRET_INTERNAL_DOMAIN}
       path: /snmp
       scrapeTimeout: 10s
       relabelings:

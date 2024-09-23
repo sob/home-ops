@@ -5,4 +5,4 @@ kind: Kustomization
 resources:
   - ./synology-nas
   - ./cyberpower-pdu
-#  - ./ups
+  - ./cyberpower-ups
