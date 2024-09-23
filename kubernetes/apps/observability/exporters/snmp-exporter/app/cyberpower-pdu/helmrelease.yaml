@@ -11,7 +11,7 @@ spec:
       version: 5.5.0
       sourceRef:
         kind: HelmRepository
-        name: prometheus-community-charts
+        name: prometheus-community
         namespace: flux-system
   install:
     remediation:
@@ -37,7 +37,7 @@ spec:
         defaultMode: 420
     serviceMonitor:
       enabled: true
-      namespace: monitoring
+      namespace: observability
       params:
         - name: pdu
           module:
