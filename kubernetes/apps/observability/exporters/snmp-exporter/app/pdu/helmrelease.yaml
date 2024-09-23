@@ -1,9 +1,9 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app snmp-exporter
+  name: &app snmp-exporter-pdu
 spec:
   interval: 30m
   chart:
@@ -27,13 +27,21 @@ spec:
       namespace: observability
   values:
     fullnameOverride: *app
+    extraArgs: ["--config.file=/config/snmp.yaml"]
+    extraConfigmapMounts:
+      - name: &name pdu-snmp-configmap
+        mountPath: /config/snmp.yaml
+        subPath: snmp.yaml
+        configMap: *name
+        readOnly: true
+        defaultMode: 420
     serviceMonitor:
       enabled: true
       params:
-        - name: cyberpower
-          module: ["cyberpower"]
+        - name: pdu
+          module: ["pdu"]
           target: 10.1.0.197
-          auth: ["public_v1"]
+          auth: ["public"]
       path: /snmp
       scrapeTimeout: 10s
       relabelings:
