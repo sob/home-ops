@@ -30,23 +30,14 @@ servers:
           pods insecure
           fallthrough in-addr.arpa ip6.arpa
       - name: forward
+        parameters: ${SECRET_INTERNAL_DOMAIN}. ${SECRET_METAL_GATEWAY}
+      - name: forward
         parameters: . /etc/resolv.conf
       - name: cache
         parameters: 30
       - name: loop
       - name: reload
       - name: loadbalance
-  - zones:
-      - zone: ${SECRET_INTERNAL_DOMAIN}.
-        scheme: dns://
-        use_tcp: true
-    port: 5301
-    plugins:
-      - name: forward
-        parameters: . ${SECRET_METAL_GATEWAY}
-        configBlock: |-
-          policy sequential
-          health_check 5s
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
