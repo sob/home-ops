@@ -1,6 +1,5 @@
 <div align="center">
-
-<img src="https://raw.githubusercontent.com/sob/home-ops/docs/src/assets/logo.png" align="center" width="144px" height="144px"/>
+[![Kubernetes Logo](https://github.com/sob/home-ops/blob/main/docs/src/assets/logo.png?raw=true)]
 
 ### My Home Operations Repository :octocat:
 
