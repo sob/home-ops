@@ -35,7 +35,7 @@ spec:
             - cyberpower
           target: rack-ups.${SECRET_INTERNAL_DOMAIN}
       path: /snmp
-      scrapeTimeout: 10s
+      scrapeTimeout: 20s
       relabelings:
         - sourceLabels: [__param_target]
           targetLabel: instance
