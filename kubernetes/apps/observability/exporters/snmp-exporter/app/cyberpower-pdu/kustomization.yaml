@@ -5,15 +5,15 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
 configMapGenerator:
-  - name: pdu-dashboard
+  - name: snmp-exporter-cyberpower-pdu-dashboards
     files:
-      - pdu-dashboard.json=./resources/dashboard.json
+      - ./resources/cyberpower-pdu-dashboard.json
     options:
       labels:
         grafana_dashboard: "true"
-  - name: pdu-snmp-configmap
+  - name: snmp-exporter-cyberpower-pdu
     files:
-      - snmp.yaml=./resources/snmp.yaml
+      - ./resources/snmp.yaml
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
