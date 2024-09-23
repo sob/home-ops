@@ -1,5 +1,6 @@
 ---
 fullnameOverride: coredns
+replicaCount: 3
 k8sAppLabelOverride: kube-dns
 serviceAccount:
   create: true
@@ -65,4 +66,4 @@ topologySpreadConstraints:
     whenUnsatisfiable: DoNotSchedule
     labelSelector:
       matchLabels:
-        app.kubernetes.io/name: *app
+        app.kubernetes.io/name: coredns
