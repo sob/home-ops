@@ -43,7 +43,7 @@ servers:
     port: 5301
     plugins:
       - name: forward
-        parameters: . udp://${SECRET_METAL_GATEWAY}
+        parameters: . ${SECRET_METAL_GATEWAY}
         configBlock: |-
           policy sequential
           health_check 5s
