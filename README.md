@@ -1,5 +1,5 @@
 <div align="center">
-[![Kubernetes Logo](https://github.com/sob/home-ops/blob/main/docs/src/assets/logo.png?raw=true)]
+  <img src="https://raw.githubusercontent.com/sob/home-ops/main/docs/src/assets/logo.png" align="center" width="144px" height="144px"/>
 
 ### My Home Operations Repository :octocat:
 
@@ -9,10 +9,9 @@ _... managed with Flux, Renovate, and GitHub Actions_ 🤖
 
 <div align="center">
 
-[![Discord](https://img.shields.io/discord/673534664354430999?style=for-the-badge&label&logo=discord&logoColor=white&color=blue)](https://discord.gg/home-operations)&nbsp;&nbsp;
+![Renovate](https://img.shields.io/github/actions/workflow/status/sob/home-ops/renovate.yaml?style=for-the-badge&logo=renovate&labelColor=blue)&nbsp;&nbsp;
 [![Talos](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.56kbps.io%2Ftalos_version&style=for-the-badge&logo=talos&logoColor=white&color=blue&label=%20)](https://talos.dev)&nbsp;&nbsp;
 [![Kubernetes](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.56kbps.io%2Fkubernetes_version&style=for-the-badge&logo=kubernetes&logoColor=white&color=blue&label=%20)](https://kubernetes.io)&nbsp;&nbsp;
-[![Renovate](https://img.shields.io/github/actions/workflow/status/sob/home-ops/renovate.yaml?branch=main&label=&logo=renovatebot&style=for-the-badge&color=blue)](https://github.com/sob/home-ops/actions/workflows/renovate.yaml)
 
 </div>
 
