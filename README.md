@@ -9,7 +9,7 @@ _... managed with Flux, Renovate, and GitHub Actions_ 🤖
 
 <div align="center">
 
-![Renovate](https://img.shields.io/github/actions/workflow/status/sob/home-ops/renovate.yaml?style=for-the-badge&logo=renovate&labelColor=blue)&nbsp;&nbsp;
+![Renovate](https://img.shields.io/github/actions/workflow/status/sob/home-ops/renovate.yaml?style=for-the-badge&logo=renovate&color=blue)&nbsp;&nbsp;
 [![Talos](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.56kbps.io%2Ftalos_version&style=for-the-badge&logo=talos&logoColor=white&color=blue&label=%20)](https://talos.dev)&nbsp;&nbsp;
 [![Kubernetes](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.56kbps.io%2Fkubernetes_version&style=for-the-badge&logo=kubernetes&logoColor=white&color=blue&label=%20)](https://kubernetes.io)&nbsp;&nbsp;
 
