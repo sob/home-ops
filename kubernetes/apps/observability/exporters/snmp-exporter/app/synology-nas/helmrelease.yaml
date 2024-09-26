@@ -30,10 +30,14 @@ spec:
       enabled: true
       namespace: observability
       params:
-        - name: nas
+        - name: doom
           module:
             - synology
           target: doom.${SECRET_INTERNAL_DOMAIN}
+        - name: mordor
+          module:
+            - synology
+          target: mordor.${SECRET_INTERNAL_DOMAIN}
       path: /snmp
       scrapeTimeout: 10s
       relabelings:
