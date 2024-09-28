@@ -25,3 +25,6 @@ Brewfile.lock.json
 wiki
 # Bootstrap
 /config.yaml
+
+**/.terraform/*
+**/terraform.tfstate*
