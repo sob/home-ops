@@ -27,13 +27,16 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    driver:
+      existingConfigSecret: democratic-csi-nfs
+      image: ghcr.io/democratic-csi/democratic-csi:v1.9.3
+      config:
+        driver: nfs-client
     csiDriver:
       # should be globally unique for a given cluster
       name: "org.democratic-csi.synology-nfs"
     controller:
       strategy: node
-      driver:
-        image: ghcr.io/democratic-csi/democratic-csi:v1.8.3
       externalAttacher:
         image: registry.k8s.io/sig-storage/csi-attacher:v4.3.0
       externalProvisioner:
