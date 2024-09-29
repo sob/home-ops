@@ -10,7 +10,7 @@ spec:
   releaseName: democratic-nfs
   chart:
     spec:
-      chart: democratic-si
+      chart: democratic-csi
       version: 0.13.7
       sourceRef:
         kind: HelmRepository
