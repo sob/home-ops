@@ -1,0 +1,86 @@
+---
+# yaml-language-server: $schema=https://github.com/fluxcd-community/flux2-schemas/raw/main/helmrelease-helm-v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: democratic-csi-nfs
+  namespace: kube-system
+spec:
+  interval: 15m
+  releaseName: democratic-nfs
+  chart:
+    spec:
+      chart: democratic-si
+      version: 0.13.7
+      sourceRef:
+        kind: HelmRepository
+        name: democratic-csi
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    csiDriver:
+      # should be globally unique for a given cluster
+      name: "org.democratic-csi.synology-nfs"
+    controller:
+      strategy: node
+      driver:
+        image: ghcr.io/democratic-csi/democratic-csi:v1.8.3
+      externalAttacher:
+        image: registry.k8s.io/sig-storage/csi-attacher:v4.3.0
+      externalProvisioner:
+        image: registry.k8s.io/sig-storage/csi-provisioner:v3.5.0
+      externalResizer:
+        enabled: false
+      externalSnapshotter:
+        enabled: false
+    node:
+      driver:
+        image: ghcr.io/democratic-csi/democratic-csi:v1.8.3
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "mkdir -p /storage; mount 10.1.100.254:/volume1/k8s /storage"]
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "umount /storage"]
+    storageClasses:
+      - name: synology-nfs-retain
+        defaultClass: false
+        reclaimPolicy: Retain
+        volumeBindingMode: WaitForFirstConsumer
+        allowVolumeExpansion: false
+        parameters:
+          fstype: nfs
+          # csi.storage.k8s.io/fstype: ext4
+        mountOptions:
+          - noatime
+          - nolock
+          - nfsvers=4,1
+      - name: synology-nfs-delete
+        defaultClass: false
+        reclaimPolicy: Delete
+        volumeBindingMode: WaitForFirstConsumer
+        allowVolumeExpansion: false
+        parameters:
+          fstype: nfs
+          # csi.storage.k8s.io/fstype: ext4
+        mountOptions:
+          - noatime
+          - nolock
+          - nfsvers=4,1
+    driver:
+      config:
+        driver: nfs-client
+        nfs:
+          shareHost: 10.1.100.254
+          shareBasePath: "/volume1/k8s"
+          controllerBasePath: "/storage"
