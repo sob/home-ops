@@ -6,6 +6,7 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./openebs/ks.yaml
+  - ./democratic-csi/ks.yaml
   - ./snapshot-controller/ks.yaml
   - ./synology-csi/ks.yaml
   - ./volsync/ks.yaml
