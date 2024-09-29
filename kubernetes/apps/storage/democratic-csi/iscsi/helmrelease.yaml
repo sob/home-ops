@@ -46,8 +46,7 @@ spec:
       externalSnapshotter:
         image: registry.k8s.io/sig-storage/csi-snapshotter:v8.1.0
       externalHealthMonitorController:
-        enabled: true
-        image: registry.k8s.io/sig-storage/csi-external-health-monitor-controller:v0.13.0
+        enabled: false
       csiProxy:
         image: ghcr.io/democratic-csi/csi-grpc-proxy:v0.5.6
     node:
