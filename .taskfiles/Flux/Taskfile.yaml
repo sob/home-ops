@@ -57,33 +57,53 @@ tasks:
       - msg: Missing kubeconfig
         sh: test -f {{.KUBECONFIG_FILE}}
 
+  nuke:
+    desc: Nuke an app and associated volumes
+    cmds:
+      - kubectl delete kustomization --namespace flux-system {{.APP}} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - kubectl delete persistentvolumeclaims {{.APP}} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - kubectl delete helmrelease --namespace {{.NS | default "default"}} {{.APP}} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - kubectl delete ReplicationDestination --namespace {{.NS | default "default"}} {{.APP}} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - kubectl delete ReplicationSource --namespace {{.NS | default "default"}} {{.APP}} --grace-period=0 --force=true --wait=false --ignore-not-found=true
+      - task: cluster-apps
+    vars:
+      NS:
+        sh: kubectl get -A helmrelease --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
+    requires:
+      vars: ["APP"]
+
   helmrelease:
     aliases: ["hr", "helm"]
     desc: Force reconcile a helmrelease record
     cmds:
       - task: .reconcile
-        vars: { type: "helmrelease" }
+        vars: { TYPE: "helmrelease" }
     requires:
-      vars: ["target"]
+      vars: ["APP"]
+
+  cluster-apps:
+    aliases: ["apps"]
+    desc: Force reconciliation of the cluster-apps kustomization
+    cmd: flux reconcile kustomization cluster-apps --with-source
 
   kustomization:
     aliases: ["k"]
     desc: Force reconcile a kustomization record
     cmds:
       - task: .reconcile
-        vars: { ns: "flux-system", type: "kustomization"}
+        vars: { NS: "flux-system", TYPE: "kustomization"}
     requires:
-      vars: ["target"]
+      vars: ["TYPE"]
     vars:
-      ns: "flux-system"
-      type: "kustomization"
+      NS: "flux-system"
+      TYPE: "kustomization"
 
   .reconcile:
     internal: true
-    cmd: flux reconcile --namespace {{.ns}} {{.type}} {{.target}} --with-source {{.CLI_ARGS}}
+    cmd: flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} --with-source {{.CLI_ARGS}}
     vars:
-      ns:
-        sh: kubectl get -A {{.type}} --no-headers --field-selector=metadata.name={{.target}} | awk '{print $1}'
+      NS:
+        sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
     preconditions:
       - msg: Missing kubeconfig
         sh: test -f {{.KUBECONFIG}}
