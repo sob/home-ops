@@ -45,21 +45,12 @@ spec:
                 enabled: true
               readiness:
                 enabled: true
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 128Mi
     defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
-        seccompProfile: { type: RuntimeDefault }
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -91,13 +82,12 @@ spec:
             scrapeTimeout: 10s
     persistence:
       data:
+        enabled: true
         type: emptyDir
+        medium: Memory
+        sizeLimit: 1Gi
         globalMounts:
-          - path: /data
-      tmp:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
+          - path: /dev/shm
       config:
         type: configMap
         name: smtp-relay-configmap
@@ -105,7 +95,3 @@ spec:
           - path: /data/maddy.conf
             subPath: maddy.conf
             readOnly: true
-      cache:
-        type: emptyDir
-        globalMounts:
-          - path: /cache
