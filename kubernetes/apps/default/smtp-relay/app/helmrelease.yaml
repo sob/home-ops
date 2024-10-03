@@ -31,8 +31,13 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/foxcpp/maddy
-              tag: 0.7.1@sha256:6ab538e2f28baf2324f7cb418c7f9476fd9c7e9fa9b14bc3aecf51a9f6962064
+              repository: ghcr.io/linuxcontainers/alpine
+              tag: latest
+            command: [/bin/sh]
+            tty: true
+            stdin: true
+              #repository: ghcr.io/foxcpp/maddy
+              #tag: 0.7.1@sha256:6ab538e2f28baf2324f7cb418c7f9476fd9c7e9fa9b14bc3aecf51a9f6962064
             env:
               SMTP_RELAY_SMTP_PORT: &port 25
               SMTP_RELAY_METRICS_PORT: &metricsPort 8080
