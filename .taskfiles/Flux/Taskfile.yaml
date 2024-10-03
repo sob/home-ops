@@ -57,7 +57,7 @@ tasks:
     desc: Force reconcile a helmrelease record
     cmds:
       - task: .reconcile
-        vars: { TYPE: "helmrelease" }
+        vars: {TYPE: "helmrelease"}
     requires:
       vars: ["APP"]
 
@@ -80,7 +80,7 @@ tasks:
 
   .reconcile:
     internal: true
-    cmd: flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} --with-source {{.CLI_ARGS}}
+    cmd: flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} {{if eq "helmrelease" .TYPE}}--force{{end}}
     vars:
       NS:
         sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
