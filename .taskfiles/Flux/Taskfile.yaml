@@ -67,20 +67,18 @@ tasks:
     cmd: flux reconcile kustomization cluster-apps --with-source
 
   kustomization:
-    aliases: ["k"]
+    aliases: ["ks"]
     desc: Force reconcile a kustomization record
     cmds:
       - task: .reconcile
         vars: { NS: "flux-system", TYPE: "kustomization"}
-    requires:
-      vars: ["TYPE"]
     vars:
       NS: "flux-system"
       TYPE: "kustomization"
 
   .reconcile:
     internal: true
-    cmd: flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} {{if eq "helmrelease" .TYPE}}--force{{end}}
+    cmd: flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} {{if eq "helmrelease" .TYPE}}--force{{end}} {{if eq "kustomization" .TYPE}}--with-source{{end}}
     vars:
       NS:
         sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
