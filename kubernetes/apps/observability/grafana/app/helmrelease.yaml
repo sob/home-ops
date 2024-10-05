@@ -223,7 +223,7 @@ spec:
         prometheus:
           # renovate: depName="Prometheus"
           gnetId: 19105
-          revision: 3
+          revision: 5
           datasource: Prometheus
         smartctl-exporter:
           # renovate: depName="Dashboard for smartctl_exporter"
