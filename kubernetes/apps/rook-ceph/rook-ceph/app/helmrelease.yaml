@@ -16,24 +16,31 @@ spec:
         name: rook-ceph
         namespace: flux-system
   install:
+    createNamespace: true
+    crds: CreateReplace
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
+    crds: CreateReplace
     remediation:
       strategy: rollback
       retries: 3
+  uninstall:
+    keepHistory: false
   dependsOn:
     - name: snapshot-controller
       namespace: storage
   values:
+    crds:
+      enabled: true
+    pspEnable: false
+    monitoring:
     csi:
       cephFSKernelMountOptions: ms_mode=prefer-crc
       enableLiveness: true
       serviceMonitor:
         enabled: true
-    monitoring:
-      enabled: true
     resources:
       requests:
         memory: 128Mi # unchangable

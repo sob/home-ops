@@ -16,6 +16,7 @@ spec:
         name: rook-ceph
         namespace: flux-system
   install:
+    createNamespace: true
     remediation:
       retries: 3
   upgrade:
@@ -23,6 +24,8 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
+  uninstall:
+    keepHistory: false
   dependsOn:
     - name: rook-ceph-operator
       namespace: rook-ceph
@@ -34,9 +37,18 @@ spec:
       createPrometheusRules: true
     ingress:
       dashboard:
+        ingressClassName: internal
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-        ingressClassName: internal
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Rook
+          gethomepage.dev/description: Cloud-Native Storage for Kubernetes.
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/icon: rook.png
+          gethomepage.dev/pod-selector: >-
+            app in (
+              rook
+            )
         host:
           name: rook.${SECRET_DOMAIN}
           path: /
@@ -46,7 +58,6 @@ spec:
       [global]
       bdev_enable_discard = true
       bdev_async_discard = true
-      osd_class_update_on_start = false
     cephClusterSpec:
       crashCollector:
         disable: false
@@ -65,20 +76,20 @@ spec:
           requireMsgr2: true
       storage:
         useAllNodes: false
-        useAllDevices: true
+        useAllDevices: false
         deviceFilter: nvme0n1
         config:
           osdsPerDevice: "1"
-      placement:
-        mgr: &placement
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-                - matchExpressions:
-                    - key: node-role.kubernetes.io/control-plane
-                      operator: Exists
-        mon: *placement
-        all: *placement
+        nodes:
+          - name: stone-metal-04
+            devices:
+              - name: sda
+          - name: stone-metal-05
+            devices:
+              - name: sda
+          - name: stone-metal-06
+            devices:
+              - name: sda
       resources:
         mgr:
           requests:
