@@ -35,12 +35,6 @@ spec:
     crds:
       enabled: true
     pspEnable: false
-    monitoring:
-    csi:
-      cephFSKernelMountOptions: ms_mode=prefer-crc
-      enableLiveness: true
-      serviceMonitor:
-        enabled: true
     resources:
       requests:
         memory: 128Mi # unchangable
