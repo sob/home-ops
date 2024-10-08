@@ -76,10 +76,20 @@ spec:
           requireMsgr2: true
       storage:
         useAllNodes: false
-        useAllDevices: true
+        useAllDevices: false
         deviceFilter: nvme0n1
         config:
           osdsPerDevice: "1"
+        nodes:
+          - name: "metal-04"
+            devices:
+              - name: "/dev/sda"
+          - name: "metal-05"
+            devices:
+              - name: "/dev/sda"
+          - name: "metal-06"
+            devices:
+              - name: "/dev/sda"
       resources:
         mgr:
           requests:
