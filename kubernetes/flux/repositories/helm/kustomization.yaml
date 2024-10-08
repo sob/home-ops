@@ -9,7 +9,6 @@ resources:
   - ./cloudnative-pg.yaml
   - ./coredns.yaml
   - ./csi-driver-nfs.yaml
-  - ./democratic-csi.yaml
   - ./descheduler.yaml
   - ./emqx.yaml
   - ./external-secrets.yaml
@@ -27,7 +26,6 @@ resources:
   - ./rook-ceph.yaml
   - ./spegel.yaml
   - ./stakater.yaml
-  - ./synology-csi.yaml
   - ./external-dns.yaml
   - ./ingress-nginx.yaml
   - ./k8s-gateway.yaml
