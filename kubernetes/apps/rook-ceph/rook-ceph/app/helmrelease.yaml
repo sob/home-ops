@@ -37,6 +37,7 @@ spec:
     toolbox:
       enabled: true
     pspEnable: false
+    enableDiscoveryDaemon: true
     monitoring:
       enabled: true
     resources:
