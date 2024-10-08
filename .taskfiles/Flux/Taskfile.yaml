@@ -76,6 +76,10 @@ tasks:
       NS: "flux-system"
       TYPE: "kustomization"
 
+  bootstrap:
+    cmds:
+      - kubectl apply --server-side --force-conflicts --kustomize {{.KUBERNETES_DIR}}/bootstrap/flux
+
   .reconcile:
     internal: true
     cmd: flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} {{if eq "helmrelease" .TYPE}}--force{{end}} {{if eq "kustomization" .TYPE}}--with-source{{end}}
