@@ -29,5 +29,4 @@ spec:
       GATUS_SUBDOMAIN: zigbee
       VOLSYNC_CAPACITY: 1Gi
       VOLSYNC_ACCESSMODES: ReadWriteMany
-      VOLSYNC_STORAGECLASS: synology-csi-delete
-      VOLSYNC_SNAPSHOTCLASS: synology-csi-snapshot
+

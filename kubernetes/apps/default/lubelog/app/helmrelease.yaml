@@ -23,8 +23,6 @@ spec:
       strategy: rollback
       retries: 3
   dependsOn:
-    - name: synology-csi
-      namespace: storage
     - name: volsync
       namespace: storage
   values:
