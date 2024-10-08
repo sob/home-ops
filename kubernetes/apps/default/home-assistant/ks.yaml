@@ -29,3 +29,5 @@ spec:
       APP: *app
       GATUS_SUBDOMAIN: hass
       VOLSYNC_CAPACITY: 5Gi
+      VOLSYNC_STORAGECLASS: ceph-block
+      VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
