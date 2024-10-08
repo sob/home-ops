@@ -31,11 +31,11 @@ spec:
       namespace: observability
       params:
         - name: pdu
-          module:
-            - cyberpower
+          module: ["cyberpower"]
+          auth: ["public_v1"]
           target: rack-pdu.${SECRET_INTERNAL_DOMAIN}
       path: /snmp
-      scrapeTimeout: 20s
+      scrapeTimeout: 60s
       relabelings:
         - sourceLabels: [__param_target]
           targetLabel: instance
