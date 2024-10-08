@@ -31,8 +31,8 @@ spec:
       namespace: observability
       params:
         - name: ups
-          module:
-            - cyberpower
+          module: ["cyberpower"]
+          auth: ["public_v1"]
           target: rack-ups.${SECRET_INTERNAL_DOMAIN}
       path: /snmp
       scrapeTimeout: 20s
