@@ -34,7 +34,11 @@ spec:
   values:
     crds:
       enabled: true
+    toolbox:
+      enabled: true
     pspEnable: false
+    monitoring:
+      enabled: true
     resources:
       requests:
         memory: 128Mi # unchangable
