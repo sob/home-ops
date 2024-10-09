@@ -94,22 +94,22 @@ tasks:
       NS: Namespace the PVC is in (default: default)
       APP: Application to snapshot (required)
     cmds:
-      - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{.NOW}}"}}}'
+      - kubectl --namespace {{.NS}} patch replicationsources {{.APP}}-r2 --type merge -p '{"spec":{"trigger":{"manual":"{{.NOW}}"}}}'
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=120m
     vars:
       NOW: '{{now | date "150405"}}'
       NS: '{{.NS | default "default"}}'
-      JOB: volsync-src-{{.APP}}
+      JOB: volsync-src-{{.APP}}-r2
       CONTROLLER:
         sh: '{{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh {{.APP}} {{.NS}}'
     env: *vars
     requires:
-      vars: ['CLUSTER', 'APP']
+      vars: ['APP']
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
-      - kubectl --namespace {{.NS}} get replicationsources {{.APP}}
+      - kubectl --namespace {{.NS}} get replicationsources {{.APP}}-r2
 
   # To run restore jobs in parallel for all replicationdestinations:
   #    - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore APP=$0 NS=$1'
@@ -121,7 +121,7 @@ tasks:
       PREVIOUS: Previous number of snapshots to restore (default: 2)
     cmds:
       - { task: .suspend, vars: *vars }
-      #- { task: .wipe, vars: *vars }
+      - { task: .wipe, vars: *vars }
       - { task: .restore, vars: *vars }
       - { task: .resume, vars: *vars }
     vars:
