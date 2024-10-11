@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: external-secrets
+spec:
+  groups:
+    - name: external-secrets
+      rules:
+        - alert: SecretSyncError
+          annotations:
+            summary: SecretSyncError {{ $labels.name }}
+            description: |
+              Synchronization of the Secret `{{ $labels.name }}` in namespace `{{ $labels.exported_namespace }}` is failing.
+              Check for errors in the Status field of the associated ExternalSecret object.
+          expr: increase(sync_calls{status="error"}[5m]) > 0
+          for: 10m
+          labels:
+            severity: critical
+    - name: oom
+      rules:
+        - alert: OOMKilled
+          annotations:
+            summary: Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has been OOMKilled {{ $value }} times in the last 10 minutes.
+          expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
+          labels:
+            severity: critical
