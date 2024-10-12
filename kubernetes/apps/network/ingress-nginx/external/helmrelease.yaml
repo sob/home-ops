@@ -81,4 +81,4 @@ spec:
     - targetPath: controller.maxmindLicenseKey
       kind: Secret
       name: nginx-external-maxmind-secret
-      valeusKey: MAXMIND_LICENSE_KEY
+      valuesKey: MAXMIND_LICENSE_KEY
