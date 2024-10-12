@@ -7,7 +7,7 @@ metadata:
   namespace: flux-system
 spec:
   providerRef:
-    name: slack-notifications
+    name: slack-notification
   eventSeverity: error
   eventSources:
     - kind: GitRepository
@@ -24,7 +24,7 @@ metadata:
   namespace: flux-system
 spec:
   providerRef:
-    name: slack-notifications
+    name: slack-notification
   eventSeverity: info
   eventSources:
     - kind: HelmRelease
