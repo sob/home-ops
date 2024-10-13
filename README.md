@@ -102,6 +102,7 @@ graph TD;
   id11>PersistentVolumeClaim: radarr] -->|SourceRef| id13>ReplicationSource: radarr-r2];
   id14>ReplicationDestination: radarr-dst] -->|Depends on| id12>ExternalSecret: radarr-volsync-r2-secret];
   id8>Kustomization: radarr] -->|Depends on| id5>Kustomization: postgres-cluster];
+  id9>HelmRelease: radarr] -->|DependsOn| id11>PersistentVolumeClaim: radarr];
 ```
 
 ### Networking
