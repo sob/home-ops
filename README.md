@@ -95,6 +95,12 @@ graph TD;
   id5>Kustomization: postgres-cluster] -->|Depends on| id3>Kustomization: postgres];
   id5>Kustomization: postgres-cluster] -->|Creates| id10[Postgres Cluster];
   id8>Kustomization: radarr] -->|Creates| id9(HelmRelease: radarr);
+  id8>Kustomization: radarr] -->|Creates| id11(PersistentVolumeClaim: radarr)
+  id8>Kustomization: radarr] -->|Creates| id12(ExternalSecret: radarr-volsync-r2-secret)
+  id8>Kustomization: radarr] -->|Creates| id13(ReplicationSource: radarr-r2)
+  id8>Kustomization: radarr] -->|Creates| id14(ReplicationDestination: radarr-dst)
+  id11>PersistentVolumeClaim: radarr] -->|SourceRef| id13>ReplicationSource: radarr-r2];
+  id14>ReplicationDestination: radarr-dst] -->|Depends on| id12>ExternalSecret: radarr-volsync-r2-secret];
   id8>Kustomization: radarr] -->|Depends on| id5>Kustomization: postgres-cluster];
 ```
 
