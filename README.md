@@ -90,12 +90,12 @@ graph TD;
   id1>Kustomization: cluster] -->|Creates| id2>Kustomization: cluster-apps];
   id2>Kustomization: cluster-apps] -->|Creates| id3>Kustomization: postgres];
   id2>Kustomization: cluster-apps] -->|Creates| id5>Kustomization: postgres-cluster]
-  id2>Kustomization: cluster-apps] -->|Creates| id8>Kustomization: atuin]
+  id2>Kustomization: cluster-apps] -->|Creates| id8>Kustomization: radarr]
   id3>Kustomization: postgres] -->|Creates| id4[HelmRelease: postgres];
   id5>Kustomization: postgres-cluster] -->|Depends on| id3>Kustomization: postgres];
   id5>Kustomization: postgres-cluster] -->|Creates| id10[Postgres Cluster];
-  id8>Kustomization: atuin] -->|Creates| id9(HelmRelease: atuin);
-  id8>Kustomization: atuin] -->|Depends on| id5>Kustomization: postgres-cluster];
+  id8>Kustomization: radarr] -->|Creates| id9(HelmRelease: radarr);
+  id8>Kustomization: radarr] -->|Depends on| id5>Kustomization: postgres-cluster];
 ```
 
 ### Networking
