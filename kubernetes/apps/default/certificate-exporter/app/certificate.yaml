@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/refs/heads/main/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: doom-${SECRET_INTERNAL_DOMAIN_ESCAPE}
+  namespace: default
+spec:
+  secretName: doom-${SECRET_INTERNAL_DOMAIN_ESCAPE}
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: doom.${SECRET_INTERNAL_DOMAIN}
+  dnsNames:
+  - doom.${SECRET_INTERNAL_DOMAIN}
