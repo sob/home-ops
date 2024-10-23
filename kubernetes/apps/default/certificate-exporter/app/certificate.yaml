@@ -2,13 +2,14 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: doom.${SECRET_INTERNAL_DOMAIN}
+  name: ${SECRET_INTERNAL_DOMAIN_ESCAPE}
   namespace: default
 spec:
-  secretName: doom-${SECRET_INTERNAL_DOMAIN_ESCAPE}
+  secretName: ${SECRET_INTERNAL_DOMAIN_ESCAPE}
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: doom.${SECRET_INTERNAL_DOMAIN}
+  commonName: ${SECRET_INTERNAL_DOMAIN}
   dnsNames:
-  - doom.${SECRET_INTERNAL_DOMAIN}
+  - "${SECRET_INTERNAL_DOMAIN}"
+  - "*.${SECRET_INTERNAL_DOMAIN}"
