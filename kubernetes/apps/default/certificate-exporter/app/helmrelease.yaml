@@ -1,0 +1,51 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app certificate-exporter
+  namespace: default
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      cert-deploy:
+        type: cronjob
+        cronjob:
+          concurrencyPolicy: Forbid
+          schedule: "@daily"
+        containers:
+          app:
+            image:
+              repository: neilpang/acme.sh
+              tag: 3.0.9@sha256:825f6383016870c54a11f9eb2e465029ef0701012ddc137423cb593c0d71c6b0
+            command: [/bin/bash, touch /acme.sh/mydomain/mydomain.conf && acme.sh --deploy --domain mydomain --deploy-hook synology_dsm]
+    service:
+      app:
+        controller: *app
+        enabled: false
+    persistence:
+      certificate-data:
+        enabled: true
+        type: secret
+        name: ${SECRET_INTERNAL_DOMAIN_ESCAPE}
