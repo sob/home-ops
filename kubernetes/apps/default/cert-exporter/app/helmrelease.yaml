@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: &app certificate-exporter
+  name: &app cert-exporter
   namespace: default
 spec:
   interval: 30m
@@ -39,7 +39,7 @@ spec:
             image:
               repository: neilpang/acme.sh
               tag: 3.0.9@sha256:825f6383016870c54a11f9eb2e465029ef0701012ddc137423cb593c0d71c6b0
-            command: [/bin/bash, touch /acme.sh/mydomain/mydomain.conf && acme.sh --deploy --domain mydomain --deploy-hook synology_dsm]
+            command: [acme.sh --deploy --domain mydomain --deploy-hook synology_dsm]
     service:
       app:
         controller: *app
@@ -49,3 +49,10 @@ spec:
         enabled: true
         type: secret
         name: ${SECRET_INTERNAL_DOMAIN_ESCAPE}
+        globalMounts:
+          - path: /config/tls.crt
+            subPath: tls.crt
+            readOnly: true
+          - path: /config/tls.key
+            subPath: tls.key
+            readOnly: true
