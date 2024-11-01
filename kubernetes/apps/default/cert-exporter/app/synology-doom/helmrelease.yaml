@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app cert-exporter
+  name: &app cert-exporter-doom
   namespace: default
 spec:
   interval: 30m
@@ -28,8 +28,11 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    global:
+      annotations:
+        cert-domain: "doom.${SECRET_INTERNAL_DOMAIN}"
     controllers:
-      cert-deploy:
+      cert-renew:
         type: cronjob
         cronjob:
           concurrencyPolicy: Forbid
@@ -39,20 +42,33 @@ spec:
             image:
               repository: neilpang/acme.sh
               tag: 3.0.9@sha256:825f6383016870c54a11f9eb2e465029ef0701012ddc137423cb593c0d71c6b0
-            command: [/usr/local/bin/acme.sh --deploy --domain mydomain --deploy-hook synology_dsm]
-    service:
-      app:
-        controller: *app
-        enabled: false
+            command: ["/scripts/renew.sh"]
+            env:
+              - name: DOMAIN
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['cert-domain']
+            envFrom:
+            - secretRef:
+                name: cert-exporter-secret
+      cert-issue:
+        type: job
+        containers:
+          app:
+            image:
+              repository: neilpang/acme.sh
+              tag: 3.0.9@sha256:825f6383016870c54a11f9eb2e465029ef0701012ddc137423cb593c0d71c6b0
+            command: ["/scripts/issue.sh"]
+            env:
+              - name: DOMAIN
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['cert-domain']
+            envFrom:
+            - secretRef:
+                name: cert-exporter-secret
     persistence:
       certificate-data:
         enabled: true
-        type: secret
-        name: ${SECRET_INTERNAL_DOMAIN_ESCAPE}
-        globalMounts:
-          - path: /config/tls.crt
-            subPath: tls.crt
-            readOnly: true
-          - path: /config/tls.key
-            subPath: tls.key
-            readOnly: true
+        type: persistentVolumeClaim
+        existingClaim: *app
