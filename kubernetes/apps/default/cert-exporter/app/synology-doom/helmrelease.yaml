@@ -71,10 +71,11 @@ spec:
       scripts:
         type: configMap
         name: cert-exporter-doom-configmap
-        items:
-          - key: issue.sh
-            path: /scripts/issue.sh
-            mode: 0755
+        defaultMode: 0775
+        globalMounts:
+          - path: /scripts/issue.sh
+            subPath: issue.sh
+            readOnly: true
       certificate-data:
         enabled: true
         type: persistentVolumeClaim
