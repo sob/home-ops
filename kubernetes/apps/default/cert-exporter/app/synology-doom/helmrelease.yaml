@@ -59,7 +59,7 @@ spec:
             command: ['/bin/sh', '/root/.acme.sh/acme.sh']
             args:
               - --issue
-              - --domain doom.${SECRET_INTERNAL_DOMAIN}
+#              - --domain doom.${SECRET_INTERNAL_DOMAIN}
               - --dns dns_cf
               - --server letsencrypt
               - --keysize 4096
