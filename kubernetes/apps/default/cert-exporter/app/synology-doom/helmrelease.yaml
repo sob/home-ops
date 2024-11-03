@@ -72,6 +72,10 @@ spec:
         name: cert-exporter-doom-configmap
         enabled: true
         type: configMap
+        items:
+          - key: issue.sh
+            path: /scripts/issue.sh
+            mode: 755
       certificate-data:
         enabled: true
         type: persistentVolumeClaim
