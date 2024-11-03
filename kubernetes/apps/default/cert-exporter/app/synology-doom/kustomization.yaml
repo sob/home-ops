@@ -4,3 +4,12 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+configMapGenerator:
+  - name: cert-exporter-doom-configmap
+    files:
+      - issue.sh=./resources/issue.sh
+      - renew.sh=./resources/renew.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
