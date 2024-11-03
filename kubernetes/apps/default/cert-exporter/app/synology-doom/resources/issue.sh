@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 # Exit if DOMAIN is not set
 if [ -z "$DOMAIN" ]; then
   echo "Error: DOMAIN environment variable is not set"

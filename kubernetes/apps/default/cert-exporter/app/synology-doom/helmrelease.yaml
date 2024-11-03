@@ -32,6 +32,7 @@ spec:
       annotations:
         cert-domain: "doom.${SECRET_INTERNAL_DOMAIN}"
     controllers:
+
 #      cert-renew:
 #        type: cronjob
 #        cronjob:
@@ -52,6 +53,8 @@ spec:
 #            - secretRef:
 #                name: cert-exporter-doom-secret
       cert-issue:
+        annotations:
+          cert-domain: "doom.${SECRET_INTERNAL_DOMAIN}"
         type: job
         containers:
           app:
