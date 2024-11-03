@@ -69,7 +69,7 @@ spec:
                 name: cert-exporter-doom-secret
     persistence:
       script-config:
-        name: scripts
+        name: cert-exporter-doom-configmap
         enabled: true
         type: configMap
         globalMounts:
