@@ -68,14 +68,14 @@ spec:
             - secretRef:
                 name: cert-exporter-doom-secret
     persistence:
-      script-config:
+      scripts:
         name: cert-exporter-doom-configmap
         enabled: true
         type: configMap
-        globalMounts:
-          - path: /scripts
-            readOnly: true
       certificate-data:
         enabled: true
         type: persistentVolumeClaim
         existingClaim: cert-exporter
+        globalMounts:
+          - path: /root/.acme.sh
+            readOnly: true
