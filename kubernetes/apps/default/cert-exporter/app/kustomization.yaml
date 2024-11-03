@@ -5,11 +5,3 @@ kind: Kustomization
 resources:
   - ./synology-doom
   - ../../../../templates/volsync
-configMapGenerator:
-  - name: cert-exporter-configmap
-    files:
-      - issue.sh=./resources/issue.sh
-generatorOptions:
-  disableNameSuffixHash: true
-  annotations:
-    kustomize.toolkit.fluxcd.io/substitute: disabled
