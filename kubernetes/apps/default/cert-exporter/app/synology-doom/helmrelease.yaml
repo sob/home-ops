@@ -71,4 +71,4 @@ spec:
       certificate-data:
         enabled: true
         type: persistentVolumeClaim
-        existingClaim: *app
+        existingClaim: cert-exporter
