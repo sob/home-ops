@@ -74,8 +74,7 @@ spec:
         type: configMap
         items:
           - key: issue.sh
-            path: /scripts/issue.sh
-            mode: 755
+            mode: 0755
       certificate-data:
         enabled: true
         type: persistentVolumeClaim
