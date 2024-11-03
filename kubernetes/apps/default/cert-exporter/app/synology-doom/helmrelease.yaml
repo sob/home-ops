@@ -69,11 +69,12 @@ spec:
                 name: cert-exporter-doom-secret
     persistence:
       scripts:
+        type: configMap
         name: cert-exporter-doom-configmap
         enabled: true
-        type: configMap
         items:
           - key: issue.sh
+            path: issue.sh
             mode: 0755
       certificate-data:
         enabled: true
