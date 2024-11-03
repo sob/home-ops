@@ -72,5 +72,5 @@ spec:
         type: persistentVolumeClaim
         existingClaim: cert-exporter
         globalMounts:
-          - path: /doom.${SECRET_DOMAIN}
-            subPath: /acme.sh/doom.${SECRET_DOMAIN}
+          - path: /acme.sh/doom.${SECRET_INTERNAL_DOMAIN}
+            subPath: doom.${SECRET_INTERNAL_DOMAIN}
