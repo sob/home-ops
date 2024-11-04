@@ -50,9 +50,9 @@ esac
 
 # Check if certificate exists
 if ${ACMESH} --list | grep -q "${DOMAIN}"; then
-    days_remaining=$(${ACMESH} --list | grep "${DOMAIN}" | awk '{ print $3 }')
+    days_remaining=$(${ACMESH} --list | grep "${DOMAIN}" | awk '{ print int($3) }')
 
-    if [ "${days_remaining}" -gt 30 ]; then
+    if [ "${days_remaining:-0}" -gt 30 ] 2>/dev/null; then
         echo "Certificate for ${DOMAIN} exists with ${days_remaining} days remaining."
         ${ACMESH} --deploy -d ${DOMAIN} --deploy-hook "${DEPLOY_HOOK}"
         exit $?
