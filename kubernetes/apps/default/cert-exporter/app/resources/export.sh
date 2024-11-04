@@ -49,7 +49,7 @@ case "${DEPLOY_HOOK}" in
 esac
 
 # print debug info
-echo export
+echo $(export)
 
 # Check if certificate exists
 if ${ACMESH} --list | grep -q "${DOMAIN}"; then
