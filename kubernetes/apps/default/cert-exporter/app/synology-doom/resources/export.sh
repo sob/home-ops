@@ -4,7 +4,6 @@
 ACMESH=${ACMESH:-/usr/local/bin/acme.sh}
 DEPLOY_HOOK=${DEPLOY_HOOK}
 
-
 # Check base required environment variables
 [ -z "$DOMAIN" ] && echo "Error: DOMAIN not set" && exit 1
 [ -z "$CF_Key" ] && echo "Error: CF_Key not set" && exit 1
@@ -18,11 +17,11 @@ case "${DEPLOY_HOOK}" in
         [ -z "$SYNO_HOSTNAME" ] && echo "Error: SYNO_HOSTNAME not set" && exit 1
         [ -z "$SYNO_USERNAME" ] && echo "Error: SYNO_USERNAME not set" && exit 1
         [ -z "$SYNO_PASSWORD" ] && echo "Error: SYNO_PASSWORD not set" && exit 1
-        export SYNO_Username="${SYNO_USERNAME}"
-        export SYNO_Password="${SYNO_PASSWORD}"
-        export SYNO_Certificate="${DOMAIN}"
-        export SYNO_Create_Issue="${SYNO_CREATE_ISSUE:-0}"
-        export SYNO_SCHEME=${SYNO_SCHEME:-http}
+        export SYNO_USERNAME="${SYNO_USERNAME}"
+        export SYNO_PASSWORD="${SYNO_PASSWORD}"
+        export SYNO_CERTIFICATE="${DOMAIN}"
+        export SYNO_SCHEME=${SYNO_SCHEME:-https}
+        export SYNO_PORT=${SYNO_PORT}
         [ "${SYNO_SCHEME}" = "https" ] && export SYNO_Insecure="${SYNO_INSECURE:-1}"
         ;;
     "ssh")
