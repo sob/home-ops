@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app cert-exporter-doom
+  name: &app cert-exporter-mordor
   namespace: default
 spec:
   interval: 30m
@@ -43,7 +43,7 @@ spec:
             command: ['/bin/sh', '/scripts/export.sh']
             envFrom:
             - secretRef:
-                name: cert-exporter-doom-secret
+                name: cert-exporter-mordor-secret
     persistence:
       scripts:
         name: cert-exporter-configmap
@@ -56,5 +56,5 @@ spec:
         type: persistentVolumeClaim
         existingClaim: cert-exporter
         globalMounts:
-          - path: /acme.sh/doom.${SECRET_INTERNAL_DOMAIN}
-            subPath: doom.${SECRET_INTERNAL_DOMAIN}
+          - path: /acme.sh/mordor.${SECRET_INTERNAL_DOMAIN}
+            subPath: mordor.${SECRET_INTERNAL_DOMAIN}
