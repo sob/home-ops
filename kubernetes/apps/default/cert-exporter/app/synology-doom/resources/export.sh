@@ -6,13 +6,10 @@ DEPLOY_HOOK=${DEPLOY_HOOK}
 
 # Check base required environment variables
 [ -z "$DOMAIN" ] && echo "Error: DOMAIN not set" && exit 1
-[ -z "$CF_API_KEY" ] && echo "Error: CF_API_KEY not set" && exit 1
+[ -z "$CF_Key" ] && echo "Error: CF_Key not set" && exit 1
+[ -z "$CF_Email" ] && echo "Error: CF_Email not set" && exit 1
 [ -z "$ACME_EMAIL" ] && echo "Error: ACME_EMAIL not set" && exit 1
 [ -z "$DEPLOY_HOOK" ] && echo "Error: DEPLOY_HOOK not set (use 'synology_dsm' or 'ssh')" && exit 1
-
-# Set Cloudflare credentials
-export CF_Key="${CF_API_KEY}"
-export CF_Email="${ACME_EMAIL}"
 
 # Check hook-specific required variables
 case "${DEPLOY_HOOK}" in
