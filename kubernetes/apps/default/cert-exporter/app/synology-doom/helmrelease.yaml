@@ -56,13 +56,7 @@ spec:
             image:
               repository: neilpang/acme.sh
               tag: 3.0.9@sha256:825f6383016870c54a11f9eb2e465029ef0701012ddc137423cb593c0d71c6b0
-            command: ['/bin/sh', '/acme.sh/acme.sh', '--issue', '--domain doom.${SECRET_INTERNAL_DOMAIN}', '--dns dns_cf', '--server letsencrypt', '--keysize 4096']
-            args: []
-#              - --issue
-#              - --domain doom.${SECRET_INTERNAL_DOMAIN}
-#              - --dns dns_cf
-#              - --server letsencrypt
-#              - --keysize 4096
+            command: ['/bin/sh', '/usr/local/bin/acme.sh', '--issue', '--domain', 'doom.${SECRET_INTERNAL_DOMAIN}', '--dns', 'dns_cf', '--server', 'letsencrypt', '--keylength', '4096']
             envFrom:
             - secretRef:
                 name: cert-exporter-doom-secret
