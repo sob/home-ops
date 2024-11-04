@@ -73,7 +73,7 @@ fi
 
 # Issue new certificate if it doesn't exist
 echo "Issuing new certificate for ${DOMAIN}..."
-${ACMESH} --issue -d ${DOMAIN} --dns dns_cf --server letsencrypt --keylength 4096
+${ACMESH} --issue -d ${DOMAIN} --dns dns_cf --keylength 4096
 
 if [ $? -eq 0 ]; then
     echo "Certificate issued successfully. Deploying..."
