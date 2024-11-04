@@ -51,9 +51,13 @@ esac
 
 # Check if certificate exists
 if ${ACMESH} --list | grep -q "${DOMAIN}"; then
-    days_remaining=$(${ACMESH} --list | grep "${DOMAIN}" | awk '{ print int($3) }')
+    # Get renewal date (last field)
+    renewal_date=$(${ACMESH} --list | grep "${DOMAIN}" | awk '{print $NF}')
+    now=$(date +%s)
+    renew_time=$(date -d "${renewal_date}" +%s)
+    days_remaining=$(( (renew_time - now) / 86400 ))
 
-    if [ "${days_remaining:-0}" -gt 30 ] 2>/dev/null; then
+    if [ "${days_remaining}" -gt 30 ] 2>/dev/null; then
         echo "Certificate for ${DOMAIN} exists with ${days_remaining} days remaining."
         ${ACMESH} --deploy -d ${DOMAIN} --deploy-hook "${DEPLOY_HOOK}"
         exit $?
