@@ -48,7 +48,7 @@ spec:
                 name: cert-exporter-doom-secret
     persistence:
       scripts:
-        name: *app-configmap
+        name: cert-exporter-doom-configmap
         enabled: true
         type: configMap
         globalMounts:
