@@ -65,7 +65,7 @@ if ${ACMESH} --list | grep -q "${DOMAIN}"; then
         exit $?
     else
         echo "Certificate exists but only ${days_remaining} days remaining. Renewing..."
-        ${ACMESH} --renew -d ${DOMAIN} --force --server letsencrypt --debug
+        ${ACMESH} --renew -d ${DOMAIN} --force --server letsencrypt --dns dns_cf
         if [ $? -eq 0 ]; then
             echo "Certificate renewed successfully. Deploying..."
             ${ACMESH} --deploy -d ${DOMAIN} --deploy-hook "${DEPLOY_HOOK}"
