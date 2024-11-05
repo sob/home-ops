@@ -6,7 +6,7 @@ DEPLOY_HOOK=${DEPLOY_HOOK}
 
 # Check base required environment variables
 [ -z "$DOMAIN" ] && echo "Error: DOMAIN not set" && exit 1
-[ -z "$CF_Key" ] && echo "Error: CF_Key not set" && exit 1
+[ -z "$CF_Token" ] && echo "Error: CF_Token not set" && exit 1
 [ -z "$CF_Email" ] && echo "Error: CF_Email not set" && exit 1
 [ -z "$ACME_EMAIL" ] && echo "Error: ACME_EMAIL not set" && exit 1
 [ -z "$DEPLOY_HOOK" ] && echo "Error: DEPLOY_HOOK not set (use 'synology_dsm' or 'ssh')" && exit 1
