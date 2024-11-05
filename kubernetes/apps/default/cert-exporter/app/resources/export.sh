@@ -54,11 +54,15 @@ echo $(export)
 # Check if certificate exists
 echo $(${ACMESH} --list)
 if ${ACMESH} --list | grep -q "${DOMAIN}"; then
-    # Get renewal date (6th field)
-    renewal_date=$(${ACMESH} --list | grep "${DOMAIN}" | awk '{print $7}')
-    now=$(date +%s)
+    # Get renewal date (last field, in format 2025-01-03T05:20:17Z)
+    cert_line=$(${ACMESH} --list | grep "${DOMAIN}")
+    renewal_date=$(echo "$cert_line" | awk '{print $(NF)}')
+    now=$(date '+%Y-%m-%dT%H:%M:%SZ')
+
+    # Convert dates to epoch
     renew_time=$(date -d "${renewal_date}" +%s)
-    days_remaining=$(( (renew_time - now) / 86400 ))
+    current_time=$(date -d "${now}" +%s)
+    days_remaining=$(( (renew_time - current_time) / 86400 ))
 
     if [ "${days_remaining}" -gt 30 ] 2>/dev/null; then
         echo "Certificate for ${DOMAIN} exists with ${days_remaining} days remaining."
