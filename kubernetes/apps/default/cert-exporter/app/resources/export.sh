@@ -49,11 +49,7 @@ case "${DEPLOY_HOOK}" in
         ;;
 esac
 
-# print debug info
-echo $(export)
-
 # Check if certificate exists
-echo $(${ACMESH} --list)
 if ${ACMESH} --list | grep -q "${DOMAIN}"; then
     # Get renewal date (last field, in format 2025-01-03T05:20:17Z)
     cert_line=$(${ACMESH} --list | grep "${DOMAIN}")
