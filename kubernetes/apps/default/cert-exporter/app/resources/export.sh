@@ -22,6 +22,7 @@ case "${DEPLOY_HOOK}" in
         export SYNO_CERTIFICATE="${DOMAIN}"
         export SYNO_SCHEME=${SYNO_SCHEME:-https}
         export SYNO_PORT=${SYNO_PORT}
+        export SYNO_CREATE=${SYNO_CREATE:-1}
         [ "${SYNO_SCHEME}" = "https" ] && export SYNO_Insecure="${SYNO_INSECURE:-1}"
         ;;
     "ssh")
