@@ -56,23 +56,20 @@ echo $(${ACMESH} --list)
 if ${ACMESH} --list | grep -q "${DOMAIN}"; then
     # Get renewal date (6th field)
     renewal_date=$(${ACMESH} --list | grep "${DOMAIN}" | awk '{print $7}')
-    echo "renewal_date: ${renewal_date}"
     now=$(date +%s)
     renew_time=$(date -d "${renewal_date}" +%s)
-    echo "renewal_time: ${renewal_time}"
     days_remaining=$(( (renew_time - now) / 86400 ))
-    echo "days_remaining: ${days_remaining}"
 
     if [ "${days_remaining}" -gt 30 ] 2>/dev/null; then
         echo "Certificate for ${DOMAIN} exists with ${days_remaining} days remaining."
-        ${ACMESH} --deploy -d ${DOMAIN} --deploy-hook "${DEPLOY_HOOK}"
+        ${ACMESH} --deploy -d ${DOMAIN} --deploy-hook "${DEPLOY_HOOK}" --insecure
         exit $?
     else
         echo "Certificate exists but only ${days_remaining} days remaining. Renewing..."
         ${ACMESH} --renew -d ${DOMAIN} --force --server letsencrypt --dns dns_cf
         if [ $? -eq 0 ]; then
             echo "Certificate renewed successfully. Deploying..."
-            ${ACMESH} --deploy -d ${DOMAIN} --deploy-hook "${DEPLOY_HOOK}"
+            ${ACMESH} --deploy -d ${DOMAIN} --deploy-hook "${DEPLOY_HOOK}" --insecure
             exit $?
         else
             echo "Failed to renew certificate"
