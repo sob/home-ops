@@ -52,12 +52,16 @@ esac
 echo $(export)
 
 # Check if certificate exists
+echo $(${ACMESH} --list)
 if ${ACMESH} --list | grep -q "${DOMAIN}"; then
     # Get renewal date (6th field)
     renewal_date=$(${ACMESH} --list | grep "${DOMAIN}" | awk '{print $7}')
+    echo "renewal_date: ${renewal_date}"
     now=$(date +%s)
     renew_time=$(date -d "${renewal_date}" +%s)
+    echo "renewal_time: ${renewal_time}"
     days_remaining=$(( (renew_time - now) / 86400 ))
+    echo "days_remaining: ${days_remaining}"
 
     if [ "${days_remaining}" -gt 30 ] 2>/dev/null; then
         echo "Certificate for ${DOMAIN} exists with ${days_remaining} days remaining."
