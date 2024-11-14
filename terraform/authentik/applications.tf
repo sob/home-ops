@@ -1,11 +1,4 @@
 locals {
-  oauth_apps = [
-    "grafana",
-    "lubelog"
-  ]
-}
-
-locals {
   applications = {
     grafana = {
       client_id     = module.onepassword_authentik.fields.GRAFANA_CLIENT_ID
@@ -87,6 +80,19 @@ resource "authentik_application" "application" {
   policy_engine_mode = "all"
 }
 
+data "authentik_group" "lookup" {
+  for_each = local.applications
+  name     = each.value.group.name
+}
+
+resource "authentik_policy_binding" "application_policy_binding" {
+  for_each = local.applications
+
+  target = authentik_application.application[each.key].uuid
+  group  = data.authentik_group.lookup[each.key].id
+  order  = 0
+}
+
 resource "authentik_application" "proxy_application" {
   for_each           = local.proxy_applications
   name               = title(each.key)
@@ -97,4 +103,17 @@ resource "authentik_application" "proxy_application" {
   meta_icon          = each.value.icon_url
   meta_launch_url    = lookup(local.proxy_applications[each.key], "external_host", null)
   policy_engine_mode = "all"
+}
+
+data "authentik_group" "proxy_lookup" {
+  for_each = local.proxy_applications
+  name     = each.value.group.name
+}
+
+resource "authentik_policy_binding" "proxy_application_policy_binding" {
+  for_each = local.proxy_applications
+
+  target = authentik_application.proxy_application[each.key].uuid
+  group  = data.authentik_group.proxy_lookup[each.key].id
+  order  = 0
 }
