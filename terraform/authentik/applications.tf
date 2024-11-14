@@ -15,6 +15,14 @@ locals {
       icon_url      = "https://demo.lubelogger.com/defaults/lubelogger_icon_72.png"
       redirect_uri  = "https://lubelog.${local.cluster_domain}/Login/RemoteAuth"
       launch_url    = "https://lubelog.${local.cluster_domain}/Login/RemoteAuth"
+    },
+    gatus = {
+      client_id     = module.onepassword_authentik.fields.GATUS_CLIENT_ID
+      client_secret = module.onepassword_authentik.fields.GATUS_CLIENT_SECRET
+      group         = resource.authentik_group.monitoring
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/gatus.png"
+      redirect_uri  = "https://status.${local.cluster_domain}/authorization-code/callback"
+      launch_url    = "https://status.${local.cluster_domain}"
     }
   }
 
@@ -33,6 +41,11 @@ locals {
       group         = resource.authentik_group.home
       external_host = "https://homepage.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
+    },
+    homeassistant = {
+      group         = resource.authentik_group.home
+      external_host = "https://hass.${local.cluster_domain}"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
     }
   }
 }
