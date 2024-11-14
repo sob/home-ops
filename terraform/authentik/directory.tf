@@ -39,20 +39,6 @@ resource "authentik_group" "users" {
   is_superuser = false
 }
 
-data "authentik_group" "lookup" {
-  for_each = local.applications
-  name     = each.value.group.name
-}
-
-resource "authentik_policy_binding" "application_policy_binding" {
-  for_each = local.applications
-
-  target = authentik_application.application[each.key].uuid
-  group  = data.authentik_group.lookup[each.key].id #authentik_application.application[each.key].group.id
-  #group  = data.authentik_group.lookup[each.key].id
-  order  = 0
-}
-
 resource "authentik_user" "admin" {
   username = module.onepassword_authentik.fields.AUTHENTIK_BOOTSTRAP_USERNAME
   name     = module.onepassword_authentik.fields.AUTHENTIK_BOOTSTRAP_NAME
