@@ -3,6 +3,7 @@
 # Default and required environment variables
 ACMESH=${ACMESH:-/usr/local/bin/acme.sh}
 DEPLOY_HOOK=${DEPLOY_HOOK}
+PRE_HOOK=${PRE_HOOK:-systemctl stop unifi-core.service}
 
 # Check base required environment variables
 [ -z "$DOMAINS" ] && echo "Error: DOMAINS not set" && exit 1
@@ -45,12 +46,10 @@ case "${DEPLOY_HOOK}" in
         export SSH_DEPLOY_REMOTE_CMD="${SSH_CMD:-}"
         export SSH_DEPLOY_KEY_PASS="${SSH_KEY_PASS:-}"
         # Target paths for certificate files
-        export SSH_DEPLOY_CERT_PATH="${SSH_CERT_PATH:-/etc/ssl/${MAIN_DOMAIN}.crt}"
-        export SSH_DEPLOY_KEY_PATH="${SSH_KEY_PATH:-/etc/ssl/${MAIN_DOMAIN}.key}"
-        export SSH_DEPLOY_CA_PATH="${SSH_CA_PATH:-/etc/ssl/${MAIN_DOMAIN}.ca}"
-        export SSH_DEPLOY_FULLCHAIN_PATH="${SSH_FULLCHAIN_PATH:-/etc/ssl/${MAIN_DOMAIN}.fullchain.cer}"
+        export SSH_DEPLOY_CERT_PATH="${SSH_CERT_PATH:-/data/unifi-core/config/unifi-core.crt}"
+        export SSH_DEPLOY_KEY_PATH="${SSH_KEY_PATH:-/data/unifi-core/config/unifi-core.key}"
         # Optional reload command
-        export SSH_DEPLOY_RELOAD_CMD="${SSH_RELOAD_CMD:-}"
+        export SSH_DEPLOY_RELOAD_CMD="${SSH_RELOAD_CMD:-systemctl start unifi-core.service}"
         ;;
     *)
         echo "Error: DEPLOY_HOOK must be either 'synology_dsm' or 'ssh'"
