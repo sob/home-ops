@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./synology-doom
   - ./synology-mordor
+  - ./unifi-gateway
   - ../../../../templates/volsync
 configMapGenerator:
   - name: cert-exporter-configmap
