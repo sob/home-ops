@@ -1,3 +1,4 @@
+
 resource "authentik_policy_password" "password-complexity" {
   name             = "password-complexity"
   length_min       = 8

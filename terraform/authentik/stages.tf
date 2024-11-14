@@ -1,4 +1,4 @@
-# ## Authorization stages
+## Authorization stages
 resource "authentik_stage_identification" "authentication-identification" {
   name                      = "authentication-identification"
   user_fields               = ["username", "email"]
@@ -7,16 +7,12 @@ resource "authentik_stage_identification" "authentication-identification" {
   show_matched_user         = false
   password_stage            = authentik_stage_password.authentication-password.id
   recovery_flow             = authentik_flow.recovery.uuid
-  sources                   = [
-    authentik_source_oauth.apple.uuid,
-    authentik_source_plex.plex.uuid
-  ]
+  sources                   = [authentik_source_plex.plex.uuid]
 }
 
 resource "authentik_stage_password" "authentication-password" {
-  name     = "authentication-password"
-  backends = ["authentik.core.auth.InbuiltBackend"]
-  # configure_flow                = data.authentik_flow.default-password-change.id
+  name                          = "authentication-password"
+  backends                      = ["authentik.core.auth.InbuiltBackend"]
   failed_attempts_before_cancel = 3
 }
 
@@ -30,12 +26,12 @@ resource "authentik_stage_user_login" "authentication-login" {
   name = "authentication-login"
 }
 
-# ## Invalidation stages
+## Invalidation stages
 resource "authentik_stage_user_logout" "invalidation-logout" {
   name = "invalidation-logout"
 }
 
-# ## Recovery stages
+## Recovery stages
 resource "authentik_stage_identification" "recovery-identification" {
   name                      = "recovery-identification"
   user_fields               = ["username", "email"]
@@ -68,7 +64,7 @@ resource "authentik_stage_user_write" "password-change-write" {
   create_users_as_inactive = false
 }
 
-# ## Invitation stages
+## Invitation stages
 resource "authentik_stage_invitation" "enrollment-invitation" {
   name                             = "enrollment-invitation"
   continue_flow_without_invitation = false
@@ -99,7 +95,7 @@ resource "authentik_stage_user_login" "source-enrollment-login" {
   session_duration = "seconds=0"
 }
 
-# ## User settings stages
+## User settings stages
 resource "authentik_stage_prompt" "user-settings" {
   name = "user-settings"
   fields = [
@@ -112,6 +108,7 @@ resource "authentik_stage_prompt" "user-settings" {
   validation_policies = [
     resource.authentik_policy_expression.user-settings-authorization.id
   ]
+
 }
 
 resource "authentik_stage_user_write" "user-settings-write" {
