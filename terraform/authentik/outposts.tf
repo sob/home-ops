@@ -5,7 +5,8 @@ locals {
 
   external_proxy_provider_ids = [
     authentik_provider_proxy.main["echo_server"].id,
-    authentik_provider_proxy.main["homepage"].id
+    authentik_provider_proxy.main["homepage"].id,
+    authentik_provider_proxy.main["homeassistant"].id
   ]
 }
 
