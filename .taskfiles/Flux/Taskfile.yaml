@@ -9,26 +9,19 @@ tasks:
       args:
         PATH: Path under apps containing the Flux Kustomization resource (ks.yaml) (required)
         NS: Namespace the Flux Kustomization exists in (default: flux-system)
-    cmd: |
-      flux --kubeconfig {{.KUBECONFIG_FILE}} build ks $(basename {{.PATH}}) \
-          --namespace {{.NS}} \
-          --kustomization-file {{.KUBERNETES_DIR}}/apps/{{.PATH}}/ks.yaml \
-          --path {{.KUBERNETES_DIR}}/apps/{{.PATH}} \
-          {{- if contains "not found" .KS }}--dry-run \{{ end }}
-      | \
-      kubectl apply --kubeconfig {{.KUBECONFIG_FILE}} --server-side \
-          --field-manager=kustomize-controller -f -
+    cmd: >
+      flux build --namespace flux-system ks {{base .PATH}}
+      --kustomization-file {{.KUBERNETES_DIR}}/apps/{{.PATH}}/ks.yaml
+      --path {{.KUBERNETES_DIR}}/apps/{{.PATH}}{{if contains .KUSTOMIZATION "not found"}} --dry-run{{end}}
+      | yq 'with(select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization"); .metadata.namespace = "flux-system")' -
+      | kubectl apply --server-side --field-manager=kustomize-controller --filename -
     requires:
-      vars: ["PATH"]
+      vars: [PATH]
     vars:
-      NS: '{{.NS | default "flux-system"}}'
-      KS:
-        sh: flux --kubeconfig {{.KUBECONFIG_FILE}} --namespace {{.NS}} get kustomizations $(basename {{.PATH}}) 2>&1
+      KUSTOMIZATION:
+        sh: flux --namespace flux-system get kustomizations {{base .PATH}} 2>&1
     preconditions:
-      - msg: Missing kubeconfig
-        sh: test -f {{.KUBECONFIG_FILE}}
-      - msg: Missing Flux Kustomization for app {{.path}}
-        sh: test -f {{.KUBERNETES_DIR}}/apps/{{.path}}/ks.yaml
+      - test -f {{.KUBERNETES_DIR}}/apps/{{.PATH}}/ks.yaml
 
   reconcile:
     desc: Force update Flux to pull in changes from your Git repository
@@ -36,6 +29,19 @@ tasks:
     preconditions:
       - msg: Missing kubeconfig
         sh: test -f {{.KUBECONFIG_FILE}}
+
+  delete:
+    desc: Delete an app but leave the volume
+    cmds:
+      - kubectl patch helmrelease --namespace {{.NS | default "default" }} {{.APP}} -p $'metadata:\n finalizers:\n  []' --type=merge || exit 1
+      - kubectl delete helmrelease --namespace {{.NS | default "default"}} {{.APP}} --grace-period=0 --force=true --wait=false --ignore-not-found=true &>/dev/null
+    vars:
+      NS:
+        sh: kubectl get -A helmrelease --no-headers --field-selector=metadata.name={{.APP}} 2>/dev/null | awk '{print $1}' || exit 1
+      KS:
+        sh: kubectl get -A helmrelease --no-headers --field-selector=metadata.name={{.APP}} -o json | jq -r ".items[] | .metadata.labels.\"kustomize.toolkit.fluxcd.io/name\""
+    requires:
+      vars: ["APP"]
 
   nuke:
     desc: Nuke an app and associated volumes
