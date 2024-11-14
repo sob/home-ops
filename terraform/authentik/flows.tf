@@ -1,47 +1,40 @@
+## Authentication flow
 data "authentik_flow" "default-source-authentication" {
   slug = "default-source-authentication"
 }
 
-data "authentik_flow" "default-source-enrollment" {
-  slug = "default-source-enrollment"
-}
-
-data "authentik_flow" "default-provider-authorization-implicit-consent" {
-  slug = "default-provider-authorization-implicit-consent"
-}
-
-##
-# Authentication Flow
-#
-resource "authentik_flow" "homelab-authentication" {
-  name               = "homelab-authentication-flow"
-  title              = module.onepassword_authentik.fields.AUTHENTIK_BRANDING_TITLE
-  slug               = "homelab-authentication-flow"
+resource "authentik_flow" "authentication" {
+  name               = "authentication-flow"
+  title              = "Welcome!"
+  slug               = "authentication-flow"
   designation        = "authentication"
   policy_engine_mode = "all"
+  # background         = "https://placeholder.jpeg"
 }
 
 resource "authentik_flow_stage_binding" "authentication-flow-binding-00" {
-  target = authentik_flow.homelab-authentication.uuid
+  target = authentik_flow.authentication.uuid
   stage  = authentik_stage_identification.authentication-identification.id
   order  = 0
 }
 
 resource "authentik_flow_stage_binding" "authentication-flow-binding-10" {
-  target = authentik_flow.homelab-authentication.uuid
+  target = authentik_flow.authentication.uuid
   stage  = authentik_stage_authenticator_validate.authentication-mfa-validation.id
   order  = 10
 }
 
 resource "authentik_flow_stage_binding" "authentication-flow-binding-100" {
-  target = authentik_flow.homelab-authentication.uuid
+  target = authentik_flow.authentication.uuid
   stage  = authentik_stage_user_login.authentication-login.id
   order  = 100
 }
 
-##
-# Invalidation Flow
-#
+## Invalidation flow
+data "authentik_flow" "default-provider-invalidation-flow" {
+  slug = "default-provider-invalidation-flow"
+}
+
 resource "authentik_flow" "invalidation" {
   name               = "invalidation-flow"
   title              = "Invalidation Flow"
@@ -58,9 +51,7 @@ resource "authentik_flow_stage_binding" "invalidation-flow-binding-00" {
   order  = 0
 }
 
-##
-# Password recovery flow
-#
+## Password recovery flow
 resource "authentik_flow" "recovery" {
   name               = "recovery-flow"
   title              = "Password recovery"
@@ -94,9 +85,12 @@ resource "authentik_flow_stage_binding" "recovery-flow-binding-30" {
   order  = 30
 }
 
-##
-# Invitation flow
-#
+## Invitation flow
+
+data "authentik_flow" "default-source-enrollment" {
+  slug = "default-source-enrollment"
+}
+
 resource "authentik_flow" "enrollment-invitation" {
   name               = "enrollment-invitation-flow"
   title              = "Enrollment invitation"
@@ -130,9 +124,7 @@ resource "authentik_flow_stage_binding" "enrollment-invitation-flow-binding-30" 
   order  = 30
 }
 
-##
-# User settings flow
-#
+## User settings flow
 resource "authentik_flow" "user-settings" {
   name               = "User settings"
   title              = "Update your info"
@@ -155,9 +147,7 @@ resource "authentik_flow_stage_binding" "user-settings-flow-binding-100" {
   order  = 100
 }
 
-##
-# Authorization flow
-#
+## Authorization flow
 resource "authentik_flow" "provider-authorization-implicit-consent" {
   name               = "Authorize Application"
   title              = "Redirecting to %(app)s"

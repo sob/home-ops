@@ -1,17 +1,12 @@
 resource "authentik_stage_prompt_field" "username" {
-  name      = "username"
-  field_key = "username"
-  required  = true
-  type      = "text"
-  label     = "Username"
-  # initial_value = <<-EOT
-  # try:
-  #   return user.username
-  # except:
-  #   return ''
-  # EOT
+  name                     = "username"
+  field_key                = "username"
+  required                 = true
+  type                     = "text"
+  label                    = "Username"
   initial_value            = "try:\n    return user.username\nexcept:\n    return ''"
   initial_value_expression = true
+  placeholder              = "try:\n    return user.username\nexcept:\n    return ''"
   order                    = 200
 }
 
@@ -23,6 +18,7 @@ resource "authentik_stage_prompt_field" "name" {
   label                    = "Name"
   initial_value            = "try:\n    return user.name\nexcept:\n    return ''"
   initial_value_expression = true
+  placeholder              = "try:\n    return user.name\nexcept:\n    return ''"
   order                    = 201
 }
 
@@ -34,6 +30,7 @@ resource "authentik_stage_prompt_field" "email" {
   label                    = "Email"
   initial_value            = "try:\n    return user.email\nexcept:\n    return ''"
   initial_value_expression = true
+  placeholder              = "try:\n    return user.email\nexcept:\n    return ''"
   order                    = 202
 }
 
@@ -45,6 +42,7 @@ resource "authentik_stage_prompt_field" "locale" {
   label                    = "Locale"
   initial_value            = "try:\n    return user.attributes.get('settings', {}).get('locale', '')\nexcept:\n    return ''"
   initial_value_expression = true
+  placeholder              = "try:\n    return user.attributes.get('settings', {}).get('locale', '')\nexcept:\n    return ''"
   order                    = 203
 }
 
@@ -54,6 +52,7 @@ resource "authentik_stage_prompt_field" "password" {
   type          = "password"
   label         = "Password"
   initial_value = "Password"
+  placeholder   = "Password"
   required      = true
   order         = 300
 }
@@ -64,6 +63,7 @@ resource "authentik_stage_prompt_field" "password-repeat" {
   type          = "password"
   label         = "Password (repeat)"
   initial_value = "Password (repeat)"
+  placeholder   = "Password (repeat)"
   required      = true
   order         = 301
 }

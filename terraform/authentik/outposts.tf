@@ -1,12 +1,10 @@
 locals {
   internal_proxy_provider_ids = [
-    # module.home_assistant.proxy_provider_id,
-    module.whoami.proxy_provider_id
+    authentik_provider_proxy.main["whoami"].id
   ]
 
   external_proxy_provider_ids = [
-    module.echo_server.proxy_provider_id,
-    # module.home_assistant.proxy_provider_id,
+    authentik_provider_proxy.main["echo_server"].id
   ]
 }
 
