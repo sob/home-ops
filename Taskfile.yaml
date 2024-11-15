@@ -8,13 +8,14 @@ vars:
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
   PRIVATE_DIR: "{{.ROOT_DIR}}/.private"
   SCRIPTS_DIR: "{{.ROOT_DIR}}/scripts"
+
   # Files
   AGE_FILE: "{{.ROOT_DIR}}/age.key"
-  BOOTSTRAP_CONFIG_FILE: "{{.ROOT_DIR}}/config.yaml"
   KUBECONFIG_FILE: "{{.ROOT_DIR}}/.kubeconfig"
   MAKEJINJA_CONFIG_FILE: "{{.ROOT_DIR}}/makejinja.toml"
   PIP_REQUIREMENTS_FILE: "{{.ROOT_DIR}}/requirements.txt"
   SOPS_CONFIG_FILE: "{{.ROOT_DIR}}/.sops.yaml"
+
   # Binaries
   PYTHON_BIN: python3
 
@@ -28,6 +29,7 @@ includes:
   authentik: .taskfiles/authentik
   kubernetes: .taskfiles/kubernetes
   flux: .taskfiles/flux
+  pds: .taskfiles/pds
   rook: .taskfiles/rook
   secrets: .taskfiles/externalsecrets
   sops: .taskfiles/sops
