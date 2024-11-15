@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  invite:
+    silent: true
+    desc: Create a new invite code.
+    cmd: |
+      curl --fail --silent --show-error \
+        --request POST \
+        --user "admin:{{.PASSWORD}}" \
+        --header "Content-Type: application/json" \
+        --data '{"useCount": 1}' \
+        "https://{{.HOSTNAME}}/xrpc/com.atproto.server.createInviteCode" | jq --raw-output '.code'
+    vars:
+      HOSTNAME:
+        sh: op item get bsky-pds --fields PDS_HOSTNAME --reveal
+      PASSWORD:
+        sh: op item get bsky-pds --fields PDS_ADMIN_PASSWORD --reveal
