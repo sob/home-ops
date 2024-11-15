@@ -90,5 +90,5 @@ spec:
                   identifier: app
                   port: http
     persistence:
-      config:
+      pds:
         existingClaim: bsky-pds
