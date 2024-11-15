@@ -89,6 +89,12 @@ spec:
                 service:
                   identifier: app
                   port: http
+          - host: sob.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
     persistence:
       pds:
         existingClaim: bsky-pds
