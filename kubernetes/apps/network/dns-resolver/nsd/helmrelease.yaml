@@ -42,6 +42,7 @@ spec:
           main:
             image:
               repository: docker.io/publicarray/nsd
+              tag: latest@sha256:912364791776bc31bb213922d46088c8ae6d83689357e2cfdb71566abdd7234d
             resources:
               requests:
                 memory: 500Mi
