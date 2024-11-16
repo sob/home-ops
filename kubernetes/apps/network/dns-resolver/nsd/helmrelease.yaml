@@ -62,3 +62,7 @@ spec:
         globalMounts:
           - path: /etc/nsd
             readOnly: true
+      nsd-run:
+        type: emptyDir
+        globalMounts:
+          - path: /etc/nsd/run
