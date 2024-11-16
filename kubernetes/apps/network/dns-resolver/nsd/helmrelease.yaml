@@ -60,7 +60,11 @@ spec:
         enabled: true
         type: configMap
         globalMounts:
-          - path: /etc/nsd
+          - path: /etc/nsd/nsd.conf
+            subPath: nsd.conf
+            readOnly: true
+          - path: /etc/nsd/opennic.conf
+            subPath: opennic.conf
             readOnly: true
       nsd-run:
         type: emptyDir
