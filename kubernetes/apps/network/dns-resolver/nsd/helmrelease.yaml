@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app nsd
+  name: &app resolver-nsd
 spec:
   releaseName: nsd
   interval: 15m
