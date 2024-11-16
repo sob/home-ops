@@ -2,14 +2,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app nsd
+  name: &app dns-resolver-nsd
   namespace: flux-system
 spec:
   targetNamespace: network
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/network/resolver/nsd
+  path: ./kubernetes/apps/network/dns-resolver/nsd
   prune: true
   sourceRef:
     kind: GitRepository
