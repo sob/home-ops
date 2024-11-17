@@ -55,11 +55,15 @@ spec:
           dns-server:
             port: 53
     persistence:
+      nsd-conf:
+        type: emptyDir
+        globalMounts:
+          - path: /etc/nsd
       nsd-run:
         type: emptyDir
         globalMounts:
           - path: /etc/nsd/run
-      nsd-conf:
+      nsd-configmap:
         name: nsd-configmap
         type: configMap
         globalMounts:
