@@ -63,6 +63,10 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /etc/nsd/run
+      nsd-run-zonefiles:
+        type: emptyDir
+        globalMounts:
+          - path: /etc/nsd/run/zonefiles
       nsd-configmap:
         name: nsd-configmap
         type: configMap
