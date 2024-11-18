@@ -5,7 +5,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
 configMapGenerator:
-  - name: nsd-configmap
+  - name: resolver-nsd-configmap
     files:
       - nsd.conf=./conf/nsd.conf
       - opennic.conf=./conf/opennic.conf

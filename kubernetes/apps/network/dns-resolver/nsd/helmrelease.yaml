@@ -76,7 +76,7 @@ spec:
         globalMounts:
           - path: /etc/nsd/run/zonefiles
       nsd-configmap:
-        name: nsd-configmap
+        name: resolver-nsd-configmap
         type: configMap
         globalMounts:
           - path: /etc/nsd/nsd.conf
