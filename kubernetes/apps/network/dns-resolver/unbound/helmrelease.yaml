@@ -52,13 +52,13 @@ spec:
         controller: main
         type: NodePort
         ports:
-          unbound-udp:
+          dns-udp:
             port: 53
-            nodePort: 53
+            targetPort: 53
             protocol: UDP
-          unbound-tcp:
+          dns-tcp:
             port: 53
-            nodePort: 53
+            targetPort: 53
             protocol: TCP
     persistence:
       unbound-conf:
