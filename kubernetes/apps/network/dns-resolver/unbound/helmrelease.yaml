@@ -50,15 +50,15 @@ spec:
     service:
       main:
         controller: main
-        type: ClusterIP
+        type: NodePort
         ports:
           unbound-udp:
             port: 53
-            targetPort: 53
+            nodePort: 53
             protocol: UDP
           unbound-tcp:
             port: 53
-            targetPort: 53
+            nodePort: 53
             protocol: TCP
     persistence:
       unbound-conf:
