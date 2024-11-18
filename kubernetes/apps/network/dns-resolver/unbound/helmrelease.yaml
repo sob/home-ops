@@ -41,8 +41,8 @@ spec:
         containers:
           main:
             image:
-              repository: docker.io/publicarray/unbound
-              tag: latest@sha256:d1b8846274711c92fcd47f5432e9b852719e492353abcafc951b860c25225dc9
+              repository: docker.io/alpinelinux/unbound
+              tag: latest@sha256:1c1863aaeee2f0fd12909144ab2c534329017519092fd1b18269e4680c12784b
             resources:
               requests:
                 memory: 500Mi
