@@ -69,18 +69,10 @@ spec:
             protocol: TCP
 
     persistence:
-      unbound-conf:
-        type: emptyDir
-        globalMounts:
-          - path: /etc/unbound
-      unbound-run:
-        type: emptyDir
-        globalMounts:
-          - path: /etc/unbound/run
       unbound-configmap:
         name: resolver-unbound-configmap
         type: configMap
         globalMounts:
-          - path: /etc/unbound/unbound.conf
+          - path: /opt/unbound/etc/unbound/unbound.conf
             subPath: unbound.conf
             readOnly: true
