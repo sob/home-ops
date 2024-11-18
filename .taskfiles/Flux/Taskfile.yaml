@@ -62,10 +62,14 @@ tasks:
     aliases: ["hr", "helm"]
     desc: Force reconcile a helmrelease record
     cmds:
+      - kubectl patch helmrelease --namespace {{.NS | default "default"}} {{.APP}} -p $'metadata:\n finalizers:\n  []' --type=merge || exit 1
       - task: .reconcile
         vars: {TYPE: "helmrelease"}
     requires:
       vars: ["APP"]
+    vars:
+      NS:
+        sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
 
   cluster-apps:
     aliases: ["apps"]
