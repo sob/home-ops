@@ -52,9 +52,14 @@ spec:
         controller: main
         type: ClusterIP
         ports:
-          dns-server:
+          unbound-udp:
             port: 53
             targetPort: 53
+            protocol: UDP
+          unbound-tcp:
+            port: 53
+            targetPort: 53
+            protocol: TCP
     persistence:
       unbound-conf:
         type: emptyDir
@@ -70,4 +75,4 @@ spec:
         globalMounts:
           - path: /etc/unbound/unbound.conf
             subPath: unbound.conf
-            readOnly: true
+            readOnly: false # TODO: fix entrypoint modifying the config file
