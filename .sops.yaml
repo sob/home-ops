@@ -6,7 +6,7 @@ creation_rules:
   - # IMPORTANT: This rule MUST be above the other
     path_regex: talos/talsecret(\.sops)?\.ya?ml
     input_type: yaml
-    encrypted_regex: ^(token|crt|key|id|secret|secretboxEncryptionSecret|ca)$
+    encrypted_regex: ^(token|crt|key|id|secret|secretboxencryptionsecret|bootstraptoken|ca)$
     key_groups:
       - age:
           - *user_sob
