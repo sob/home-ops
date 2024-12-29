@@ -32,12 +32,18 @@ spec:
     - name: snapshot-controller
       namespace: storage
   values:
+    csi:
+      enableVolumeGroupSnapshot: false
+      cephFSKernelMountOptions: ms_mode=prefer-crc
+      enableLiveness: true
+      serviceMonitor:
+        enabled: true
+    enableDiscoveryDaemon: true
     crds:
       enabled: true
     toolbox:
       enabled: true
     pspEnable: false
-    enableDiscoveryDaemon: true
     monitoring:
       enabled: true
     resources:
