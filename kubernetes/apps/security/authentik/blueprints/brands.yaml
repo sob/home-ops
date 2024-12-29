@@ -10,7 +10,7 @@ entries:
       domain: 56kbps.io
     attrs:
       branding_title: STONEHEDGES-CT
-      branding_logo: https://lama-corp.space/llama.png
-      branding_favicon: https://lama-corp.space/llama.png
+      branding_logo: https://raw.githubusercontent.com/sob/home-ops/main/docs/src/assets/stonehedges-ct.png
+      branding_favicon: https://raw.githubusercontent.com/sob/home-ops/main/docs/src/assets/stonehedges-icon.png
       default: true
 
