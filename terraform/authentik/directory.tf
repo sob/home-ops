@@ -46,6 +46,10 @@ resource "authentik_user" "admin" {
   password = module.onepassword_authentik.fields.AUTHENTIK_BOOTSTRAP_PASSWORD
   groups = [
     data.authentik_group.admins.id,
-    authentik_group.users.id
+    authentik_group.users.id,
+    authentik_group.infrastructure.id,
+    authentik_group.monitoring.id,
+    authentik_group.home.id,
+    authentik_group.downloads.id
   ]
 }
