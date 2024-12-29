@@ -10,7 +10,7 @@ data:
     endpoints:
       - name: "${APP}"
         group: guarded
-        url: "https://${GATUS_SUBDOMAIN:-${APP}}.${SECRET_DOMAIN}"
+        url: "https://${GATUS_SUBDOMAIN:-${APP}}.${SECRET_DOMAIN}${GATUS_PATH:-/}"
         interval: 1m
         ui:
           hide-hostname: false
@@ -18,7 +18,9 @@ data:
         client:
           dns-resolver: tcp://10.1.0.1:53
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] == ${GATUS_STATUS:-200}"
+        alerts:
+          - type: pushover
       - name: "${APP}-dns"
         group: guarded
         url: 1.1.1.1
