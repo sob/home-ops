@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+# yamllint disable
+---
+version: 1
+metadata:
+  name: Brands
+entries:
+  - model: authentik_brands.brand
+    identifiers:
+      domain: 56kbps.io
+    attrs:
+      branding_title: STONEHEDGES-CT
+      branding_logo: https://lama-corp.space/llama.png
+      branding_favicon: https://lama-corp.space/llama.png
+      default: true
+
