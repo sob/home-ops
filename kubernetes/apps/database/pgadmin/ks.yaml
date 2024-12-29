@@ -28,3 +28,4 @@ spec:
       VOLSYNC_CAPACITY: 2Gi
       VOLSYNC_UID: "5050"
       VOLSYNC_GID: "5050"
+      GATUS_PATH: "/misc/ping"

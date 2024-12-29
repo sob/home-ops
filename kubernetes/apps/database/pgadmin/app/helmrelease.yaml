@@ -55,6 +55,15 @@ spec:
                 memory: 100Mi
               limits:
                 memory: 500Mi
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /misc/ping
+                    port: 80
+              readiness: *probes
     service:
       app:
         controller: *app
