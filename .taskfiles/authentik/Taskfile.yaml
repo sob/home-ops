@@ -20,3 +20,9 @@ tasks:
     dir: terraform/authentik
     cmds:
       - terraform apply  -auto-approve
+
+  destroy:
+    desc: "Run 'terraform destroy'"
+    dir: terraform/authentik
+    cmds:
+      - terraform destroy
