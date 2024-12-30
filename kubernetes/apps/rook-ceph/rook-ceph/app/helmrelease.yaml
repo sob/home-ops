@@ -39,11 +39,8 @@ spec:
       serviceMonitor:
         enabled: true
     enableDiscoveryDaemon: true
-    crds:
-      enabled: true
     toolbox:
       enabled: true
-    pspEnable: false
     monitoring:
       enabled: true
     resources:
