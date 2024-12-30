@@ -11,4 +11,5 @@ configMapGenerator:
     files:
       - ./brands.yaml
       - ./groups.yaml
+      - ./outposts.yaml
       - ./users.yaml
