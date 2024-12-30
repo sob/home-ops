@@ -51,4 +51,4 @@ spec:
         cpu: 100m # unchangable
       limits: {}
     image:
-      tag: rook/ceph:v1.16.0-4.g6da8ef89d
+      tag: v1.16.0-4.g6da8ef89d
