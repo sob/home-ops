@@ -1,8 +1,14 @@
 # yaml-language-server: $schema=https://version-2023-4.goauthentik.io/blueprints/schema.json
+---
 version: 1
 metadata:
   name: STONEHEDGES-users
 entries:
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES-groups
+      required: true
   - id: users-sob
     identifiers:
       username: sob
@@ -13,6 +19,15 @@ entries:
       email: !Env AUTHENTIK_BLUEPRINTS_USERS_SOB_EMAIL
       is_active: true
       password: !Env AUTHENTIK_BLUEPRINTS_USERS_SOB_PASSWORD
+  - id: users-liam
+    identifiers:
+      username: liam
+    model: authentik_core.user
+    attrs:
+      username: liam
+      name: Liam O'Brien
+      email: !Env AUTHENTIK_BLUEPRINTS_USERS_LOB_EMAIL
+      is_active: true
   - id: users-liam
     identifiers:
       username: liam

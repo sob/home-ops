@@ -5,14 +5,22 @@ version: 1
 metadata:
   name: STONEHEDGES-groups
 entries:
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES-users
+      required: true
   - model: authentik_core.group
     id: group-superusers
     identifiers:
       name: superusers
     attrs:
-      users: []
+      users:
+        - !Find [authentik_core.user, [username, "sob"]]
   - model: authentik_core.group
     identifiers:
-      name: media-users
+      name: media
     attrs:
-      users: []
+      users:
+        - !Find [authentik_core.user, [username, "sob"]]
+        - !Find [authentik_core.user, [username, "liam"]]
