@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+# yamllint disable
+---
+version: 1
+metadata:
+  name: STONEHEDGES-outposts
+entries:
+  - model: authentik_outposts.outpost
+    identifiers:
+      name: internal
+    attrs:
+      type: proxy
+    config:
+        log_level: info
+        docker_labels: null
+        authentik_host: https://sso.${SECRET_DOMAIN}
+        authentik_host_insecure: false
+        authentik_host_browser: null
+        docker_network: null
+        container_image: null
+        docker_map_ports: true
+        kubernetes_replcias: 1
+        kubernetes_ingress_class_name: internal
+        kubernetes_ingress_secret_name: authentik-outpost-tls
+        kubernetes_namespace: security
+        kubernetes_service_type: ClusterIP
+        object_naming_template: ak-internal-outpost-%(name)s
+  - model: authentik_outposts.outpost
+    identifiers:
+      name: external
+    attrs:
+      type: proxy
+    config:
+        log_level: info
+        docker_labels: null
+        authentik_host: https://sso.${SECRET_DOMAIN}
+        authentik_host_insecure: false
+        authentik_host_browser: null
+        docker_network: null
+        container_image: null
+        docker_map_ports: true
+        kubernetes_replcias: 1
+        kubernetes_ingress_class_name: external
+        kubernetes_ingress_secret_name: authentik-outpost-tls
+        kubernetes_namespace: security
+        kubernetes_service_type: ClusterIP
+        object_naming_template: ak-internal-outpost-%(name)s
+
