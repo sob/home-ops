@@ -69,7 +69,7 @@ tasks:
       vars: ["APP"]
     vars:
       NS:
-        sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
+        sh: kubectl get -A helmrelease --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
 
   cluster-apps:
     aliases: ["apps"]
@@ -85,6 +85,8 @@ tasks:
     vars:
       NS: "flux-system"
       TYPE: "kustomization"
+    requires:
+      vars: ["APP"]
 
   bootstrap:
     cmds:
