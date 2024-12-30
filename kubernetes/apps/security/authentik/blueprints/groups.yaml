@@ -17,6 +17,7 @@ entries:
     attrs:
       users:
         - !Find [authentik_core.user, [username, "sob"]]
+      is_superuser: true
   - model: authentik_core.group
     identifiers:
       name: media
@@ -24,3 +25,4 @@ entries:
       users:
         - !Find [authentik_core.user, [username, "sob"]]
         - !Find [authentik_core.user, [username, "liam"]]
+      is_superuser: false
