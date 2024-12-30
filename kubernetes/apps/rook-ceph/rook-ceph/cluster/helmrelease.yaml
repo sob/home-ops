@@ -58,9 +58,13 @@ spec:
       [global]
       bdev_enable_discard = true
       bdev_async_discard = true
+      osd_class_update_on_start = false
     cephClusterSpec:
       crashCollector:
         disable: false
+      csi:
+        readAffinity:
+          enabled: true
       dashboard:
         enabled: true
         urlPrefix: /
@@ -68,6 +72,8 @@ spec:
         prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
       mgr:
         modules:
+          - name: insights
+            enabled: true
           - name: pg_autoscaler
             enabled: true
           - name: rook
@@ -130,9 +136,10 @@ spec:
           reclaimPolicy: Delete
           allowVolumeExpansion: true
           volumeBindingMode: Immediate
+          mountOptions: ["discard"]
           parameters:
             imageFormat: "2"
-            imageFeatures: layering
+            imageFeatures: layering,fast-diff,object-map,deep-flatten,exclusive-lock
             csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
             csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
             csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
@@ -196,47 +203,47 @@ spec:
       name: csi-ceph-filesystem
       isDefault: false
       deletionPolicy: Delete
-    cephObjectStores:
-      - name: ceph-objectstore
-        spec:
-          metadataPool:
-            failureDomain: host
-            replicated:
-              size: 3
-          dataPool:
-            failureDomain: host
-            erasureCoded:
-              dataChunks: 2
-              codingChunks: 1
-          preservePoolsOnDelete: true
-          gateway:
-            hostNetwork: false
-            port: 80
-            resources:
-              requests:
-                cpu: 100m
-                memory: 1Gi
-              limits:
-                memory: 2Gi
-            instances: 2
-            priorityClassName: system-cluster-critical
-          healthCheck:
-            bucket:
-              interval: 60s
-        storageClass:
-          enabled: true
-          name: ceph-bucket
-          reclaimPolicy: Delete
-          volumeBindingMode: Immediate
-          parameters:
-            region: us-central-1
-        ingress:
-          enabled: true
-          annotations:
-            external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-            nginx.ingress.kubernetes.io/proxy-body-size: "0"
-            nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-          ingressClassName: internal
-          host:
-            name: rgw.${SECRET_DOMAIN}
-            path: /
+    cephObjectStores: []
+#      - name: ceph-objectstore
+#        spec:
+#          metadataPool:
+#            failureDomain: host
+#            replicated:
+#              size: 3
+#          dataPool:
+#            failureDomain: host
+#            erasureCoded:
+#              dataChunks: 2
+#              codingChunks: 1
+#          preservePoolsOnDelete: true
+#          gateway:
+#            hostNetwork: false
+#            port: 80
+#            resources:
+#              requests:
+#                cpu: 100m
+#                memory: 1Gi
+#              limits:
+#                memory: 2Gi
+#            instances: 2
+#            priorityClassName: system-cluster-critical
+#          healthCheck:
+#            bucket:
+#              interval: 60s
+#        storageClass:
+#          enabled: true
+#          name: ceph-bucket
+#          reclaimPolicy: Delete
+#          volumeBindingMode: Immediate
+#          parameters:
+#            region: us-central-1
+#        ingress:
+#          enabled: true
+#          annotations:
+#            external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+#            nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#            nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+#          ingressClassName: internal
+#          host:
+#            name: rgw.${SECRET_DOMAIN}
+#            path: /
