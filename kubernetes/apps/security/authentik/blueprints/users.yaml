@@ -7,21 +7,18 @@ entries:
   - model: "authentik_blueprints.metaapplyblueprint"
     attrs:
       identifiers:
-        name: "Groups"
+        name: "STONEHEDGES-groups"
       required: true
-  - id: "users-sob"
+  - id: users-sob
     identifiers:
-      username: "sob"
-    model: "authentik_core.user"
+      username: sob
+    model: authentik_core.user
     attrs:
-      username: "sob"
-      name: "Sean O'Brien"
+      username: sob
+      name: Sean O'Brien
       email: !Env AUTHENTIK_BLUEPRINTS_USERS_SOB_EMAIL
       is_active: true
-      path: "users"
       password: !Env AUTHENTIK_BLUEPRINTS_USERS_SOB_PASSWORD
-      groups:
-        - !Find [authentik_core.group, [name, person]]
   - id: "users-liam"
     identifiers:
       username: "liam"
@@ -32,5 +29,3 @@ entries:
       email: !Env AUTHENTIK_BLUEPRINTS_USERS_LOB_EMAIL
       is_active: true
       path: "users"
-      groups:
-        - !Find [authentik_core.group, [name, person]]
