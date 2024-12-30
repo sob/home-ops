@@ -19,13 +19,12 @@ entries:
       email: !Env AUTHENTIK_BLUEPRINTS_USERS_SOB_EMAIL
       is_active: true
       password: !Env AUTHENTIK_BLUEPRINTS_USERS_SOB_PASSWORD
-  - id: "users-liam"
+  - id: users-liam
     identifiers:
-      username: "liam"
-    model: "authentik_core.user"
+      username: liam
+    model: authentik_core.user
     attrs:
-      username: "liam"
-      name: "Liam O'Brien"
+      username: liam
+      name: Liam O'Brien
       email: !Env AUTHENTIK_BLUEPRINTS_USERS_LOB_EMAIL
       is_active: true
-      path: "users"
