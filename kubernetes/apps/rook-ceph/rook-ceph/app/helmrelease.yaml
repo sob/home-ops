@@ -38,6 +38,8 @@ spec:
       enableLiveness: true
       serviceMonitor:
         enabled: true
+      snapshotter:
+        tag: "v8.2.0"
     enableDiscoveryDaemon: true
     toolbox:
       enabled: true
