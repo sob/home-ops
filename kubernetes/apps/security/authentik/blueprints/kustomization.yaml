@@ -10,3 +10,5 @@ configMapGenerator:
   - name: authentik-blueprints
     files:
       - ./brands.yaml
+      - ./groups.yaml
+      - ./users.yaml
