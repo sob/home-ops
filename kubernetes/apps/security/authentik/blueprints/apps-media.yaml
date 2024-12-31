@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+# yamllint disable
+---
+version: 1
+metadata:
+  name: Apps - Media
+entries:
+  - id: provider-bazarr
+    model: authentik_providers_proxy.proxyprovider
+    identifiers:
+      name: k8s/stonehedges.net/services-media/bazarr
+    attrs:
+      authorization_flow:
+        !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"],]
+      mode: forward_single
+      external_host: https://bazarr.${SECRET_DOMAIN}
+      access_token_validity: hours=24
+  - id: application-bazarr
+    model: authentik_core.application
+    identifiers:
+      slug: bazarr
+    attrs:
+      name: Bazarr
+      group: Media
+      description: Subtitles
+      icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png
+      provider: !KeyOf provider-bazarr
+      policy_engine_mode: any
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf application-bazarr
+      group: !Find [authentik_core.group, [name, "media"]]
+    attrs:
+      order: 1
