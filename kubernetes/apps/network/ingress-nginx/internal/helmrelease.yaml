@@ -24,7 +24,7 @@ spec:
   values:
     fullnameOverride: ingress-nginx-internal
     controller:
-      replicaCount: 2
+      replicaCount: 1
       service:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: internal.${SECRET_DOMAIN}
