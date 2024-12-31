@@ -7,6 +7,19 @@
     "yaml.schemas": {
         "Kubernetes": "./kubernetes/*.yaml"
     },
+    "yaml.customTags": [
+        // Tags for authentik blueprints
+        "!Condition sequence",
+        "!Context scalar",
+        "!Enumerate sequence",
+        "!Env scalar",
+        "!Find sequence",
+        "!Format sequence",
+        "!If sequence",
+        "!Index scalar",
+        "!KeyOf scalar",
+        "!Value scalar"
+    ],
     "vs-kubernetes": {
         "vs-kubernetes.kubeconfig": "./kubeconfig",
         "vs-kubernetes.knownKubeconfigs": [
