@@ -7,7 +7,7 @@ metadata:
 entries:
   - model: authentik_sources_plex.plexsource
     identifiers:
-      name: STONEHEDGES-sources-plex
+      name: Plex
     attrs:
       name: Plex
       slug: plex
@@ -22,7 +22,7 @@ entries:
       enrollment_flow: !Find [authentik_flows.flow, [slug, "default-source-enrollment"],]
   - model: authentik_sources_oauth.oauthsource
     identifiers:
-      name: STONEHEDGES-sources-apple
+      name: Apple ID
     attrs:
       name: Apple
       slug: apple
