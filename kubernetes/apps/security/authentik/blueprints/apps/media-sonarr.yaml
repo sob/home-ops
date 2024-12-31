@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+# yamllint disable
+---
+version: 1
+metadata:
+  name: STONEHEDGES Apps - Media - Sonarr
+entries:
+  - id: provider-sonarr
+    model: authentik_providers_proxy.proxyprovider
+    identifiers:
+      name: k8s/stonehedges.net/services-media/sonarr
+    attrs:
+      authorization_flow:
+        !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"],]
+      invalidation_flow:
+        !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"],]
+      mode: forward_single
+      external_host: https://sonarr.${SECRET_DOMAIN}
+      access_token_validity: hours=24
+  - id: application-sonarr
+    model: authentik_core.application
+    identifiers:
+      slug: sonarr
+    attrs:
+      name: Sonarr
+      group: Media
+      description: TV Shows
+      icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png
+      provider: !KeyOf provider-sonarr
+      policy_engine_mode: any
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf application-sonarr
+      group: !Find [authentik_core.group, [name, "media"]]
+    attrs:
+      order: 1

@@ -9,7 +9,13 @@ generatorOptions:
 configMapGenerator:
   - name: authentik-blueprints
     files:
-      - ./apps-media.yaml
+      - ./apps/media-bazarr.yaml
+      - ./apps/media-lidarr.yaml
+      - ./apps/media-prowlarr.yaml
+      - ./apps/media-radarr.yaml
+      - ./apps/media-readarr.yaml
+      - ./apps/media-sonarr.yaml
+      - ./apps/media-usenet.yaml
       - ./brands.yaml
       - ./groups.yaml
       - ./outposts.yaml
