@@ -12,8 +12,8 @@ entries:
       name: Plex
       slug: plex
       enabled: true
-      client_id: !Env PLEX_CLIENT_ID
-      plex_token: !Env PLEX_TOKEN
+      client_id: !Env AUTHENTIK_BLUEPRINTS_SOURCES_PLEX_CLIENT_ID
+      plex_token: !Env AUTHENTIK_BLUEPRINTS_SOURCES_PLEX_TOKEN
       allow_friends: false
       user_matching_mode: "email_link"
       allowed_servers:
@@ -27,8 +27,8 @@ entries:
       name: Apple
       slug: apple
       enabled: true
-      consumer_key: !Env APPLE_CONSUMER_KEY
-      consumer_secret: !Env APPLE_CONSUMER_SECRET
+      consumer_key: !Env AUTHENTIK_BLUEPRINTS_SOURCES_APPLE_CONSUMER_KEY
+      consumer_secret: !Env AUTHENTIK_BLUEPRINTS_SOURCES_APPLE_CONSUMER_SECRET
       provider_type: apple
       user_matching_mode: "email_link"
       authentication_flow: !Find [authentik_flows.flow, [slug, "default-source-authentication"],]
