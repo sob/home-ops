@@ -26,3 +26,9 @@ tasks:
     dir: terraform/authentik
     cmds:
       - terraform destroy
+
+  errors:
+    desc: "Output task errors"
+    silent: true
+    cmd: >-
+      {{ shellQuote .TASKFILE_DIR }}/get-task-errors.sh
