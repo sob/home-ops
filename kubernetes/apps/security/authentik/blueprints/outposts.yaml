@@ -8,7 +8,7 @@ entries:
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: Apps - Media
+        name: STONEHEDGES-Apps - Media
       required: true
   - model: authentik_outposts.outpost
     identifiers:
@@ -21,10 +21,13 @@ entries:
           [name, "Local Kubernetes Cluster"],
         ]
       providers:
-        - !Find [
-            authentik_core.provider,
-            [name, "k8s/stonehedges.net/services-media/bazarr"],
-          ]
+        - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/bazarr"]]
+        - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/lidarr"]]
+        - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/prowlarr"]]
+        - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/radarr"]]
+        - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/readarr"]]
+        - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/sonarr"]]
+        - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/usenet"]]
       config:
         log_level: info
         authentik_host: https://sso.${SECRET_DOMAIN}
