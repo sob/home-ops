@@ -12,7 +12,7 @@ entries:
     attrs:
       authorization_flow:
         !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"],]
-      invalidation_flow: :
+      invalidation_flow:
         !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"],]
       mode: forward_single
       external_host: https://bazarr.${SECRET_DOMAIN}
