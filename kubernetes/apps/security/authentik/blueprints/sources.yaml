@@ -18,8 +18,8 @@ entries:
       user_matching_mode: "email_link"
       allowed_servers:
         - !Env PLEX_SERVER_ID
-      authentication_flow: '!Find [authentik_flows.flow, [name, "default-source-authentication"],]'
-      enrollment_flow: '!Find [authentik_flows.flow, [name, "default-source-enrollment"],]'
+      authentication_flow: '!Find [authentik_flows.flow, [slug, "default-source-authentication"],]'
+      enrollment_flow: '!Find [authentik_flows.flow, [slug, "default-source-enrollment"],]'
   - model: authentik_sources_oauth.oauthsource
     identifiers:
       name: STONEHEDGES-sources-apple
@@ -31,5 +31,5 @@ entries:
       consumer_secret: !Env APPLE_CONSUMER_SECRET
       provider_type: apple
       user_matching_mode: "email_link"
-      authentication_flow: '!Find [authentik_flows.flow, [name, "default-source-authentication"],]'
-      enrollment_flow: '!Find [authentik_flows.flow, [name, "default-source-enrollment"],]'
+      authentication_flow: '!Find [authentik_flows.flow, [slug, "default-source-authentication"],]'
+      enrollment_flow: '!Find [authentik_flows.flow, [slug, "default-source-enrollment"],]'
