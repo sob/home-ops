@@ -3,7 +3,7 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES Apps - Media - Readarr
+  name: STONEHEDGES-apps-media-readarr
 entries:
   - id: provider-readarr
     model: authentik_providers_proxy.proxyprovider

@@ -3,7 +3,7 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES - Brands
+  name: STONEHEDGES-brands
 entries:
   - model: authentik_brands.brand
     identifiers:

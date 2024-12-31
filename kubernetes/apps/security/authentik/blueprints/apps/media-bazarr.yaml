@@ -3,7 +3,7 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES Apps - Media - Bazarr
+  name: STONEHEDGES-apps-media-bazarr
 entries:
   - id: provider-bazarr
     model: authentik_providers_proxy.proxyprovider

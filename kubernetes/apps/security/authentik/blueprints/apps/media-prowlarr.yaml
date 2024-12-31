@@ -3,7 +3,7 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES Apps - Media - Prowlarr
+  name: STONEHEDGES-apps-media-prowlarr
 entries:
   - id: provider-prowlarr
     model: authentik_providers_proxy.proxyprovider

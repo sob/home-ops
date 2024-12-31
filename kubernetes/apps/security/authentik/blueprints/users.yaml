@@ -6,10 +6,9 @@ metadata:
   name: STONEHEDGES-users
 entries:
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
-      identifiers:
-        name: STONEHEDGES-groups
-      required: true
+    identifiers:
+      name: STONEHEDGES-groups
+    required: true
   - id: users-sob
     identifiers:
       username: sob

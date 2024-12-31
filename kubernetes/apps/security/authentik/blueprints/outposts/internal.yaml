@@ -8,37 +8,37 @@ entries:
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES Apps - Media - Bazarr
+        name: STONEHEDGES-apps-media-bazarr
       required: true
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES Apps - Media - Lidarr
+        name: STONEHEDGES-apps-media-lidarr
       required: true
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES Apps - Media - Prowlarr
+        name: STONEHEDGES-apps-media-prowlarr
       required: true
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES Apps - Media - Radarr
+        name: STONEHEDGES-apps-media-radarr
       required: true
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES Apps - Media - Readarr
+        name: STONEHEDGES-apps-media-readarr
       required: true
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES Apps - Media - Sonarr
+        name: STONEHEDGES-apps-media-sonarr
       required: true
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES Apps - Media - Usenet
+        name: STONEHEDGES-apps-media-usenet
       required: true
   - model: authentik_outposts.outpost
     identifiers:
