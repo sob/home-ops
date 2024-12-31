@@ -3,7 +3,7 @@
 ---
 version: 1
 metadata:
-  name: Brands
+  name: STONEHEDGES - Brands
 entries:
   - model: authentik_brands.brand
     identifiers:
