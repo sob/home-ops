@@ -1,6 +1,6 @@
-# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
-# yamllint disable
 ---
+# yaml-language-server: $schema=https://version-2024-12.goauthentik.io/blueprints/schema.json
+# yamllint disable
 version: 1
 metadata:
   name: STONEHEDGES Apps - Media - Sonarr
@@ -23,7 +23,7 @@ entries:
       slug: sonarr
     attrs:
       name: Sonarr
-      group: Media
+      group: media
       description: TV Shows
       icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png
       provider: !KeyOf provider-sonarr

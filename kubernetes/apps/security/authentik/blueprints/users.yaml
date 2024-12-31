@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://version-2023-4.goauthentik.io/blueprints/schema.json
+# yaml-language-server: $schema=https://version-2024-12.goauthentik.io/blueprints/schema.json
 # yamllint disable
 version: 1
 metadata:

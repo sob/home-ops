@@ -1,6 +1,6 @@
-# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
-# yamllint disable
 ---
+# yaml-language-server: $schema=https://version-2024-12.goauthentik.io/blueprints/schema.json
+# yamllint disable
 version: 1
 metadata:
   name: STONEHEDGES Apps - Media - Usenet
@@ -11,9 +11,9 @@ entries:
       name: k8s/stonehedges.net/services-media/usenet
     attrs:
       authorization_flow:
-        !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"],]
+        '!Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"],]'
       invalidation_flow:
-        !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"],]
+        '!Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"],]'
       mode: forward_single
       external_host: https://sab.${SECRET_DOMAIN}
       access_token_validity: hours=24
@@ -23,7 +23,7 @@ entries:
       slug: usenet
     attrs:
       name: Usenet
-      group: Media
+      group: media
       description: Usenet Downloads
       icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sabnzbd.png
       provider: !KeyOf provider-usenet
@@ -31,6 +31,6 @@ entries:
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf application-usenet
-      group: !Find [authentik_core.group, [name, "media"]]
+      group: '!Find [authentik_core.group, [name, "media"]]'
     attrs:
       order: 1
