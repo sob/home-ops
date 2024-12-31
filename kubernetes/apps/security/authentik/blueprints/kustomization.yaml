@@ -18,5 +18,5 @@ configMapGenerator:
       - ./apps/media-usenet.yaml
       - ./brands.yaml
       - ./groups.yaml
-      - ./outposts.yaml
+      - ./outposts/internal.yaml
       - ./users.yaml
