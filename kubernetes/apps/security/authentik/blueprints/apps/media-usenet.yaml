@@ -30,7 +30,7 @@ entries:
       policy_engine_mode: any
   - model: authentik_policies.policybinding
     identifiers:
-      target: !KeyOf application-sonarr
+      target: !KeyOf application-usenet
       group: !Find [authentik_core.group, [name, "media"]]
     attrs:
       order: 1

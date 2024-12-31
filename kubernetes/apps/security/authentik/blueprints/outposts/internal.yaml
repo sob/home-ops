@@ -3,12 +3,42 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES-outposts
+  name: STONEHEDGES-outposts-internal
 entries:
   - model: authentik_blueprints.metaapplyblueprint
     attrs:
       identifiers:
-        name: STONEHEDGES-Apps - Media
+        name: STONEHEDGES Apps - Media - Bazarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES Apps - Media - Lidarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES Apps - Media - Prowlarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES Apps - Media - Radarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES Apps - Media - Readarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES Apps - Media - Sonarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: STONEHEDGES Apps - Media - Usenet
       required: true
   - model: authentik_outposts.outpost
     identifiers:
@@ -16,10 +46,7 @@ entries:
     attrs:
       type: proxy
       service_connection:
-        !Find [
-          authentik_outposts.outpostserviceconnection,
-          [name, "Local Kubernetes Cluster"],
-        ]
+        !Find [authentik_outposts.outpostserviceconnection,[name, "Local Kubernetes Cluster"]]
       providers:
         - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/bazarr"]]
         - !Find [authentik_core.provider,[name, "k8s/stonehedges.net/services-media/lidarr"]]
