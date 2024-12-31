@@ -65,4 +65,4 @@ entries:
         kubernetes_ingress_secret_name: authentik-outpost-tls
         kubernetes_namespace: security
         kubernetes_service_type: ClusterIP
-        object_naming_template: ak-internal-outpost-%(name)s
+        object_naming_template: ak-outpost-%(name)s
