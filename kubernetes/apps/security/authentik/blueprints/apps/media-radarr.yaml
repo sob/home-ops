@@ -3,7 +3,7 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES Apps - Media - Radarr
+  name: STONEHEDGES-apps-media-radarr
 entries:
   - id: provider-radarr
     model: authentik_providers_proxy.proxyprovider

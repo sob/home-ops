@@ -3,7 +3,7 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES Apps - Media - Sonarr
+  name: STONEHEDGES-apps-media-sonarr
 entries:
   - id: provider-sonarr
     model: authentik_providers_proxy.proxyprovider

@@ -3,7 +3,7 @@
 # yamllint disable
 version: 1
 metadata:
-  name: STONEHEDGES Apps - Media - Lidarr
+  name: STONEHEDGES-apps-media-lidarr
 entries:
   - id: provider-lidarr
     model: authentik_providers_proxy.proxyprovider
