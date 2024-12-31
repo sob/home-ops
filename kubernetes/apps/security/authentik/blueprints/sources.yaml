@@ -17,7 +17,7 @@ entries:
       allow_friends: false
       user_matching_mode: "email_link"
       allowed_servers:
-        - !Env PLEX_SERVER_ID
+        - !Env AUTHENTIK_BLUEPRINTS_SOURCES_PLEX_SERVER_ID
       authentication_flow: !Find [authentik_flows.flow, [slug, "default-source-authentication"],]
       enrollment_flow: !Find [authentik_flows.flow, [slug, "default-source-enrollment"],]
   - model: authentik_sources_oauth.oauthsource
