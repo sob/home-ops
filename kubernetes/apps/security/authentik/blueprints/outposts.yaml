@@ -27,12 +27,8 @@ entries:
           ]
       config:
         log_level: info
-        docker_labels: ""
         authentik_host: https://sso.${SECRET_DOMAIN}
         authentik_host_insecure: false
-        authentik_host_browser: ""
-        docker_network: ""
-        container_image: ""
         docker_map_ports: true
         kubernetes_replcias: 1
         kubernetes_ingress_class_name: internal
