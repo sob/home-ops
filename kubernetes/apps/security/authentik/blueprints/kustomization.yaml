@@ -19,4 +19,5 @@ configMapGenerator:
       - ./brands.yaml
       - ./groups.yaml
       - ./outposts/internal.yaml
+      - ./sources.yaml
       - ./users.yaml
