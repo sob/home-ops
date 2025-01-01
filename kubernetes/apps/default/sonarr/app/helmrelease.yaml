@@ -120,7 +120,7 @@ spec:
                   port: http
               - path: /outpost.goauthentik.io
                 service:
-                  name: ak-outpost-internal
+                  name: ak-outpost-internal.security.svc.cluster.local
                   port: 9000
 
     persistence:
