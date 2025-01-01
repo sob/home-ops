@@ -62,6 +62,8 @@ entries:
         docker_map_ports: true
         kubernetes_replcias: 1
         kubernetes_ingress_class_name: internal
+        kubernetes_ingress_annotations:
+          "cert-manager.io/cluster-issuer": "letsencrypt-production"
         kubernetes_ingress_secret_name: authentik-outpost-tls
         kubernetes_namespace: security
         kubernetes_service_type: ClusterIP
