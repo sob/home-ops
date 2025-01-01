@@ -48,7 +48,7 @@ spec:
             env:
               SONARR__APP__INSTANCENAME: Sonarr
               SONARR__APP__THEME: dark
-              SONARR__LOG__DBENABLED: "True"
+              SONARR__LOG__DBENABLED: "False"
               SONARR__LOG__LEVEL: debug
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
