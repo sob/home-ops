@@ -118,6 +118,11 @@ spec:
                 service:
                   identifier: app
                   port: http
+              - path: /outpost.goauthentik.io
+                service:
+                  name: ak-outpost-internal
+                  port: 9000
+
     persistence:
       config:
         existingClaim: sonarr
