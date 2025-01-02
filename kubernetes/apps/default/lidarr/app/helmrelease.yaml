@@ -106,6 +106,11 @@ spec:
           gethomepage.dev/widget.type: lidarr
           gethomepage.dev/widget.url: http://lidarr.default.svc.cluster.local
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_LIDARR_TOKEN}}` }}"
+          nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+          nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+          nginx.ingress.kubernetes.io/auth-signin: /outpost.goauthentik.io/start?rd=$escaped_request_uri
+          nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+          nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host $http_host;
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
