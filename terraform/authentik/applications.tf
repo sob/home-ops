@@ -27,23 +27,27 @@ locals {
     echo_server = {
       external_host = "https://echo-server.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
+      group                          = resource.authentik_group.network
     },
     whoami = {
       external_host = "https://whoami.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
+      group                          = resource.authentik_group.network
     },
     homepage = {
       external_host = "https://homepage.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
+      group                          = resource.authentik_group.home
     },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
+      group                          = resource.authentik_group.home
     },
     sonarr = {
       external_host                  = "https://sonarr.${local.cluster_domain}"
       icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
-      parent_group                   = resource.authentik_group.media
+      group                          = resource.authentik_group.media
       basic_auth_enabled             = true
       basic_auth_username_attribute  = "sonarr_username"
       basic_auth_password_attribute  = "sonarr_password"
@@ -51,7 +55,7 @@ locals {
     radarr = {
       external_host                  = "https://radarr.${local.cluster_domain}"
       icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
-      parent_group                   = resource.authentik_group.media
+      group                          = resource.authentik_group.media
       basic_auth_enabled             = true
       basic_auth_username_attribute  = "radarr_username"
       basic_auth_password_attribute  = "radarr_password"
@@ -59,7 +63,7 @@ locals {
     readarr = {
       external_host                  = "https://readarr.${local.cluster_domain}"
       icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
-      parent_group                   = resource.authentik_group.media
+      group                          = resource.authentik_group.media
     },
 
   }
@@ -82,15 +86,9 @@ resource "authentik_provider_proxy" "main" {
   skip_path_regex               = lookup(local.proxy_applications[each.key], "skip_path_regex", null)
 }
 
-resource "authentik_group" "proxy_applications" {
-  for_each     = local.proxy_applications
-  name         = lookup(local.proxy_applications[each.key], "group", each.key)
-  is_superuser = false
-  attributes   = lookup(local.proxy_applications[each.key], "basic_auth_enabled", false) ? jsonencode({
-    lookup(local.proxy_applications[each.key], "basic_auth_username_attribute") = module.onepassword_authentik.fields.SONARR_HTTP_USERNAME
-    lookup(local.proxy_applications[each.key], "basic_auth_password_attribute") = module.onepassword_authentik.fields.SONARR_HTTP_PASSWORD
-  }) : null
-
+data "authentik_group" "proxy_lookup" {
+  for_each = local.proxy_applications
+  name     = each.value.group.name
 }
 
 resource "authentik_application" "proxy_application" {
@@ -98,8 +96,7 @@ resource "authentik_application" "proxy_application" {
   name               = title(each.key)
   slug               = lookup(local.proxy_applications[each.key], "slug", each.key)
   protocol_provider  = authentik_provider_proxy.main[each.key].id
-  group              = resource.authentik_group.proxy_applications[each.key].name
-  // group              = lookup(local.proxy_applications[each.key], "group", null)
+  group              = each.value.group.name
   open_in_new_tab    = true
   meta_icon          = each.value.icon_url
   meta_launch_url    = lookup(local.proxy_applications[each.key], "external_host", null)
@@ -110,7 +107,7 @@ resource "authentik_policy_binding" "proxy_application_policy_binding" {
   for_each = local.proxy_applications
 
   target = authentik_application.proxy_application[each.key].uuid
-  group  = resource.authentik_group.proxy_applications[each.key].id
+  group  = data.authentik_group.proxy_lookup[each.key].id
   order  = 0
 }
 
