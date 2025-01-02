@@ -3,7 +3,6 @@ locals {
     grafana = {
       client_id     = module.onepassword_authentik.fields.GRAFANA_CLIENT_ID
       client_secret = module.onepassword_authentik.fields.GRAFANA_CLIENT_SECRET
-      group         = resource.authentik_group.monitoring
       icon_url      = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/grafana.png"
       redirect_uri  = "https://grafana.${local.cluster_domain}/login/generic_oauth"
       launch_url    = "https://grafana.${local.cluster_domain}/login/generic_oauth"
@@ -11,7 +10,6 @@ locals {
     lubelog = {
       client_id     = module.onepassword_authentik.fields.LUBELOG_CLIENT_ID
       client_secret = module.onepassword_authentik.fields.LUBELOG_CLIENT_SECRET
-      group         = resource.authentik_group.home
       icon_url      = "https://demo.lubelogger.com/defaults/lubelogger_icon_72.png"
       redirect_uri  = "https://lubelog.${local.cluster_domain}/Login/RemoteAuth"
       launch_url    = "https://lubelog.${local.cluster_domain}/Login/RemoteAuth"
@@ -19,7 +17,6 @@ locals {
     gatus = {
       client_id     = module.onepassword_authentik.fields.GATUS_CLIENT_ID
       client_secret = module.onepassword_authentik.fields.GATUS_CLIENT_SECRET
-      group         = resource.authentik_group.monitoring
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/gatus.png"
       redirect_uri  = "https://status.${local.cluster_domain}/authorization-code/callback"
       launch_url    = "https://status.${local.cluster_domain}"
@@ -28,31 +25,49 @@ locals {
 
   proxy_applications = {
     echo_server = {
-      group         = resource.authentik_group.infrastructure
       external_host = "https://echo-server.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
     },
     whoami = {
-      group         = resource.authentik_group.infrastructure
       external_host = "https://whoami.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
     },
     homepage = {
-      group         = resource.authentik_group.home
       external_host = "https://homepage.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
     },
     homeassistant = {
-      group         = resource.authentik_group.home
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
-    }
+    },
+    sonarr = {
+      external_host                  = "https://sonarr.${local.cluster_domain}"
+      icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
+      parent_group                   = resource.authentik_group.media
+      basic_auth_enabled             = true
+      basic_auth_username_attribute  = "sonarr_username"
+      basic_auth_password_attribute  = "sonarr_password"
+    },
+    radarr = {
+      external_host                  = "https://radarr.${local.cluster_domain}"
+      icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
+      parent_group                   = resource.authentik_group.media
+      basic_auth_enabled             = true
+      basic_auth_username_attribute  = "radarr_username"
+      basic_auth_password_attribute  = "radarr_password"
+    },
+    readarr = {
+      external_host                  = "https://readarr.${local.cluster_domain}"
+      icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
+      parent_group                   = resource.authentik_group.media
+    },
+
   }
 }
 
 resource "authentik_provider_proxy" "main" {
   for_each                      = local.proxy_applications
-  name                          = each.key
+  name                          = "k8s/stonehedges.net/${lookup(local.proxy_applications[each.key], "namespace", "default")}/${each.key}"
   external_host                 = lookup(local.proxy_applications[each.key], "external_host", null)
   internal_host                 = lookup(local.proxy_applications[each.key], "internal_host", null)
   basic_auth_enabled            = lookup(local.proxy_applications[each.key], "basic_auth_enabled", false)
@@ -66,6 +81,42 @@ resource "authentik_provider_proxy" "main" {
   property_mappings             = lookup(local.proxy_applications[each.key], "property_mappings", null)
   skip_path_regex               = lookup(local.proxy_applications[each.key], "skip_path_regex", null)
 }
+
+resource "authentik_group" "proxy_applications" {
+  for_each     = local.proxy_applications
+  name         = lookup(local.proxy_applications[each.key], "group", each.key)
+  is_superuser = false
+  attributes   = lookup(local.proxy_applications[each.key], "basic_auth_enabled", false) ? jsonencode({
+    lookup(local.proxy_applications[each.key], "basic_auth_username_attribute") = module.onepassword_authentik.fields.SONARR_HTTP_USERNAME
+    lookup(local.proxy_applications[each.key], "basic_auth_password_attribute") = module.onepassword_authentik.fields.SONARR_HTTP_PASSWORD
+  }) : null
+
+}
+
+resource "authentik_application" "proxy_application" {
+  for_each           = local.proxy_applications
+  name               = title(each.key)
+  slug               = lookup(local.proxy_applications[each.key], "slug", each.key)
+  protocol_provider  = authentik_provider_proxy.main[each.key].id
+  group              = resource.authentik_group.proxy_applications[each.key].name
+  // group              = lookup(local.proxy_applications[each.key], "group", null)
+  open_in_new_tab    = true
+  meta_icon          = each.value.icon_url
+  meta_launch_url    = lookup(local.proxy_applications[each.key], "external_host", null)
+  policy_engine_mode = "all"
+}
+
+resource "authentik_policy_binding" "proxy_application_policy_binding" {
+  for_each = local.proxy_applications
+
+  target = authentik_application.proxy_application[each.key].uuid
+  group  = resource.authentik_group.proxy_applications[each.key].id
+  order  = 0
+}
+
+// -----------------------------------------------------------------------------
+// OAUTH
+// -----------------------------------------------------------------------------
 
 resource "authentik_provider_oauth2" "oauth2" {
   for_each              = local.applications
@@ -85,53 +136,32 @@ resource "authentik_provider_oauth2" "oauth2" {
     }
   ]
 }
+/*
+resource "authentik_group" "applications" {
+  for_each     = local.applications
+  name         = each.key
+  parent       = each.value.parent_group.id
+  is_superuser = false
+}
 
 resource "authentik_application" "application" {
   for_each           = local.applications
   name               = title(each.key)
   slug               = each.key
   protocol_provider  = authentik_provider_oauth2.oauth2[each.key].id
-  group              = each.value.group.name
+  group              = resource.authentik_group.applications[each.key].id
   open_in_new_tab    = true
   meta_icon          = each.value.icon_url
   meta_launch_url    = each.value.launch_url
   policy_engine_mode = "all"
 }
 
-data "authentik_group" "lookup" {
-  for_each = local.applications
-  name     = each.value.group.name
-}
-
 resource "authentik_policy_binding" "application_policy_binding" {
   for_each = local.applications
 
   target = authentik_application.application[each.key].uuid
-  group  = data.authentik_group.lookup[each.key].id
+  group  = resource.authentik_group.applications[each.key].id
   order  = 0
 }
+*/
 
-resource "authentik_application" "proxy_application" {
-  for_each           = local.proxy_applications
-  name               = title(each.key)
-  slug               = lookup(local.proxy_applications[each.key], "slug", each.key)
-  protocol_provider  = authentik_provider_proxy.main[each.key].id
-  group              = each.value.group.name
-  open_in_new_tab    = true
-  meta_icon          = each.value.icon_url
-  meta_launch_url    = lookup(local.proxy_applications[each.key], "external_host", null)
-  policy_engine_mode = "all"
-}
-
-data "authentik_group" "proxy_lookup" {
-  for_each = local.proxy_applications
-  name     = each.value.group.name
-}
-
-resource "authentik_policy_binding" "proxy_application_policy_binding" {
-  for_each = local.proxy_applications
-
-  target = authentik_application.proxy_application[each.key].uuid
-  group  = data.authentik_group.proxy_lookup[each.key].id
-  order  = 0
-}

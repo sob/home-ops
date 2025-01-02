@@ -1,6 +1,9 @@
 locals {
   internal_proxy_provider_ids = [
-    authentik_provider_proxy.main["whoami"].id
+    authentik_provider_proxy.main["whoami"].id,
+    authentik_provider_proxy.main["sonarr"].id,
+    authentik_provider_proxy.main["readarr"].id,
+    authentik_provider_proxy.main["radarr"].id,
   ]
 
   external_proxy_provider_ids = [
