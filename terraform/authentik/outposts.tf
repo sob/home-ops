@@ -1,6 +1,7 @@
 locals {
   internal_proxy_provider_ids = [
     authentik_provider_proxy.main["whoami"].id,
+    authentik_provider_proxy.main["bazarr"].id,
     authentik_provider_proxy.main["lidarr"].id,
     authentik_provider_proxy.main["prowlarr"].id,
     authentik_provider_proxy.main["radarr"].id,
@@ -11,7 +12,6 @@ locals {
   external_proxy_provider_ids = [
     authentik_provider_proxy.main["echo_server"].id,
     authentik_provider_proxy.main["homepage"].id,
-
     authentik_provider_proxy.main["homeassistant"].id,
     authentik_provider_proxy.main["wizarr"].id,
   ]
