@@ -27,45 +27,53 @@ locals {
     echo_server = {
       external_host = "https://echo-server.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
-      group                          = resource.authentik_group.network
+      group         = resource.authentik_group.network
     },
     whoami = {
       external_host = "https://whoami.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
-      group                          = resource.authentik_group.network
+      group         = resource.authentik_group.network
     },
     homepage = {
       external_host = "https://homepage.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
-      group                          = resource.authentik_group.home
+      group         = resource.authentik_group.home
     },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
-      group                          = resource.authentik_group.home
+      group         = resource.authentik_group.home
     },
-    sonarr = {
-      external_host                  = "https://sonarr.${local.cluster_domain}"
-      icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
-      group                          = resource.authentik_group.media
-      basic_auth_enabled             = true
-      basic_auth_username_attribute  = "sonarr_username"
-      basic_auth_password_attribute  = "sonarr_password"
+    lidarr = {
+      external_host  = "https://lidarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
+      group          = resource.authentik_group.media
+    },
+    prowlarr = {
+      external_host  = "https://prowlarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
+      group          = resource.authentik_group.media
     },
     radarr = {
-      external_host                  = "https://radarr.${local.cluster_domain}"
-      icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
-      group                          = resource.authentik_group.media
-      basic_auth_enabled             = true
-      basic_auth_username_attribute  = "radarr_username"
-      basic_auth_password_attribute  = "radarr_password"
+      external_host  = "https://radarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
+      group          = resource.authentik_group.media
     },
     readarr = {
-      external_host                  = "https://readarr.${local.cluster_domain}"
-      icon_url                       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
-      group                          = resource.authentik_group.media
+      external_host  = "https://readarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
+      group          = resource.authentik_group.media
     },
-
+    sonarr = {
+      external_host  = "https://sonarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
+      group          = resource.authentik_group.media
+    },
+    wizarr = {
+      external_host  = "https://wizarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
+      group          = resource.authentik_group.media
+    },
   }
 }
 
