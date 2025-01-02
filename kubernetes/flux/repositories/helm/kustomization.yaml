@@ -16,6 +16,7 @@ resources:
   - ./hajimari.yaml
   - ./intel.yaml
   - ./jetstack.yaml
+  - ./kyverno.yaml
   - ./metrics-server.yaml
   - ./nfs-provisioner.yaml
   - ./node-feature-discovery.yaml
