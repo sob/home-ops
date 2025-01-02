@@ -44,6 +44,11 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
       group         = resource.authentik_group.home
     },
+    bazarr = {
+      external_host  = "https://bazarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
+      group          = resource.authentik_group.media
+    },
     lidarr = {
       external_host  = "https://lidarr.${local.cluster_domain}"
       icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
@@ -71,7 +76,7 @@ locals {
     },
     wizarr = {
       external_host  = "https://wizarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png"
       group          = resource.authentik_group.media
     },
   }
