@@ -75,7 +75,7 @@ locals {
       group          = resource.authentik_group.media
     },
     wizarr = {
-      external_host  = "https://wizarr.${local.cluster_domain}"
+      external_host  = "https://join.${local.cluster_domain}"
       icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png"
       group          = resource.authentik_group.media
     },
