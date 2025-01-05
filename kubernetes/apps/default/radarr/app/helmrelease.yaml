@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: ghcr.io/onedr0p/radarr-develop
-              tag: 5.17.0.9555@sha256:ca1d1f55524c1d58cd9aa58e747b7ee37536aed4f95852ab07eb0b984dcf1817
+              tag: 5.17.1.9561@sha256:ebc3c0e95ae7f8d5325179cbd51ac23cab1bcc10f141ba5c34cd13bc4cc8c52f
             env:
               RADARR__APP__INSTANCENAME: Radarr
               RADARR__APP__THEME: dark
