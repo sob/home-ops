@@ -29,3 +29,5 @@ wiki
 
 **/.terraform/*
 **/terraform.tfstate*
+
+.codegpt
