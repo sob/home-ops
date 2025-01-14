@@ -35,9 +35,6 @@ spec:
       redis:
         host: dragonfly.database.svc.cluster.local
       log_level: trace
-    blueprints:
-      configMaps:
-        - authentik-blueprints
     postgresql:
       enabled: false
     server:
