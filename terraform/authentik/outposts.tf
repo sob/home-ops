@@ -38,8 +38,11 @@ resource "authentik_outpost" "internal" {
     "kubernetes_image_pull_secrets"  = []
     "kubernetes_ingress_class_name"  = "internal"
     "kubernetes_disabled_components" = []
-    "kubernetes_ingress_annotations" = {}
-    "kubernetes_ingress_secret_name" = "authentik-outpost-tls"
+    "kubernetes_ingress_annotations" = {
+      "external-dns.alpha.kubernetes.io/is-public" : "false"
+      "external-dns.alpha.kubernetes.io/target" : "internal.${local.cluster_domain}"
+    }
+    "kubernetes_ingress_secret_name" = "authentik-outpost-internal"
   })
 }
 
@@ -65,9 +68,9 @@ resource "authentik_outpost" "external" {
     "kubernetes_ingress_class_name"  = "external"
     "kubernetes_disabled_components" = []
     "kubernetes_ingress_annotations" = {
-      "external-dns/is-public" : "true"
+      "external-dns.alpha.kubernetes.io/is-public" : "true"
       "external-dns.alpha.kubernetes.io/target" : "external.${local.cluster_domain}"
     }
-    "kubernetes_ingress_secret_name" = "authentik-outpost-tls"
+    "kubernetes_ingress_secret_name" = "authentik-outpost-external"
   })
 }
