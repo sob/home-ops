@@ -27,6 +27,8 @@ spec:
         patchStrategicMerge:
           metadata:
             annotations:
+              +(external-dns.alpha.kubernetes.io/is-public): |-
+                false
               +(nginx.ingress.kubernetes.io/proxy-body-size): |-
                 1000M
               +(nginx.ingress.kubernetes.io/auth-url): |-
@@ -48,6 +50,8 @@ spec:
         patchStrategicMerge:
           metadata:
             annotations:
+              +(external-dns.alpha.kubernetes.io/is-public): |-
+                true
               +(nginx.ingress.kubernetes.io/proxy-body-size): |-
                 1000M
               +(nginx.ingress.kubernetes.io/auth-url): |-
