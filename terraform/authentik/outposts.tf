@@ -42,7 +42,7 @@ resource "authentik_outpost" "internal" {
       "external-dns.alpha.kubernetes.io/is-public" : "false"
       "external-dns.alpha.kubernetes.io/target" : "internal.${local.cluster_domain}"
     }
-    "kubernetes_ingress_secret_name" = "ak-outpost-internal"
+    "kubernetes_ingress_secret_name" = "ak-outpost-internal-tls"
   })
 }
 
