@@ -42,7 +42,7 @@ resource "authentik_outpost" "internal" {
       "external-dns.alpha.kubernetes.io/is-public" : "false"
       "external-dns.alpha.kubernetes.io/target" : "internal.${local.cluster_domain}"
     }
-    "kubernetes_ingress_secret_name" = "authentik-outpost-internal"
+    "kubernetes_ingress_secret_name" = "ak-outpost-internal"
   })
 }
 
@@ -71,6 +71,6 @@ resource "authentik_outpost" "external" {
       "external-dns.alpha.kubernetes.io/is-public" : "true"
       "external-dns.alpha.kubernetes.io/target" : "external.${local.cluster_domain}"
     }
-    "kubernetes_ingress_secret_name" = "authentik-outpost-external"
+    "kubernetes_ingress_secret_name" = "ak-outpost-external"
   })
 }
