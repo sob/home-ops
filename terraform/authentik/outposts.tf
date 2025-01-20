@@ -1,6 +1,5 @@
 locals {
   internal_proxy_provider_ids = [
-    authentik_provider_proxy.main["whoami"].id,
     authentik_provider_proxy.main["bazarr"].id,
     authentik_provider_proxy.main["lidarr"].id,
     authentik_provider_proxy.main["prowlarr"].id,
