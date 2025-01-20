@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: bazarr
+  name: &app bazarr
 spec:
   interval: 30m
   chart:
@@ -80,15 +80,15 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
+        runAsUser: 1034
+        runAsGroup: 65536
+        fsGroup: 65536
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [10000]
+        supplementalGroups: [100]
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: bazarr
+        controller: *app
         ports:
           http:
             port: *port
@@ -96,6 +96,7 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          authentik.home.arpa/internal: "true"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Bazarr

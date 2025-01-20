@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: plex
+  name: &app plex
 spec:
   interval: 30m
   chart:
@@ -73,15 +73,15 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
+        runAsUser: 1030
+        runAsGroup: 65536
+        fsGroup: 65536
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [44, 10000]
+        supplementalGroups: [44, 100]
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: plex
+        controller: *app
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: ${SECRET_VIP_PLEX}
