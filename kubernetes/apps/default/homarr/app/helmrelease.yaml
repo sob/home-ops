@@ -72,7 +72,7 @@ spec:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           authentik.home.arpa/external: "true"
         hosts:
-          - host: homarr${SECRET_DOMAIN}
+          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths: &paths
               - path: /
                 service:
