@@ -24,25 +24,25 @@ locals {
   }
 
   proxy_applications = {
+    bazarr = {
+      external_host  = "https://bazarr.${local.cluster_domain}"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
+      group          = resource.authentik_group.media
+    },
     echo_server = {
       external_host = "https://echo-server.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
       group         = resource.authentik_group.network
-    },
-    homepage = {
-      external_host = "https://homepage.${local.cluster_domain}"
-      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
-      group         = resource.authentik_group.home
     },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
       group         = resource.authentik_group.home
     },
-    bazarr = {
-      external_host  = "https://bazarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
-      group          = resource.authentik_group.media
+    homepage = {
+      external_host = "https://homepage.${local.cluster_domain}"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
+      group         = resource.authentik_group.home
     },
     lidarr = {
       external_host  = "https://lidarr.${local.cluster_domain}"
