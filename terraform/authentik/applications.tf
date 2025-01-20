@@ -85,7 +85,8 @@ resource "authentik_provider_proxy" "main" {
   basic_auth_enabled            = lookup(local.proxy_applications[each.key], "basic_auth_enabled", false)
   basic_auth_password_attribute = lookup(local.proxy_applications[each.key], "basic_auth_password_attribute", null)
   basic_auth_username_attribute = lookup(local.proxy_applications[each.key], "basic_auth_username_attribute", null)
-  mode                          = lookup(local.proxy_applications[each.key], "mode", "forward_single")
+  mode                          = lookup(local.proxy_applications[each.key], "mode", "forward_domain")
+  cookie_domain                 = lookup(local.proxy_applications[each.key], "cookie_domain", "${local.cluster_domain}")
   authentication_flow           = authentik_flow.authentication.uuid
   authorization_flow            = authentik_flow.provider-authorization-implicit-consent.uuid
   invalidation_flow             = data.authentik_flow.default-provider-invalidation-flow.id
