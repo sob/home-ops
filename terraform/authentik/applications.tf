@@ -29,11 +29,6 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
       group         = resource.authentik_group.network
     },
-    whoami = {
-      external_host = "https://whoami.${local.cluster_domain}"
-      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
-      group         = resource.authentik_group.network
-    },
     homepage = {
       external_host = "https://homepage.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
