@@ -10,6 +10,7 @@ resources:
   - ./bsky-pds/ks.yaml
   - ./cert-exporter/ks.yaml
   - ./home-assistant/ks.yaml
+  - ./homarr/ks.yaml
   - ./homepage/ks.yaml
   - ./ghostfolio/ks.yaml
   - ./lidarr/ks.yaml
