@@ -137,7 +137,7 @@ resource "authentik_policy_binding" "proxy_application_policy_binding" {
 
 resource "authentik_provider_oauth2" "oauth2" {
   for_each              = local.applications
-  name                  = each.key
+  name                  = "k8s/stonehedges.net/${lookup(local.applications[each.key], "namespace", "default")}/${each.key}"
   client_id             = each.value.client_id
   client_secret         = each.value.client_secret
   authorization_flow    = authentik_flow.provider-authorization-implicit-consent.uuid
