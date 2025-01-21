@@ -81,5 +81,5 @@ spec:
                   identifier: app
         className: external
     persistence:
-      config:
+      appdata:
         existingClaim: homarr
