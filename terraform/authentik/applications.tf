@@ -6,6 +6,7 @@ locals {
       icon_url      = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/grafana.png"
       redirect_uri  = "https://grafana.${local.cluster_domain}/login/generic_oauth"
       launch_url    = "https://grafana.${local.cluster_domain}/login/generic_oauth"
+      group         = resource.authentik_group.observability
     },
     lubelog = {
       client_id     = module.onepassword_authentik.fields.LUBELOG_CLIENT_ID
@@ -13,6 +14,7 @@ locals {
       icon_url      = "https://demo.lubelogger.com/defaults/lubelogger_icon_72.png"
       redirect_uri  = "https://lubelog.${local.cluster_domain}/Login/RemoteAuth"
       launch_url    = "https://lubelog.${local.cluster_domain}/Login/RemoteAuth"
+      group         = resource.authentik_group.home
     },
     gatus = {
       client_id     = module.onepassword_authentik.fields.GATUS_CLIENT_ID
@@ -20,7 +22,16 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/gatus.png"
       redirect_uri  = "https://status.${local.cluster_domain}/authorization-code/callback"
       launch_url    = "https://status.${local.cluster_domain}"
-    }
+      group         = resource.authentik_group.observability
+    },
+    homarr = {
+      client_id     = module.onepassword_authentik.fields.HOMARR_CLIENT_ID
+      client_secret = module.onepassword_authentik.fields.HOMARR_CLIENT_SECRET
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homarr.png"
+      redirect_uri  = "https://homarr.${local.cluster_domain}/authorization-code/callback"
+      launch_url    = "https://homarr.${local.cluster_domain}"
+      group         = resource.authentik_group.home
+    },
   }
 
   proxy_applications = {
@@ -142,20 +153,18 @@ resource "authentik_provider_oauth2" "oauth2" {
     }
   ]
 }
-/*
-resource "authentik_group" "applications" {
+
+data "authentik_group" "applications" {
   for_each     = local.applications
-  name         = each.key
-  parent       = each.value.parent_group.id
-  is_superuser = false
+  name         = each.value.group.name
 }
 
 resource "authentik_application" "application" {
   for_each           = local.applications
   name               = title(each.key)
-  slug               = each.key
+  slug               = lookup(local.applications[each.key], "slug", each.key)
   protocol_provider  = authentik_provider_oauth2.oauth2[each.key].id
-  group              = resource.authentik_group.applications[each.key].id
+  group              = data.authentik_group.applications[each.key].id
   open_in_new_tab    = true
   meta_icon          = each.value.icon_url
   meta_launch_url    = each.value.launch_url
@@ -166,8 +175,6 @@ resource "authentik_policy_binding" "application_policy_binding" {
   for_each = local.applications
 
   target = authentik_application.application[each.key].uuid
-  group  = resource.authentik_group.applications[each.key].id
+  group  = data.authentik_group.applications[each.key].id
   order  = 0
 }
-*/
-
