@@ -70,6 +70,6 @@ resource "authentik_outpost" "external" {
       "external-dns.alpha.kubernetes.io/is-public" : "true"
       "external-dns.alpha.kubernetes.io/target" : "external.${local.cluster_domain}"
     }
-    "kubernetes_ingress_secret_name" = "ak-outpost-external"
+    "kubernetes_ingress_secret_name" = "ak-outpost-external-tls"
   })
 }
