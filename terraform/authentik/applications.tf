@@ -164,7 +164,7 @@ resource "authentik_application" "application" {
   name               = title(each.key)
   slug               = lookup(local.applications[each.key], "slug", each.key)
   protocol_provider  = authentik_provider_oauth2.oauth2[each.key].id
-  group              = data.authentik_group.applications[each.key].id
+  group              = each.value.group.name
   open_in_new_tab    = true
   meta_icon          = each.value.icon_url
   meta_launch_url    = each.value.launch_url
