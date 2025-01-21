@@ -37,7 +37,7 @@ locals {
   proxy_applications = {
     bazarr = {
       external_host  = "https://bazarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
+      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"
       group          = resource.authentik_group.media
     },
     echo_server = {
