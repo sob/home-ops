@@ -28,7 +28,7 @@ locals {
       client_id     = module.onepassword_authentik.fields.HOMARR_CLIENT_ID
       client_secret = module.onepassword_authentik.fields.HOMARR_CLIENT_SECRET
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homarr.png"
-      redirect_uri  = "https://homarr.${local.cluster_domain}/authorization-code/callback"
+      redirect_uri  = "https://homarr.${local.cluster_domain}/api/auth/callback/oidc"
       launch_url    = "https://homarr.${local.cluster_domain}"
       group         = resource.authentik_group.home
     },
