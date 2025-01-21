@@ -3,14 +3,14 @@
 version: "3"
 
 tasks:
-  sync-secrets:
+  sync:
     desc: sync ExternalSecret resources from provider
     silent: true
     summary: |
       cluster: cluster to run command against (default: main)
     cmds:
       - for: { var: secrets, split: '' }
-        task: sync
+        task: .sync-secret
         vars:
           cluster: '{{.cluster}}'
           ns: '{{$a := split "|" .ITEM}}{{$a._0}}'
@@ -20,12 +20,8 @@ tasks:
         sh: kubectl get externalsecret --all-namespaces --no-headers -A | awk '{print $1 "|" $2}'
       cluster: '{{ .cluster | default "admin@stone" }}'
 
-  sync:
-    desc: sync an ExternalSecret resource for a cluster
-    summary: |
-      cluster: cluster to run command against (default: main)
-      ns: namespace to sync secret in (default: default)
-      secret: secret to sync (default: unset/all secrets)
+  .sync-secret:
+    internal: true
     cmd: kubectl --context {{.cluster}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
     vars:
       ns: '{{ .ns | default "default" }}'
