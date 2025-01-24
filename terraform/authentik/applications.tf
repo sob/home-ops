@@ -36,9 +36,10 @@ locals {
 
   proxy_applications = {
     bazarr = {
-      external_host  = "https://bazarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"
-      group          = resource.authentik_group.media
+      external_host   = "https://bazarr.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"
+      group           = resource.authentik_group.media
+      skip_path_regex = "^/api([/?].*)?"
     },
     echo_server = {
       external_host = "https://echo-server.${local.cluster_domain}"
@@ -56,29 +57,34 @@ locals {
       group         = resource.authentik_group.home
     },
     lidarr = {
-      external_host  = "https://lidarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
-      group          = resource.authentik_group.media
+      external_host   = "https://lidarr.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
+      group           = resource.authentik_group.media
+      skip_path_regex = "^/api([/?].*)?"
     },
     prowlarr = {
-      external_host  = "https://prowlarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
-      group          = resource.authentik_group.media
+      external_host   = "https://prowlarr.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
+      group           = resource.authentik_group.media
+      skip_path_regex = "^/api([/?].*)?"
     },
     radarr = {
-      external_host  = "https://radarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
-      group          = resource.authentik_group.media
+      external_host   = "https://radarr.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
+      group           = resource.authentik_group.media
+      skip_path_regex = "^/api([/?].*)?"
     },
     readarr = {
-      external_host  = "https://readarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
-      group          = resource.authentik_group.media
+      external_host   = "https://readarr.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
+      group           = resource.authentik_group.media
+      skip_path_regex = "^/api([/?].*)?"
     },
     sonarr = {
-      external_host  = "https://sonarr.${local.cluster_domain}"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
-      group          = resource.authentik_group.media
+      external_host   = "https://sonarr.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
+      group           = resource.authentik_group.media
+      skip_path_regex = "^/api([/?].*)?"
     },
     wizarr = {
       external_host  = "https://join.${local.cluster_domain}"
@@ -96,7 +102,7 @@ resource "authentik_provider_proxy" "main" {
   basic_auth_enabled            = lookup(local.proxy_applications[each.key], "basic_auth_enabled", false)
   basic_auth_password_attribute = lookup(local.proxy_applications[each.key], "basic_auth_password_attribute", null)
   basic_auth_username_attribute = lookup(local.proxy_applications[each.key], "basic_auth_username_attribute", null)
-  mode                          = lookup(local.proxy_applications[each.key], "mode", "forward_domain")
+  mode                          = lookup(local.proxy_applications[each.key], "mode", "forward_single")
   cookie_domain                 = lookup(local.proxy_applications[each.key], "cookie_domain", "${local.cluster_domain}")
   authentication_flow           = authentik_flow.authentication.uuid
   authorization_flow            = authentik_flow.provider-authorization-implicit-consent.uuid
