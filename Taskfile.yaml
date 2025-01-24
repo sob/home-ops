@@ -29,6 +29,7 @@ includes:
   authentik: .taskfiles/authentik
   kubernetes: .taskfiles/kubernetes
   flux: .taskfiles/flux
+  media: .taskfiles/media
   pds: .taskfiles/pds
   rook: .taskfiles/rook
   secrets: .taskfiles/externalsecrets
