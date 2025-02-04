@@ -33,7 +33,7 @@ resource "readarr_remote_path_mapping" "sabnzbd" {
   local_path  = "/media/Downloads/sabnzbd/complete/"
 }
 
-resource "readarr_host" "sonarr" {
+resource "readarr_host" "readarr" {
   depends_on = [
     readarr_root_folder.books,
     readarr_download_client_sabnzbd.sabnzbd,
@@ -45,11 +45,10 @@ resource "readarr_host" "sonarr" {
   bind_address = "*"
   application_url = ""
   instance_name = "Readarr"
-
   authentication = {
     method = "external"
-    password = ""
-    passwordConfirmation = ""
+    password = "password"
+    passwordConfirmation = "password"
   }
   proxy = {
     enabled = false
@@ -60,7 +59,7 @@ resource "readarr_host" "sonarr" {
     certificate_validation = "enabled"
   }
   logging = {
-    log_level = "debug"
+    log_level = "info"
     analytics_enabled = false
     log_size_limit = 1
   }
