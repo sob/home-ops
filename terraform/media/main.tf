@@ -12,6 +12,10 @@ terraform {
       source = "devopsarr/sonarr"
       version = "3.4.0"
     }
+    readarr = {
+      source = "devopsarr/readarr"
+      version = "2.1.0"
+    }
     lidarr = {
       source = "devopsarr/lidarr"
       version = "1.13.0"
