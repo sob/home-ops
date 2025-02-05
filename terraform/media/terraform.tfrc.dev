@@ -1,6 +1,6 @@
 provider_installation {
   dev_overrides {
-    "devopsarr/readarr" = "/Users/seobrien/work/terraform-provider-readarr"
+    "devopsarr/readarr" = "/Users/seobrien/work/terraform-provider-readarr/.build/"
   }
   direct {}
 }
