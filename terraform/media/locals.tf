@@ -1,3 +1,3 @@
 locals {
-  cluster_domain   = module.onepassword_prowlarr.fields.PROWLARR_URL
+  cluster_domain   = module.secrets.items["prowlarr"].PROWLARR_URL
 }

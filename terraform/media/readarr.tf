@@ -1,6 +1,6 @@
 provider "readarr" {
-  url     = module.onepassword_readarr.fields.READARR_URL
-  api_key = module.onepassword_readarr.fields.READARR_API_KEY
+  url     = module.secrets.items["readarr"].READARR_URL
+  api_key = module.secrets.items["readarr"].READARR_API_KEY
 }
 
 resource "readarr_root_folder" "books" {
@@ -20,7 +20,7 @@ resource "readarr_download_client_sabnzbd" "sabnzbd" {
   name                       = "SABnzbd"
   host                       = "sabnzbd.default.svc.cluster.local"
   port                       = "80"
-  api_key                    = module.onepassword_sabnzbd.fields.SABNZBD_API_KEY
+  api_key                    = module.secrets.items["sabnzbd"].SABNZBD_API_KEY
   book_category              = "books"
   use_ssl                    = false
   remove_completed_downloads = true

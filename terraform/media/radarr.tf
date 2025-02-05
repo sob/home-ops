@@ -1,6 +1,6 @@
 provider "radarr" {
-  url     = module.onepassword_radarr.fields.RADARR_URL
-  api_key = module.onepassword_radarr.fields.RADARR_API_KEY
+  url     = module.secrets.items["radarr"].RADARR_URL
+  api_key = module.secrets.items["radarr"].RADARR_API_KEY
 }
 
 resource "radarr_root_folder" "movies" {
@@ -17,7 +17,7 @@ resource "radarr_download_client_sabnzbd" "sabnzbd" {
   name                       = "SABnzbd"
   host                       = "sabnzbd.default.svc.cluster.local"
   port                       = "80"
-  api_key                    = module.onepassword_sabnzbd.fields.SABNZBD_API_KEY
+  api_key                    = module.secrets.items["sabnzbd"].SABNZBD_API_KEY
   movie_category             = "movies"
   use_ssl                    = false
   remove_completed_downloads = true
