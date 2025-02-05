@@ -5,7 +5,7 @@ Thumbs.db
 kubeconfig
 .kubeconfig
 talosconfig
-talos/talsecret.yaml
+talsecret.yaml
 .decrypted~*.yaml
 .config.env
 *.agekey
