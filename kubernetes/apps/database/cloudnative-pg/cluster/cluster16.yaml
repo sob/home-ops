@@ -51,11 +51,11 @@ spec:
           key: aws-secret-access-key
   bootstrap:
     recovery:
-      source: "postgres-20250209000000"
+      source: &previousCluster postgres16-v6
   externalClusters:
-    - name: postgres16
+    - name: *previousCluster
       barmanObjectStore:
-        serverName: postgres16
+        serverName: *previousCluster
         wal:
           compression: bzip2
           maxParallel: 8
