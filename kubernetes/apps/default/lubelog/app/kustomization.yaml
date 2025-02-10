@@ -6,4 +6,4 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ../../../../flux/components/volsync
-  - ../../../../templates/gatus/external
+  - ../../../../flux/components/gatus/external
