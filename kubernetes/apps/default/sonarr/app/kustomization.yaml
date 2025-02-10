@@ -7,6 +7,7 @@ resources:
   - ./helmrelease.yaml
   - ../../../../flux/components/gatus/guarded
   - ../../../../flux/components/volsync
+  - ../../../../flux/components/postgresql
 configMapGenerator:
   - name: sonarr-configmap
     files:
