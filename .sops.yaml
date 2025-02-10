@@ -3,6 +3,12 @@ keys:
   - &user_sob age123w8qnhf7cdmgwmgmy8kvqhr6cd92kx4882y82cze23us376dgyqzf245n
 
 creation_rules:
+  - path_regex: kubernetes/.+\.sops\.yaml
+    encrypted_regex: ^(token|crt|key|id|secret|secretboxEncryptionSecret|ca)$
+    mac_only_encrypted: true
+    key_groups:
+      - age:
+        - *user_sob
   - # IMPORTANT: This rule MUST be above the other
     path_regex: kubernetes/bootstrap/talos/talsecret(\.sops)?\.ya?ml
     input_type: yaml
