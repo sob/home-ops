@@ -1,6 +1,5 @@
----
 - op: add
-  path: /spec/values/controllers/0/initContainers/init-db
+  path: /spec/values/controllers/${APP}/initContainers/init-db
   value:
     image:
       repository: ghcr.io/onedr0p/postgres-init
