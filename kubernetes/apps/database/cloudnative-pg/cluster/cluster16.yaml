@@ -41,7 +41,7 @@ spec:
       endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
       # Note: serverName version needs to be inclemented
       # when recovering from an existing cnpg cluster
-      serverName: &currentCluster postgres16-v1
+      serverName: &currentCluster postgres16-v6
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
