@@ -1,0 +1,10 @@
+---
+- op: add
+  path: /spec/values/controllers/0/initContainers/init-db
+  value:
+    image:
+      repository: ghcr.io/onedr0p/postgres-init
+      tag: 16
+    envFrom:
+      - secretRef:
+          name: ${APP}-db-secret
