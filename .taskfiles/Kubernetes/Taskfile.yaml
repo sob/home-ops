@@ -3,7 +3,7 @@
 version: "3"
 
 vars:
-  KUBECONFORM_SCRIPT: "{{.SCRIPTS_DIR}}/kubeconform.sh"
+  KUBECONFORM_SCRIPT: "{{.ROOT_DIR}}/.github/scripts/kubeconform.sh"
 
 tasks:
 
@@ -26,7 +26,7 @@ tasks:
 
   kubeconform:
     desc: Validate Kubernetes manifests with kubeconform
-    cmd: bash {{.KUBECONFORM_SCRIPT}} {{.KUBERNETES_DIR}}
+    cmd: bash {{.KUBECONFORM_SCRIPT}} {{.KUBERNETES_DIR}} --ignore
     preconditions:
       - msg: Missing kubeconform script
         sh: test -f {{.KUBECONFORM_SCRIPT}}
