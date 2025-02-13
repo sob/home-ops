@@ -29,17 +29,9 @@ spec:
       namespace: database
   values:
     controllers:
-      prowlarr:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: prowlarr-secret
         containers:
           app:
             image:
@@ -88,7 +80,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: prowlarr
+        controller: main
         ports:
           http:
             port: *port
