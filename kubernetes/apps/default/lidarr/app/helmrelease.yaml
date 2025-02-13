@@ -22,11 +22,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn:
-    - name: volsync
-      namespace: storage
-    - name: cloudnative-pg
-      namespace: database
   values:
     controllers:
       main:
