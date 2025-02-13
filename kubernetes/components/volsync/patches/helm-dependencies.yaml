@@ -1,0 +1,9 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: required-for-kustomize-but-not-used
+spec:
+  dependsOn:
+    - name: volsync
+      namespace: storage
