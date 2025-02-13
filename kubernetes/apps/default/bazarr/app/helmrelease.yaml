@@ -27,7 +27,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      bazarr:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -88,7 +88,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: *port
@@ -122,15 +122,23 @@ spec:
         globalMounts:
           - path: /config/cache
       config:
-        existingClaim: bazarr
+        existingClaim: *app
       log:
         type: emptyDir
         globalMounts:
           - path: /config/log
       media:
-        type: nfs
-        server: ${SECRET_NFS_SERVER}
-        path: ${SECRET_NFS_PATH_MEDIA}
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${SECRET_NFS_SERVER}
+            path: ${SECRET_NFS_PATH_MEDIA}
+            mountOptions:
+              - nfsvers=4.1
+              - hard
+              - noatime
+              - rsize=131072
+              - wsize=131072
         globalMounts:
           - path: /media
           - path: /Downloads
