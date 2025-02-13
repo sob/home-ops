@@ -10,11 +10,13 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/gatus/external
+    - ../../../../components/volsync
+    - ../../../../components/postgresql
   dependsOn:
     - name: external-secrets-stores
-    - name: volsync
     - name: emqx-cluster
-    - name: cloudnative-pg-cluster
   path: ./kubernetes/apps/default/home-assistant/app
   prune: true
   sourceRef:

@@ -10,8 +10,11 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/gatus/external
+    - ../../../../components/volsync
+    - ../../../../components/postgresql
   dependsOn:
-    - name: cloudnative-pg-cluster
     - name: external-secrets-stores
   path: ./kubernetes/apps/default/lubelog/app
   prune: true

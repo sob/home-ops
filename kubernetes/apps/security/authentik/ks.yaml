@@ -10,8 +10,10 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/gatus/external
+    - ../../../../components/volsync
   dependsOn:
-    - name: cloudnative-pg-cluster
     - name: dragonfly-cluster
     - name: external-secrets-stores
   path: ./kubernetes/apps/security/authentik/app

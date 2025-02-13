@@ -24,17 +24,9 @@ spec:
       retries: 3
   values:
     controllers:
-      home-assistant:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: home-assistant-secret
         containers:
           app:
             image:
@@ -46,7 +38,9 @@ spec:
               HOME_ASSISTANT_PURGE_KEEP_DAYS: 4000
               HOME_ASSISTANT_TRUSTED_PROXIES: ${CLUSTER_POD_CIDR}
               HOME_ASSISTANT_UNIT_SYSTEM: us_customary
-            envFrom: *envFrom
+            envFrom: &envFrom
+              - secretRef:
+                  name: home-assistant-secret
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -82,7 +76,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: home-assistant
+        controller: main
         ports:
           http:
             port: 8123

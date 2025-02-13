@@ -82,6 +82,11 @@ spec:
         ports:
           http:
             port: *port
+    serviceMonitor:
+      app:
+        serviceName: main
+        endpoints:
+          - port: http
     ingress:
       app:
         annotations:
