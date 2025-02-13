@@ -78,7 +78,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: *port
@@ -106,7 +106,7 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: lidarr
+        existingClaim: *app
       tmp:
         type: emptyDir
       media:
