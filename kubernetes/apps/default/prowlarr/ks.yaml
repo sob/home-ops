@@ -10,8 +10,11 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/postgresql
+    - ../../../../components/gatus/guarded
+    - ../../../../components/volsync
   dependsOn:
-    - name: cloudnative-pg-cluster
     - name: external-secrets-stores
   path: ./kubernetes/apps/default/prowlarr/app
   prune: true
