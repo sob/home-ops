@@ -5,3 +5,8 @@ kind: Kustomization
 resources:
   - ./claim.yaml
   - ./r2.yaml
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: patches/helm-dependencies.yaml
