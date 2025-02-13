@@ -5,13 +5,6 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ../../../../flux/components/gatus/guarded
-  - ../../../../flux/components/volsync
-  - ../../../../flux/components/postgresql
-configMapGenerator:
-  - name: sonarr-configmap
-    files:
-      - pushover-notify.sh=./resources/pushover-notify.sh
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

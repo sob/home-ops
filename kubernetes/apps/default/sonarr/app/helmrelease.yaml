@@ -29,7 +29,7 @@ spec:
       namespace: database
   values:
     controllers:
-      sonarr:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -111,20 +111,20 @@ spec:
     persistence:
       config:
         existingClaim: sonarr
-      pushover-notify:
-        type: configMap
-        name: sonarr-configmap
-        defaultMode: 0775
-        globalMounts:
-          - path: /scripts/pushover-notify.sh
-            subPath: pushover-notify.sh
-            readOnly: true
       tmp:
         type: emptyDir
       media:
-        type: nfs
-        server: ${SECRET_NFS_SERVER}
-        path: ${SECRET_NFS_PATH_MEDIA}
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${SECRET_NFS_SERVER}
+            path: ${SECRET_NFS_PATH_MEDIA}
+            mountOptions:
+              - nfsvers=4.1
+              - hard
+              - noatime
+              - rsize=131072
+              - wsize=131072
         globalMounts:
           - path: /media
           - path: /Downloads
