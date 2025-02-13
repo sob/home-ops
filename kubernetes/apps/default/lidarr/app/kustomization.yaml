@@ -5,8 +5,6 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ../../../../flux/components/gatus/guarded
-  - ../../../../flux/components/volsync
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
