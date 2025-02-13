@@ -234,7 +234,7 @@ tasks:
       - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
       - kubectl --namespace {{.NS}} delete job {{.JOB}}
     vars:
-      JOB: volsync-wipe-{{.APP}}
+      JOB: volsync-dst-wipe-{{.APP}}  # Created exactly as specified
     env: *vars
     preconditions:
       - test -f /usr/local/bin/envsubst
@@ -246,11 +246,11 @@ tasks:
     internal: true
     cmds:
       - /usr/local/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml) | kubectl apply -f -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=120m
-      - kubectl --namespace {{.NS}} delete replicationdestination {{.JOB}}
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh restore-{{.APP}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait replicationdestination/restore-{{.APP}} --for=condition=synchronizing=false --timeout=120m
+      - kubectl --namespace {{.NS}} delete replicationdestination restore-{{.APP}}
     vars:
-      JOB: volsync-dst-{{.APP}}
+      JOB: restore-{{.APP}}
     env: *vars
     preconditions:
       - test -f /usr/local/bin/envsubst
