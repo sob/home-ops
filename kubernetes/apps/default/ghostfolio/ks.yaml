@@ -10,6 +10,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/gatus/guarded
+    - ../../../../components/postgresql
   path: ./kubernetes/apps/default/ghostfolio/app
   prune: true
   sourceRef:
@@ -18,7 +21,11 @@ spec:
   dependsOn:
     - name: external-secrets-stores
     - name: dragonfly-cluster
-    - name: cloudnative-pg-cluster
+  healthChecks:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      name: postgres16
+      namespace: database
   wait: false
   interval: 30m
   retryInterval: 1m

@@ -29,7 +29,7 @@ spec:
     keepHistory: false
   values:
     controllers:
-      ghostfolio:
+      main:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -57,7 +57,7 @@ spec:
                 memory: 256Mi
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: 3333

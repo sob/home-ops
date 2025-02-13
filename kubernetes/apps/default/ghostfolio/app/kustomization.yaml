@@ -6,4 +6,3 @@ namespace: default
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ../../../../flux/components/gatus/guarded

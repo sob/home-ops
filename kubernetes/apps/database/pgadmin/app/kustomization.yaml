@@ -6,5 +6,3 @@ namespace: database
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ../../../../flux/components/gatus/guarded
-  - ../../../../flux/components/volsync

@@ -27,19 +27,11 @@ spec:
       namespace: storage
   values:
     controllers:
-      lubelog:
+      main:
         labels:
           postgres: "true"
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16.6
-            envFrom: &envFrom
-              - secretRef:
-                  name: lubelog-secret
         containers:
           app:
             image:
@@ -47,7 +39,9 @@ spec:
               tag: v1.4.3
             env:
               TZ: America/Chicago
-            envFrom: *envFrom
+            envFrom: &envFrom
+              - secretRef:
+                  name: lubelog-secret
             resources:
               requests:
                 cpu: 15m
@@ -56,7 +50,7 @@ spec:
                 memory: 256M
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: 8080

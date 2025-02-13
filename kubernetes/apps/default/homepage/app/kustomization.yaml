@@ -7,7 +7,6 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./rbac.yaml
-  - ../../../../flux/components/gatus/guarded
 configMapGenerator:
   - name: homepage-config
     files:
