@@ -13,8 +13,8 @@ patches:
       kind: HelmRelease
     path: patches/helm-dependencies.yaml
   - target:
-      kind: HelmRelease
-    path: patches/helm-healthcheck.yaml
+      kind: Kustomization
+    path: patches/kustomization-healthcheck.yaml
   - target:
       kind: Kustomization
     path: patches/kustomization-dependencies.yaml
