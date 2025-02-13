@@ -1,0 +1,15 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: required-for-kustomize-but-not-used
+spec:
+  values:
+    controllers:
+      main:
+        initContainers:
+          - name: init-db
+            image: ghcr.io/onedr0p/postgres-init:16
+            envFrom:
+              - secretRef:
+                  name: ${APP}-secret

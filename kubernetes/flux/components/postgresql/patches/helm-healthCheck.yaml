@@ -1,7 +1,0 @@
-- op: add
-  path: /spec/healthChecks/-
-  value:
-    apiVersion: postgresql.cnpg.io/v1
-    kind: Cluster
-    name: postgres16
-    namespace: database
