@@ -17,10 +17,9 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-kubernetes
+    name: flux-system
   dependsOn:
     - name: external-secrets-stores
-    - name: volsync
   wait: false
   interval: 30m
   retryInterval: 1m
