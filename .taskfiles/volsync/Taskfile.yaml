@@ -141,6 +141,31 @@ tasks:
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh
 
+  delete-folder:
+    desc: Delete a folder from the stone-volsync R2 bucket [FOLDER=required]
+    summary: |
+      FOLDER: Folder to delete (required)
+    cmds:
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/delete-folder.sh {{.FOLDER}}
+    requires:
+      vars: ['FOLDER']
+    preconditions:
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/delete-folder.sh
+      - command -v op
+      - sh -c '[ -x "$(command -v docker)" ] || [ -x "$(command -v podman)" ]'
+
+  rename-folder:
+    desc: Rename a folder in the stone-volsync R2 bucket using restic
+    summary: |
+      OLD_NAME: Current folder name (required)
+      NEW_NAME: New folder name (required)
+    cmds:
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/rename-folder.sh {{.OLD_NAME}} {{.NEW_NAME}}
+    requires:
+      vars: ['OLD_NAME', 'NEW_NAME']
+    preconditions:
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/rename-folder.sh
+
   nuke:
     desc: Nuke all volsync custom resources
     summary: Kill em all. Let Buddah sort em out
