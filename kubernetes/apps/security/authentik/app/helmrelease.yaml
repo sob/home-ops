@@ -62,12 +62,6 @@ spec:
         hosts:
           - sso.${SECRET_DOMAIN}
         https: false
-      initContainers:
-        - name: init-db
-          image: ghcr.io/onedr0p/postgres-init:16
-          envFrom:
-            - secretRef:
-                name: authentik-secret
     worker:
       autoscaling:
         enabled: true

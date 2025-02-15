@@ -33,14 +33,6 @@ spec:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: ghostfolio-secret
         containers:
           app:
             image:
@@ -50,7 +42,9 @@ spec:
               NODE_ENV: production
               REDIS_HOST: dragonfly.database.svc.cluster.local.
               REDIS_PORT: 6379
-            envFrom: *envFrom
+            envFrom:
+              - secretRef:
+                  name: ghostfolio-secret
             resources:
               requests:
                 cpu: 100m
