@@ -14,4 +14,4 @@ spec:
               tag: 16
             envFrom:
               - secretRef:
-                  name: ${APP}-secret
+                  name: ${APP}-secret-db
