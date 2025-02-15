@@ -263,4 +263,5 @@ tasks:
     cmds:
       - flux --namespace {{.NS}} resume helmrelease {{.APP}}
       - flux --namespace flux-system resume kustomization {{.APP}}
+      - kubectl --namespace {{.NS}} scale {{.CONTROLLER}} --replicas 1
     env: *vars
