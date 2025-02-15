@@ -50,7 +50,7 @@ spec:
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: &name home-assistant
+  name: &name homeassistant
 spec:
   staticConfigs: [targets: ["hass.home.svc.cluster.local"]]
   metricsPath: /api/prometheus
@@ -58,8 +58,8 @@ spec:
   authorization:
     type: Bearer
     credentials:
-      key: HOME_ASSISTANT_PROMETHEUS
-      name: home-assistant-secret
+      key: HOMEASSISTANT_PROMETHEUS
+      name: homeassistant-secret
       optional: false
   relabelings:
     - action: replace

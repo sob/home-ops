@@ -27,7 +27,7 @@ spec:
   uninstall:
     keepHistory: false
   dependsOn:
-    - name: home-assistant
+    - name: homeassistant
       namespace: default
   values:
     controllers:

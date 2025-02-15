@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app home-assistant
+  name: &app homeassistant
 spec:
   interval: 30m
   chart:
@@ -38,9 +38,9 @@ spec:
               HOME_ASSISTANT_PURGE_KEEP_DAYS: 4000
               HOME_ASSISTANT_TRUSTED_PROXIES: ${CLUSTER_POD_CIDR}
               HOME_ASSISTANT_UNIT_SYSTEM: us_customary
-            envFrom: &envFrom
+            envFrom:
               - secretRef:
-                  name: home-assistant-secret
+                  name: homeassistant-secret
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -91,10 +91,10 @@ spec:
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/icon: home-assistant.png
           gethomepage.dev/description: Automation
-          gethomepage.dev/app: home-assistant
+          gethomepage.dev/app: homeassistant
           gethomepage.dev/href: https://hass.${SECRET_DOMAIN}
           gethomepage.dev/widget.type: homeassistant
-          gethomepage.dev/widget.url: http://home-assistant.home.svc.cluster.local:8123
+          gethomepage.dev/widget.url: http://homeassistant.home.svc.cluster.local:8123
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}` }}"
         className: external
         hosts:
@@ -112,10 +112,10 @@ spec:
           gethomepage.dev/name: Home Assistant Configuration
           gethomepage.dev/icon: vscode.png
           gethomepage.dev/description: Visual Studio Code
-          gethomepage.dev/app: home-assistant
+          gethomepage.dev/app: homeassistant
           gethomepage.dev/podSelector: code-server
           gethomepage.dev/href: https://hass-code.${SECRET_DOMAIN}
-          gethomepage.dev/siteMonitor: http://home-assistant.home.svc.cluster.local:12321
+          gethomepage.dev/siteMonitor: http://homeassistant.home.svc.cluster.local:12321
         className: internal
         hosts:
           - host: hass-code.${SECRET_DOMAIN}

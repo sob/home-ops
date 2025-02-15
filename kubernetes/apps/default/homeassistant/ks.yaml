@@ -17,7 +17,7 @@ spec:
   dependsOn:
     - name: external-secrets-stores
     - name: emqx-cluster
-  path: ./kubernetes/apps/default/home-assistant/app
+  path: ./kubernetes/apps/default/homeassistant/app
   prune: true
   sourceRef:
     kind: GitRepository
