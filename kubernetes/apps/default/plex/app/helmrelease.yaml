@@ -138,7 +138,7 @@ spec:
         volumeSpec:
           nfs:
             server: ${SECRET_NFS_SERVER}
-            path: ${SECRET_NFS_PATH_MEDIA}
+            path: ${SECRET_NFS_PATH_MEDIA}/Library
             mountOptions:
               - nfsvers=4.1
               - hard

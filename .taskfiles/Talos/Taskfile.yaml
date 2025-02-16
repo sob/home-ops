@@ -1,100 +1,134 @@
 ---
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
-version: "3"
+version: '3'
 
 vars:
-  TALOS_DIR: "{{.ROOT_DIR}}/talos"
-  TALHELPER_CLUSTER_DIR: "{{.ROOT_DIR}}/talos/clusterconfig"
-  TALHELPER_SECRET_FILE: "{{.ROOT_DIR}}/talos/talsecret.sops.yaml"
-  TALHELPER_CONFIG_FILE: "{{.ROOT_DIR}}/talos/talconfig.yaml"
-  TALHELPER_ENV_FILE: "{{.ROOT_DIR}}/talos/talenv.sops.yaml"
-  TALOSCONFIG_FILE: "{{.TALHELPER_CLUSTER_DIR}}/talosconfig"
+  KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
+  TALOS_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/talos/resources'
 
 tasks:
-
-  generate:
-    desc: Generate Talos configuration files with talhelper
-    dir: "{{.TALOS_DIR}}"
+  get-config:
+    desc: Retrieve machineconfig from a node and store it
+    dotenv: ['{{.KUBERNETES_DIR}}/bootstrap/.cluster.env']
     cmds:
-      - talhelper genconfig --config-file {{.TALHELPER_CONFIG_FILE}} --env-file "{{.TALHELPER_ENV_FILE}}" --out-dir {{.TALHELPER_CLUSTER_DIR}} --talos-mode metal --debug
-    vars:
-      cluster: '{{.cluster | default "stone"}}'
-
-  apply-config:
-    desc: Apply talos configuration to a node
-    dir: "{{.TALOS_DIR}}"
-    prompt: Apply talos configuration {{.cluster}}-{{.hostname}}.yaml to {{.address}} on cluster {{.cluster}} ... continue?
-    cmd: |
-      talosctl --context {{.cluster}} apply-config --mode={{.mode}} --nodes {{.address}} --file {{.TALHELPER_CLUSTER_DIR}}/{{.cluster}}-{{.hostname}}.yaml {{if .insecure}}--insecure{{end}}
-    vars:
-      mode: '{{.mode | default "auto"}}'
-      insecure: '{{.insecure | default ""}}'
-      cluster: '{{.cluster | default "stone"}}'
-      address:
-        sh: cat {{.TALHELPER_CLUSTER_DIR}}/{{.cluster}}-{{.hostname}}.yaml | yq '.machine.network.interfaces[0].addresses[0] | split("/")[0]'
+      - echo "Retrieving machineconfig from node {{.IP}}"
+      - bash {{.TALOS_RESOURCES_DIR}}/get-machineconfig.sh {{.IP}} {{.TALOS_RESOURCES_DIR}}/machineconfig.tmpl.yaml {{.KUBERNETES_DIR}}/bootstrap/talos
+      - echo "Saved encrypted config to {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.sops.yaml"
     requires:
-      vars: ["hostname"]
+      vars: [IP]
     preconditions:
-      - test -f {{.TALOSCONFIG_FILE}}
-      - test -f {{.TALHELPER_CLUSTER_DIR}}/{{.cluster}}-{{.hostname}}.yaml
+      - sh: test -x .taskfiles/talos/resources/get-machineconfig.sh
+        msg: "Config script not found or not executable"
+      - sh: test -f .taskfiles/talos/resources/machineconfig.tmpl.yaml
+        msg: "Template file not found"
+      - sh: talosctl --nodes {{.IP}} get machineconfig
+        msg: "Unable to connect to node {{.IP}}"
+      - sh: which talosctl sops envsubst yq
+        msg: "Required tools (talosctl, sops, envsubst, yq) not found"
 
-  reset-node:
-    desc: Reset a Talos node
-    dir: "{{.TALOS_DIR}}"
-    prompt: Reset Talos '{{.hostname}}' node on the '{{.cluster}}' cluster ... continue?
-    cmd: talosctl --context {{.cluster}} reset --nodes {{.hostname}} --graceful=false
-    requires:
-      vars: ["cluster", "hostname"]
-    preconditions:
-      - test -f {{.TALOSCONFIG_FILE}}
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - talosctl --context {{.cluster}} --nodes {{.hostname}} get machineconfig >/dev/null 2>&1
-
-  tailscale:
-    desc: Configure tailscale extension on a node
-    dir: "{{.TALOS_DIR}}"
-    cmd: |
-      sops --decrypt {{.TALHELPER_ENV_FILE}} | \
-        envsubst | \
-          talosctl patch mc --patch-file {{.TALOS_DIR}}/patches/global/tailscale-config.yaml --nodes {{.hostname}} --mode {{.mode}}
+  upgrade-node:
+    desc: Upgrade Talos on a single node [IP=required]
+    dotenv: ['{{.KUBERNETES_DIR}}/bootstrap/.cluster.env']
     vars:
-      cluster: '{{.cluster | default "stone"}}'
-      mode: '{{.mode | default "auto"}}'
-    requires:
-      vars: ["cluster", "hostname"]
-    preconditions:
-      - test -f {{.TALOS_DIR}}/patches/global/tailscale-config.yaml
-      - test -f {{.TALHELPER_ENV_FILE}}
-      - talosctl --context {{.cluster}}
-
-  upgrade:
-    desc: Upgrade Talos on a node
-    dir: "{{.TALOS_DIR}}"
+      TALOS_IMAGE: factory.talos.dev/installer/97bf8e92fc6bba0f03928b859c08295d7615737b29db06a97be51dc63004e403:${TALOS_VERSION}
     cmds:
-      - talosctl --nodes {{.node}} upgrade --image {{.image}} --wait=true --timeout=10m --preserve=true --reboot-mode={{.mode}}
-      - talosctl --nodes {{.node}} health --wait-timeout=10m --server=false
-    vars:
-      mode: '{{.mode | default "default"}}'
+      - task: down
+      - bash {{.TALOS_RESOURCES_DIR}}/upgrade-node.sh {{.IP}} {{.TALOS_IMAGE}}
+      - task: up
     requires:
-      vars: ["node", "image"]
+      vars: [IP]
     preconditions:
-      - msg: Missing talosconfig
-        sh: test -f {{.TALOSCONFIG_FILE}}
-      - msg: Unable to retrieve Talos config
-        sh: talosctl config info >/dev/null 2>&1
-      - msg: Node not found
-        sh: talosctl --nodes {{.node}} get machineconfig >/dev/null 2>&1
+      - sh: test -x .taskfiles/talos/resources/upgrade-node.sh
+        msg: "Upgrade script not found or not executable"
+      - sh: talosctl --nodes {{.IP}} get machineconfig
+        msg: "Unable to connect to node {{.IP}}"
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the cluster
-    dir: "{{.TALOS_DIR}}"
-    cmd: talosctl --nodes {{.controller}} upgrade-k8s --to {{.to}}
-    requires:
-      vars: ["controller", "to"]
+    dotenv: ['{{.KUBERNETES_DIR}}/bootstrap/.cluster.env']
+    vars:
+      TALOS_CONTROLLER:
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+    cmds:
+      - echo "Selected control plane node {{.TALOS_CONTROLLER}} for orchestrating upgrade"
+      - echo "Upgrading Kubernetes cluster to version ${KUBERNETES_VERSION}"
+      - task: down
+      - |
+        talosctl --nodes {{.TALOS_CONTROLLER}} upgrade-k8s \
+          --to ${KUBERNETES_VERSION} \
+          --wait-timeout=30m
+      - |
+        echo "Waiting for cluster health..."
+        talosctl --nodes {{.TALOS_CONTROLLER}} health --wait-timeout=10m
+      - task: up
     preconditions:
-      - msg: Missing talosconfig
-        sh: test -f {{.TALOSCONFIG_FILE}}
-      - msg: Unable to retrieve Talos config
-        sh: talosctl config info >/dev/null 2>&1
-      - msg: Node not found
-        sh: talosctl --nodes {{.controller}} get machineconfig >/dev/null 2>&1
+      - sh: talosctl --nodes {{.TALOS_CONTROLLER}} get machineconfig
+        msg: "Unable to connect to control plane node {{.TALOS_CONTROLLER}}"
+      - sh: talosctl config info
+        msg: "Talos configuration not found"
+      - sh: test -f {{.KUBERNETES_DIR}}/bootstrap/.cluster.env
+        msg: "Cluster environment file not found"
+      - sh: test -f {{.KUBERNETES_DIR}}/talosconfig
+        msg: "Talos config file not found"
+      - sh: which jq talosctl
+        msg: "Required tools (jq, talosctl) not found"
+
+  reboot-node:
+    desc: Reboot a Talos node with optional mode selection
+    vars:
+      MODE: '{{.MODE | default "default"}}'
+    cmds:
+      - task: down
+      - task: cordon-node
+      - echo "Rebooting node {{.IP}} in {{.MODE}} mode"
+      - talosctl --nodes {{.IP}} reboot --mode={{.MODE}} --timeout=10m
+      - |
+        echo "Waiting for node {{.IP}} to become healthy..."
+        talosctl --nodes {{.IP}} health --wait-timeout=10m
+      - task: uncordon-node
+      - task: up
+
+  down:
+    internal: true
+    cmds:
+      - kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null
+      - kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null
+    preconditions:
+      - which kubectl
+
+  up:
+    internal: true
+    cmds:
+      - kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null
+      - kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null
+    preconditions:
+      - which kubectl
+
+  cordon-node:
+    internal: true
+    cmds:
+      - echo "Cordoning node {{.IP}}"
+      - kubectl cordon {{.IP}}
+      - |
+        echo "Draining node {{.IP}}"
+        kubectl drain {{.IP}} \
+          --ignore-daemonsets \
+          --delete-emptydir-data \
+          --force \
+          --timeout=5m
+    requires:
+      vars: [IP]
+    preconditions:
+      - sh: which kubectl
+        msg: "kubectl not found"
+
+  uncordon-node:
+    internal: true
+    cmds:
+      - echo "Uncordoning node {{.IP}}"
+      - kubectl uncordon {{.IP}}
+    requires:
+      vars: [IP]
+    preconditions:
+      - sh: which kubectl
+        msg: "kubectl not found"
