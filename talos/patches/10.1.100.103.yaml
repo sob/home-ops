@@ -1,0 +1,4 @@
+---
+machine:
+  network:
+    hostname: metal-03
