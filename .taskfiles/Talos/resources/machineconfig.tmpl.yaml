@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/siderolabs/talos/refs/tags/${TALOS_VERSION}/pkg/machinery/config/schemas/config.schema.json
+
+# substitutions:
+- .machine.kubelet.image = sub(":v[0-9]+\.[0-9]+\.[0-9]+.*$", ":${KUBERNETES_VERSION}")
+- .machine.install.image = sub(":[^:]+$", ":${TALOS_VERSION}")
+- .cluster.apiServer.image = sub(":v[0-9]+\.[0-9]+\.[0-9]+.*$", ":${KUBERNETES_VERSION}")
+- .cluster.controllerManager.image = sub(":v[0-9]+\.[0-9]+\.[0-9]+.*$", ":${KUBERNETES_VERSION}")
+- .cluster.scheduler.image = sub(":v[0-9]+\.[0-9]+\.[0-9]+.*$", ":${KUBERNETES_VERSION}")
+- .cluster.proxy.image = sub(":v[0-9]+\.[0-9]+\.[0-9]+.*$", ":${KUBERNETES_VERSION}")
