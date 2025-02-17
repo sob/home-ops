@@ -57,6 +57,40 @@ ffmpeg:
       "yuv420p",
     ]
 
+go2rtc:
+  webrtc:
+    candidates:
+      - {FRIGATE_WEBRTC_CANDIDATE}:8555
+      - stun:8555
+  streams:
+    driveway_hd:
+      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.88.100:544/cam/realmonitor?channel=1&subtype=0#backchannel=0
+    driveway_sd:
+      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.88.100:544/cam/realmonitor?channel=1&subtype=1#backchannel=0
+    driveway_audio:
+      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.88.100:544/cam/realmonitor?channel=1&subtype=0
+
 cameras:
-  driveway_hd:
+  driveway:
     enabled: false
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-aac
+      inputs:
+        - path: rtsp://127.0.0.1:8554/driveway_hd?video=copy&audio=aac
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/driveway_sd?video=copy&audio=aac
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - audio
+    motion:
+      lightning_threshold: 1.0
+      mask:
+        - 1,0,1,0.052,0.69,0.52,0.685,0
+      live:
+        stream_name: driveway_hd
+      audio:
+        min_volume: 300
