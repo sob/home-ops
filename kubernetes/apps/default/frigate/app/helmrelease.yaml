@@ -85,7 +85,7 @@ spec:
         controller: *app
         type: LoadBalancer
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: cam.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/hostname: frigate.${SECRET_DOMAIN}
           lbipam.cilium.io/ips: ${SECRET_VIP_FRIGATE}
         ports:
           http:
