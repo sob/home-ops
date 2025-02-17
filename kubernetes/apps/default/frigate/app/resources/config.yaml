@@ -57,4 +57,4 @@ ffmpeg:
       "yuv420p",
     ]
 
-cameras: []
+cameras:
