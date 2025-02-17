@@ -58,3 +58,5 @@ ffmpeg:
     ]
 
 cameras:
+  driveway_hd:
+    enabled: false
