@@ -13,6 +13,17 @@ tasks:
       - grep -qxF 'age.key' {{.ROOT_DIR}}/.gitignore || echo 'age.key' >> {{.ROOT_DIR}}/.gitignore
       - op inject -i {{.ROOT_DIR}}/.taskfiles/kubernetes/resources/age.key.tmpl -o {{.ROOT_DIR}}/age.key
 
+  node-shell:
+    desc: open a shell to a node [NODE=required]
+    interactive: true
+    cmd: kubectl node-shell -n kube-system -x {{.NODE}}
+    requires:
+      vars: [NODE]
+    preconditions:
+      - kubectl get nodes {{.NODE}}
+      - kubectl node-shell --version
+      - which kubectl
+
   resources:
     desc: Gather common resources in your cluster, useful when asking for support
     cmds:
