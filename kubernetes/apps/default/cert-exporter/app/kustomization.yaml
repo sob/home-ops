@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - ./synology-doom
   - ./synology-mordor
-  - ../../../../flux/components/volsync
 configMapGenerator:
   - name: cert-exporter-configmap
     files:
