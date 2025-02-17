@@ -129,4 +129,3 @@ spec:
               - wsize=131072
         globalMounts:
           - path: /media
-          - path: /Downloads/sabnzbd
