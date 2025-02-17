@@ -1,0 +1,148 @@
+logger:
+  default: info
+mqtt:
+  client_id: frigate
+  host: emqx-listeners.default.svc.cluster.local
+  topic_prefix: frigate
+  user: "{FRIGATE_MQTT_USERNAME}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+database:
+  path: /data/frigate.db
+birdseye:
+  enabled: true
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+semantic_search:
+  enabled: True
+  reindex: False
+  model_size: large
+genai:
+  enabled: True
+  provider: gemini
+  api_key: "{FRIGATE_GOOGLE_GEMINI_API_KEY}"
+  model: gemini-1.5-flash
+model:
+  labelmap:
+    2: vehicle # car
+    3: vehicle # motorcycle
+    4: vehicle # airplane
+    5: vehicle # bus
+    6: vehicle # train
+    7: vehicle # car
+    8: vehicle # boat
+    15: animal # bird
+    16: animal # cat
+    17: animal # dog
+    18: animal # horse
+    19: animal # sheep
+    20: animal # cow
+    21: animal # elephant
+    22: animal # bear
+    23: animal # zebra
+    24: animal # giraffe
+ffmpeg:
+  global_args: ["-hide_banner", "-loglevel", "warning"]
+  hwaccel_args:
+    [
+      "-hwaccel",
+      "vaapi",
+      "-hwaccel_device",
+      "/dev/dri/renderD128",
+      "-hwaccel_output_format",
+      "yuv420p",
+    ]
+snapshots:
+  enabled: true
+  timestamp: true
+  bounding_box: true
+  retain:
+    default: 2
+record:
+  enabled: true
+  retain:
+    days: 14
+    mode: all
+  alerts:
+    retain:
+      days: 90
+      mode: active_objects
+  detections:
+    retain:
+      days: 90
+      mode: active_objects
+objects:
+  track:
+    - person
+    - vehicle
+    - animal
+    - bike
+  filters:
+    person:
+      min_area: 5000
+      max_area: 100000
+      threshold: 0.7
+audio:
+  enabled: true
+  listen:
+    - alarm
+    - ambulance
+    - bang
+    - break
+    - breaking
+    - emergency_vehicle
+    - fire_alarm
+    - glass
+    - knock
+    - noise
+    - police_car
+    - scream
+    - siren
+    - smash
+    - speech
+    - tap
+    - yell
+go2rtc:
+  webrtc:
+    candidates:
+      - 192.168.100.124:8555
+      - stun:8555
+  streams:
+    driveway_hd:
+      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.0.10.144:554/cam/realmonitor?channel=1&subtype=0#backchannel=0
+    doorbell_sd:
+      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.0.10.144:554/cam/realmonitor?channel=1&subtype=1#backchannel=0
+cameras:
+  driveway:
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-aac
+      inputs:
+        - path: rtsp://127.0.0.1:8554/driveway_hd?video=copy&audio=aac
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/driveway_sd?video=copy&audio=aac
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - audio
+    motion:
+      lightning_threshold: 1.0
+      mask:
+        - 1,0,1,0.052,0.69,0.052,0.685,0
+    live:
+      stream_name: driveway_hd
+    audio:
+      min_volume: 300
+
+auth:
+  enabled: False
+
+proxy:
+  header_map:
+    user: remote-user
+
+tls:
+  enabled: False
