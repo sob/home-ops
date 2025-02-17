@@ -86,11 +86,3 @@ cameras:
           roles:
             - detect
             - audio
-    motion:
-      lightning_threshold: 1.0
-      mask:
-        - 1,0,1,0.052,0.69,0.52,0.685,0
-      live:
-        stream_name: driveway_hd
-      audio:
-        min_volume: 300
