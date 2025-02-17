@@ -56,3 +56,5 @@ ffmpeg:
       "-hwaccel_output_format",
       "yuv420p",
     ]
+
+cameras: []
