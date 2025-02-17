@@ -60,7 +60,7 @@ ffmpeg:
 go2rtc:
   webrtc:
     candidates:
-      - {FRIGATE_WEBRTC_CANDIDATE}:8555
+      - 10.1.100.208:8555
       - stun:8555
   streams:
     driveway_hd:
