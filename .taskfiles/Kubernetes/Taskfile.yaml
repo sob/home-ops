@@ -7,6 +7,12 @@ vars:
 
 tasks:
 
+  restore-age-key:
+    desc: restore the age.key file from onepassword
+    cmds:
+      - grep -qxF 'age.key' {{.ROOT_DIR}}/.gitignore || echo 'age.key' >> {{.ROOT_DIR}}/.gitignore
+      - op inject -i {{.ROOT_DIR}}/.taskfiles/kubernetes/resources/age.key.tmpl -o {{.ROOT_DIR}}/age.key
+
   resources:
     desc: Gather common resources in your cluster, useful when asking for support
     cmds:
