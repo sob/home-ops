@@ -18,7 +18,7 @@ env:
 
 includes:
   authentik: .taskfiles/authentik
-  kubernetes: .taskfiles/kubernetes
+  kube: .taskfiles/kube
   flux: .taskfiles/flux
   media: .taskfiles/media
   pds: .taskfiles/pds
