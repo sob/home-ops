@@ -81,8 +81,9 @@ spec:
       resources:
         requests:
           cpu: 100m
-        limits:
           memory: 500Mi
+        limits:
+          memory: 1Gi
   valuesFrom:
     - targetPath: controller.maxmindLicenseKey
       kind: Secret
