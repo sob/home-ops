@@ -39,7 +39,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://cloudnative-pg/
       endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
-      serverName: postgres16
+      serverName: &currentCluster postgres16
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
@@ -51,11 +51,11 @@ spec:
     recovery:
       database: app
       owner: app
-      source: postgres16-v1
+      source: *currentCluster
   externalClusters:
-    - name: postgres16-v1
+    - name: *currentCluster
       barmanObjectStore:
-        serverName: postgres16-v1
+        serverName: *currentCluster
         wal:
           compression: bzip2
           maxParallel: 8
