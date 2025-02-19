@@ -39,9 +39,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://cloudnative-pg/
       endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
-      # Note: serverName version needs to be inclemented
-      # when recovering from an existing cnpg cluster
-      serverName: &currentCluster postgres16-v1
+      serverName: postgres16
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
@@ -51,11 +49,13 @@ spec:
           key: aws-secret-access-key
   bootstrap:
     recovery:
-      source: &previousCluster postgres16-v1
+      database: app
+      owner: app
+      source: postgres16-v1
   externalClusters:
-    - name: *previousCluster
+    - name: postgres16-v1
       barmanObjectStore:
-        serverName: *previousCluster
+        serverName: postgres16-v1
         wal:
           compression: bzip2
           maxParallel: 8
