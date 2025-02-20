@@ -19,6 +19,9 @@ spec:
       max_connections: "400"
       max_slot_wal_keep_size: 10GB
       shared_buffers: 512MB
+      wal_level: logical
+      archive_mode: on
+      archive_timeout: 300s
   nodeMaintenanceWindow:
     inProgress: false
     reusePVC: true
