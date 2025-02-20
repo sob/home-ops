@@ -15,3 +15,5 @@ spec:
             envFrom:
               - secretRef:
                   name: ${APP}-db-secret
+              - secretRef:
+                  name: ${APP}-secret
