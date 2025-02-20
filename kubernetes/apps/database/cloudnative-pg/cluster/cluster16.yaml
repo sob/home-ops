@@ -51,6 +51,18 @@ spec:
           name: cloudnative-pg-secret
           key: aws-secret-access-key
   bootstrap:
-    initdb:
-      database: app
-      owner: app
+    recovery:
+      source: postgres16
+  externalClusters:
+    - name: postgres16
+      barmanObjectStore:
+        destinationPath: s3://cloudnative-pg/
+        endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
+        serverName: postgres16
+        s3Credentials:
+          accessKeyId:
+            name: cloudnative-pg-secret
+            key: aws-access-key-id
+          secretAccessKey:
+            name: cloudnative-pg-secret
+            key: aws-secret-access-key
