@@ -49,13 +49,15 @@ spec:
             severity: warning
         - alert: LastFailedArchiveTime
           annotations:
-            description: Archiving failed for {{ $labels.pod }}
-            summary: Checks the last time archiving failed. Will be < 0 when it has not failed.
-          expr: |-
-            (cnpg_pg_stat_archiver_last_failed_time - cnpg_pg_stat_archiver_last_archived_time) > 1
+            description: "WAL archiving failed for {{ $labels.pod }}, which may impact backup integrity"
+            summary: "WAL archiving failure detected"
+          expr: |
+            (time() - cnpg_pg_stat_archiver_last_failed_time) < 3600
+            and
+            (cnpg_pg_stat_archiver_last_failed_time > cnpg_pg_stat_archiver_last_archived_time)
           for: 1m
           labels:
-            severity: warning
+            severity: critical
         - alert: DatabaseDeadlockConflicts
           annotations:
             description: There are over 10 deadlock conflicts in {{ $labels.pod }}
@@ -63,5 +65,21 @@ spec:
           expr: |-
             cnpg_pg_stat_database_deadlocks > 10
           for: 1m
+          labels:
+            severity: warning
+        - alert: PostgresBackupFailed
+          annotations:
+            description: "The most recent backup attempt for PostgreSQL cluster {{ $labels.cluster }} has failed"
+            summary: "PostgreSQL backup failed"
+          expr: cnpg_backup_failed_total > 0
+          for: 5m
+          labels:
+            severity: critical
+        - alert: NoRecentBackup
+          annotations:
+            description: "No successful backup has been completed in the past 25 hours for cluster {{ $labels.cluster }}"
+            summary: "Missing recent PostgreSQL backup"
+          expr: time() - cnpg_backup_last_success_time > 25 * 3600
+          for: 5m
           labels:
             severity: warning
