@@ -31,7 +31,7 @@ spec:
     enablePodMonitor: true
   backup:
     retentionPolicy: 30d
-    barmanObjectStore: &barmanObjectStore
+    barmanObjectStore:
       data:
         compression: bzip2
       wal:
@@ -39,7 +39,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://cloudnative-pg/
       endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
-      serverName: &currentCluster postgres16
+      serverName: postgres16
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
@@ -51,11 +51,13 @@ spec:
     recovery:
       database: app
       owner: app
-      source: *currentCluster
+      source: postgres16
+      recoveryTarget:
+        backupID: "20250219T190750"  # The specific backup we want to restore from
   externalClusters:
-    - name: *currentCluster
+    - name: postgres16
       barmanObjectStore:
-        serverName: *currentCluster
+        serverName: postgres16
         wal:
           compression: bzip2
           maxParallel: 8
