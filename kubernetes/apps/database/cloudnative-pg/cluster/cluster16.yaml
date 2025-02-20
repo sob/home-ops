@@ -51,8 +51,9 @@ spec:
           name: cloudnative-pg-secret
           key: aws-secret-access-key
   bootstrap:
-    recovery:
-      source: postgres16
+    initdb:
+      database: app
+      owner: app
   externalClusters:
     - name: postgres16
       barmanObjectStore:
