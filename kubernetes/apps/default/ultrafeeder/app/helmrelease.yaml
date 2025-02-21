@@ -1,0 +1,136 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ultrafeeder
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: intel-device-plugin-gpu
+      namespace: kube-system
+    # - name: rook-ceph-cluster
+    #   namespace: rook-ceph
+  values:
+    controllers:
+      ultrafeeder:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder
+              tag: latest-build-635
+            env:
+              TZ: America/Chicago
+              READSB_RTLSDR_DEVICE: 1090
+              READSB_DEVICE_TYPE: rtlsdr
+              UPDATE_TAR1090: true
+              TAR1090_MESSAGERATEINTITLE: true
+              TAR1090_PAGETITLE: Ultrafeeder
+              TAR1090_PLANECOUNTINTITLE: true
+              TAR1090_ENABLE_AC_DB: true
+              TAR1090_FLIGHTAWARELINKS: true
+              TAR1090_SITESHOW: true
+              TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE: true
+              READSB_ENABLE_BIASTEE: true
+              TAR1090_RANGE_OUTLINE_WIDTH: 2.0
+              TAR1090_RANGERINGSDISTANCES: 50,100,150,200
+              TAR1090_USEROUTEAPI: ON
+              LOGLEVEL: verbose
+              GPSD_DEBUG: true
+            envFrom:
+              - secretRef:
+                  name: ultrafeeder-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 80
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              privileged: true
+            resources:
+              requests:
+                cpu: 50m
+              limits:
+                memory: 1G
+    defaultPodOptions:
+      nodeSelector:
+        rtlsdr.feature.node.kubernetes.io/rtlsdrblog-v4: "true"
+    service:
+      app:
+        controller: main
+        ports:
+          http:
+            port: *port
+          beast-output:
+            port: 30005
+    ingress:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+        className: internal
+        hosts:
+          - host: "ultrafeeder.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      config:
+        existingClaim: ultrafeeder-history
+        globalMounts:
+          - path: /var/globe_history
+      data:
+        existingClaim: ultrafeeder-graphs
+        globalMounts:
+          - path: /var/lib/collectd
+      run-cache:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 256Mi
+        globalMounts:
+          - path: /run
+      tmp-cache:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 128Mi
+        globalMounts:
+          - path: /tmp
+      usb:
+        globalMounts:
+        - path: /dev/bus/usb
+        hostPath: /dev/bus/usb
+        hostPathType: Directory
+        type: hostPath
+      log-cache:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 32Mi
+        globalMounts:
+          - path: /var/log
