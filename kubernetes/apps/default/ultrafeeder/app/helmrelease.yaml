@@ -29,7 +29,7 @@ spec:
     #   namespace: rook-ceph
   values:
     controllers:
-      ultrafeeder:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
