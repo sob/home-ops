@@ -7,6 +7,7 @@ CLUSTER="${2}"
 BACKUP_NAME="${3}"
 TARGET_TIME="${4}"
 CLUSTER_FILE="${5}"
+SERVICE_FILE="${CLUSTER_FILE%/*}/service.yaml"  # Derive service file location from cluster file
 
 # Verify arguments
 if [ -z "$NAMESPACE" ] || [ -z "$CLUSTER" ] || [ -z "$BACKUP_NAME" ] || [ -z "$TARGET_TIME" ] || [ -z "$CLUSTER_FILE" ]; then
@@ -19,6 +20,14 @@ fi
 if ! kubectl get backup "$BACKUP_NAME" -n "$NAMESPACE" -o jsonpath='{.status.phase}' | grep -q "Completed"; then
     echo "Backup $BACKUP_NAME not found or not completed in namespace $NAMESPACE"
     exit 1
+fi
+
+# Verify service file exists
+if [ ! -f "$SERVICE_FILE" ]; then
+    echo "Warning: Service file not found at $SERVICE_FILE"
+    echo "Only the cluster manifest will be updated"
+else
+    echo "Found service file at $SERVICE_FILE"
 fi
 
 # Get current restore number and increment
@@ -43,4 +52,12 @@ yq eval -i \
 
 echo "Updated cluster manifest with new name $NEW_CLUSTER_NAME for PITR using backup $BACKUP_NAME to target time $TARGET_TIME"
 echo "Note: For PITR to work properly, the externalClusters server name is set to $ORIGINAL_SERVER_NAME to access the WAL files"
+
+# Update service file if it exists
+if [ -f "$SERVICE_FILE" ]; then
+    # Update the service selector to point to the new cluster
+    yq eval -i ".spec.selector.\"cnpg.io/cluster\" = \"${NEW_CLUSTER_NAME}\"" "$SERVICE_FILE"
+    echo "Updated service selector to point to $NEW_CLUSTER_NAME"
+fi
+
 echo "Review changes and commit when ready"

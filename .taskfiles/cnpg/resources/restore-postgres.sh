@@ -6,6 +6,7 @@ NAMESPACE="${1}"
 CLUSTER="${2}"
 BACKUP_NAME="${3}"
 CLUSTER_FILE="${4}"
+SERVICE_FILE="${CLUSTER_FILE%/*}/service.yaml"  # Derive service file location from cluster file
 
 # Verify arguments
 if [ -z "$NAMESPACE" ] || [ -z "$CLUSTER" ] || [ -z "$BACKUP_NAME" ] || [ -z "$CLUSTER_FILE" ]; then
@@ -14,9 +15,17 @@ if [ -z "$NAMESPACE" ] || [ -z "$CLUSTER" ] || [ -z "$BACKUP_NAME" ] || [ -z "$C
 fi
 
 # Verify backup exists and is completed
-if ! kubectl get backup "$BACKUP_NAME" -n "$NAMESPACE" -o jsonpath='{.status.phase}' | grep -q "completed"; then
+if ! kubectl get backup "$BACKUP_NAME" -n "$NAMESPACE" -o jsonpath='{.status.phase}' | grep -q "Completed"; then
     echo "Backup $BACKUP_NAME not found or not completed in namespace $NAMESPACE"
     exit 1
+fi
+
+# Verify service file exists
+if [ ! -f "$SERVICE_FILE" ]; then
+    echo "Warning: Service file not found at $SERVICE_FILE"
+    echo "Only the cluster manifest will be updated"
+else
+    echo "Found service file at $SERVICE_FILE"
 fi
 
 # Get current restore number and increment
@@ -34,5 +43,12 @@ yq eval -i \
     "$CLUSTER_FILE"
 
 echo "Updated cluster manifest with new name $NEW_CLUSTER_NAME using backup $BACKUP_NAME"
+
+# Update service file if it exists
+if [ -f "$SERVICE_FILE" ]; then
+    # Update the service selector to point to the new cluster
+    yq eval -i ".spec.selector.\"cnpg.io/cluster\" = \"${NEW_CLUSTER_NAME}\"" "$SERVICE_FILE"
+    echo "Updated service selector to point to $NEW_CLUSTER_NAME"
+fi
+
 echo "Review changes and commit when ready"
-git diff ${CLUSTER_FILE}
