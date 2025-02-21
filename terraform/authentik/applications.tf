@@ -112,11 +112,6 @@ resource "authentik_provider_proxy" "main" {
   skip_path_regex               = lookup(local.proxy_applications[each.key], "skip_path_regex", null)
 }
 
-data "authentik_group" "proxy_lookup" {
-  for_each = local.proxy_applications
-  name     = each.value.group.name
-}
-
 resource "authentik_application" "proxy_application" {
   for_each           = local.proxy_applications
   name               = title(each.key)
@@ -133,7 +128,7 @@ resource "authentik_policy_binding" "proxy_application_policy_binding" {
   for_each = local.proxy_applications
 
   target = authentik_application.proxy_application[each.key].uuid
-  group  = data.authentik_group.proxy_lookup[each.key].id
+  group  = each.value.group.id
   order  = 0
 }
 
@@ -160,11 +155,6 @@ resource "authentik_provider_oauth2" "oauth2" {
   ]
 }
 
-data "authentik_group" "applications" {
-  for_each     = local.applications
-  name         = each.value.group.name
-}
-
 resource "authentik_application" "application" {
   for_each           = local.applications
   name               = title(each.key)
@@ -181,6 +171,6 @@ resource "authentik_policy_binding" "application_policy_binding" {
   for_each = local.applications
 
   target = authentik_application.application[each.key].uuid
-  group  = data.authentik_group.applications[each.key].id
+  group  = each.value.group.id
   order  = 0
 }
