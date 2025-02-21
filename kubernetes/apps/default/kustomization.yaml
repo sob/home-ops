@@ -17,6 +17,7 @@ resources:
   - ./go2rtc/ks.yaml
   - ./lidarr/ks.yaml
   - ./lubelog/ks.yaml
+  - ./n8n/ks.yaml
   - ./node-red/ks.yaml
   - ./overseerr/ks.yaml
   - ./plex/ks.yaml
