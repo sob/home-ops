@@ -103,7 +103,7 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: ultrafeeder-history
+        existingClaim: ultrafeeder
         globalMounts:
           - path: /var/globe_history
       data:
