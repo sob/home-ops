@@ -18,10 +18,12 @@ env:
 
 includes:
   authentik: .taskfiles/authentik
+  bucket: .taskfiles/bucket
   kube: .taskfiles/kube
   flux: .taskfiles/flux
   media: .taskfiles/media
   pds: .taskfiles/pds
+  cnpg: .taskfiles/pg
   rook: .taskfiles/rook
   secrets: .taskfiles/externalsecrets
   sops: .taskfiles/sops
