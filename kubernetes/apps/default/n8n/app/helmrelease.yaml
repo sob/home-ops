@@ -54,6 +54,7 @@ spec:
               N8N_HOST: &hostName "{{ .Release.Name }}.${SECRET_DOMAIN}"
               N8N_LOG_LEVEL: info
               N8N_LOG_OUTPUT: console
+              N8N_RUNNERS_ENABLED: true
             resources:
               requests:
                 memory: 350Mi
