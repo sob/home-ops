@@ -9,7 +9,8 @@ else
     CONTAINER_CMD="docker"
 fi
 
-FOLDER=$1
+BUCKET=$1
+FOLDER=$2
 
 if [ -z "$FOLDER" ]; then
     echo "Error: Folder name is required"
@@ -26,6 +27,6 @@ $CONTAINER_CMD run --rm \
     -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" \
     -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
     amazon/aws-cli --endpoint-url "https://${CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com" \
-    s3 rm "s3://stone-volsync/${FOLDER}" --recursive
+    s3 rm "s3://${BUCKET}/${FOLDER}" --recursive
 
 echo "Deletion complete"

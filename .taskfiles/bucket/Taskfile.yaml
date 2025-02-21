@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  BUCKET_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bucket/resources'
+
+tasks:
+  delete-folder:
+    desc: Delete a folder in a cloudflare-r2 bucket [BUCKET=required] [FOLDER=required]
+    summary: |
+      BUCKET: bucket where folder resides (required)
+      FOLDER: Folder to delete (required)
+    cmds:
+      - bash {{.BUCKET_RESOURCES_DIR}}/delete-folder.sh {{.BUCKET}} {{.FOLDER}}
+    requires:
+      vars: ['BUCKET', 'FOLDER']
+    preconditions:
+      - test -f {{.BUCKET_RESOURCES_DIR}}/delete-folder.sh
+      - command -v op
+      - sh -c '[ -x "$(command -v docker)" ] || [ -x "$(command -v podman)" ]'
+
+  rename-folder:
+    desc: Rename a folder in a cloudflare-r2 bucket [BUCKET=required] [OLD_NAME=required] [NEW_NAME=required]
+    summary: |
+      BUCKET: Bucket where folders reside (required)
+      OLD_NAME: Current folder name (required)
+      NEW_NAME: New folder name (required)
+    cmds:
+      - bash {{.BUCKET_RESOURCES_DIR}}/rename-folder.sh {{.BUCKET}} {{.OLD_NAME}} {{.NEW_NAME}}
+    requires:
+      vars: ['BUCKET', 'OLD_NAME', 'NEW_NAME']
+    preconditions:
+      - test -f {{.BUCKET_RESOURCES_DIR}}/rename-folder.sh
