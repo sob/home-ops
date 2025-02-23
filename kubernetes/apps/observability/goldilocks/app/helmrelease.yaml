@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app goldilocks
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: *app
+      version: 9.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: fairwinds
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    vpa:
+      enabled: true
+      updater:
+        enabled: false
+    metrics-server:
+      enabled: false
+    controller:
+      enabled: true
+    dashboard:
+      ingress:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        ingressClassName: internal
+        hosts:
+          - host: &host goldilocks.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                type: ImplementationSpecific
