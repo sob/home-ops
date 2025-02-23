@@ -42,9 +42,11 @@ spec:
             restartPolicy: Always
             resources: &resources
               requests:
-                cpu: 10m
+                cpu: 15m
+                memory: 105M
               limits:
-                memory: 256Mi
+                cpu: 15m
+                memory: 105M
         containers:
           app:
             image:
