@@ -30,7 +30,7 @@ spec:
   values:
     defaultPodOptions:
       nodeSelector:
-#        google.feature.node.kubernetes.io/coral: "true"
+        google.feature.node.kubernetes.io/coral: "true"
         intel.feature.node.kubernetes.io/gpu: "true"
         intel.feature.node.kubernetes.io/gpu-ihd: "true"
     controllers:
