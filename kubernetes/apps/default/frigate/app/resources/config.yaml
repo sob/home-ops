@@ -8,11 +8,52 @@ mqtt:
 database:
   path: /data/frigate.db
 
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+
+record:
+  enabled: true
+  retain:
+    days: 30
+    mode: motion
+  alerts:
+    retain:
+      days: 30
+  detections:
+    retain:
+      days: 30
+
+snapshots:
+  enabled: true
+  retain:
+    default: 30
+
 tls:
   enabled: False
 
 auth:
   enabled: False
+
+objects:
+  track:
+    - person
+    - car
+    - truck
+    - motorcycle
+    - bicycle
+    - dog
+    - cat
+  filters:
+    person:
+      min_area: 5000
+      max_area: 100000
+      threshold: 0.7
+    car:
+      min_area: 5000
+      max_area: 100000
+      threshold: 0.7
 
 audio:
   enabled: true
@@ -71,6 +112,10 @@ go2rtc:
 cameras:
   driveway:
     enabled: true
+    detect:
+      width: 640
+      height: 360
+      fps: 5
     ffmpeg:
       output_args:
         record: preset-record-generic-audio-aac
