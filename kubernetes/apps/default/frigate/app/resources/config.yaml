@@ -64,25 +64,34 @@ go2rtc:
       - stun:8555
   streams:
     driveway_hd:
-      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.88.100:544/cam/realmonitor?channel=1&subtype=0#backchannel=0
+      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.99.157:544/h264Preview_01_main
     driveway_sd:
-      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.88.100:544/cam/realmonitor?channel=1&subtype=1#backchannel=0
-    driveway_audio:
-      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.88.100:544/cam/realmonitor?channel=1&subtype=0
+      - rtsp://{FRIGATE_DRIVEWAY_CAMERA_USERNAME}:{FRIGATE_DRIVEWAY_CAMERA_PASSWORD}@10.1.99.157:544/h264Preview_01_sub
 
 cameras:
   driveway:
-    enabled: false
+    enabled: true
     ffmpeg:
       output_args:
         record: preset-record-generic-audio-aac
       inputs:
-        - path: rtsp://127.0.0.1:8554/driveway_hd?video=copy&audio=aac
+        - path: rtsp://127.0.0.1:8554/driveway_hd
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/driveway_sd?video=copy&audio=aac
+        - path: rtsp://127.0.0.1:8554/driveway_sd
           input_args: preset-rtsp-restream
           roles:
             - detect
             - audio
+    detect:
+      width: 1280
+      height: 720
+    record:
+      enabled: true
+      retain:
+        days: 7
+      events:
+        retain:
+          default: 7
+      ffmpeg_args: -c:v copy -c:a aac
