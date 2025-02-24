@@ -25,8 +25,8 @@ spec:
           matchExpressions:
             vendor: { op: In, value: ["8086"] }
             class: { op: In, value: ["0300", "0380"] }
-            # Device IDs for Gen11+ GPUs (Ice Lake, Tiger Lake, Alder Lake, Raptor Lake, etc.)
-            device: { op: In, value: ["8a56", "8a58", "8a5b", "8a5d", "8a71", "8a54", "8a5a", "8a5c", "8a7a", "9a49", "9a40", "9a78", "9a60", "9a68", "9a70", "a780", "a781", "a782", "a783", "a788", "a789", "a78a", "a78b"] }
+            # Added a7a0 for your Raptor Lake-P Iris Xe Graphics
+            device: { op: In, value: ["8a56", "8a58", "8a5b", "8a5d", "8a71", "8a54", "8a5a", "8a5c", "8a7a", "9a49", "9a40", "9a78", "9a60", "9a68", "9a70", "a780", "a781", "a782", "a783", "a788", "a789", "a78a", "a78b", "a7a0"] }
 
     - # Older Intel GPUs (up to Gen10, using i965 driver)
       name: intel.gpu.i965
@@ -37,5 +37,5 @@ spec:
           matchExpressions:
             vendor: { op: In, value: ["8086"] }
             class: { op: In, value: ["0300", "0380"] }
-            # We'll negate the match for newer GPUs to identify older ones
-            device: { op: NotIn, value: ["8a56", "8a58", "8a5b", "8a5d", "8a71", "8a54", "8a5a", "8a5c", "8a7a", "9a49", "9a40", "9a78", "9a60", "9a68", "9a70", "a780", "a781", "a782", "a783", "a788", "a789", "a78a", "a78b"] }
+            # Updated to exclude a7a0 as well
+            device: { op: NotIn, value: ["8a56", "8a58", "8a5b", "8a5d", "8a71", "8a54", "8a5a", "8a5c", "8a7a", "9a49", "9a40", "9a78", "9a60", "9a68", "9a70", "a780", "a781", "a782", "a783", "a788", "a789", "a78a", "a78b", "a7a0"] }
