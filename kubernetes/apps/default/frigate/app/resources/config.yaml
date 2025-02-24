@@ -84,14 +84,3 @@ cameras:
           roles:
             - detect
             - audio
-    detect:
-      width: 1280
-      height: 720
-    record:
-      enabled: true
-      retain:
-        days: 7
-      events:
-        retain:
-          default: 7
-      ffmpeg_args: -c:v copy -c:a aac
