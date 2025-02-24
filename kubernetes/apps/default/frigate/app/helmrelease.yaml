@@ -32,6 +32,7 @@ spec:
       nodeSelector:
 #        google.feature.node.kubernetes.io/coral: "true"
         intel.feature.node.kubernetes.io/gpu: "true"
+        intel.feature.node.kubernetes.io/gpu-ihd: "true"
     controllers:
       frigate:
         annotations:
@@ -43,7 +44,7 @@ spec:
               tag: "0.15.0"
             env:
               TZ: America/Chicago
-              LIBVA_DRIVER_NAME: i965
+              LIBVA_DRIVER_NAME: iHD
             envFrom:
               - secretRef:
                   name: frigate-secret
@@ -154,6 +155,12 @@ spec:
         sizeLimit: 4Gi
         globalMounts:
           - path: /dev/shm
+      dri:
+        type: hostPath
+        hostPath: /dev/dri
+        hostPathType: Directory
+        globalMounts:
+          - path: /dev/dri
       usb:
         type: hostPath
         hostPath: /dev/bus/usb
