@@ -112,10 +112,6 @@ go2rtc:
 cameras:
   driveway:
     enabled: true
-    detect:
-      width: 640
-      height: 360
-      fps: 5
     ffmpeg:
       output_args:
         record: preset-record-generic-audio-aac
