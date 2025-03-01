@@ -88,13 +88,7 @@ genai:
   model: gemini-1.5-flash
 
 ffmpeg:
-  hwaccel_args:
-    [
-      "-hwaccel",
-      "preset-intel-qsv-h265",
-      "-hwaccel_device",
-      "/dev/dri/renderD128"
-    ]
+  hwaccel_args: "preset-intel-qsv-h265"
 
 go2rtc:
   webrtc:
