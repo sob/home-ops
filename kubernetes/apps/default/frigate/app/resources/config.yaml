@@ -91,11 +91,9 @@ ffmpeg:
   hwaccel_args:
     [
       "-hwaccel",
-      "vaapi",
+      "preset-intel-qsv-h265",
       "-hwaccel_device",
-      "/dev/dri/renderD128",
-      "-hwaccel_output_format",
-      "yuv420p",
+      "/dev/dri/renderD128"
     ]
 
 go2rtc:
