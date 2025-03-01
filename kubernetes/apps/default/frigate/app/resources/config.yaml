@@ -113,3 +113,9 @@ cameras:
           roles:
             - detect
             - audio
+    zones:
+      basketball_hoop:
+        coordinates: 0.742,0.203,0.728,0.564,0.815,0.695,0.884,0.313
+        filters:
+          bicycle:
+            mask: 0.742,0.203,0.728,0.564,0.815,0.695,0.884,0.313
