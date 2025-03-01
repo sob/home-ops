@@ -38,6 +38,10 @@ tls:
 auth:
   enabled: False
 
+proxy:
+  header_map:
+    user: x-authentik-username
+
 objects:
   track:
     - person
