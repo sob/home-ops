@@ -107,6 +107,10 @@ spec:
         className: external
         annotations:
           authentik.home.arpa/external: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: "1000M"
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+          nginx.ingress.kubernetes.io/large-client-header-buffers: "4 100k"
+          nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
