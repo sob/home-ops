@@ -104,12 +104,13 @@ spec:
     ingress:
       app:
         enabled: true
-        className: internal
+        className: external
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Home
           gethomepage.dev/name: Frigate
           gethomepage.dev/icon: frigate.png
+          authentik.home.arpa/external: "true"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
