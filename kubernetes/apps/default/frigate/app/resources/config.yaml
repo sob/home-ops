@@ -21,10 +21,6 @@ record:
   alerts:
     retain:
       days: 30
-  events:
-    retain:
-      default: 1
-      mode: active_objects
   detections:
     retain:
       days: 30
