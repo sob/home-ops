@@ -13,6 +13,7 @@ locals {
     authentik_provider_proxy.main["homepage"].id,
     authentik_provider_proxy.main["homeassistant"].id,
     authentik_provider_proxy.main["wizarr"].id,
+    authentik_provider_proxy.main["frigate"].id,
   ]
 }
 
