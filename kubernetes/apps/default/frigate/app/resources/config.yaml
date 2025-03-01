@@ -17,16 +17,22 @@ record:
   enabled: true
   retain:
     days: 30
-    mode: motion
+    mode: all
   alerts:
     retain:
       days: 30
+  events:
+    retain:
+      default: 1
+      mode: active_objects
   detections:
     retain:
       days: 30
 
 snapshots:
   enabled: true
+  timestamp: false
+  bounding_box: true
   retain:
     default: 30
 
@@ -45,15 +51,6 @@ objects:
     - bicycle
     - dog
     - cat
-  filters:
-    person:
-      min_area: 5000
-      max_area: 100000
-      threshold: 0.7
-    car:
-      min_area: 5000
-      max_area: 100000
-      threshold: 0.7
 
 audio:
   enabled: true
@@ -88,7 +85,10 @@ genai:
   model: gemini-1.5-flash
 
 ffmpeg:
+  global_args: ["-hide_banner", "-loglevel", "warning"]
   hwaccel_args: "preset-intel-qsv-h264"
+  output_args:
+    record: preset-record-generic-audio-aac
 
 go2rtc:
   webrtc:
