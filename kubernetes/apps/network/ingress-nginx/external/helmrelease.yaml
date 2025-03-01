@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: ingress-nginx-external
+  name: &app ingress-nginx-external
 spec:
   interval: 30m
   chart:
@@ -20,15 +20,12 @@ spec:
     cleanupOnFail: true
     remediation:
       retries: 3
-  dependsOn:
-    - name: cloudflared
-      namespace: network
   values:
-    fullnameOverride: ingress-nginx-external
+    fullnameOverride: *app
     controller:
       service:
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: "external.${SECRET_DOMAIN}"
+          external-dns.alpha.kubernetes.io/hostname: &hostname "external.${SECRET_DOMAIN}"
           io.cilium/lb-ipam-ips: "${SECRET_NGINX_EXTERNAL_VIP}"
         externalTrafficPolicy: Cluster
       ingressClass: external
