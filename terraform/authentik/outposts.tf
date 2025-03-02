@@ -6,6 +6,7 @@ locals {
     authentik_provider_proxy.main["radarr"].id,
     authentik_provider_proxy.main["readarr"].id,
     authentik_provider_proxy.main["sonarr"].id,
+    authentik_provider_proxy.main["n8n"].id,
   ]
 
   external_proxy_provider_ids = [

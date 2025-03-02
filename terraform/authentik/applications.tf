@@ -68,6 +68,11 @@ locals {
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
+    n8n = {
+      external_host   = "https://n8n.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/n8n.png"
+      group           = resource.authentik_group.home
+    },
     prowlarr = {
       external_host   = "https://prowlarr.${local.cluster_domain}"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
