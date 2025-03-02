@@ -5,7 +5,7 @@ kind: Kustomization
 configMapGenerator:
   - files:
       - hooks.js=./resources/hooks.js
-    name:
+    name: n8n-hooks-js
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled
