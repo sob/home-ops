@@ -5,7 +5,11 @@ kind: Kustomization
 configMapGenerator:
   - files:
       - hooks.js=./resources/hooks.js
-    name: n8n-hooks-js
+    name:
+generatorOptions:
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  disableNameSuffixHash: true
 resources:
   - helmrelease.yaml
   - externalsecret.yaml
