@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://demo.frigate.video/api/config/schema.json
 mqtt:
   client_id: frigate
   host: emqx-listeners.default.svc.cluster.local
@@ -117,6 +118,10 @@ cameras:
           roles:
             - detect
             - audio
+    motion:
+      mask:
+        - 0.221,0.006,0.226,0.233,0.308,0.292,0.334,0.283,0.403,0.194,0.381,0
+        - 0.642,0.006,0.649,0.197,0.797,0.313,0.82,0.151,0.796,0.002
     zones:
       basketball_hoop:
         coordinates: 0.742,0.203,0.728,0.564,0.815,0.695,0.884,0.313
