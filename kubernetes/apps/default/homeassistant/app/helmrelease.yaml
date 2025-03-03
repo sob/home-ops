@@ -86,16 +86,7 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Automation
-          gethomepage.dev/name: Home Assistant
-          gethomepage.dev/icon: home-assistant.png
-          gethomepage.dev/description: Automation
-          gethomepage.dev/app: homeassistant
-          gethomepage.dev/href: https://hass.${SECRET_DOMAIN}
-          gethomepage.dev/widget.type: homeassistant
-          gethomepage.dev/widget.url: http://homeassistant.home.svc.cluster.local:8123
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}` }}"
+          authentik.home.arpa/external: "true"
         className: external
         hosts:
           - host: hass.${SECRET_DOMAIN}
