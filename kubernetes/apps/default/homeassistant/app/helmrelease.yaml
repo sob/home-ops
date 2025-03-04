@@ -86,7 +86,6 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-          authentik.home.arpa/external: "true"
         className: external
         hosts:
           - host: hass.${SECRET_DOMAIN}
