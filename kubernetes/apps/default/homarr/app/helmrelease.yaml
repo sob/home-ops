@@ -38,7 +38,7 @@ spec:
           app:
             image:
               repository: ghcr.io/homarr-labs/homarr
-              tag: v1.10.0
+              tag: v1.11.0
             env:
               TZ: ${TIMEZONE}
               LOG_LEVEL: debug
