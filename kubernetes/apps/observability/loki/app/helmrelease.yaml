@@ -59,6 +59,13 @@ spec:
         enabled: true
         storageClass: openebs-hostpath
         size: 50Gi
+      resources:
+        requests:
+          cpu: 23m
+          memory: 298M
+        limits:
+          cpu: 23m
+          memory: 298M
     gateway:
       replicas: 0
     backend:

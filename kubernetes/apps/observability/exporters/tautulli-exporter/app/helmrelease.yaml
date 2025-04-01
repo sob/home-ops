@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -44,9 +45,11 @@ spec:
                 enabled: true
             resources:
               requests:
-                cpu: 10m
+                cpu: 15m
+                memory: 105M
               limits:
-                memory: 128Mi
+                cpu: 15m
+                memory: 105M
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

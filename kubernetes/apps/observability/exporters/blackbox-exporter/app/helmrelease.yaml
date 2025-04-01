@@ -63,6 +63,13 @@ spec:
       defaults:
         interval: 1m
         scrapeTimeout: 10s
+    resources:
+      requests:
+        cpu: 15m
+        memory: 105M
+      limits:
+        cpu: 15m
+        memory: 105M
     prometheusRule:
       enabled: true
       rules:
