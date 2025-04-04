@@ -28,6 +28,10 @@ spec:
         - /dev/nvme0n1
         - /dev/nvme1n1
         - /dev/nvme2n1
+    resources:
+      requests:
+        cpu: 12m
+        memory: 32MiB
     serviceMonitor:
       enabled: true
       relabelings:

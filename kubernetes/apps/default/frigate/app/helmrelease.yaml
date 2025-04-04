@@ -49,11 +49,11 @@ spec:
               privileged: true
             resources:
               requests:
-                cpu: 600m
-                memory: 1000Mi
+                cpu: 892m
+                memory: 11.87GiB
                 gpu.intel.com/i915: "1"
               limits:
-                memory: 10Gi
+                memory: 23.74GiB
                 gpu.intel.com/i915: "1"
             probes:
               liveness: &probe

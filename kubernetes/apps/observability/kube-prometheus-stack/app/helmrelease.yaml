@@ -95,9 +95,10 @@ spec:
         retentionSize: 70GB
         resources:
           requests:
-            cpu: 100m
+            cpu: 228m
+            memory: 2.13GiB
           limits:
-            memory: 2000Mi
+            memory: 4.26GiB
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -109,6 +110,10 @@ spec:
       enabled: true
     prometheus-node-exporter:
       fullnameOverride: node-exporter
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32MiB
       prometheus:
         monitor:
           enabled: true
