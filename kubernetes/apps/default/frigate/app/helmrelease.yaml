@@ -50,10 +50,10 @@ spec:
             resources:
               requests:
                 cpu: 892m
-                memory: 11.87GiB
+                memory: 11.87Gi
                 gpu.intel.com/i915: "1"
               limits:
-                memory: 23.74GiB
+                memory: 23.74Gi
                 gpu.intel.com/i915: "1"
             probes:
               liveness: &probe
