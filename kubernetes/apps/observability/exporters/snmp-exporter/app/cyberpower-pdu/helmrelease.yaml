@@ -42,4 +42,4 @@ spec:
     resources:
       requests:
         cpu: 10m
-        memoty: 32Mi
+        memory: 32Mi
