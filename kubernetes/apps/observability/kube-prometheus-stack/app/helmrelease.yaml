@@ -113,7 +113,7 @@ spec:
       resources:
         requests:
           cpu: 10m
-          memory: 32MiB
+          memory: 32Mi
       prometheus:
         monitor:
           enabled: true
