@@ -30,7 +30,7 @@ spec:
         - /dev/nvme2n1
     resources:
       requests:
-        cpu: 12m
+        cpu: 11m
         memory: 32Mi
     serviceMonitor:
       enabled: true

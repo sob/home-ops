@@ -61,11 +61,11 @@ spec:
         size: 50Gi
       resources:
         requests:
-          cpu: 23m
-          memory: 298M
+          cpu: 20m
+          memory: 256Mi
         limits:
-          cpu: 23m
-          memory: 298M
+          cpu: 40m
+          memory: 512Mi
     gateway:
       replicas: 0
     backend:

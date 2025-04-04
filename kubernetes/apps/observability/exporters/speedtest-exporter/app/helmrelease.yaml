@@ -39,11 +39,11 @@ spec:
                 enabled: true
             resources:
               requests:
-                cpu: 15m
-                memory: 105M
+                cpu: 10m
+                memory: 32Mi
               limits:
-                cpu: 15m
-                memory: 105M
+                cpu: 20m
+                memory: 128Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
