@@ -60,8 +60,8 @@ spec:
                   name: n8n-secret
             resources:
               requests:
-                memory: 350Mi
-                cpu: 25m
+                cpu: 10m
+                memory: 234Mi
               limits:
                 memory: 500Mi
     service:

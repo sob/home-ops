@@ -44,10 +44,10 @@ spec:
                   name: lubelog-secret
             resources:
               requests:
-                cpu: 15m
-                memory: 80M
+                cpu: 10m
+                memory: 113Mi
               limits:
-                memory: 256M
+                memory: 245Mi
     service:
       app:
         controller: main

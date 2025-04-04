@@ -39,10 +39,10 @@ spec:
               TZ: America/Chicago
             resources:
               requests:
-                cpu: 15m
-                memory: 180M
+                cpu: 10m
+                memory: 131Mi
               limits:
-                memory: 300M
+                memory: 286.1Mi
     service:
       app:
         controller: *app
