@@ -305,6 +305,10 @@ spec:
         enabled: true
         searchNamespace: ALL
         labelValue: ""
+      resources:
+        requests:
+          cpu: 10m
+          memory: 128Mi
     plugins:
       - grafana-clock-panel
       - grafana-piechart-panel
@@ -312,6 +316,10 @@ spec:
       - natel-discrete-panel
       - pr0ps-trackmap-panel
       - vonage-status-panel
+    resources:
+      requests:
+        cpu: 23m
+        memory: 132Mi
     serviceMonitor:
       enabled: true
     ingress:

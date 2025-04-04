@@ -65,10 +65,10 @@ spec:
         scrapeTimeout: 10s
     resources:
       requests:
-        cpu: 15m
-        memory: 105Mi
+        cpu: 10m
+        memory: 32Mi
       limits:
-        cpu: 15m
+        cpu: 20m
         memory: 105Mi
     prometheusRule:
       enabled: true
