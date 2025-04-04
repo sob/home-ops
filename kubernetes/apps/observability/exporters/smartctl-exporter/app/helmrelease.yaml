@@ -31,7 +31,7 @@ spec:
     resources:
       requests:
         cpu: 12m
-        memory: 32MiB
+        memory: 32Mi
     serviceMonitor:
       enabled: true
       relabelings:
