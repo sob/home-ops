@@ -36,7 +36,8 @@ spec:
               privileged: true
             resources:
               requests:
-                cpu: 10m
+                cpu: 493m
+                memory: 32Mi
               limits:
                 memory: 256Mi
     defaultPodOptions:

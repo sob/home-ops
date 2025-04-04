@@ -49,7 +49,7 @@ spec:
               privileged: true
             resources:
               requests:
-                cpu: 892m
+                cpu: 980m
                 memory: 11.87Gi
                 gpu.intel.com/i915: "1"
               limits:

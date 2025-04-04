@@ -52,10 +52,10 @@ spec:
                 enabled: true
             resources:
               requests:
-                cpu: 15m
-                memory: 200M
+                cpu: 18m
+                memory: 555Mi
               limits:
-                memory: 2G
+                memory: 1.86Gi
     service:
       app:
         controller: *app
