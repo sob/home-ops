@@ -85,19 +85,18 @@ spec:
         provider: host
         connections:
           requireMsgr2: true
-      placement:
-        mon:
-          tolerations:
-            - key: "node-role.kubernetes.io/control-plane"
-              operator: "Exists"
-              effect: "NoSchedule"
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                preference:
-                  matchExpressions:
-                    - key: node-role.kubernetes.io/control-plane
-                      operator: Exists
+    placement:
+      mon:
+        tolerations:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: "Exists"
+            effect: "NoSchedule"
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
         mgr:
           tolerations:
             - key: "node-role.kubernetes.io/control-plane"
