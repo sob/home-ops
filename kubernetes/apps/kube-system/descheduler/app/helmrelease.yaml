@@ -47,15 +47,27 @@ spec:
                 constraints:
                   - DoNotSchedule
                   - ScheduleAnyway
+            - name: PodLifeTime
+              args:
+                maxPodLifeTimeSeconds: 86400  # 24 hours
+            - name: LoadVariationRiskBalancing
+              args:
+                metricProvider:
+                  type: prometheusExporter
+                  address: http://prometheus-kube-prometheus-stack.observability.svc:9090
+                safeVarianceMargin: 1
+                safeVarianceSensitivity: 1
           plugins:
             balance:
               enabled:
                 - RemovePodsViolatingTopologySpreadConstraint
+                - LoadVariationRiskBalancing
             deschedule:
               enabled:
                 - RemovePodsViolatingInterPodAntiAffinity
                 - RemovePodsViolatingNodeAffinity
                 - RemovePodsViolatingNodeTaints
+                - PodLifeTime
     service:
       enabled: true
     serviceMonitor:
