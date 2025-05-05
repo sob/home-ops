@@ -86,6 +86,17 @@ spec:
         connections:
           requireMsgr2: true
     placement:
+      mds:
+        tolerations:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: "Exists"
+            effect: "NoSchedule"
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
       mon:
         tolerations:
           - key: "node-role.kubernetes.io/control-plane"
@@ -97,27 +108,26 @@ spec:
               - matchExpressions:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
-        mgr:
-          tolerations:
-            - key: "node-role.kubernetes.io/control-plane"
-              operator: "Exists"
-              effect: "NoSchedule"
-          nodeAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                preference:
-                  matchExpressions:
-                    - key: node-role.kubernetes.io/control-plane
-                      operator: Exists
-        osd:
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-                - matchExpressions:
-                    - key: storage.rook.io/ceph
-                      operator: In
-                      values:
-                        - "true"
+      mgr:
+        tolerations:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: "Exists"
+            effect: "NoSchedule"
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+      osd:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: storage.rook.io/ceph
+                  operator: In
+                  values:
+                    - "true"
       storage:
         useAllNodes: false
         useAllDevices: false
