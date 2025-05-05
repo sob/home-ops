@@ -78,6 +78,9 @@ spec:
             enabled: true
           - name: rook
             enabled: true
+      mon:
+        count: 3
+        allowMultiplePerNode: false
       network:
         provider: host
         connections:
@@ -89,7 +92,7 @@ spec:
               operator: "Exists"
               effect: "NoSchedule"
           nodeAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
+            requiredDuringSchedulingIgnoredDuringExecution:
               - weight: 100
                 preference:
                   matchExpressions:
@@ -112,12 +115,10 @@ spec:
             requiredDuringSchedulingIgnoredDuringExecution:
               nodeSelectorTerms:
                 - matchExpressions:
-                    - key: kubernetes.io/hostname
+                    - key: storage.rook.io/ceph
                       operator: In
                       values:
-                        - metal-04
-                        - metal-05
-                        - metal-06
+                        - "true"
       storage:
         useAllNodes: false
         useAllDevices: false
