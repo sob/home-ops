@@ -29,7 +29,7 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
-          priorityClassName: critical-infrastructure
+          priorityClassName: infrastructure-critical
         containers:
           api:
             image:
