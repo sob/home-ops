@@ -1,0 +1,8 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: supportive-infrastructure
+value: 800000
+globalDefault: false
+description: "For supportive infrastructure like monitoring, logging, and non-critical apps"
