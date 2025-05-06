@@ -28,6 +28,8 @@ spec:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          priorityClassName: critical-infrastructure
         containers:
           api:
             image:
