@@ -23,11 +23,6 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    priorityClassName: infrastructure-critical
-    tolerations:
-      - key: "node-role.kubernetes.io/control-plane"
-        operator: "Exists"
-        effect: "NoSchedule"
     resources:
       requests:
         memory: 128Mi
