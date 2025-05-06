@@ -24,7 +24,7 @@ spec:
       retries: 3
   values:
     controllers:
-      onepassword-connect:
+      main:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -118,7 +118,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: onepassword-connect
+        controller: main
         ports:
           http:
             port: *apiPort
