@@ -31,6 +31,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/priority-class/critical
   dependsOn:
     - name: external-secrets
   path: ./kubernetes/apps/external-secrets/external-secrets/stores

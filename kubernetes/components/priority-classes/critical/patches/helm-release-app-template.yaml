@@ -1,0 +1,17 @@
+---
+- op: remove
+  path: /spec/values/priorityClassName
+
+- op: remove
+  path: /spec/values/tolerations
+
+- op: add
+  path: /spec/values/controllers/main/pod/priorityClassName
+  value: infrastructure-critical
+
+- op: add
+  path: /spec/values/controllers/main/pod/tolerations
+  value:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
