@@ -22,13 +22,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  values:
-    resources:
-      requests:
-        memory: 128Mi
-        cpu: 50m
-      limits:
-        memory: 256Mi
   valuesFrom:
     - kind: ConfigMap
       name: external-secrets-helm-values
