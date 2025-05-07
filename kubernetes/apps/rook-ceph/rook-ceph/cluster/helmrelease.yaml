@@ -193,6 +193,8 @@ spec:
             memory: 50Mi
           limits:
             memory: 128Mi
+    priorityClassNames:
+      crashcollector: system-node-critical
     cephBlockPools:
       - name: ceph-blockpool
         spec:
