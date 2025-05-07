@@ -36,6 +36,25 @@ spec:
       enableVolumeGroupSnapshot: false
       cephFSKernelMountOptions: ms_mode=prefer-crc
       enableLiveness: true
+      provisioner:
+        tolerations:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: "Exists"
+            effect: "NoSchedule"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+      csiRBDProvisioner:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+      csiRBDPlugin:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
       serviceMonitor:
         enabled: true
       snapshotter:
