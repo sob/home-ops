@@ -147,6 +147,7 @@ spec:
               - name: "/dev/sda"
     priorityClassNames:
       crashcollector: system-node-critical
+      exporter: system-node-critical
     cephBlockPools:
       - name: ceph-blockpool
         spec:
