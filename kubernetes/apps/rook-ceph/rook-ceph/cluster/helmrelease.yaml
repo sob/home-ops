@@ -144,55 +144,6 @@ spec:
           - name: "metal-06"
             devices:
               - name: "/dev/sda"
-      resources:
-        mgr:
-          requests:
-            cpu: 20m
-            memory: 768Mi
-          limits:
-            memory: 2Gi
-        mon:
-          requests:
-            cpu: 75m
-            memory: 1Gi
-          limits:
-            memory: 2.5Gi
-        osd:
-          requests:
-            cpu: 50m
-            memory: 1.5Gi
-          limits:
-            memory: 6Gi
-        mgr-sidecar:
-          requests:
-            cpu: 25m
-            memory: 32Mi
-          limits:
-            memory: 256Mi
-        crashcollector:
-          requests:
-            cpu: 100m
-            memory: 60Mi
-          limits:
-            memory: 60Mi
-        logcollector:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            memory: 1Gi
-        cleanup:
-          requests:
-            cpu: 500m
-            memory: 100Mi
-          limits:
-            memory: 1Gi
-        exporter:
-          requests:
-            cpu: 50m
-            memory: 50Mi
-          limits:
-            memory: 128Mi
     priorityClassNames:
       crashcollector: system-node-critical
     cephBlockPools:
@@ -259,12 +210,6 @@ spec:
                     matchLabels:
                       app.kubernetes.io/name: ceph-mds
                       app.kubernetes.io/part-of: *cephFileSystemName
-            resources:
-              requests:
-                cpu: 15m
-                memory: 64Mi
-              limits:
-                memory: 4Gi
         # Fix for the error - explicitly provide all fields for storageClass
         storageClass:
           enabled: true
@@ -303,12 +248,6 @@ spec:
           gateway:
             hostNetwork: false
             port: 80
-            resources:
-              requests:
-                cpu: 100m
-                memory: 1Gi
-              limits:
-                memory: 2Gi
             instances: 2
             priorityClassName: system-cluster-critical
             placement:
