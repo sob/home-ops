@@ -8,3 +8,10 @@ prometheus:
   enabled: true
   servicemonitor:
     enabled: true
+priorityClassName: &priorityClass infrastructure-critical
+image:
+  repository: ghcr.io/external-secrets/external-secrets
+tolerations: &tolerations
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
