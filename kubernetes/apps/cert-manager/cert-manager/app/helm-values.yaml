@@ -8,7 +8,8 @@ prometheus:
   enabled: true
   servicemonitor:
     enabled: true
-priorityClassName: &priorityClass infrastructure-critical
+global:
+  priorityClassName: &priorityClass infrastructure-critical
 image:
   repository: ghcr.io/external-secrets/external-secrets
 tolerations: &tolerations
