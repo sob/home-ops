@@ -30,3 +30,8 @@ spec:
         create: true
     webhook:
       enabled: false
+    priorityClassName: &priorityClassName infrastructure-critical
+    tolerations: &tolerations
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
