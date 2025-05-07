@@ -45,19 +45,12 @@ spec:
       enabled: true
     monitoring:
       enabled: true
-    resources:
-      requests:
-        memory: 128Mi
-        cpu: 100m
-      limits:
-        memory: 512Mi
     image:
       tag: v1.16.0-4.g6da8ef89d
-    # Critical fix: add tolerations directly at root level
     tolerations:
       - key: "node-role.kubernetes.io/control-plane"
         operator: "Exists"
         effect: "NoSchedule"
-    # Target control plane nodes specifically
     nodeSelector:
       node-role.kubernetes.io/control-plane: ""
+    priorityClassName: system-cluster-critical
