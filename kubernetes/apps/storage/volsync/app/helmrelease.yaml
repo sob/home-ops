@@ -31,8 +31,19 @@ spec:
     manageCRDs: true
     metrics:
       disableAuth: true
-    priorityClassName: &priorityClassName infrastructure-critical
     tolerations: &tolerations
       - key: "node-role.kubernetes.io/control-plane"
         operator: "Exists"
         effect: "NoSchedule"
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: volsync
+              spec:
+                template:
+                  spec:
+                    priorityClassName: infrastructure-critical
