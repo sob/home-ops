@@ -53,7 +53,7 @@ spec:
           name: rook.${SECRET_DOMAIN}
           path: /
     toolbox:
-      enabled: true
+      enabled: false
       priorityClassName: infrastructure-critical
     configOverride: |
       [global]
