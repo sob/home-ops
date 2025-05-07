@@ -54,6 +54,7 @@ spec:
           path: /
     toolbox:
       enabled: true
+      priorityClassName: infrastructure-critical
     configOverride: |
       [global]
       bdev_enable_discard = true
