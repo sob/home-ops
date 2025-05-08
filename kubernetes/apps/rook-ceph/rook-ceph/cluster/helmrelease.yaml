@@ -99,22 +99,22 @@ spec:
       resources:
         osd:
           requests:
-            cpu: "300m"
-            memory: "2Gi"
+            cpu: "100m"
+            memory: "512Mi"
           limits:
             cpu: "500m"
             memory: "4Gi"
         mon:
           requests:
-            cpu: "300m"
-            memory: "512Mi"
+            cpu: "100m"
+            memory: "128Mi"
           limits:
             cpu: "500m"
             memory: "1Gi"
         mgr:
           requests:
-            cpu: "200m"
-            memory: "512Mi"
+            cpu: "100m"
+            memory: "256Mi"
           limits:
             cpu: "500m"
             memory: "1Gi"
@@ -141,17 +141,17 @@ spec:
       csi:
         csiRBDPluginResource:
           requests:
-            cpu: "50m"
-            memory: "128Mi"
+            cpu: "5m"
+            memory: "64Mi"
           limits:
-            cpu: "200m"
+            cpu: "100m"
             memory: "256Mi"
         csiCephFSPluginResource:
           requests:
-            cpu: "50m"
-            memory: "128Mi"
+            cpu: "5m"
+            memory: "64i"
           limits:
-            cpu: "200m"
+            cpu: "100m"
             memory: "256Mi"
         csiRBDProvisionerResource: *defaultResources
         csiCephFSProvisionerResource: *defaultResources
@@ -305,53 +305,4 @@ spec:
       isDefault: false
       deletionPolicy: Delete
 
-    cephObjectStores:
-      - name: ceph-objectstore
-        spec:
-          metadataPool:
-            failureDomain: host
-            replicated:
-              size: 3
-          dataPool:
-            failureDomain: host
-            erasureCoded:
-              dataChunks: 2
-              codingChunks: 1
-          preservePoolsOnDelete: true
-          gateway:
-            hostNetwork: false
-            port: 80
-            instances: 2
-            priorityClassName: system-cluster-critical
-            resources:
-              requests:
-                cpu: "100m"
-                memory: "256Mi"
-              limits:
-                cpu: "300m"
-                memory: "512Mi"
-            placement:
-              tolerations: *controlPlaneToleration
-              nodeAffinity: *controlPlanePreferredAffinity
-          healthCheck:
-            bucket:
-              interval: 60s
 
-        storageClass:
-          enabled: true
-          name: ceph-bucket
-          reclaimPolicy: Delete
-          volumeBindingMode: Immediate
-          parameters:
-            region: us-central-1
-
-        ingress:
-          enabled: true
-          annotations:
-            <<: *dashboardAnnotations
-            nginx.ingress.kubernetes.io/proxy-body-size: "0"
-            nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-          ingressClassName: *ingressClass
-          host:
-            name: rgw.${SECRET_DOMAIN}
-            path: *rootPath
