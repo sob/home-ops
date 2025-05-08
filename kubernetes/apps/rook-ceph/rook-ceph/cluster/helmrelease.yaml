@@ -21,7 +21,7 @@ spec:
       retries: 5
   upgrade:
     cleanupOnFail: true
-    remediation:
+    remediation: &remediation
       strategy: rollback
       retries: 5
   uninstall:
@@ -37,8 +37,8 @@ spec:
       createPrometheusRules: true
     ingress:
       dashboard:
-        ingressClassName: internal
-        annotations:
+        ingressClassName: &ingressClass internal
+        annotations: &dashboardAnnotations
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Rook
@@ -51,26 +51,119 @@ spec:
             )
         host:
           name: rook.${SECRET_DOMAIN}
-          path: /
+          path: &rootPath /
     toolbox:
       enabled: false
-      priorityClassName: infrastructure-critical
+      priorityClassName: &criticalPriority infrastructure-critical
+
+    # Resource definitions
+    resources: &defaultResources
+      requests: &defaultRequests
+        cpu: "50m"
+        memory: "64Mi"
+      limits: &defaultLimits
+        cpu: "100m"
+        memory: "128Mi"
+
+    # Control plane toleration and affinity
+    controlPlaneToleration: &controlPlaneToleration
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+
+    controlPlaneAffinity: &controlPlaneAffinity
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+
+    controlPlanePreferredAffinity: &controlPlanePreferredAffinity
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+
     configOverride: |
       [global]
       bdev_enable_discard = true
       bdev_async_discard = true
       osd_class_update_on_start = false
+
     cephClusterSpec:
+      # Resource definitions
+      resources:
+        osd:
+          requests:
+            cpu: "300m"
+            memory: "2Gi"
+          limits:
+            cpu: "500m"
+            memory: "4Gi"
+        mon:
+          requests:
+            cpu: "300m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        mgr:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        mds: *defaultResources
+        rgw:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "300m"
+            memory: "512Mi"
+        crashcollector:
+          requests:
+            cpu: "25m"
+            memory: "32Mi"
+          limits:
+            cpu: "50m"
+            memory: "64Mi"
+        provisioner: *defaultResources
+
       crashCollector:
         disable: false
+
       csi:
+        csiRBDPluginResource:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        csiCephFSPluginResource:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        csiRBDProvisionerResource: *defaultResources
+        csiCephFSProvisionerResource: *defaultResources
         readAffinity:
           enabled: true
+
       dashboard:
         enabled: true
-        urlPrefix: /
+        urlPrefix: *rootPath
         ssl: false
         prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
+
       mgr:
         modules:
           - name: insights
@@ -79,50 +172,30 @@ spec:
             enabled: true
           - name: rook
             enabled: true
+
       mon:
         count: 3
         allowMultiplePerNode: false
+
       network:
         provider: host
         connections:
           requireMsgr2: true
+
       priorityClassNames:
         crashcollector: system-node-critical
         exporter: system-node-critical
+
     placement:
       mds:
-        tolerations:
-          - key: "node-role.kubernetes.io/control-plane"
-            operator: "Exists"
-            effect: "NoSchedule"
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                - key: node-role.kubernetes.io/control-plane
-                  operator: Exists
+        tolerations: *controlPlaneToleration
+        nodeAffinity: *controlPlaneAffinity
       mon:
-        tolerations:
-          - key: "node-role.kubernetes.io/control-plane"
-            operator: "Exists"
-            effect: "NoSchedule"
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: node-role.kubernetes.io/control-plane
-                    operator: Exists
+        tolerations: *controlPlaneToleration
+        nodeAffinity: *controlPlaneAffinity
       mgr:
-        tolerations:
-          - key: "node-role.kubernetes.io/control-plane"
-            operator: "Exists"
-            effect: "NoSchedule"
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                - key: node-role.kubernetes.io/control-plane
-                  operator: Exists
+        tolerations: *controlPlaneToleration
+        nodeAffinity: *controlPlaneAffinity
       osd:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -132,22 +205,24 @@ spec:
                   operator: In
                   values:
                     - "true"
-      storage:
-        useAllNodes: false
-        useAllDevices: false
-        deviceFilter: nvme0n1
-        config:
-          osdsPerDevice: "1"
-        nodes:
-          - name: "metal-04"
-            devices:
-              - name: "/dev/sda"
-          - name: "metal-05"
-            devices:
-              - name: "/dev/sda"
-          - name: "metal-06"
-            devices:
-              - name: "/dev/sda"
+
+    storage:
+      useAllNodes: false
+      useAllDevices: false
+      deviceFilter: nvme0n1
+      config:
+        osdsPerDevice: "1"
+      nodes:
+        - name: "metal-04"
+          devices:
+            - name: "/dev/sda"
+        - name: "metal-05"
+          devices:
+            - name: "/dev/sda"
+        - name: "metal-06"
+          devices:
+            - name: "/dev/sda"
+
     cephBlockPools:
       - name: ceph-blockpool
         spec:
@@ -172,11 +247,13 @@ spec:
             csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
             csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
             csi.storage.k8s.io/fstype: ext4
+
     cephBlockPoolsVolumeSnapshotClass:
       enabled: true
       name: csi-ceph-blockpool
       isDefault: false
       deletionPolicy: Delete
+
     cephFileSystems:
       - name: &cephFileSystemName ceph-filesystem
         spec:
@@ -192,18 +269,10 @@ spec:
             activeCount: 1
             activeStandby: true
             priorityClassName: system-cluster-critical
+            resources: *defaultResources
             placement:
-              tolerations:
-                - key: "node-role.kubernetes.io/control-plane"
-                  operator: "Exists"
-                  effect: "NoSchedule"
-              nodeAffinity:
-                preferredDuringSchedulingIgnoredDuringExecution:
-                  - weight: 100
-                    preference:
-                      matchExpressions:
-                        - key: node-role.kubernetes.io/control-plane
-                          operator: Exists
+              tolerations: *controlPlaneToleration
+              nodeAffinity: *controlPlanePreferredAffinity
               topologySpreadConstraints:
                 - maxSkew: 1
                   topologyKey: kubernetes.io/hostname
@@ -212,7 +281,7 @@ spec:
                     matchLabels:
                       app.kubernetes.io/name: ceph-mds
                       app.kubernetes.io/part-of: *cephFileSystemName
-        # Fix for the error - explicitly provide all fields for storageClass
+
         storageClass:
           enabled: true
           isDefault: false
@@ -229,11 +298,13 @@ spec:
             csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
             csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
             csi.storage.k8s.io/fstype: ext4
+
     cephFileSystemVolumeSnapshotClass:
       enabled: true
       name: csi-ceph-filesystem
       isDefault: false
       deletionPolicy: Delete
+
     cephObjectStores:
       - name: ceph-objectstore
         spec:
@@ -252,21 +323,20 @@ spec:
             port: 80
             instances: 2
             priorityClassName: system-cluster-critical
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "256Mi"
+              limits:
+                cpu: "300m"
+                memory: "512Mi"
             placement:
-              tolerations:
-                - key: "node-role.kubernetes.io/control-plane"
-                  operator: "Exists"
-                  effect: "NoSchedule"
-              nodeAffinity:
-                preferredDuringSchedulingIgnoredDuringExecution:
-                  - weight: 100
-                    preference:
-                      matchExpressions:
-                        - key: node-role.kubernetes.io/control-plane
-                          operator: Exists
+              tolerations: *controlPlaneToleration
+              nodeAffinity: *controlPlanePreferredAffinity
           healthCheck:
             bucket:
               interval: 60s
+
         storageClass:
           enabled: true
           name: ceph-bucket
@@ -274,13 +344,14 @@ spec:
           volumeBindingMode: Immediate
           parameters:
             region: us-central-1
+
         ingress:
           enabled: true
           annotations:
-            external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+            <<: *dashboardAnnotations
             nginx.ingress.kubernetes.io/proxy-body-size: "0"
             nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-          ingressClassName: internal
+          ingressClassName: *ingressClass
           host:
             name: rgw.${SECRET_DOMAIN}
-            path: /
+            path: *rootPath
