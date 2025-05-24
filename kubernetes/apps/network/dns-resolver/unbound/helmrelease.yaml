@@ -47,7 +47,7 @@ spec:
           tools:
             image:
               repository: docker.io/library/busybox
-              tag: latest@sha256:a5d0ce49aa801d475da48f8cb163c354ab95cab073cd3c138bd458fc8257fbf1
+              tag: latest@sha256:f64ff79725d0070955b368a4ef8dc729bd8f3d8667823904adcb299fe58fc3da
             command: ['sh', '-c', 'sleep $(shuf -i 900-10000 -n 1)']
             resources:
               requests:
