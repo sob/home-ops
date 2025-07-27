@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kyverno.io/clusterpolicy_v1.json
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: bypass-api-auth-media
+  annotations:
+    policies.kyverno.io/title: Bypass authentication for media API endpoints
+    policies.kyverno.io/subject: Ingress
+    policies.kyverno.io/description: >-
+      This policy adds nginx annotations to bypass authentication for API endpoints
+      on media applications (prowlarr, radarr, sonarr, etc) to allow Terraform and
+      other automation tools to access the APIs.
+spec:
+  generateExisting: true
+  rules:
+    - name: bypass-media-api-auth
+      match:
+        any:
+          - resources:
+              kinds: ["Ingress"]
+              names: 
+                - prowlarr
+                - radarr
+                - sonarr
+                - lidarr
+                - readarr
+                - bazarr
+              namespaces:
+                - default
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              +(nginx.ingress.kubernetes.io/configuration-snippet): |-
+                location ~ ^/api {
+                  proxy_pass $scheme://$upstream_addr;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Original-URL $scheme://$http_host$request_uri;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                }
