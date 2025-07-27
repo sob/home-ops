@@ -68,6 +68,20 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [10000]
         seccompProfile: { type: RuntimeDefault }
+      tolerations:
+        - key: "workload-type"
+          operator: "Equal"
+          value: "media"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/media
+                operator: In
+                values:
+                - "true"
     service:
       app:
         controller: unpackerr
