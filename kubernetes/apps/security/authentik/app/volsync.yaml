@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: authentik-postgresql
+spec:
+  sourcePVC: data-authentik-postgresql-0
+  trigger:
+    schedule: "0 3 * * *"  # Daily at 3 AM
+  restic:
+    copyMethod: Snapshot
+    cacheStorageClassName: openebs-hostpath
+    cacheCapacity: 2Gi
+    moverSecurityContext:
+      runAsUser: 1001
+      runAsGroup: 1001
+      fsGroup: 1001
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    pruneIntervalDays: 14
+    retain:
+      daily: 14
+      within: 3d
+    repository: authentik-postgresql-restic-secret
+  paused: false
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: authentik-postgresql-dst
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    copyMethod: Snapshot
+    repository: authentik-postgresql-restic-secret
+    cacheStorageClassName: openebs-hostpath
+    cacheCapacity: 2Gi
+    moverSecurityContext:
+      runAsUser: 1001
+      runAsGroup: 1001
+      fsGroup: 1001
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ceph-block
+    capacity: 10Gi  # Must match the PVC size
+  paused: true

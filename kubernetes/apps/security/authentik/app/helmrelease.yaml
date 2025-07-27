@@ -36,7 +36,29 @@ spec:
         host: dragonfly.database.svc.cluster.local
       log_level: trace
     postgresql:
-      enabled: false
+      enabled: true
+      auth:
+        database: authentik
+        username: authentik
+        existingSecret: authentik-secret
+        secretKeys:
+          adminPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
+          userPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
+      primary:
+        persistence:
+          enabled: true
+          storageClass: ceph-block
+          size: 10Gi
+        # Important: Enable PostgreSQL WAL archiving for consistent backups
+        extraEnvVars:
+          - name: POSTGRESQL_WAL_LEVEL
+            value: "replica"
+          - name: POSTGRESQL_ARCHIVE_MODE
+            value: "on"
+        # Add pod disruption budget to prevent data loss
+        podDisruptionBudget:
+          enabled: true
+          minAvailable: 1
     server:
       autoscaling:
         enabled: true
@@ -62,12 +84,6 @@ spec:
         hosts:
           - sso.${SECRET_DOMAIN}
         https: false
-      initContainers:
-        - name: init-db
-          image: ghcr.io/onedr0p/postgres-init:16
-          envFrom:
-            - secretRef:
-                name: authentik-secret
     worker:
       autoscaling:
         enabled: true
