@@ -3,7 +3,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: postgres16-001
+  name: postgres16-002
 spec:
   instances: 4
   imageName: ghcr.io/cloudnative-pg/postgresql:16.9-19
@@ -42,7 +42,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://cloudnative-pg/
       endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
-      serverName: postgres16-001
+      serverName: postgres16-002
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
@@ -53,13 +53,13 @@ spec:
   bootstrap:
     recovery:
       backup:
-        name: postgres16-20250220122122
+        name: postgres16-20250220104758
   externalClusters:
-    - name: postgres16-001
+    - name: postgres16-002
       barmanObjectStore:
         destinationPath: s3://cloudnative-pg/
         endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
-        serverName: postgres16-001
+        serverName: postgres16-002
         s3Credentials:
           accessKeyId:
             name: cloudnative-pg-secret
