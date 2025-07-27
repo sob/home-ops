@@ -52,14 +52,15 @@ spec:
           key: aws-secret-access-key
   bootstrap:
     recovery:
+      source: postgres16
       backup:
-        name: postgres16-20250220104758
+        name: postgres16-20250220122122
   externalClusters:
-    - name: postgres16-002
+    - name: postgres16
       barmanObjectStore:
         destinationPath: s3://cloudnative-pg/
         endpointURL: https://${SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
-        serverName: postgres16-002
+        serverName: postgres16
         s3Credentials:
           accessKeyId:
             name: cloudnative-pg-secret
