@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kyverno.io/clusterpolicy_v1.json
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-reflector-cert-annotations
+  annotations:
+    policies.kyverno.io/title: Add reflector annotations to wildcard certificate
+    policies.kyverno.io/subject: Secret
+    policies.kyverno.io/description: >-
+      This policy adds reflector annotations to the wildcard certificate secret
+      so it gets synced to the security namespace for authentik outposts
+spec:
+  mutateExistingOnPolicyUpdate: true
+  generateExistingOnPolicyUpdate: true
+  rules:
+    - name: add-reflector-annotations
+      match:
+        any:
+          - resources:
+              kinds: ["Secret"]
+              names: ["56kbps-io-production-tls"]
+              namespaces: ["network"]
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              +(reflector.v1.k8s.emberstack.com/reflection-allowed): "true"
+              +(reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces): "security"
+              +(reflector.v1.k8s.emberstack.com/reflection-auto-enabled): "true"
+              +(reflector.v1.k8s.emberstack.com/reflection-auto-namespaces): "security"
