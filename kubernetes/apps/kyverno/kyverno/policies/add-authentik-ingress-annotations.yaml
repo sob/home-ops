@@ -33,6 +33,10 @@ spec:
                 1000M
               +(nginx.ingress.kubernetes.io/large-client-header-buffers): |-
                 4 100k
+              +(nginx.ingress.kubernetes.io/proxy-buffer-size): |-
+                32k
+              +(nginx.ingress.kubernetes.io/proxy-buffers): |-
+                8 16k
               +(nginx.ingress.kubernetes.io/auth-url): |-
                 http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
               +(nginx.ingress.kubernetes.io/auth-signin): |-
@@ -60,6 +64,10 @@ spec:
                 1000M
               +(nginx.ingress.kubernetes.io/large-client-header-buffers): |-
                 4 100k
+              +(nginx.ingress.kubernetes.io/proxy-buffer-size): |-
+                32k
+              +(nginx.ingress.kubernetes.io/proxy-buffers): |-
+                8 16k
               +(nginx.ingress.kubernetes.io/auth-url): |-
                 http://ak-outpost-external.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
               +(nginx.ingress.kubernetes.io/auth-signin): |-
