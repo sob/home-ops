@@ -11,8 +11,6 @@ metadata:
       This policy adds reflector annotations to the wildcard certificate secret
       so it gets synced to the security namespace for authentik outposts
 spec:
-  mutateExistingOnPolicyUpdate: true
-  generateExistingOnPolicyUpdate: true
   rules:
     - name: add-reflector-annotations
       match:
@@ -22,6 +20,12 @@ spec:
               names: ["56kbps-io-production-tls"]
               namespaces: ["network"]
       mutate:
+        mutateExisting: true
+        targets:
+          - apiVersion: v1
+            kind: Secret
+            name: "56kbps-io-production-tls"
+            namespace: "network"
         patchStrategicMerge:
           metadata:
             annotations:
