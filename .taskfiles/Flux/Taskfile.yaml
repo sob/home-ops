@@ -43,15 +43,6 @@ tasks:
     requires:
       vars: ["APP"]
 
-  wipe:
-    desc: Remove an app and associated flux resources (leaves volumes)
-    cmds:
-      - kubectl patch helmrelease --namespace {{.NS | default "default"}} {{.APP}} -p $'metadata:\n finalizers:\n  []' --type=merge || exit 0
-      - task: .delete
-        vars: {TYPE: "kustomization"}
-      - task: .delete
-        vars: {TYPE: "helmrelease"}
-
   nuke:
     desc: Nuke an app and associated volumes
     cmds:
@@ -85,21 +76,22 @@ tasks:
     desc: Force reconciliation of the cluster-apps kustomization
     cmd: flux reconcile kustomization cluster-apps --with-source
 
-  wipe-nginx:
+  wipe:
     desc: Wipe nginx ingress controllers and their resources
     cmds:
       # Patch and delete HelmReleases
-      - kubectl patch helmrelease -n network ingress-nginx-internal -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
-      - kubectl patch helmrelease -n network ingress-nginx-external -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
-      - kubectl delete helmrelease -n network ingress-nginx-internal ingress-nginx-external --ignore-not-found=true --grace-period=0 --force=true
+      - kubectl patch helmrelease -n security {{.APP}} -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
+      - kubectl delete --namespace security helmrelease {{.APP}} --ignore-not-found=true --grace-period=0 --force=true
       # Delete deployments and services
-      - kubectl delete deployment,service,configmap -n network -l app.kubernetes.io/name=ingress-nginx --ignore-not-found=true --grace-period=0 --force=true
+      - kubectl delete deployment,service,configmap,statefulset -n security -l app.kubernetes.io/name={{.APP}} --ignore-not-found=true --grace-period=0 --force=true
+      - kubectl delete deployment,service,configmap,statefulset -n security -l app.kubernetes.io/name={{.APP}}-proxy --ignore-not-found=true --grace-period=0 --force=true
+      - kubectl delete statefulset -n security authentik-postgresql
       # Delete any remaining pods
-      - kubectl delete pods -n network -l app.kubernetes.io/name=ingress-nginx --ignore-not-found=true --grace-period=0 --force=true
-      # Delete admission webhooks if they exist
-      - kubectl delete validatingwebhookconfiguration ingress-nginx-admission --ignore-not-found=true
+      - kubectl delete pods -n security -l app.kubernetes.io/name={{.APP}} --ignore-not-found=true --grace-period=0 --force=true
       # Force reconcile to recreate
       - echo "Resources removed. Run 'task flux:hr APP=ingress-nginx-internal' and 'task flux:hr APP=ingress-nginx-external' to recreate"
+    requires:
+      vars: ["APP"]
 
   kustomization:
     aliases: ["ks"]
@@ -129,7 +121,7 @@ tasks:
 
   .delete:
     internal: true
-    cmd: kubectl delete --namespace {{.NS | "default"}} {{.TYPE}} {{.APP}}
+    cmd: kubectl delete --namespace {{.NS | "default"}} {{.TYPE}} {{.APP}} --ignore-not-found=true --grace-period=0 --force=true
     vars:
       NS:
         sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
