@@ -66,7 +66,7 @@ spec:
         proxy-body-size: 0
         proxy-buffer-size: 16k
         proxy-buffers: 8 16k
-        proxy-busy-buffers-size: 32k
+        proxy-busy-buffers-size: 64k
         ssl-protocols: TLSv1.3 TLSv1.2
         use-forwarded-headers: "true"
       metrics:
