@@ -1,5 +1,4 @@
 ---
-# yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -10,10 +9,12 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  interval: 10m
   path: ./kubernetes/apps/kube-system/reflector/app
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-kubernetes
-  wait: true
+    name: flux-system
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
