@@ -77,12 +77,6 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/name: Jellyseerr
-          gethomepage.dev/icon: jellyseerr.png
-          gethomepage.dev/description: Media Requests
-          gethomepage.dev/href: https://jelly.${SECRET_DOMAIN}
         className: external
         hosts:
           - host: jelly.${SECRET_DOMAIN}

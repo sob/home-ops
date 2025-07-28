@@ -113,15 +113,6 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           authentik.home.arpa/internal: "true"
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Downloads
-          gethomepage.dev/name: Bazarr
-          gethomepage.dev/icon: bazarr.png
-          gethomepage.dev/description: Subtitles
-          gethomepage.dev/href: https://bazarr.${SECRET_DOMAIN}
-          gethomepage.dev/widget.type: bazarr
-          gethomepage.dev/widget.url: http://bazarr.default.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_BAZARR_TOKEN}}` }}"
         className: internal
         hosts:
           - host: bazarr.${SECRET_DOMAIN}
