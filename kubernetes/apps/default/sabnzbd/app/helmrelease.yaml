@@ -104,15 +104,6 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Downloads
-          gethomepage.dev/name: sabNZBD
-          gethomepage.dev/icon: sabnzbd.png
-          gethomepage.dev/description: Downloads
-          gethomepage.dev/href: https://sab.${SECRET_DOMAIN}
-          gethomepage.dev/widget.type: sabnzbd
-          gethomepage.dev/widget.url: http://sabnzbd.default.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SABNZBD_TOKEN}}` }}"
         className: internal
         hosts:
           - host: sab.${SECRET_DOMAIN}

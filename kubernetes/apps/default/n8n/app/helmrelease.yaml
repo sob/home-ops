@@ -76,16 +76,6 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           authentik.home.arpa/internal: "true"
-          nginx.ingress.kubernetes.io/proxy-body-size: "1000M"
-          nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
-          nginx.ingress.kubernetes.io/large-client-header-buffers: "4 100k"
-          nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Automation
-          gethomepage.dev/name: n8
-          gethomepage.dev/icon: node-red.png
-          gethomepage.dev/description: Rules Automation
-          gethomepage.dev/href: https://node-red.${SECRET_DOMAIN}
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"

@@ -102,15 +102,6 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           authentik.home.arpa/internal: "true"
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Downloads
-          gethomepage.dev/name: Radarr
-          gethomepage.dev/icon: radarr.png
-          gethomepage.dev/description: Movies
-          gethomepage.dev/href: https://radarr.${SECRET_DOMAIN}
-          gethomepage.dev/widget.type: radarr
-          gethomepage.dev/widget.url: http://radarr.default.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_RADARR_TOKEN}}` }}"
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"

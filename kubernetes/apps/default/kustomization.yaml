@@ -11,7 +11,6 @@ resources:
   #- ./cert-exporter/ks.yaml
   #- ./homeassistant/ks.yaml
   - ./homarr/ks.yaml
-  #- ./homepage/ks.yaml
   #- ./jellyseerr/ks.yaml
   - ./lidarr/ks.yaml
   #- ./lubelog/ks.yaml
