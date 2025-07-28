@@ -42,8 +42,10 @@ resource "authentik_outpost" "internal" {
     "kubernetes_ingress_annotations" = {
       "external-dns.alpha.kubernetes.io/is-public" : "false"
       "external-dns.alpha.kubernetes.io/target" : "internal.${local.cluster_domain}"
+      "nginx.ingress.kubernetes.io/proxy-buffers" : "8 16k"
+      "nginx.ingress.kubernetes.io/proxy-busy-buffers-size" : "32k"
     }
-    "kubernetes_ingress_secret_name" = ""
+    "kubernetes_ingress_secret_name" = "56kbps-io-production-tls"
   })
 }
 
@@ -71,7 +73,9 @@ resource "authentik_outpost" "external" {
     "kubernetes_ingress_annotations" = {
       "external-dns.alpha.kubernetes.io/is-public" : "true"
       "external-dns.alpha.kubernetes.io/target" : "external.${local.cluster_domain}"
+      "nginx.ingress.kubernetes.io/proxy-buffers" : "8 16k"
+      "nginx.ingress.kubernetes.io/proxy-busy-buffers-size" : "32k"
     }
-    "kubernetes_ingress_secret_name" = ""
+    "kubernetes_ingress_secret_name" = "56kbps-io-production-tls"
   })
 }
