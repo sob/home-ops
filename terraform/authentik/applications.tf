@@ -46,20 +46,9 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
       group         = resource.authentik_group.network
     },
-    frigate = {
-      external_host = "https://frigate.${local.cluster_domain}"
-      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/frigate.png"
-      group         = resource.authentik_group.home
-      skip_path_regex = "^/api([/?].*)?"
-    },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
-      group         = resource.authentik_group.home
-    },
-    homepage = {
-      external_host = "https://homepage.${local.cluster_domain}"
-      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homepage.png"
       group         = resource.authentik_group.home
     },
     lidarr = {
@@ -67,11 +56,6 @@ locals {
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
-    },
-    n8n = {
-      external_host   = "https://n8n.${local.cluster_domain}"
-      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/n8n.png"
-      group           = resource.authentik_group.home
     },
     prowlarr = {
       external_host   = "https://prowlarr.${local.cluster_domain}"
