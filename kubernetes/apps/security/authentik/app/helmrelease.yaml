@@ -64,6 +64,9 @@ spec:
       autoscaling:
         enabled: true
         minReplicas: 2
+      envFrom:
+        - secretRef:
+            name: authentik-secret
       metrics:
         prometheus:
           serviceMonitor:
@@ -80,3 +83,6 @@ spec:
       autoscaling:
         enabled: true
         minReplicas: 2
+      envFrom:
+        - secretRef:
+            name: authentik-secret
