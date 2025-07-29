@@ -25,12 +25,12 @@ spec:
   values:
     global:
       podAnnotations:
-        secret.reloader.stakater.com/reload: authentik-secret
+        secret.reloader.stakater.com/reload: authentik
       deploymentStrategy:
         type: RollingUpdate
       envFrom:
         - secretRef:
-            name: authentik-secret
+            name: authentik
     authentik:
       # Disable the creation of the default secret since we're using an external secret
       enabled: false
@@ -40,7 +40,7 @@ spec:
     postgresql:
       enabled: true
       auth:
-        existingSecret: authentik-secret
+        existingSecret: authentik
         secretKeys:
           userPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
           usernameKey: AUTHENTIK_POSTGRESQL__USER
@@ -64,9 +64,6 @@ spec:
       autoscaling:
         enabled: true
         minReplicas: 2
-      envFrom:
-        - secretRef:
-            name: authentik-secret
       metrics:
         prometheus:
           serviceMonitor:
@@ -83,6 +80,3 @@ spec:
       autoscaling:
         enabled: true
         minReplicas: 2
-      envFrom:
-        - secretRef:
-            name: authentik-secret
