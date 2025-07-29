@@ -37,6 +37,12 @@ spec:
       log_level: trace
     postgresql:
       enabled: true
+      auth:
+        existingSecret: authentik-secret
+        secretKeys:
+          userPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
+          usernameKey: AUTHENTIK_POSTGRESQL__USER
+          databaseKey: AUTHENTIK_POSTGRESQL__NAME
       primary:
         persistence:
           enabled: true
