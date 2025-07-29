@@ -77,21 +77,105 @@ tasks:
     cmd: flux reconcile kustomization cluster-apps --with-source
 
   wipe:
-    desc: Wipe nginx ingress controllers and their resources
+    desc: Completely wipe an application including HelmRelease, PVCs, and Volsync backups
+    silent: true
+    summary: |
+      args:
+        APP: Application name to wipe (required)
+        NS: Namespace (optional, will be auto-detected from HelmRelease if not provided)
+    vars:
+      NS:
+        sh: |
+          if [ -n "{{.NS}}" ]; then
+            echo "{{.NS}}"
+          else
+            kubectl get -A helmrelease --no-headers --field-selector=metadata.name={{.APP}} 2>/dev/null | awk '{print $1}'
+          fi
+    prompt: |
+      WARNING: This will completely wipe {{.APP}} from namespace {{.NS}}!
+
+      This includes:
+      - HelmRelease and all managed resources
+      - Persistent Volume Claims (PVCs)
+      - Restic backup snapshots from repository
+      - All pods, jobs, secrets, and configs
+
+      Are you sure you want to continue?
     cmds:
-      # Patch and delete HelmReleases
-      - kubectl patch helmrelease -n security {{.APP}} -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
-      - kubectl delete --namespace security helmrelease {{.APP}} --ignore-not-found=true --grace-period=0 --force=true
-      # Delete deployments and services
-      - kubectl delete deployment,service,configmap,statefulset -n security -l app.kubernetes.io/name={{.APP}} --ignore-not-found=true --grace-period=0 --force=true
-      - kubectl delete deployment,service,configmap,statefulset -n security -l app.kubernetes.io/name={{.APP}}-proxy --ignore-not-found=true --grace-period=0 --force=true
-      - kubectl delete statefulset -n security authentik-postgresql
-      # Delete any remaining pods
-      - kubectl delete pods -n security -l app.kubernetes.io/name={{.APP}} --ignore-not-found=true --grace-period=0 --force=true
-      # Force reconcile to recreate
-      - echo "Resources removed. Run 'task flux:hr APP=ingress-nginx-internal' and 'task flux:hr APP=ingress-nginx-external' to recreate"
+      # Remove HelmRelease with finalizers
+      - kubectl patch helmrelease -n {{.NS}} {{.APP}} -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
+      - task: .delete
+        vars: {TYPE: "helmrelease", APP: "{{.APP}}", NS: "{{.NS}}"}
+
+      # Delete resources by common label selectors
+      - task: .delete
+        vars:
+          TYPE: "all,pvc,configmap,secret,ingress,servicemonitor,networkpolicy"
+          LABEL: "app.kubernetes.io/name={{.APP}},app.kubernetes.io/instance={{.APP}},app.kubernetes.io/component={{.APP}},app={{.APP}}"
+          NS: "{{.NS}}"
+
+      # Delete Volsync resources
+      - task: .delete
+        vars:
+          TYPE: "replicationsource,replicationdestination"
+          LABEL: "app.kubernetes.io/name={{.APP}},app.kubernetes.io/instance={{.APP}}"
+          NS: "{{.NS}}"
+
+      # Delete resources by name (catches things without proper labels)
+      - task: .delete
+        vars:
+          TYPE: "replicationsource,replicationdestination"
+          APP: "{{.APP}}"
+          NS: "{{.NS}}"
+
+      # Delete restic snapshots from repository
+      - task: .delete-restic-snapshots
+        vars: {APP: "{{.APP}}", NS: "{{.NS}}"}
+
+      # Delete PVCs and StatefulSets by name pattern
+      - |
+        echo
+        echo "Deleting PVCs and StatefulSets by name pattern..."
+        resources=$(kubectl get pvc,statefulset -n {{.NS}} -o name 2>/dev/null | grep -E "{{.APP}}|data-.*{{.APP}}|volsync-.*{{.APP}}" || true)
+        if [ -n "$resources" ]; then
+          echo "$resources" | xargs kubectl delete -n {{.NS}} --ignore-not-found=true --grace-period=0 --force=true 2>&1 | grep -v "Warning: Immediate deletion does not wait" || true
+        else
+          echo "No PVCs or StatefulSets found"
+        fi
+        echo
+
+      # Delete secrets by name pattern (volsync, etc)
+      - |
+        echo "Deleting related secrets..."
+        secrets=$(kubectl get secrets -n {{.NS}} -o name 2>/dev/null | grep -E "{{.APP}}|volsync-{{.APP}}" || true)
+        if [ -n "$secrets" ]; then
+          echo "$secrets" | xargs kubectl delete -n {{.NS}} --ignore-not-found=true --grace-period=0 --force=true 2>&1 | grep -v "Warning: Immediate deletion does not wait" || true
+        else
+          echo "No related secrets found"
+        fi
+        echo
+
+      # Final cleanup - pods and jobs
+      - task: .delete
+        vars:
+          TYPE: "pod,job"
+          LABEL: "app.kubernetes.io/name={{.APP}},app.kubernetes.io/instance={{.APP}}"
+          NS: "{{.NS}}"
+
+      - task: .delete
+        vars:
+          TYPE: "kustomization"
+          APP: "{{.APP}}"
+          NS: "flux-system"
+
+      - echo
+      - echo "Wipe complete for {{.APP}}. To recreate, run 'task flux:apply PATH=<path>' or 'task flux:hr APP={{.APP}}'"
+      - echo
     requires:
       vars: ["APP"]
+    preconditions:
+      - sh: "[ -n '{{.NS}}' ]"
+        msg: "Could not determine namespace for app {{.APP}}"
 
   kustomization:
     aliases: ["ks"]
@@ -121,10 +205,28 @@ tasks:
 
   .delete:
     internal: true
-    cmd: kubectl delete --namespace {{.NS | "default"}} {{.TYPE}} {{.APP}} --ignore-not-found=true --grace-period=0 --force=true
-    vars:
-      NS:
-        sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
+    silent: true
+    cmd: |
+      {{- if .LABEL }}
+      # Handle comma-separated labels
+      echo "{{.LABEL}}" | tr ',' '\n' | while read -r label; do
+        echo "Deleting {{.TYPE}} with label: $label"
+        kubectl delete --namespace {{.NS}} {{.TYPE}} -l "$label" --ignore-not-found=true --grace-period=0 --force=true 2>&1 | grep -v "Warning: Immediate deletion does not wait" || true
+        echo
+      done
+      {{- else }}
+      echo "Deleting {{.TYPE}} with name: {{.APP}}"
+      kubectl delete --namespace {{.NS}} {{.TYPE}} {{.APP}} --ignore-not-found=true --grace-period=0 --force=true 2>&1 | grep -v "Warning: Immediate deletion does not wait" || true
+      {{- end }}
     preconditions:
       - msg: Missing kubeconfig
         sh: test -f {{.KUBECONFIG}}
+      - msg: Must provide either APP or LABEL
+        sh: '[ -n "{{.APP}}" ] || [ -n "{{.LABEL}}" ]'
+
+  .delete-restic-snapshots:
+    internal: true
+    silent: true
+    cmd: bash {{.ROOT_DIR}}/.taskfiles/flux/scripts/delete-restic-snapshots.sh {{.APP}} {{.NS}}
+    requires:
+      vars: ["APP", "NS"]
