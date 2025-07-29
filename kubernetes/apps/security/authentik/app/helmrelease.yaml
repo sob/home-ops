@@ -32,6 +32,8 @@ spec:
         - secretRef:
             name: authentik-secret
     authentik:
+      # Disable the creation of the default secret since we're using an external secret
+      enabled: false
       redis:
         host: dragonfly.database.svc.cluster.local
       log_level: trace
