@@ -111,7 +111,7 @@ tasks:
       - task: .delete
         vars:
           TYPE: "all,pvc,configmap,secret,ingress,servicemonitor,networkpolicy"
-          LABEL: "app.kubernetes.io/name={{.APP}},app.kubernetes.io/instance={{.APP}},app.kubernetes.io/component={{.APP}},app={{.APP}}"
+          LABEL: "app.kubernetes.io/name={{.APP}},app.kubernetes.io/instance={{.APP}},app.kubernetes.io/component={{.APP}},app.kubernetes.io/part-of={{.APP}},app={{.APP}}"
           NS: "{{.NS}}"
 
       # Delete Volsync resources
