@@ -24,6 +24,22 @@ spec:
     # Core Cilium configuration for UDM Pro with L2 announcements
     kubeProxyReplacement: true
     
+    # Use local KubePrism endpoint for API server access
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+    
+    # Security context required for Talos
+    securityContext:
+      capabilities:
+        ciliumAgent: "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
+        cleanCiliumState: "{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
+    
+    # Cgroup configuration for Talos
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    
     # L2 Announcements (replaces MetalLB)
     l2announcements:
       enabled: true
@@ -32,6 +48,8 @@ spec:
     # Gateway API Support
     gatewayAPI:
       enabled: true
+      enableAlpn: true
+      enableAppProtocol: true
       gatewayClass:
         name: cilium
         default: false
