@@ -56,7 +56,7 @@ spec:
       mode: kubernetes
       operator:
         clusterPoolIPv4PodCIDRList:
-          - ${CLUSTER_CIDR}
+          - ${SECRET_CIDR}
     
     # External workload support
     externalWorkloads:
