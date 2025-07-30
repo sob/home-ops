@@ -1,0 +1,38 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: cilium-pool
+spec:
+  blocks:
+    - start: "${CILIUM_LB_RANGE_START}"
+      stop: "${CILIUM_LB_RANGE_END}"
+  disabled: false  # Set to true to disable during testing
+  # Optional: disable automatic allocation for certain services
+  # serviceSelector:
+  #   matchExpressions:
+  #   - key: io.cilium/manual-ip
+  #     operator: NotIn
+  #     values: ["true"]
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default-l2-announcement-policy
+spec:
+  # Announce all LoadBalancer services
+  loadBalancerIPs: true
+  # If you want to be more selective, use:
+  # serviceSelector:
+  #   matchLabels:
+  #     io.cilium/l2-announce: "true"
+
+  # Auto-detect interfaces or specify them
+  # interfaces:
+  # - eth0
+  # - ens3
+
+  # Select which nodes should announce IPs
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux

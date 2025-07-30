@@ -15,75 +15,15 @@ spec:
         namespace: flux-system
   install:
     remediation:
-      retries: 3
+      retries: -1
   upgrade:
     cleanupOnFail: true
     remediation:
       retries: 3
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-values
   values:
-    # Core Cilium configuration for UDM Pro with L2 announcements
-    kubeProxyReplacement: true
-    
-    # Use local KubePrism endpoint for API server access
-    k8sServiceHost: localhost
-    k8sServicePort: 7445
-    
-    # Security context required for Talos
-    securityContext:
-      capabilities:
-        ciliumAgent: "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
-        cleanCiliumState: "{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
-    
-    # Cgroup configuration for Talos
-    cgroup:
-      autoMount:
-        enabled: false
-      hostRoot: /sys/fs/cgroup
-    
-    # L2 Announcements (replaces MetalLB)
-    l2announcements:
-      enabled: true
-      # Interfaces will be auto-detected if not specified
-    
-    # Gateway API Support
-    gatewayAPI:
-      enabled: true
-      enableAlpn: true
-      enableAppProtocol: true
-      gatewayClass:
-        name: cilium
-        default: false
-      
-    # Skip BGP (not supported by UDM Pro)
-    bgpControlPlane:
-      enabled: false
-    
-    # LoadBalancer configuration
-    loadBalancer:
-      algorithm: maglev
-      mode: snat  # SNAT mode for better compatibility with L2
-      serviceTopology: true
-    
-    # BPF configuration
-    bpf:
-      masquerade: true
-      tproxy: true
-    
-    # IPAM for LoadBalancer IPs
-    ipam:
-      mode: kubernetes
-      operator:
-        clusterPoolIPv4PodCIDRList:
-          - ${SECRET_CIDR}
-    
-    # External workload support
-    externalWorkloads:
-      enabled: false
-    
-    # Security policies
-    policyEnforcementMode: default
-    
-    # Existing Hubble configuration
     hubble:
       enabled: true
       metrics:
@@ -99,8 +39,6 @@ spec:
           enabled: true
         dashboards:
           enabled: true
-          annotations:
-            grafana_folder: Cilium
       relay:
         enabled: true
         rollOutPods: true
@@ -110,25 +48,3 @@ spec:
       ui:
         enabled: true
         rollOutPods: true
-        ingress:
-          enabled: true
-          className: internal
-          hosts: ["hubble.${SECRET_DOMAIN}"]
-    operator:
-      prometheus:
-        enabled: true
-        serviceMonitor:
-          enabled: true
-      dashboards:
-        enabled: true
-        annotations:
-          grafana_folder: Cilium
-    prometheus:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        trustCRDsExist: true
-    dashboards:
-      enabled: true
-      annotations:
-        grafana_folder: Cilium
