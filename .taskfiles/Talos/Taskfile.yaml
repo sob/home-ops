@@ -2,42 +2,73 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
+env:
+  TALOSCONFIG: "{{.ROOT_DIR}}/.talosconfig"
+
 tasks:
 
   apply-node:
-    desc: Apply Talos config to a node [IP=required] [MODE=auto]
+    desc: Apply Talos config to a node [IP=required] [MODE=auto] [TYPE=worker]
     cmds:
-      - task: down
       - minijinja-cli {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2 | op inject | talosctl --nodes {{.IP}} apply-config --insecure --mode {{.MODE}} --config-patch @{{.TALOS_DIR}}/patches/{{.IP}}.yaml --file /dev/stdin
-      - talosctl --nodes {{.IP}} health
-      - task: up
+      - |
+        if [ "{{.TALOS_MACHINE_TYPE}}" = "worker" ]; then
+          echo "Checking worker node health..."
+          talosctl --nodes {{.IP}} service kubelet status || echo "Node is still initializing..."
+        else
+          echo "Checking control plane health..."
+          talosctl --nodes {{.IP}} health --wait-timeout 5m || echo "Health check timed out, but node may still be initializing"
+        fi
     vars:
       MODE: '{{.MODE | default "auto"}}'
+      ENDPOINTS:
+        sh: talosctl config info --output json | jq -r '.endpoints | join(",")'
       TALOS_MACHINE_TYPE:
-        sh: talosctl --nodes {{.IP}} get machinetypes --output jsonpath='{.spec}'
+        sh: |
+          if [ -n "{{.TYPE}}" ]; then
+            echo "{{.TYPE}}"
+          else
+            type=$(talosctl --nodes {{.IP}} get machinetypes --output jsonpath='{.spec}' --insecure 2>/dev/null || true)
+            if [ -z "$type" ] || [ "$type" = "unknown" ]; then
+              echo "worker"
+            else
+              echo "$type"
+            fi
+          fi
     requires:
       vars: [IP]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
       - test -f {{.ROOT_DIR}}/.talos.env
       - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2
-      - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}/{{.IP}}.yaml
+      - test -f {{.TALOS_DIR}}/patches/{{.IP}}.yaml
       - test -f {{.ROOT_DIR}}/.talosconfig
       - which minijinja-cli op talosctl
 
   upgrade-node:
     silent: false
-    desc: Upgrade Talos on a single node [IP=required]
+    desc: Upgrade Talos on a single node [IP=required] [VERSION=optional]
     cmds:
-      - task: down
+      # - task: down
       - talosctl --nodes {{.IP}} upgrade --image="{{.TALOS_IMAGE}}" --timeout=10m
-      - talosctl --nodes {{.IP}} health
+      - |
+        if [ "{{.TALOS_MACHINE_TYPE}}" = "worker" ]; then
+          echo "Checking worker node health..."
+          talosctl --nodes {{.IP}} service kubelet status
+        else
+          echo "Checking control plane health..."
+          talosctl --nodes {{.IP}} health
+        fi
       - task: up
     vars:
       TALOS_MACHINE_TYPE:
         sh: talosctl --nodes {{.IP}} get machinetypes --output jsonpath='{.spec}'
       TALOS_IMAGE:
-        sh: minijinja-cli {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2 | yq '.machine.install.image' -
+        sh: |
+          if [ -n "{{.VERSION}}" ]; then
+            echo "ghcr.io/siderolabs/installer:v{{.VERSION}}"
+          else
+            minijinja-cli {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2 | yq '.machine.install.image' -
+          fi
     requires:
       vars: [IP]
     preconditions:
@@ -45,7 +76,7 @@ tasks:
       - talosctl config info
       - test -f {{.ROOT_DIR}}/.talos.env
       - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2
-      - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}/{{.IP}}.yaml
+      - test -f {{.TALOS_DIR}}/patches/{{.IP}}.yaml
       - test -f {{.ROOT_DIR}}/.talosconfig
       - which minijinja-cli talosctl yq
 
@@ -69,15 +100,17 @@ tasks:
     desc: Reboot Talos on a single node [IP=required] [MODE=default]
     cmds:
       - task: down
-      - talosctl --nodes {{.IP}} reboot --mode={{.MODE}}
-      - talosctl --nodes {{.IP}} health
+      - talosctl --endpoints {{.ENDPOINTS}} --nodes {{.IP}} reboot --mode={{.MODE}}
+      - talosctl --endpoints {{.ENDPOINTS}} --nodes {{.IP}} health
       - task: up
     vars:
       MODE: '{{.MODE | default "default"}}'
+      ENDPOINTS:
+        sh: talosctl config info --output json | jq -r '.endpoints | join(",")'
     requires:
       vars: [IP]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
+      - talosctl --endpoints {{.ENDPOINTS}} --nodes {{.IP}} get machineconfig
       - talosctl config info
       - test -f {{.ROOT_DIR}}/.talos.env
       - test -f {{.ROOT_DIR}}/.talosconfig
@@ -99,11 +132,14 @@ tasks:
   reset-node:
     desc: Reset Talos on a single node [IP=required]
     prompt: Reset Talos node '{{.IP}}' ... continue?
-    cmd: talosctl reset --nodes {{.IP}} --graceful=false
+    cmd: talosctl --endpoints {{.ENDPOINTS}} reset --nodes {{.IP}} --graceful=false
+    vars:
+      ENDPOINTS:
+        sh: talosctl config info --output json | jq -r '.endpoints | join(",")'
     requires:
       vars: [IP]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
+      - talosctl --endpoints {{.ENDPOINTS}} --nodes {{.IP}} get machineconfig
       - talosctl config info
       - test -f {{.ROOT_DIR}}/.talosconfig
       - which talosctl
@@ -131,6 +167,30 @@ tasks:
       - talosctl config info
       - test -f {{.ROOT_DIR}}/.talosconfig
       - which jq talosctl
+
+  list-nodes:
+    desc: List all nodes with their Talos and Kubernetes versions
+    cmd: |
+      printf "%-12s %-15s %-15s %-15s %-18s %-10s\n" "NODE" "IP" "TALOS" "KUBELET" "KERNEL" "STATUS"
+      printf "%-12s %-15s %-15s %-15s %-18s %-10s\n" "----" "--" "-----" "-------" "------" "------"
+
+      for node in $(kubectl get nodes -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | sort); do
+        ip=$(kubectl get node $node -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
+        kubelet=$(kubectl get node $node -o jsonpath='{.status.nodeInfo.kubeletVersion}')
+        talos=$(kubectl get node $node -o jsonpath='{.status.nodeInfo.osImage}' | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
+        kernel=$(kubectl get node $node -o jsonpath='{.status.nodeInfo.kernelVersion}' | cut -d'-' -f1)
+        status=$(kubectl get node $node -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+
+        if [ "$status" = "True" ]; then
+          status="Ready"
+        else
+          status="NotReady"
+        fi
+
+        printf "%-12s %-15s %-15s %-15s %-18s %-10s\n" "$node" "$ip" "$talos" "$kubelet" "$kernel" "$status"
+      done
+    preconditions:
+      - which kubectl
 
   down:
     internal: true
