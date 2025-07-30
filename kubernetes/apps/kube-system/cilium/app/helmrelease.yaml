@@ -32,6 +32,9 @@ spec:
     # Gateway API Support
     gatewayAPI:
       enabled: true
+      gatewayClass:
+        name: cilium
+        default: false
       
     # Skip BGP (not supported by UDM Pro)
     bgpControlPlane:
