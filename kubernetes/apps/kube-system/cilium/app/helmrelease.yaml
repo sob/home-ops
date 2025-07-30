@@ -20,10 +20,49 @@ spec:
     cleanupOnFail: true
     remediation:
       retries: 3
-  valuesFrom:
-    - kind: ConfigMap
-      name: cilium-helm-values
   values:
+    # Core Cilium configuration for UDM Pro with L2 announcements
+    kubeProxyReplacement: true
+    
+    # L2 Announcements (replaces MetalLB)
+    l2announcements:
+      enabled: true
+      # Interfaces will be auto-detected if not specified
+    
+    # Gateway API Support
+    gatewayAPI:
+      enabled: true
+      
+    # Skip BGP (not supported by UDM Pro)
+    bgpControlPlane:
+      enabled: false
+    
+    # LoadBalancer configuration
+    loadBalancer:
+      algorithm: maglev
+      mode: snat  # SNAT mode for better compatibility with L2
+      serviceTopology: true
+    
+    # BPF configuration
+    bpf:
+      masquerade: true
+      tproxy: true
+    
+    # IPAM for LoadBalancer IPs
+    ipam:
+      mode: kubernetes
+      operator:
+        clusterPoolIPv4PodCIDRList:
+          - ${CLUSTER_CIDR}
+    
+    # External workload support
+    externalWorkloads:
+      enabled: false
+    
+    # Security policies
+    policyEnforcementMode: default
+    
+    # Existing Hubble configuration
     hubble:
       enabled: true
       metrics:
