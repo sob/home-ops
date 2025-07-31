@@ -10,7 +10,7 @@ tasks:
   apply-node:
     desc: Apply Talos config to a node [IP=required] [MODE=auto] [TYPE=worker]
     cmds:
-      - minijinja-cli {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2 | op inject | talosctl --nodes {{.IP}} apply-config --insecure --mode {{.MODE}} --config-patch @{{.TALOS_DIR}}/patches/{{.IP}}.yaml --file /dev/stdin
+      - minijinja-cli {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2 | op inject | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --config-patch @{{.TALOS_DIR}}/patches/{{.IP}}.yaml --file /dev/stdin
       - |
         if [ "{{.TALOS_MACHINE_TYPE}}" = "worker" ]; then
           echo "Checking worker node health..."
@@ -99,10 +99,10 @@ tasks:
   reboot-node:
     desc: Reboot Talos on a single node [IP=required] [MODE=default]
     cmds:
-      - task: down
+      #- task: down
       - talosctl --endpoints {{.ENDPOINTS}} --nodes {{.IP}} reboot --mode={{.MODE}}
       - talosctl --endpoints {{.ENDPOINTS}} --nodes {{.IP}} health
-      - task: up
+      #- task: up
     vars:
       MODE: '{{.MODE | default "default"}}'
       ENDPOINTS:
