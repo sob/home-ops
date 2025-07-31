@@ -33,4 +33,4 @@ machine:
     node-role.kubernetes.io/media: "true"
     hardware-type: "media"
   nodeTaints:
-    node-role.kubernetes.io/media: "media:NoSchedule"
+    workload-type: "media:NoSchedule"
