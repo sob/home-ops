@@ -9,6 +9,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: external-secrets-stores
   path: ./kubernetes/apps/network/dns-resolver/nsd
   prune: true
   sourceRef:
@@ -29,6 +31,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: external-secrets-stores
   path: ./kubernetes/apps/network/dns-resolver/dnscrypt
   prune: true
   sourceRef:

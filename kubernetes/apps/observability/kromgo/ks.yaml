@@ -12,6 +12,8 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/external
+  dependsOn:
+    - name: external-secrets-stores
   path: ./kubernetes/apps/observability/kromgo/app
   prune: true
   sourceRef:
