@@ -117,23 +117,49 @@ radarr:
     quality_definition:
       type: movie
     quality_profiles:
-      - name: Remux/Web 1080p
+      - name: HD-1080p
         reset_unmatched_scores:
           enabled: true
         upgrade:
-          allowed: true
-          until_quality: Remux-1080p
+          allowed: false  # No upgrades beyond 1080p
+          until_quality: Web-1080p
           until_score: 10000
         min_format_score: 0
         quality_sort: top
         qualities:
-          - name: Remux-1080p
-          - name: Bluray-1080p
-            enabled: false
           - name: Web-1080p
             qualities:
               - WEBDL-1080p
               - WEBRip-1080p
+          - name: Bluray-1080p
+          - name: HDTV-1080p
+          - name: Web-720p
+            qualities:
+              - WEBDL-720p
+              - WEBRip-720p
+          - name: Bluray-720p
+          - name: HDTV-720p
+      - name: Ultra-HD
+        reset_unmatched_scores:
+          enabled: true
+        upgrade:
+          allowed: true  # Will upgrade from HD to 4K
+          until_quality: Web-2160p
+          until_score: 10000
+        min_format_score: 0
+        quality_sort: top
+        qualities:
+          - name: Web-2160p
+            qualities:
+              - WEBDL-2160p
+              - WEBRip-2160p
+          - name: Bluray-2160p
+          - name: HDTV-2160p
+          - name: Web-1080p
+            qualities:
+              - WEBDL-1080p
+              - WEBRip-1080p
+          - name: Bluray-1080p
           - name: HDTV-1080p
     custom_formats:
       - trash_ids:
@@ -182,7 +208,8 @@ radarr:
           - 2a6039655313bf5dab1e43523b62c374  # MA
           - 16622a6911d1ab5d5b8b713d5b0036d4  # CRiT
         quality_profiles:
-          - name: Remux/Web 1080p
+          - name: HD-1080p
+          - name: Ultra-HD
       - trash_ids:
           # Streaming Services
           - b3b3a6ac74ecbd56bcdbefa4799fb9df  # AMZN
@@ -200,5 +227,6 @@ radarr:
           - e36a0ba1bc902b26ee40818a1d59b8bd  # PMTP
           - c2863d2a50c9acad1fb50e53ece60817  # STAN
         quality_profiles:
-          - name: Remux/Web 1080p
+          - name: HD-1080p
+          - name: Ultra-HD
             score: 0
