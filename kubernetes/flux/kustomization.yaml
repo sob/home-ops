@@ -2,6 +2,4 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources:
-  - cluster-infrastructure.yaml
-  - cluster-apps.yaml
+# This file is kept empty as flux-system points directly to kubernetes/apps
