@@ -91,7 +91,11 @@ spec:
         globalMounts:
           - path: /app/config
       cache:
-        existingClaim: jellyseerr-cache
+        type: persistentVolumeClaim
+        storageClass: openebs-hostpath
+        retain: false
+        accessMode: ReadWriteOnce
+        size: 15Gi
         globalMounts:
           - path: /app/config/cache
       config-logs:
