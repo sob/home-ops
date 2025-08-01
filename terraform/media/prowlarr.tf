@@ -85,9 +85,3 @@ resource "prowlarr_application_readarr" "readarr" {
   api_key = module.secrets.items["readarr"].READARR_API_KEY
   sync_categories = [3030, 7000]
 }
-
-resource "prowlarr_indexer" "nzbfinder.ws" {
-  enable = "true"
-  name = "nzbfinder.ws"
-  implementation = ""
-}

@@ -25,6 +25,10 @@ terraform {
       source = "1password/onepassword"
       version = "2.1.2"
     }
+    restapi = {
+      source  = "Mastercard/restapi"
+      version = "~> 1.18"
+    }
   }
 }
 
@@ -35,5 +39,5 @@ provider "onepassword" {
 module "secrets" {
   source = "./modules/onepassword"
   vault = "STONEHEDGES"
-  items = ["lidarr", "prowlarr", "sonarr", "radarr", "readarr", "sabnzbd"]
+  items = ["lidarr", "prowlarr", "sonarr", "radarr", "readarr", "sabnzbd", "cluster-secrets"]
 }
