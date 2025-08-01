@@ -32,7 +32,7 @@ servers:
       - name: forward
         parameters: ${SECRET_INTERNAL_DOMAIN}. ${SECRET_METAL_GATEWAY}
       - name: forward
-        parameters: . /etc/resolv.conf
+        parameters: . ${SECRET_METAL_GATEWAY}
       - name: cache
         parameters: 30
       - name: loop
