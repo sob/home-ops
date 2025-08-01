@@ -117,7 +117,7 @@ radarr:
     quality_definition:
       type: movie
     quality_profiles:
-      - name: HD-1080p
+      - name: HD - 720p/1080p
         reset_unmatched_scores:
           enabled: true
         upgrade:
@@ -208,7 +208,7 @@ radarr:
           - 2a6039655313bf5dab1e43523b62c374  # MA
           - 16622a6911d1ab5d5b8b713d5b0036d4  # CRiT
         quality_profiles:
-          - name: HD-1080p
+          - name: HD - 720p/1080p
           - name: Ultra-HD
       - trash_ids:
           # Streaming Services
@@ -227,6 +227,6 @@ radarr:
           - e36a0ba1bc902b26ee40818a1d59b8bd  # PMTP
           - c2863d2a50c9acad1fb50e53ece60817  # STAN
         quality_profiles:
-          - name: HD-1080p
+          - name: HD - 720p/1080p
           - name: Ultra-HD
             score: 0
