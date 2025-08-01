@@ -9,3 +9,7 @@ patches:
   - target:
       kind: HelmRelease
     path: patches/helm-dependencies.yaml
+  - target:
+      kind: Kustomization
+      group: kustomize.toolkit.fluxcd.io
+    path: patches/kustomization-dependencies.yaml
