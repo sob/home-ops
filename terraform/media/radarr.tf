@@ -7,10 +7,6 @@ resource "radarr_root_folder" "movies" {
   path = "/media/Library/movies"
 }
 
-resource "radarr_root_folder" "movies-uhd" {
-  path = "/media/Library/movies-uhd"
-}
-
 resource "radarr_download_client_sabnzbd" "sabnzbd" {
   enable                     = true
   priority                   = 1
@@ -31,7 +27,7 @@ resource "radarr_remote_path_mapping" "sabnzbd" {
 }
 
 resource "radarr_host" "radarr" {
-  depends_on = [ radarr_root_folder.movies, radarr_root_folder.movies-uhd, radarr_download_client_sabnzbd.sabnzbd ]
+  depends_on = [ radarr_root_folder.movies, radarr_download_client_sabnzbd.sabnzbd ]
   launch_browser = true
   port = 80
   url_base = ""

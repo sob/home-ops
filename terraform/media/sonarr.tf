@@ -7,10 +7,6 @@ resource "sonarr_root_folder" "series" {
   path = "/media/Library/series"
 }
 
-resource "sonarr_root_folder" "series-uhd" {
-  path = "/media/Library/series-uhd"
-}
-
 resource "sonarr_download_client_sabnzbd" "sabnzbd" {
   enable                     = true
   priority                   = 1
@@ -33,7 +29,6 @@ resource "sonarr_remote_path_mapping" "sabnzbd" {
 resource "sonarr_host" "sonarr" {
   depends_on = [
     sonarr_root_folder.series,
-    sonarr_root_folder.series-uhd,
     sonarr_download_client_sabnzbd.sabnzbd,
     sonarr_remote_path_mapping.sabnzbd
   ]
