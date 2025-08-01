@@ -14,7 +14,7 @@ instance:
     kind: GitRepository
     url: https://github.com/sob/home-ops
     ref: refs/heads/main
-    path: kubernetes/flux
+    path: kubernetes/apps
     interval: 1h
   
   # HelmRepository definitions migrated from kubernetes/flux/meta/repositories/helm/
