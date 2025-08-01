@@ -1,0 +1,270 @@
+---
+instance:
+  distribution:
+    # renovate: datasource=github-releases depName=fluxcd/flux2
+    version: 2.6.4
+  cluster:
+    networkPolicy: false
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+  sync:
+    kind: GitRepository
+    url: https://github.com/sob/home-ops
+    ref: refs/heads/main
+    path: kubernetes/flux
+    interval: 1h
+  
+  # HelmRepository definitions migrated from kubernetes/flux/meta/repositories/helm/
+  helmRepositories:
+    - name: authentik
+      namespace: flux-system
+      interval: 30m
+      url: https://charts.goauthentik.io
+      timeout: 3m
+    
+    - name: backube
+      namespace: flux-system
+      interval: 2h
+      url: https://backube.github.io/helm-charts/
+    
+    - name: bjw-s
+      namespace: flux-system
+      type: oci
+      interval: 5m
+      url: oci://ghcr.io/bjw-s/helm
+    
+    - name: cilium
+      namespace: flux-system
+      interval: 1h
+      url: https://helm.cilium.io
+    
+    - name: cloudnative-pg
+      namespace: flux-system
+      interval: 2h
+      url: https://cloudnative-pg.github.io/charts
+    
+    - name: controlplaneio
+      namespace: flux-system
+      type: oci
+      interval: 30m
+      url: oci://ghcr.io/controlplaneio-fluxcd/charts
+    
+    - name: coredns
+      namespace: flux-system
+      interval: 1h
+      url: https://coredns.github.io/helm
+    
+    - name: csi-driver-nfs
+      namespace: flux-system
+      interval: 30m
+      url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+      timeout: 3m
+    
+    - name: descheduler
+      namespace: flux-system
+      interval: 2h
+      url: https://kubernetes-sigs.github.io/descheduler
+    
+    - name: emberstack
+      namespace: flux-system
+      interval: 2h
+      url: https://emberstack.github.io/helm-charts
+    
+    - name: emqx
+      namespace: flux-system
+      interval: 2h
+      url: https://repos.emqx.io/charts
+    
+    - name: external-dns
+      namespace: flux-system
+      interval: 1h
+      url: https://kubernetes-sigs.github.io/external-dns
+    
+    - name: external-secrets
+      namespace: flux-system
+      interval: 2h
+      url: https://charts.external-secrets.io
+    
+    - name: fairwinds
+      namespace: flux-system
+      interval: 2h
+      url: https://charts.fairwinds.com/stable
+    
+    - name: grafana
+      namespace: flux-system
+      interval: 2h
+      url: https://grafana.github.io/helm-charts
+    
+    - name: hajimari
+      namespace: flux-system
+      interval: 2h
+      url: https://hajimari.io
+    
+    - name: ingress-nginx
+      namespace: flux-system
+      interval: 1h
+      url: https://kubernetes.github.io/ingress-nginx
+    
+    - name: intel
+      namespace: flux-system
+      interval: 2h
+      url: https://intel.github.io/helm-charts
+    
+    - name: jetstack
+      namespace: flux-system
+      interval: 1h
+      url: https://charts.jetstack.io
+    
+    - name: k8s-gateway
+      namespace: flux-system
+      interval: 1h
+      url: https://ori-edge.github.io/k8s_gateway
+    
+    - name: kyverno
+      namespace: flux-system
+      type: oci
+      interval: 5m
+      url: oci://ghcr.io/kyverno/charts
+    
+    - name: metrics-server
+      namespace: flux-system
+      interval: 1h
+      url: https://kubernetes-sigs.github.io/metrics-server
+    
+    - name: nfs-provisioner
+      namespace: flux-system
+      interval: 30m
+      url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+      timeout: 3m
+    
+    - name: node-feature-discovery
+      namespace: flux-system
+      interval: 2h
+      url: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+    
+    - name: openebs
+      namespace: flux-system
+      interval: 1h
+      url: https://openebs.github.io/openebs
+    
+    - name: piraeus
+      namespace: flux-system
+      interval: 2h
+      url: https://piraeus.io/helm-charts/
+    
+    - name: postfinance
+      namespace: flux-system
+      interval: 1h
+      url: https://postfinance.github.io/kubelet-csr-approver
+    
+    - name: prometheus-community
+      namespace: flux-system
+      type: oci
+      interval: 5m
+      url: oci://ghcr.io/prometheus-community/charts
+    
+    - name: rook-ceph
+      namespace: flux-system
+      interval: 2h
+      url: https://charts.rook.io/release
+    
+    - name: spegel
+      namespace: flux-system
+      type: oci
+      interval: 5m
+      url: oci://ghcr.io/spegel-org/helm-charts
+    
+    - name: stakater
+      namespace: flux-system
+      type: oci
+      interval: 5m
+      url: oci://ghcr.io/stakater/charts
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: flux
+  kustomize:
+    patches:
+      - # Add Sops decryption to 'flux-system' Kustomization
+        patch: |
+          - op: add
+            path: /spec/decryption
+            value:
+              provider: sops
+              secretRef:
+                name: sops-age
+        target:
+          group: kustomize.toolkit.fluxcd.io
+          kind: Kustomization
+      - # Increase the number of workers
+        patch: |
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --concurrent=10
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --requeue-dependency=5s
+        target:
+          kind: Deployment
+          name: (kustomize-controller|helm-controller|source-controller)
+      - # Increase the memory limits
+        patch: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: all
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: manager
+                    resources:
+                      limits:
+                        memory: 2Gi
+        target:
+          kind: Deployment
+          name: (kustomize-controller|helm-controller|source-controller)
+      - # Enable in-memory kustomize builds
+        patch: |
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --concurrent=20
+          - op: replace
+            path: /spec/template/spec/volumes/0
+            value:
+              name: temp
+              emptyDir:
+                medium: Memory
+        target:
+          kind: Deployment
+          name: kustomize-controller
+      - # Enable Helm repositories caching
+        patch: |
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --helm-cache-max-size=10
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --helm-cache-ttl=60m
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --helm-cache-purge-interval=5m
+        target:
+          kind: Deployment
+          name: source-controller
+      - # Flux near OOM detection for Helm
+        patch: |
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --feature-gates=OOMWatch=true
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --oom-watch-memory-threshold=95
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --oom-watch-interval=500ms
+        target:
+          kind: Deployment
+          name: helm-controller

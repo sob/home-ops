@@ -1,0 +1,140 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-infrastructure-storage
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/storage
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 10m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-infrastructure-network
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/network
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 10m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-infrastructure-kube-system
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/kube-system
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 10m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-infrastructure-cert-manager
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/cert-manager
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 10m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-infrastructure-external-secrets
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/external-secrets
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 10m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  # External secrets must come up before apps that use it
+  dependsOn:
+    - name: cluster-infrastructure-network
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-infrastructure-kyverno
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/kyverno
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 10m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-infrastructure-rook-ceph
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/rook-ceph
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 15m  # Rook-Ceph needs more time
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  # Rook-Ceph depends on network being ready
+  dependsOn:
+    - name: cluster-infrastructure-network

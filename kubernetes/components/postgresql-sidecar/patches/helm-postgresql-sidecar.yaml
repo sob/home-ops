@@ -1,0 +1,73 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: required-for-kustomize-but-not-used
+spec:
+  values:
+    controllers:
+      main:
+        containers:
+          postgres:
+            image:
+              repository: docker.io/postgres
+              tag: 16-alpine
+            env:
+              PGDATA: /var/lib/postgresql/data/pgdata
+              # Performance tuning for small instances
+              POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+              POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+            envFrom:
+              - secretRef:
+                  name: ${APP}-db-secret
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 10m        # PostgreSQL is very efficient at idle
+                memory: 128Mi   # Minimum for PostgreSQL to start
+              limits:
+                cpu: 500m       # Allow bursts during queries
+                memory: 512Mi   # Enough for small databases
+    
+    persistence:
+      postgres-data:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: ceph-block  # Replicated storage for data safety
+        accessMode: ReadWriteOnce
+        size: 8Gi
+        globalMounts:
+          - path: /var/lib/postgresql/data
+            subPath: postgres
+      
+      # PostgreSQL temp files and runtime data
+      postgres-temp:
+        enabled: true
+        type: emptyDir
+        sizeLimit: 2Gi
+        globalMounts:
+          - path: /tmp
+          - path: /var/run/postgresql
+          - path: /dev/shm  # For shared memory

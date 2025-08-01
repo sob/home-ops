@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - externalsecret.yaml
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: patches/helm-postgresql-sidecar.yaml
+  - target:
+      kind: HelmRelease
+    path: patches/helm-initContainers.yaml
