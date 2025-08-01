@@ -64,3 +64,65 @@ resource "radarr_host" "radarr" {
     update_automatically = false
   }
 }
+
+resource "radarr_naming" "movies" {
+  rename_movies = true
+  replace_illegal_characters = true
+  colon_replacement_format = "spaceDashSpace"  # Replace with Space Dash Space
+
+  # Movie Folder Format
+  # Creates: /media/Library/movies/Movie Title (2024) {imdb-tt0133093}
+  movie_folder_format = "{Movie Title} ({Release Year}) {imdb-{ImdbId}}"
+
+  # Standard Movie Format
+  # Creates: Movie Title (2024) - [WEBDL-2160p][HDR10][DTS-HD MA 7.1][x265]-ReleaseGroup.mkv
+  standard_movie_format = "{Movie Title} ({Release Year}) - {[Quality Full]}{[MediaInfo VideoDynamicRangeType]}{[MediaInfo AudioCodec}{ MediaInfo AudioChannels]}{[MediaInfo VideoCodec]}-{Release Group}"
+}
+
+resource "radarr_media_management" "movies" {
+  auto_unmonitor_previously_downloaded_movies = true
+  auto_rename_folders = false
+  create_empty_movie_folders = false
+  delete_empty_folders = true
+  enable_media_info = true
+
+  import_extra_files = true
+  extra_file_extensions = "srt,sub,idx,ass,ssa"  # Subtitle formats
+
+  download_propers_and_repacks = "preferAndUpgrade"
+  rescan_after_refresh = "always"
+  file_date = "none"
+  recycle_bin = ""
+  recycle_bin_cleanup_days = 7
+
+  set_permissions_linux = false
+  chmod_folder = "755"
+  chown_group = ""
+
+  skip_free_space_check_when_importing = false
+  minimum_free_space_when_importing = 100  # MB
+
+  copy_using_hardlinks = false  # Can't use hardlinks over NFS
+  paths_default_static = false
+}
+
+resource "radarr_notification_plex" "plex" {
+  name                        = "kubernetes"
+  on_download                 = true
+  on_upgrade                  = true
+  on_rename                   = true
+  on_movie_added              = false
+  on_movie_delete             = true
+  on_movie_file_delete        = true
+  on_movie_file_delete_for_upgrade = true
+
+  host        = "plex.default.svc.cluster.local"
+  port        = 32400
+  use_ssl     = false
+  auth_token  = module.secrets.items["plex"].PLEX_TOKEN
+
+  update_library = true
+  include_health_warnings = false
+
+  tags = []
+}

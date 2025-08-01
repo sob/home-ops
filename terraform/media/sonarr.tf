@@ -66,3 +66,80 @@ resource "sonarr_host" "sonarr" {
     update_automatically = false
   }
 }
+
+resource "sonarr_naming" "series" {
+  rename_episodes = true
+  replace_illegal_characters = true
+  colon_replacement_format = 4  # Replace with Space Dash Space
+  multi_episode_style = 0  # Extend
+
+  # Series Folder Format
+  # Creates: /media/Library/series/Series Title (2024) {tvdb-12345}
+  series_folder_format = "{Series Title} ({Series Year}) {tvdb-{TvdbId}}"
+
+  # Season Folder Format
+  # Creates: Season 01
+  season_folder_format = "Season {season:00}"
+
+  # Specials Folder Format
+  specials_folder_format = "Specials"
+
+  # Standard Episode Format
+  # Creates: Series Title (2024) - S01E01 - Episode Title - [WEBDL-2160p][HDR10][DTS-HD MA 5.1][x265]-ReleaseGroup.mkv
+  standard_episode_format = "{Series Title} ({Series Year}) - S{season:00}E{episode:00} - {Episode Title} - {[Quality Full]}{[MediaInfo VideoDynamicRangeType]}{[MediaInfo AudioCodec}{ MediaInfo AudioChannels]}{[MediaInfo VideoCodec]}-{Release Group}"
+
+  # Daily Episode Format (for daily shows like talk shows)
+  daily_episode_format = "{Series Title} ({Series Year}) - {Air-Date} - {Episode Title} - {[Quality Full]}{[MediaInfo VideoDynamicRangeType]}{[MediaInfo AudioCodec}{ MediaInfo AudioChannels]}{[MediaInfo VideoCodec]}-{Release Group}"
+
+  # Anime Episode Format
+  anime_episode_format = "{Series Title} ({Series Year}) - S{season:00}E{episode:00} - {absolute:000} - {Episode Title} - {[Quality Full]}{[MediaInfo VideoDynamicRangeType]}{[MediaInfo AudioCodec}{ MediaInfo AudioChannels]}{[MediaInfo VideoCodec]}-{Release Group}"
+}
+
+resource "sonarr_media_management" "series" {
+  unmonitor_previous_episodes = true
+  hardlinks_copy = false  # Can't use hardlinks over NFS
+  create_empty_folders = false
+  delete_empty_folders = true
+  enable_media_info = true
+
+  import_extra_files = true
+  extra_file_extensions = "srt,sub,idx,ass,ssa"  # Subtitle formats
+
+  download_propers_repacks = "preferAndUpgrade"
+  rescan_after_refresh = "always"
+  file_date = "none"
+  recycle_bin_path = ""
+  recycle_bin_days = 7
+
+  set_permissions = false
+  chmod_folder = "755"
+  chown_group = ""
+
+  skip_free_space_check = false
+  minimum_free_space = 100  # MB
+
+  # Episode Title Required
+  episode_title_required = "always"
+}
+
+resource "sonarr_notification_plex" "plex" {
+  name                          = "kubernetes"
+  on_download                   = true
+  on_upgrade                    = true
+  on_rename                     = true
+  on_series_add                 = false
+  on_series_delete              = true
+  on_episode_file_delete        = true
+  on_episode_file_delete_for_upgrade = true
+  on_import_complete            = false
+
+  host        = "plex.default.svc.cluster.local"
+  port        = 32400
+  use_ssl     = false
+  auth_token  = module.secrets.items["plex"].PLEX_TOKEN
+
+  update_library = true
+  include_health_warnings = false
+
+  tags = []
+}
