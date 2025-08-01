@@ -39,5 +39,5 @@ provider "onepassword" {
 module "secrets" {
   source = "./modules/onepassword"
   vault = "STONEHEDGES"
-  items = ["lidarr", "prowlarr", "sonarr", "radarr", "readarr", "sabnzbd", "cluster-secrets"]
+  items = ["lidarr", "prowlarr", "sonarr", "radarr", "readarr", "sabnzbd", "cluster-secrets", "plex"]
 }
