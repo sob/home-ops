@@ -106,6 +106,15 @@ releases:
     values: ['../kubernetes/apps/flux-system/flux-instance/app/helm/values.yaml']
     needs: ['flux-system/flux-operator']
     wait: false
+    hooks:
+      - # Apply cluster secrets after flux-instance is ready
+        events: ['postsync']
+        command: kubectl
+        args:
+          - apply
+          - --filename
+          - ../kubernetes/apps/flux-system/flux-instance/app/cluster-secrets.yaml
+        showlogs: true
 
 # Post-sync hooks
 hooks:
