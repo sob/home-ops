@@ -81,7 +81,7 @@ releases:
     hooks:
       - events: ['prepare']
         showlogs: true
-        command: kubectl
+        command: sh
         args:
           - -c
           - "op inject -i helm/onepassword-connect-secret.yaml.tmpl | kubectl apply -f -"
