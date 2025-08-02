@@ -96,8 +96,7 @@ service:
     controller: main
     ports:
       http:
-        port: 8080
-        targetPort: 80
+        port: *apiPort
 persistence:
   config:
     type: emptyDir

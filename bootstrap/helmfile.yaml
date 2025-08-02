@@ -49,6 +49,15 @@ releases:
     version: 0.18.2
     values: ['../kubernetes/apps/external-secrets/external-secrets/app/helm/helm-values.yaml']
     hooks:
+      - # Clean up any existing webhook configs to avoid certificate issues
+        events: ['prepare']
+        command: sh
+        args:
+          - -c
+          - |
+            kubectl delete validatingwebhookconfiguration externalsecret-validate secretstore-validate clustersecretstore-validate 2>/dev/null || true
+            kubectl delete secret -n external-secrets external-secrets-webhook 2>/dev/null || true
+        showlogs: true
       - # Apply cluster secret store
         events: ['postsync']
         command: kubectl
@@ -71,14 +80,14 @@ releases:
     needs:
       - external-secrets/external-secrets
     values:
-      - helm/onepassword-connect-app-template-values.yaml
+      - ../kubernetes/apps/external-secrets/onepassword-connect/app/helm/values.yaml
 
   # 7. Flux Operator
   - name: flux-operator
     namespace: flux-system
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
     version: 0.26.0
-    values: ['../kubernetes/apps/flux-system/flux-operator/app/helm/helm-values.yaml']
+    values: ['../kubernetes/apps/flux-system/flux-operator/app/helm/values.yaml']
     needs: ['external-secrets/external-secrets']
 
   # 8. Flux Instance
