@@ -68,7 +68,7 @@ releases:
           - --server-side
           - --field-manager=kustomize-controller
           - --filename
-          - ../kubernetes/apps/external-secrets/external-secrets/app/clustersecretstore.yaml
+          - ../kubernetes/apps/external-secrets/external-secrets/stores/clustersecretstore.yaml
           - --wait=true
         showlogs: true
     needs: ['cert-manager/cert-manager']
@@ -78,6 +78,13 @@ releases:
     namespace: external-secrets
     chart: oci://ghcr.io/bjw-s/helm/app-template
     version: 3.7.3
+    hooks:
+      - events: ['prepare']
+        showlogs: true
+        command: kubectl
+        args:
+          - -c
+          - "op inject -i helm/onepassword-connect-secret.yaml.tmpl | kubectl apply -f -"
     needs:
       - external-secrets/external-secrets
     values:
