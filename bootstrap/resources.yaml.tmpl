@@ -1,0 +1,67 @@
+---
+# Essential namespaces
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-secrets
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: network
+---
+# 1Password Connect Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: onepassword-connect-secret
+  namespace: external-secrets
+type: Opaque
+stringData:
+  1password-credentials.json: {{ op://STONEHEDGES/jgpib4bppxmzhcg4kmo5lkz4hm/1password-credentials-base64 }}
+  token: {{ op://STONEHEDGES/gg7deoh3wga3jqlt6sqyfifzou/credential }}
+---
+# SOPS Age Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sops-age
+  namespace: flux-system
+type: Opaque
+stringData:
+  age.agekey: |
+    {{ op://STONEHEDGES/age-key/AGE_SECRET_KEY }}
+---
+# HelmRepository for bjw-s charts
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: bjw-s
+  namespace: flux-system
+spec:
+  type: oci
+  interval: 5m
+  url: oci://ghcr.io/bjw-s/helm
+---
+# ClusterSecretStore for 1Password
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: onepassword-connect
+spec:
+  provider:
+    onepassword:
+      connectHost: http://onepassword-connect.external-secrets.svc.cluster.local:8080
+      vaults:
+        STONEHEDGES: 1
+      auth:
+        secretRef:
+          connectTokenSecretRef:
+            name: onepassword-connect-secret
+            namespace: external-secrets
+            key: token
