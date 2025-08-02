@@ -1,11 +1,14 @@
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: flux-operator
-  namespace: flux-system
 spec:
-  interval: 12h
-  url: oci://ghcr.io/controlplaneio-fluxcd/charts
+  interval: 5m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
   ref:
-    tag: flux-operator-0.26.0
+    tag: 0.26.0
+  url: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
