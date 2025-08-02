@@ -27,7 +27,7 @@ terraform {
     }
     restapi = {
       source  = "Mastercard/restapi"
-      version = "~> 1.18"
+      version = "~> 2.0"
     }
   }
 }
