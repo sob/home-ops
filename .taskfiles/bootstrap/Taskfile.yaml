@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  BOOTSTRAP_DIR: "{{.ROOT_DIR}}/bootstrap"
+  SCRIPTS_DIR: "{{.TASKFILE_DIR}}/scripts"
+
+tasks:
+  all:
+    desc: Run complete bootstrap process
+    cmds:
+      - task: validate
+      - task: helmfile-sync
+      - task: verify
+
+  init:
+    desc: Initialize bootstrap dependencies
+    cmds:
+      - brew install helmfile age sops envsubst
+
+  validate:
+    desc: Validate prerequisites and environment
+    preconditions:
+      - sh: command -v helmfile
+        msg: "helmfile is not installed. Run 'task bootstrap:init'"
+      - sh: command -v kubectl
+        msg: "kubectl is not installed"
+      - sh: command -v age
+        msg: "age is not installed. Run 'task bootstrap:init'"
+      - sh: command -v op
+        msg: "1Password CLI (op) is not installed. Install from https://1password.com/downloads/command-line/"
+      - sh: op account list
+        msg: "1Password CLI is not signed in. Run 'op signin'"
+    cmds:
+      - echo "All prerequisites validated ✓"
+
+  age-keygen:
+    desc: Generate new Age encryption key
+    cmds:
+      - age-keygen -o age.agekey
+      - echo "Age key generated at ./age.agekey"
+      - echo "Public key:"
+      - grep "public key:" age.agekey
+
+  export-secrets:
+    desc: Export existing secrets from cluster
+    cmds:
+      - "{{.SCRIPTS_DIR}}/export-secrets.sh"
+
+  helmfile-sync:
+    desc: Run helmfile to install base components
+    dir: "{{.BOOTSTRAP_DIR}}"
+    cmds:
+      - helmfile sync
+
+  verify:
+    desc: Verify bootstrap completed successfully
+    cmds:
+      - "{{.SCRIPTS_DIR}}/verify-bootstrap.sh"
+
+  test-secrets:
+    desc: Test 1Password template rendering
+    dir: "{{.BOOTSTRAP_DIR}}"
+    cmds:
+      - op inject -i resources.yaml.tmpl
+
+  create-resources:
+    desc: Create bootstrap resources (secrets and repositories)
+    dir: "{{.BOOTSTRAP_DIR}}"
+    cmds:
+      - op inject -i resources.yaml.tmpl | kubectl apply -f -
+
+  dry-run:
+    desc: Show what helmfile would do without applying
+    dir: "{{.BOOTSTRAP_DIR}}"
+    cmds:
+      - helmfile diff
