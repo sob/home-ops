@@ -15,10 +15,6 @@ webhook:
     enabled: true
     interval: 1m
   tolerations: *tolerations
-  certManager:
-    enabled: true
-    # cert-manager will create certificates for the webhook
-    addInjectorAnnotations: true
 certController:
   image:
     repository: ghcr.io/external-secrets/external-secrets
@@ -26,8 +22,6 @@ certController:
     enabled: true
     interval: 1m
   tolerations: *tolerations
-  # Use cert-manager for webhook certificates
-  create: false
 serviceMonitor:
   enabled: true
   interval: 1m
