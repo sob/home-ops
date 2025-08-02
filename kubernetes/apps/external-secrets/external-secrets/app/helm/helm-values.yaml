@@ -2,7 +2,6 @@
 installCRDs: true
 replicaCount: 1
 leaderElect: true
-priorityClassName: &priorityClass infrastructure-critical
 image:
   repository: ghcr.io/external-secrets/external-secrets
 tolerations: &tolerations
@@ -10,27 +9,25 @@ tolerations: &tolerations
     operator: "Exists"
     effect: "NoSchedule"
 webhook:
-  priorityClassName: *priorityClass
   image:
     repository: ghcr.io/external-secrets/external-secrets
   serviceMonitor:
     enabled: true
     interval: 1m
   tolerations: *tolerations
+  certManager:
+    enabled: true
+    # cert-manager will create certificates for the webhook
+    addInjectorAnnotations: true
 certController:
-  priorityClassName: *priorityClass
   image:
     repository: ghcr.io/external-secrets/external-secrets
   serviceMonitor:
     enabled: true
     interval: 1m
   tolerations: *tolerations
+  # Use cert-manager for webhook certificates
+  create: false
 serviceMonitor:
   enabled: true
   interval: 1m
-resources:
-  requests:
-    memory: 128Mi
-    cpu: 50m
-  limits:
-    memory: 256Mi
