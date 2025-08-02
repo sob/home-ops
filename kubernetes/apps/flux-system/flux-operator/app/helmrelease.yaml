@@ -9,10 +9,10 @@ spec:
   chart:
     spec:
       chart: flux-operator
-      version: 0.25.0
+      version: 0.26.0
       sourceRef:
-        kind: HelmRepository
-        name: controlplaneio
+        kind: OCIRepository
+        name: flux-operator
         namespace: flux-system
   install:
     remediation:
