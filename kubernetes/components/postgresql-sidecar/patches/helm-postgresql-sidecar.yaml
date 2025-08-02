@@ -11,7 +11,7 @@ spec:
           postgres:
             image:
               repository: docker.io/postgres
-              tag: 16-alpine
+              tag: 17-alpine
             env:
               PGDATA: /var/lib/postgresql/data/pgdata
               # Performance tuning for small instances
