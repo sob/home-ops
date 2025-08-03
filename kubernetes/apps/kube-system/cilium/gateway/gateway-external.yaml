@@ -30,4 +30,4 @@ spec:
           from: All
   addresses:
     - type: IPAddress
-      value: ${CLUSTER_VIP_EXTERNAL}
+      value: ${SECRET_CILIUM_EXTERNAL_VIP}
