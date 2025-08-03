@@ -29,5 +29,10 @@ spec:
       config:
         core:
           sources: ["pci", "system", "usb"]
+      tolerations:
+        - key: "workload-type"
+          operator: "Equal"
+          value: "media"
+          effect: "NoSchedule"
     prometheus:
       enable: true
