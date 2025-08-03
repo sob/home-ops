@@ -15,7 +15,9 @@ spec:
     - ../../../../components/volsync
   dependsOn:
     - name: dragonfly-cluster
+      namespace: database
     - name: external-secrets-stores
+      namespace: external-secrets
   path: ./kubernetes/apps/security/authentik/app
   prune: true
   sourceRef:
