@@ -29,3 +29,6 @@ spec:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 5Gi
+      VOLSYNC_UID: "1032"
+      VOLSYNC_GID: "65536"
+      VOLSYNC_FSGROUP: "65536"
