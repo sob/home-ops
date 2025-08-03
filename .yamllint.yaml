@@ -1,0 +1,38 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 250
+    level: warning
+    ignore: |
+      # Allow long lines for yaml-language-server schema URLs
+      .*# yaml-language-server:.*
+      .*https://.*\.json.*
+      .*https://.*\.yaml.*
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no', 'on']
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  brackets:
+    forbid: false
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0
+  braces:
+    forbid: false
+    min-spaces-inside: 1
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0
+
+ignore: |
+  .github/
+  *.sops.yaml
+  kubernetes/apps/*/schemas/
+  kubernetes/apps/*/resources/

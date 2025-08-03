@@ -42,8 +42,8 @@ spec:
               tag: 3.1.1@sha256:ba4f08004c19374fe05f5e3c454ab1a1e470359a743e51238c689685edf696f8
             command: ['/bin/sh', '/scripts/export.sh']
             envFrom:
-            - secretRef:
-                name: cert-exporter-doom-secret
+              - secretRef:
+                  name: cert-exporter-doom-secret
     persistence:
       scripts:
         name: cert-exporter-configmap

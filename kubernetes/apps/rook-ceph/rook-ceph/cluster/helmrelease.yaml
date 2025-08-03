@@ -67,8 +67,8 @@ spec:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/control-plane
-                operator: Exists
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
 
     controlPlanePreferredAffinity: &controlPlanePreferredAffinity
       nodeAffinity:
@@ -192,10 +192,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                - key: storage.rook.io/ceph
-                  operator: In
-                  values:
-                    - "true"
+                  - key: storage.rook.io/ceph
+                    operator: In
+                    values:
+                      - "true"
 
     storage:
       useAllNodes: false
@@ -295,5 +295,3 @@ spec:
       name: csi-ceph-filesystem
       isDefault: false
       deletionPolicy: Delete
-
-

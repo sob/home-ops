@@ -25,8 +25,6 @@ spec:
   dependsOn:
     - name: intel-device-plugin-gpu
       namespace: kube-system
-    # - name: rook-ceph-cluster
-    #   namespace: rook-ceph
   values:
     controllers:
       main:
@@ -52,7 +50,7 @@ spec:
               READSB_ENABLE_BIASTEE: true
               TAR1090_RANGE_OUTLINE_WIDTH: 2.0
               TAR1090_RANGERINGSDISTANCES: 50,100,150,200
-              TAR1090_USEROUTEAPI: ON
+              TAR1090_USEROUTEAPI: true
               LOGLEVEL: verbose
               GPSD_DEBUG: true
             envFrom:
@@ -123,11 +121,11 @@ spec:
         globalMounts:
           - path: /tmp
       usb:
-        globalMounts:
-        - path: /dev/bus/usb
+        type: hostPath
         hostPath: /dev/bus/usb
         hostPathType: Directory
-        type: hostPath
+        globalMounts:
+          - path: /dev/bus/usb
       log-cache:
         type: emptyDir
         medium: Memory
