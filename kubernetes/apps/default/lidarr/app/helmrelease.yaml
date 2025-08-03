@@ -86,11 +86,11 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: node-role.kubernetes.io/media
-                operator: In
-                values:
-                - "true"
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/media
+                    operator: In
+                    values:
+                      - "true"
     service:
       app:
         controller: main

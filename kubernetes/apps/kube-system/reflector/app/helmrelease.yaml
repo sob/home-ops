@@ -24,16 +24,16 @@ spec:
       retries: 3
   values:
     fullnameOverride: reflector
-    
+
     # Watch all namespaces
     configuration:
       logging:
         minimumLevel: Information
-    
+
     # ServiceMonitor for Prometheus
     serviceMonitor:
       enabled: true
-    
+
     # Resources
     resources:
       requests:

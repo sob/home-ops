@@ -6,11 +6,11 @@ components:
   - ../../components/common
 resources:
   - ./gatus/ks.yaml
-  #- ./grafana/ks.yaml
+# - ./grafana/ks.yaml
   - ./kromgo/ks.yaml
-  #- ./kube-prometheus-stack/ks.yaml
-  #- ./loki/ks.yaml
-  #- ./prometheus-operator-crds/ks.yaml
-  #- ./promtail/ks.yaml
-  #- ./unpoller/ks.yaml
-  #- ./exporters
+# - ./kube-prometheus-stack/ks.yaml
+# - ./loki/ks.yaml
+# - ./prometheus-operator-crds/ks.yaml
+# - ./promtail/ks.yaml
+# - ./unpoller/ks.yaml
+# - ./exporters
