@@ -2,7 +2,6 @@
 installCRDs: true
 replicaCount: 1
 leaderElect: true
-priorityClassName: &priorityClass infrastructure-critical
 image:
   repository: ghcr.io/external-secrets/external-secrets
 tolerations: &tolerations
@@ -10,7 +9,6 @@ tolerations: &tolerations
     operator: "Exists"
     effect: "NoSchedule"
 webhook:
-  priorityClassName: *priorityClass
   image:
     repository: ghcr.io/external-secrets/external-secrets
   serviceMonitor:
@@ -18,7 +16,6 @@ webhook:
     interval: 1m
   tolerations: *tolerations
 certController:
-  priorityClassName: *priorityClass
   image:
     repository: ghcr.io/external-secrets/external-secrets
   serviceMonitor:
