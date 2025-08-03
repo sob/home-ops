@@ -28,4 +28,4 @@ spec:
           from: All
   addresses:
     - type: IPAddress
-      value: ${CLUSTER_VIP_INTERNAL}
+      value: ${SECRET_CILIUM_INTERNAL_VIP}
