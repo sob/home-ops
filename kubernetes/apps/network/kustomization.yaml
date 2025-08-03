@@ -4,7 +4,6 @@ kind: Kustomization
 components:
   - ../../components/common
 resources:
-  - ./namespace.yaml
   - ./cloudflared/ks.yaml
   - ./echo-server/ks.yaml
   - ./dns-resolver/ks.yaml

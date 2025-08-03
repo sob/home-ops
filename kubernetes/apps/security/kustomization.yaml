@@ -4,7 +4,4 @@ kind: Kustomization
 components:
   - ../../components/common
 resources:
-  # Pre Flux-Kustomizations
-  - ./namespace.yaml
-  # Flux-Kustomizations
   - ./authentik/ks.yaml
