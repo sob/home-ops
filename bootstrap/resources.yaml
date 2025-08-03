@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: onepassword-connect-secret
+  namespace: external-secrets
+stringData:
+  1password-credentials.json: "op://STONEHEDGES/STONEHEDGES Credentials File/1password-credentials-base64"
+  token: "op://STONEHEDGES/gg7deoh3wga3jqlt6sqyfifzou/credential"

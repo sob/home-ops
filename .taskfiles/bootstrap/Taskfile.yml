@@ -26,6 +26,7 @@ tasks:
     desc: Bootstrap Apps
     prompt: Bootstrap apps into the cluster?
     cmds:
+      - cat bootstrap/resources.yaml | op inject | kubectl apply -f -
       - helmfile --file bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
     preconditions:
       - test -f bootstrap/helmfile.yaml
