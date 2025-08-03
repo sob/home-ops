@@ -28,13 +28,9 @@ hooks:
         kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
         # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
         kubectl apply --server-side --force-conflicts -f https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.84.0/stripped-down-crds.yaml
-  - events: ["prepare"]
-    command: "/bin/sh" # TODO: also install the age key secret
-    args:
-      - "-c"
-      - |
         kubectl apply --server-side --force-conflicts -f ../kubernetes/flux/components/sops/cluster-secrets.secret.sops.yaml
         kubectl apply --server-side --force-conflicts -f ../kubernetes/bootstrap/flux/github-deploy-key.sops.yaml"
+        kubectl apply --server-side --force-conflicts -f ../kubernetes/apps/external-secrets/onepassword-connect/app/onepassword-connect.secret.sops.yaml"
 
 releases:
   - name: cilium
@@ -67,6 +63,34 @@ releases:
     version: v1.18.2
     values: ['../kubernetes/apps/cert-manager/cert-manager/app/helm-values.yaml']
     needs: ['kube-system/coredns']
+
+  - name: onepassword-connect
+    namespace: external-secrets
+    atomic: true
+    chart: oci://ghcr.io/bjw-s/helm-charts/app-template
+    version: 3.6.0
+    values: ['../kubernetes/apps/external-secrets/onepassword-connect/app/helm-values.yaml']
+    needs: ['cert-manager/cert-manager']
+
+  - name: external-secrets
+    namespace: external-secrets
+    chart: oci://ghcr.io/external-secrets/charts/external-secrets
+    version: 0.19.0
+    values: ['../kubernetes/apps/external-secrets/external-secrets/app/helm-values.yaml']
+    hooks:
+      - # Apply cluster secret store
+        events: ['postsync']
+        command: kubectl
+        args:
+          - apply
+          - --namespace=external-secrets
+          - --server-side
+          - --field-manager=kustomize-controller
+          - --filename
+          - ../kubernetes/apps/external-secrets/external-secrets/stores/clustersecretstore.yaml
+          - --wait=true
+        showlogs: true
+    needs: ['external-secrets/onepassword-connect']
 
   - name: flux-operator
     namespace: flux-system
