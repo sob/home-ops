@@ -3,8 +3,6 @@ controllers:
     strategy: RollingUpdate
     annotations:
       reloader.stakater.com/auto: "true"
-    pod:
-      priorityClassName: infrastructure-critical
     containers:
       api:
         image:
