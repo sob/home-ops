@@ -23,27 +23,10 @@ tasks:
       - which jq minijinja-cli sops talosctl
 
   apps:
-    desc: Bootstrap Apps [ROOK_DISK=required]
-    summary: |
-      IMPORTANT: All nodes will be used for OSDs and ROOK_DISK must be set to a value that matches the disk model on all nodes (e.g. Micron_7450)
+    desc: Bootstrap Apps
     prompt: Bootstrap apps into the cluster?
     cmds:
-      - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
-      - op run --env-file {{.KUBERNETES_DIR}}/bootstrap/apps/.secrets.env --no-masking -- minijinja-cli {{.KUBERNETES_DIR}}/bootstrap/apps/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
-      - helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --supress-diff
-      - for: ['prometheus-operator-crds', 'wipe-rook']
-        cmd: helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml destroy --selector name={{.ITEM}}
-    env:
-      NODE_COUNT:
-        sh: talosctl config info --output json | jq --raw-output '.nodes | length'
-      ROOK_DISK: '{{.ROOK_DISK}}'
-    requires:
-      vars: [ROOK_DISK]
+      - helmfile --file bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
     preconditions:
-      - op user get --me
-      - talosctl config info
-      - test -f {{.KUBERNETES_DIR}}/.talosconfig
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/templates/resouces.yaml.j2
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/templates/wipe-rook.yaml.gotmpl
+      - test -f bootstrap/helmfile.yaml
       - which curl jq helmfile kubectl op talosctl
