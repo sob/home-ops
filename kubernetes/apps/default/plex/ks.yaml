@@ -32,4 +32,7 @@ spec:
       VOLSYNC_CAPACITY: 30Gi
       VOLSYNC_STORAGECLASS: ceph-block
       VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
+      VOLSYNC_UID: "1030"
+      VOLSYNC_GID: "65536"
+      VOLSYNC_FSGROUP: "65536"
 
