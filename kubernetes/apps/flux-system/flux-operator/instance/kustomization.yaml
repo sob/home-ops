@@ -3,12 +3,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./httproute.yaml
   - ./prometheusrule.yaml
-  - ./webhook
+  - ./receiver.yaml
 configMapGenerator:
-  - name: flux-instance-helm-values
+  - name: flux-instance-values
     files:
-      - values.yaml=./helm-values.yaml
+      - values.yaml=./helm/values.yaml
 configurations:
   - kustomize-config.yaml
