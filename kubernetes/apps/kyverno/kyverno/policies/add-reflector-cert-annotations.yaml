@@ -17,14 +17,14 @@ spec:
         any:
           - resources:
               kinds: ["Secret"]
-              names: ["56kbps-io-production-tls"]
+              names: ["${SECRET_DOMAIN/./-}-production-tls"]
               namespaces: ["network"]
       mutate:
-        mutateExisting: true
+        mutateExistingOnPolicyUpdate: true
         targets:
           - apiVersion: v1
             kind: Secret
-            name: "56kbps-io-production-tls"
+            name: "${SECRET_DOMAIN/./-}-production-tls"
             namespace: "network"
         patchStrategicMerge:
           metadata:
