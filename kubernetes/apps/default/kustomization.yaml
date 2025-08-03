@@ -5,9 +5,6 @@ kind: Kustomization
 components:
   - ../../components/common
 resources:
-  # Pre Flux-Kustomizations
-  - ./namespace.yaml
-  # Flux-Kustomizations
   - ./bazarr/ks.yaml
   #- ./bsky-pds/ks.yaml
   #- ./cert-exporter/ks.yaml
