@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/admissionregistration.k8s.io/mutatingadmissionpolicy_v1.json
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: volsync-jitter
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["batch"]
+        apiVersions: ["v1"]
+        resources: ["jobs"]
+        operations: ["CREATE"]
+    namespaceSelector: {}
+    objectSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values: ["volsync"]
+        - key: volsync.backube/cleanup
+          operator: DoesNotExist
+  variables:
+    - name: isSourceJob
+      expression: 'has(object.metadata.name) && object.metadata.name.startsWith("volsync-src-")'
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: |
+          variables.isSourceJob ?
+          Object{
+            apiVersion: "batch/v1",
+            kind: "Job",
+            spec: Object.spec{
+              template: Object.spec.template{
+                spec: Object.spec.template.spec{
+                  initContainers: [
+                    Object{
+                      name: "jitter",
+                      image: "docker.io/library/busybox:latest",
+                      command: ["/bin/sh"],
+                      args: [
+                        "-c",
+                        "JITTER=$(awk 'BEGIN{srand(); print int(rand()*90)}'); echo \"Sleeping for $${JITTER} seconds...\"; sleep $${JITTER}"
+                      ],
+                      resources: Object{
+                        requests: Object{
+                          memory: "8Mi",
+                          cpu: "5m"
+                        },
+                        limits: Object{
+                          memory: "8Mi",
+                          cpu: "5m"
+                        }
+                      }
+                    }
+                  ] + (has(object.spec.template.spec.initContainers) ? object.spec.template.spec.initContainers : [])
+                }
+              }
+            }
+          } : Object{}
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/admissionregistration.k8s.io/mutatingadmissionpolicybinding_v1.json
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: volsync-jitter
+spec:
+  policyName: volsync-jitter
+  validationActions: ["Deny"]
+  matchResources:
+    namespaceSelector: {}
+    objectSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values: ["volsync"]
+        - key: volsync.backube/cleanup
+          operator: DoesNotExist
