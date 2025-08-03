@@ -65,6 +65,10 @@ spec:
               - name: cluster-secrets
                 kind: Secret
                 optional: true
+          sourceRef:
+            kind: GitRepository
+            name: flux-system
+            namespace: flux-system
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
