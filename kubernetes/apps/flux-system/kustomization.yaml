@@ -5,6 +5,7 @@ namespace: flux-system
 components:
   - ../../flux/components/alerts
   - ../../flux/components/sops
+  - ../../components/common
 resources:
   - ./flux-operator/ks.yaml
   - ./notifications/ks.yaml
