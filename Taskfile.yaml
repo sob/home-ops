@@ -18,6 +18,7 @@ env:
 
 includes:
   authentik: .taskfiles/authentik
+  bootstrap: .taskfiles/bootstrap
   bucket: .taskfiles/bucket
   kube: .taskfiles/kube
   flux: .taskfiles/flux

@@ -1,0 +1,84 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+
+helmDefaults:
+  force: true
+  timeout: 600
+  wait: true
+  waitForJobs: true
+  createNamespace: true
+
+repositories:
+  - name: cilium
+    url: https://helm.cilium.io
+
+  - name: jetstack
+    url: https://charts.jetstack.io
+
+hooks:
+  - events: ["prepare"]
+    showlogs: true
+    command: "/bin/sh"
+    args:
+      - "-c"
+      - |
+        # renovate: datasource=github-releases depName=kubernetes-sigs/external-dns
+        kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.18.0/config/crd/standard/dnsendpoints.externaldns.k8s.io.yaml
+        # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+        kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
+        # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
+        kubectl apply --server-side --force-conflicts -f https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.84.0/stripped-down-crds.yaml
+  - events: ["prepare"]
+    command: "/bin/sh" # TODO: also install the age key secret
+    args:
+      - "-c"
+      - |
+        kubectl apply --server-side --force-conflicts -f ../kubernetes/flux/components/sops/cluster-secrets.secret.sops.yaml
+        kubectl apply --server-side --force-conflicts -f ../kubernetes/bootstrap/flux/github-deploy-key.sops.yaml"
+
+releases:
+  - name: cilium
+    namespace: kube-system
+    atomic: true
+    chart: cilium/cilium
+    version: 1.18.0
+    values: ['../kubernetes/apps/kube-system/cilium/app/helm/cilium-values.yaml']
+
+  - name: coredns
+    namespace: kube-system
+    atomic: true
+    chart: oci://ghcr.io/coredns/charts/coredns
+    version: 1.43.0
+    values: ['../kubernetes/apps/kube-system/coredns/app/helm-values.yaml']
+    needs: ['kube-system/cilium']
+
+  - name: spegel
+    namespace: kube-system
+    atomic: true
+    chart: oci://ghcr.io/spegel-org/helm-charts/spegel
+    version: 0.3.0
+    values: ['../kubernetes/apps/kube-system/spegel/app/helm-values.yaml']
+    needs: ['kube-system/coredns']
+
+  - name: cert-manager
+    namespace: cert-manager
+    atomic: true
+    chart: oci://quay.io/jetstack/charts/cert-manager
+    version: v1.18.2
+    values: ['../kubernetes/apps/cert-manager/cert-manager/app/helm-values.yaml']
+    needs: ['kube-system/coredns']
+
+  - name: flux-operator
+    namespace: flux-system
+    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+    version: 0.26.0
+    values: ['../kubernetes/apps/flux-system/flux-operator/app/helm-values.yaml']
+    needs: ['cert-manager/cert-manager']
+
+  - name: flux-instance
+    namespace: flux-system
+    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
+    version: 0.26.0
+    values: ['../kubernetes/apps/flux-system/flux-operator/instance/helm-values.yaml']
+    needs: ['flux-system/flux-operator']
+    wait: false

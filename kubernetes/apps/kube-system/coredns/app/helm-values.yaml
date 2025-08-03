@@ -30,9 +30,7 @@ servers:
           pods insecure
           fallthrough in-addr.arpa ip6.arpa
       - name: forward
-        parameters: ${SECRET_INTERNAL_DOMAIN}. ${SECRET_METAL_GATEWAY}
-      - name: forward
-        parameters: . ${SECRET_METAL_GATEWAY}
+        parameters: . 1.1.1.1 8.8.8.8
       - name: cache
         parameters: 30
       - name: loop
