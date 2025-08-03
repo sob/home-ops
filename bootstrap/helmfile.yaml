@@ -28,9 +28,6 @@ hooks:
         kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
         # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
         kubectl apply --server-side --force-conflicts -f https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.84.0/stripped-down-crds.yaml
-        kubectl apply --server-side --force-conflicts -f ../kubernetes/flux/components/sops/cluster-secrets.secret.sops.yaml
-        kubectl apply --server-side --force-conflicts -f ../kubernetes/bootstrap/flux/github-deploy-key.sops.yaml"
-        kubectl apply --server-side --force-conflicts -f ../kubernetes/apps/external-secrets/onepassword-connect/app/onepassword-connect.secret.sops.yaml"
 
 releases:
   - name: cilium
@@ -67,8 +64,8 @@ releases:
   - name: onepassword-connect
     namespace: external-secrets
     atomic: true
-    chart: oci://ghcr.io/bjw-s/helm-charts/app-template
-    version: 3.6.0
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: 4.2.0
     values: ['../kubernetes/apps/external-secrets/onepassword-connect/app/helm-values.yaml']
     needs: ['cert-manager/cert-manager']
 
@@ -97,7 +94,7 @@ releases:
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
     version: 0.26.0
     values: ['../kubernetes/apps/flux-system/flux-operator/app/helm-values.yaml']
-    needs: ['cert-manager/cert-manager']
+    needs: ['external-secrets/external-secrets']
 
   - name: flux-instance
     namespace: flux-system
