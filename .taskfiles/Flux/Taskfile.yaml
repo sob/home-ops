@@ -194,8 +194,18 @@ tasks:
       - kubectl apply --server-side --force-conflicts --kustomize {{.KUBERNETES_DIR}}/bootstrap/flux
 
   .reconcile:
+    silent: true
     internal: true
-    cmd: flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} {{if eq "helmrelease" .TYPE}}--force{{end}} {{if eq "kustomization" .TYPE}}--with-source{{end}}
+    cmds:
+      - |
+        if [ "{{.TYPE}}" = "helmrelease" ]; then
+          HELM_STATUS=$(helm list -n {{.NS}} --filter "^{{.APP}}$" -o json | jq -r '.[0].status // "not-found"' || echo "not-found")
+          if [ "$HELM_STATUS" = "failed" ] || [ "$HELM_STATUS" = "pending-install" ] || [ "$HELM_STATUS" = "pending-upgrade" ]; then
+            helm delete {{.APP}} -n {{.NS}} --no-hooks || true
+            sleep 5
+          fi
+        fi
+      - flux reconcile --namespace {{.NS}} {{.TYPE}} {{.APP}} {{if eq "helmrelease" .TYPE}}--force{{end}} {{if eq "kustomization" .TYPE}}--with-source{{end}}
     vars:
       NS:
         sh: kubectl get -A {{.TYPE}} --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
