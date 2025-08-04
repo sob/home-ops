@@ -27,6 +27,8 @@ spec:
       dragonfly-operator:
         replicas: 1
         strategy: RollingUpdate
+        serviceAccount:
+          name: dragonfly-operator
         containers:
           app:
             image:
