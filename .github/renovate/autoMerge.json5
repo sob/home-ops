@@ -51,6 +51,27 @@
       "minimumReleaseAge": "1 day"
     },
     
+    // Utility packages - Safe minor updates
+    {
+      "description": "Utility packages - minor and patch updates",
+      "matchPackagePatterns": [
+        "stakater/reloader",
+        "reloader",
+        "kured",
+        "node-feature-discovery",
+        "metrics-server",
+        "prometheus-operator/prometheus-config-reloader",
+        "grafana/.*",
+        "descheduler",
+        "system-upgrade-controller"
+      ],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "minimumReleaseAge": "3 days"
+    },
+    
     // GitHub Actions - Always automerge
     {
       "description": "Auto merge Github Actions",
