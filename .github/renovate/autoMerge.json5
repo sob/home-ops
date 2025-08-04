@@ -1,20 +1,93 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "packageRules": [
+    // Critical Infrastructure - No automerge
     {
-      "description": ["Auto merge Github Actions"],
+      "description": "Critical infrastructure - manual approval required",
+      "matchPackagePatterns": [
+        "fluxcd/flux2",
+        "fluxcd/.*-controller",
+        "rook/rook",
+        "rook/ceph",
+        "cilium/cilium",
+        "cert-manager/cert-manager",
+        "external-secrets/external-secrets",
+        "kubernetes-sigs/external-dns",
+        "ingress-nginx/controller"
+      ],
+      "automerge": false,
+      "minimumReleaseAge": "7 days"
+    },
+    
+    // Data/Storage - Automerge patches only
+    {
+      "description": "Data and storage services - patches only",
+      "matchPackagePatterns": [
+        "cloudnative-pg/postgres-operator",
+        "volsync/volsync",
+        "1password/connect",
+        "mozilla/sops",
+        "emqx/emqx",
+        "dragonflydb/dragonfly"
+      ],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "minimumReleaseAge": "5 days"
+    },
+    
+    // Media apps - Fast automerge
+    {
+      "description": "Media applications - fast updates",
+      "matchPackagePatterns": [
+        "ghcr.io/onedr0p/.*",
+        "jellyfin/jellyfin",
+        "wizarrrr/wizarr"
+      ],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "branch",
+      "minimumReleaseAge": "1 day"
+    },
+    
+    // GitHub Actions - Always automerge
+    {
+      "description": "Auto merge Github Actions",
       "matchManagers": ["github-actions"],
       "automerge": true,
       "automergeType": "branch",
-      "ignoreTests": true,
-      "matchUpdateTypes": ["minor", "patch"]
-    },
-    {
-      "description": ["Auto merge minor or patches"],
-      "automerge": true,
-      "automergeType": "pr",
       "ignoreTests": false,
       "matchUpdateTypes": ["minor", "patch"]
+    },
+    
+    // Security patches - Expedited
+    {
+      "description": "Security patches - expedited merge",
+      "matchVulnerabilityAlerts": true,
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "prPriority": 10
+    },
+    
+    // Default patches
+    {
+      "description": "Auto merge patches by default",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "ignoreTests": false,
+      "minimumReleaseAge": "3 days"
+    },
+    
+    // Major updates need approval
+    {
+      "description": "Major updates require manual approval",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "dependencyDashboardApproval": true
     }
   ]
 }

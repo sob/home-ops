@@ -20,8 +20,18 @@
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "suppressNotifications": ["prEditedNotification", "prIgnoreNotification"],
   "rebaseWhen": "conflicted",
-  "schedule": ["every weekend"],
-  "ignorePaths": ["**/*.sops.*"],
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 5,
+  "branchConcurrentLimit": 20,
+  "minimumReleaseAge": "3 days",
+  "rollbackPrs": true,
+  "ignoreTests": false,
+  "schedule": [
+    "after 10pm and before 5am on monday",
+    "after 10pm and before 5am on wednesday", 
+    "after 10pm and before 5am on friday"
+  ],
+  "ignorePaths": ["**/*.sops.*", "**/*.secret.yaml"],
   "gitAuthor": "stimpy-bot <101597957+stimpy-bot[bot]@users.noreply.github.com>",
   "flux": {
     "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
@@ -31,5 +41,12 @@
   },
   "kubernetes": {
     "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
-  }
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  },
+  "requiredStatusChecks": [
+    "Validation Success"
+  ]
 }
