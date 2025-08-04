@@ -12,21 +12,19 @@
         "cilium/cilium",
         "cert-manager/cert-manager",
         "external-secrets/external-secrets",
+        "1password/connect",
         "kubernetes-sigs/external-dns",
         "ingress-nginx/controller"
       ],
       "automerge": false,
       "minimumReleaseAge": "7 days"
     },
-    
+
     // Data/Storage - Automerge patches only
     {
       "description": "Data and storage services - patches only",
       "matchPackagePatterns": [
         "cloudnative-pg/postgres-operator",
-        "volsync/volsync",
-        "1password/connect",
-        "mozilla/sops",
         "emqx/emqx",
         "dragonflydb/dragonfly"
       ],
@@ -36,7 +34,7 @@
       "platformAutomerge": true,
       "minimumReleaseAge": "5 days"
     },
-    
+
     // Media apps - Fast automerge
     {
       "description": "Media applications - fast updates",
@@ -50,7 +48,7 @@
       "automergeType": "branch",
       "minimumReleaseAge": "1 day"
     },
-    
+
     // Utility packages - Safe minor updates
     {
       "description": "Utility packages - minor and patch updates",
@@ -63,7 +61,9 @@
         "prometheus-operator/prometheus-config-reloader",
         "grafana/.*",
         "descheduler",
-        "system-upgrade-controller"
+        "system-upgrade-controller",
+        "volsync/volsync",
+        "mozilla/sops"
       ],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true,
@@ -71,7 +71,7 @@
       "platformAutomerge": true,
       "minimumReleaseAge": "3 days"
     },
-    
+
     // GitHub Actions - Always automerge
     {
       "description": "Auto merge Github Actions",
@@ -81,7 +81,7 @@
       "ignoreTests": false,
       "matchUpdateTypes": ["minor", "patch"]
     },
-    
+
     // Security patches - Expedited
     {
       "description": "Security patches - expedited merge",
@@ -91,7 +91,7 @@
       "platformAutomerge": true,
       "prPriority": 10
     },
-    
+
     // Default patches
     {
       "description": "Auto merge patches by default",
@@ -102,7 +102,7 @@
       "ignoreTests": false,
       "minimumReleaseAge": "3 days"
     },
-    
+
     // Major updates need approval
     {
       "description": "Major updates require manual approval",
