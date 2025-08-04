@@ -63,6 +63,11 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
+    tolerations:
+      - key: "workload-type"
+        operator: "Equal"
+        value: "media"
+        effect: "NoSchedule"
     service:
       app:
         ports:
