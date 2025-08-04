@@ -1,5 +1,4 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/admissionregistration.k8s.io/mutatingadmissionpolicy_v1.json
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingAdmissionPolicy
 metadata:
@@ -60,7 +59,6 @@ spec:
             }
           } : Object{}
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/admissionregistration.k8s.io/mutatingadmissionpolicybinding_v1.json
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingAdmissionPolicyBinding
 metadata:
