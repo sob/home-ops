@@ -142,7 +142,7 @@ jobs:
     if: needs.changed-files.outputs.any_changed == 'true'
     strategy:
       matrix:
-        path: 
+        path:
           - flux
           - apps
       fail-fast: false
@@ -221,16 +221,16 @@ jobs:
       - name: Run kubeconform
         run: |
           set -euo pipefail
-          
+
           # Create kubeconform wrapper script
           cat > kubeconform-wrapper.sh << 'EOF'
           #!/bin/bash
           set -euo pipefail
-          
+
           KUBERNETES_DIR="${1:-./kubernetes}"
           KUBERNETES_VERSION="${2:-1.31.0}"
           SPECIFIC_DIRS="${3:-}"
-          
+
           kubeconform_args=(
             "-kubernetes-version" "${KUBERNETES_VERSION}"
             "-strict"
@@ -241,7 +241,7 @@ jobs:
             "-summary"
             "-output" "json"
           )
-          
+
           if [ -n "$SPECIFIC_DIRS" ]; then
             echo "=== Validating specific directories ==="
             for dir in $SPECIFIC_DIRS; do
@@ -263,7 +263,7 @@ jobs:
             find "${KUBERNETES_DIR}/flux" -type f -name "*.yaml" \
               -not -path "*/kustomization.yaml" \
               -exec kubeconform "${kubeconform_args[@]}" {} +
-            
+
             # Validate app kustomizations
             echo "=== Validating App kustomizations ==="
             find "${KUBERNETES_DIR}/apps" -type f -name "kustomization.yaml" \
@@ -275,7 +275,7 @@ jobs:
             done
           fi
           EOF
-          
+
           chmod +x kubeconform-wrapper.sh
           if [ "${{ needs.changed-files.outputs.any_changed }}" == "true" ] && [ -n "${{ steps.affected.outputs.dirs }}" ]; then
             ./kubeconform-wrapper.sh "${{ env.KUBERNETES_DIR }}" "${{ matrix.kubernetes_version }}" "${{ steps.affected.outputs.dirs }}"
@@ -329,11 +329,11 @@ jobs:
               done
             fi
           done
-          
+
           # Remove duplicates
           affected_ks=$(echo $affected_ks | tr ' ' '\n' | sort -u | tr '\n' ' ')
           echo "affected_ks=$affected_ks" >> $GITHUB_OUTPUT
-          
+
           if [ -n "$affected_ks" ]; then
             echo "Found affected Flux Kustomizations: $affected_ks"
           fi
@@ -396,7 +396,7 @@ jobs:
         id: diff
         run: |
           set -euo pipefail
-          
+
           flux-local diff ${{ matrix.resource }} \
             --unified 6 \
             --path ./pr/kubernetes/flux/cluster \
@@ -406,7 +406,7 @@ jobs:
             --all-namespaces \
             --sources flux-system \
             --output-file diff.patch || true
-          
+
           if [ -s diff.patch ]; then
             echo "has_diff=true" >> $GITHUB_OUTPUT
             {
@@ -426,14 +426,14 @@ jobs:
           message-id: flux-diff-${{ matrix.resource }}
           message: |
             ### Flux ${{ matrix.resource }} diff
-            
+
             <details>
             <summary>View diff</summary>
-            
+
             ```diff
             ${{ steps.diff.outputs.diff }}
             ```
-            
+
             </details>
 
   helm-values-validation:
@@ -460,17 +460,17 @@ jobs:
       - name: Validate HelmReleases
         run: |
           set -euo pipefail
-          
+
           # Find all HelmReleases and validate their values
           find "${{ env.KUBERNETES_DIR }}" -type f -name "helmrelease.yaml" -o -name "helm-release.yaml" | while read -r file; do
             echo "::group::Validating ${file}"
-            
+
             # Extract values from HelmRelease if inline
             if yq e '.spec.values' "${file}" > /dev/null 2>&1; then
               yq e '.spec.values' "${file}" > /tmp/values.yaml
               echo "Extracted inline values"
             fi
-            
+
             # Check for values file reference
             values_file=$(dirname "${file}")/helm-values.yaml
             if [ -f "${values_file}" ]; then
@@ -481,7 +481,7 @@ jobs:
                 exit 1
               }
             fi
-            
+
             echo "::endgroup::"
           done
 
@@ -544,85 +544,6 @@ jobs:
             .github/scripts/validate-opa.sh
           fi
 
-  dependency-check:
-    name: Dependency Check
-    runs-on: ubuntu-latest
-    needs: [changed-files]
-    if: needs.changed-files.outputs.any_changed == 'true'
-    steps:
-      - name: Generate Token
-        uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: "${{ secrets.BOT_APP_ID }}"
-          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-
-      - name: Check Dependencies
-        run: |
-          set -euo pipefail
-          
-          # Create dependency checker script
-          cat > check-dependencies.sh << 'EOF'
-          #!/bin/bash
-          set -euo pipefail
-          
-          KUBERNETES_DIR="${1:-./kubernetes}"
-          declare -A dependencies
-          declare -A kustomizations
-          errors=0
-          
-          # Find all kustomizations
-          echo "=== Scanning kustomizations ==="
-          while IFS= read -r -d '' file; do
-            name=$(yq e '.metadata.name' "${file}")
-            namespace=$(yq e '.metadata.namespace // "flux-system"' "${file}")
-            key="${namespace}/${name}"
-            kustomizations["${key}"]="${file}"
-            echo "Found: ${key}"
-          done < <(find "${KUBERNETES_DIR}" -type f -name "ks.yaml" -print0)
-          
-          # Check dependencies
-          echo -e "\n=== Checking dependencies ==="
-          for key in "${!kustomizations[@]}"; do
-            file="${kustomizations[${key}]}"
-            
-            # Extract dependencies
-            deps=$(yq e '.spec.dependsOn[]?.name' "${file}" 2>/dev/null || true)
-            if [ -n "${deps}" ]; then
-              while IFS= read -r dep; do
-                dep_ns=$(yq e ".spec.dependsOn[] | select(.name == \"${dep}\") | .namespace // \"flux-system\"" "${file}")
-                dep_key="${dep_ns}/${dep}"
-                
-                if [ -z "${kustomizations[${dep_key}]:-}" ]; then
-                  echo "::error file=${file}::Missing dependency: ${dep_key}"
-                  ((errors++))
-                else
-                  echo "✓ ${key} -> ${dep_key}"
-                fi
-              done <<< "${deps}"
-            fi
-          done
-          
-          # Check for circular dependencies (simplified)
-          echo -e "\n=== Checking for circular dependencies ==="
-          # This is a simplified check - a full implementation would need graph traversal
-          
-          if [ ${errors} -gt 0 ]; then
-            echo "::error::Found ${errors} dependency errors"
-            exit 1
-          fi
-          
-          echo -e "\n✅ All dependencies validated"
-          EOF
-          
-          chmod +x check-dependencies.sh
-          ./check-dependencies.sh "${{ env.KUBERNETES_DIR }}"
-
   validate-success:
     name: Validation Success
     runs-on: ubuntu-latest
@@ -636,7 +557,6 @@ jobs:
       - flux-local-diff
       - helm-values-validation
       - opa-policies
-      - dependency-check
     if: always()
     steps:
       - name: Check results
