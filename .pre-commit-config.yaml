@@ -1,0 +1,92 @@
+---
+# See https://pre-commit.com for more information
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: check-case-conflict
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args:
+          - -c
+          - ".yamllint.yaml"
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: forbid-crlf
+      - id: forbid-tabs
+
+  - repo: https://github.com/sirosen/texthooks
+    rev: 0.6.7
+    hooks:
+      - id: fix-smartquotes
+      - id: fix-ligatures
+
+  - repo: local
+    hooks:
+      - id: validate-sops
+        name: Validate SOPS files
+        entry: >-
+          bash -c 'for file in "$@"; do
+            if [[ "$file" == *.sops.yaml ]]; then
+              if ! head -1 "$file" | grep -q "^sops:"; then
+                echo "ERROR: $file is a .sops.yaml file but doesn't appear to be encrypted";
+                exit 1;
+              fi;
+            fi;
+          done' --
+        language: system
+        files: '\.sops\.yaml$'
+
+      - id: validate-kubernetes-files
+        name: Validate Kubernetes file naming
+        entry: >-
+          bash -c 'for file in "$@"; do
+            if [[ "$file" =~ kubernetes/apps/.*/.*\.yaml$ ]] &&
+                [[ ! "$file" =~ (kustomization|helmrelease|ks|externalsecret|secret\.sops)\.yaml$ ]] &&
+                [[ ! "$file" =~ kubernetes/apps/.*/app/ ]]; then
+              echo "ERROR: $file doesn't follow naming conventions";
+              exit 1;
+            fi;
+          done' --
+        language: system
+        files: '^kubernetes/.*\.yaml$'
+
+      - id: no-direct-secrets
+        name: Check for direct secrets
+        entry: >-
+          bash -c 'for file in "$@"; do
+            if [[ "$file" =~ \.yaml$ ]] && [[ ! "$file" =~ \.sops\.yaml$ ]] &&
+                grep -E "(password|token|key|secret):\s*['\''\""]?[^$\{]" "$file" 2>/dev/null |
+                grep -v "secretName" | grep -v "kind: Secret"; then
+              echo "ERROR: $file may contain unencrypted secrets";
+              exit 1;
+            fi;
+          done' --
+        language: system
+        files: '\.yaml$'
+
+exclude: |
+  (?x)^(
+    .*.sample$|
+    kubernetes/apps/.*/schemas/.*|
+    kubernetes/apps/.*/files/.*|
+    kubernetes/apps/.*/resources/.*\.yaml$
+  )

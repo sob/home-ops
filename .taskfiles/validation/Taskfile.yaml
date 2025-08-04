@@ -1,0 +1,264 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
+  POLICY_FILE: '{{.ROOT_DIR}}/.github/policies/kubernetes.rego'
+
+tasks:
+  default:
+    desc: Run all validation checks locally
+    cmds:
+      - |
+        echo "=== Running All Validation Checks ==="
+        echo
+        failed_checks=""
+        
+        # Run each validation and track failures
+        if task validate:yaml; then
+          echo "✓ YAML lint passed"
+        else
+          echo "✗ YAML lint failed"
+          failed_checks="${failed_checks}yaml "
+        fi
+        
+        if task validate:schema; then
+          echo "✓ Schema validation passed"
+        else
+          echo "✗ Schema validation failed"
+          failed_checks="${failed_checks}schema "
+        fi
+        
+        if task validate:secrets; then
+          echo "✓ Secret scanning passed"
+        else
+          echo "✗ Secret scanning failed"
+          failed_checks="${failed_checks}secrets "
+        fi
+        
+        if task validate:kustomize; then
+          echo "✓ Kustomize builds passed"
+        else
+          echo "✗ Kustomize builds failed"
+          failed_checks="${failed_checks}kustomize "
+        fi
+        
+        if task validate:kubeconform; then
+          echo "✓ Kubeconform validation passed"
+        else
+          echo "✗ Kubeconform validation failed"
+          failed_checks="${failed_checks}kubeconform "
+        fi
+        
+        if task validate:flux; then
+          echo "✓ Flux local test passed"
+        else
+          echo "✗ Flux local test failed"
+          failed_checks="${failed_checks}flux "
+        fi
+        
+        if task validate:opa; then
+          echo "✓ OPA policy validation passed"
+        else
+          echo "✗ OPA policy validation failed"
+          failed_checks="${failed_checks}opa "
+        fi
+        
+        echo
+        if [ -z "$failed_checks" ]; then
+          echo "=== All validation checks passed! ==="
+          exit 0
+        else
+          echo "=== Validation failed for: $failed_checks==="
+          exit 1
+        fi
+    silent: true
+
+  yaml:
+    desc: Run YAML lint
+    cmds:
+      - "yamllint -c {{.ROOT_DIR}}/.yamllint.yaml {{.KUBERNETES_DIR}}"
+    silent: true
+    ignore_error: true
+    preconditions:
+      - sh: command -v yamllint
+        msg: "yamllint not installed. Install with: brew install yamllint"
+
+  schema:
+    desc: Validate YAML files against their declared schemas
+    cmds:
+      - "{{.ROOT_DIR}}/.github/scripts/validate-yaml-schemas.sh"
+    silent: true
+    ignore_error: true
+    preconditions:
+      - sh: test -f {{.ROOT_DIR}}/.github/scripts/validate-yaml-schemas.sh
+        msg: "Schema validation script not found"
+      - sh: test -x {{.ROOT_DIR}}/.github/scripts/validate-yaml-schemas.sh
+        msg: "Schema validation script is not executable"
+
+  secrets:
+    desc: Run secret scanning with pre-commit
+    cmds:
+      - "pre-commit run gitleaks --all-files"
+    silent: true
+    ignore_error: true
+    preconditions:
+      - sh: command -v pre-commit
+        msg: "pre-commit not installed. Install with: brew install pre-commit"
+
+  kustomize:
+    desc: Validate all kustomizations build successfully
+    cmds:
+      - |
+        echo "=== Validating Kustomize Builds ==="
+        errors=0
+        find {{.KUBERNETES_DIR}} -type f -name kustomization.yaml \
+          -not -path "*/components/*" | while read -r file; do
+          dir="${file%/kustomization.yaml}"
+          printf "  Building %s... " "${dir#{{.KUBERNETES_DIR}}/}"
+          if kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone > /dev/null 2>&1; then
+            echo "✓"
+          else
+            echo "✗"
+            ((errors++))
+          fi
+        done
+        if [ ${errors} -gt 0 ]; then
+          echo "✗ ${errors} kustomizations failed to build"
+          exit 1
+        fi
+        echo "✓ All kustomizations build successfully"
+    silent: true
+    ignore_error: true
+
+  kubeconform:
+    desc: Run kubeconform validation
+    cmds:
+      - |
+        echo "=== Running Kubeconform ==="
+        errors=0
+        # Validate flux manifests
+        find {{.KUBERNETES_DIR}}/flux -type f -name "*.yaml" \
+          -not -path "*/kustomization.yaml" \
+          -not -name "*.sops.yaml" | while read -r file; do
+          if ! kubeconform \
+            -strict \
+            -ignore-missing-schemas \
+            -skip "Secret,ExternalSecret,SopsSecret" \
+            -schema-location "default" \
+            -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+            "${file}" > /dev/null 2>&1; then
+            echo "  ✗ Failed: ${file#{{.KUBERNETES_DIR}}/}"
+            ((errors++))
+          fi
+        done
+
+        # Validate app kustomizations
+        find {{.KUBERNETES_DIR}}/apps -type f -name "kustomization.yaml" \
+          -not -path "*/components/*" | while read -r file; do
+          dir="${file%/kustomization.yaml}"
+          if ! kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone 2>/dev/null | \
+            kubeconform \
+              -strict \
+              -ignore-missing-schemas \
+              -skip "Secret,ExternalSecret,SopsSecret" \
+              -schema-location "default" \
+              -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+              -summary > /dev/null 2>&1; then
+            echo "  ✗ Failed: ${dir#{{.KUBERNETES_DIR}}/}"
+            ((errors++))
+          fi
+        done
+
+        if [ ${errors} -gt 0 ]; then
+          echo "✗ Kubeconform validation failed with ${errors} errors"
+          exit 1
+        fi
+        echo "✓ Kubeconform validation passed"
+    silent: true
+    ignore_error: true
+    preconditions:
+      - sh: command -v kubeconform
+        msg: "kubeconform not installed. Install with: go install github.com/yannh/kubeconform/cmd/kubeconform@latest"
+
+  flux:
+    desc: Run flux-local test
+    env:
+      PYTHONWARNINGS: "ignore::DeprecationWarning"
+      PYTEST_ADDOPTS: "--tb=short -q -o asyncio_default_fixture_loop_scope=function -W ignore::DeprecationWarning"
+    cmds:
+      - |
+        flux-local test \
+          --path {{.KUBERNETES_DIR}}/flux/cluster \
+          --enable-helm \
+          --all-namespaces \
+          --sources flux-system \
+          --verbosity 1
+        echo "✓ Flux local test passed"
+    silent: true
+    ignore_error: true
+    preconditions:
+      - sh: command -v flux-local
+        msg: "flux-local not installed. Install with: pip install flux-local[helm]"
+
+  opa:
+    desc: Run OPA policy validation
+    cmds:
+      - "{{.ROOT_DIR}}/.github/scripts/validate-opa.sh {{.KUBERNETES_DIR}} {{.POLICY_FILE}}"
+    ignore_error: true
+    preconditions:
+      - sh: test -f {{.ROOT_DIR}}/.github/scripts/validate-opa.sh
+        msg: "OPA validation script not found"
+      - sh: test -x {{.ROOT_DIR}}/.github/scripts/validate-opa.sh
+        msg: "OPA validation script is not executable"
+
+
+  quick:
+    desc: Run quick validation (YAML + Kustomize only)
+    cmds:
+      - task: yaml
+      - task: kustomize
+
+  pre-commit:
+    desc: Run all pre-commit hooks
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - pre-commit run --all-files
+
+  no-schema:
+    desc: List YAML files without schema declarations
+    cmds:
+      - |
+        echo "=== YAML files without schema declarations ==="
+        files_without_schema=0
+        total_yaml_files=0
+
+        find {{.KUBERNETES_DIR}} -type f \( -name "*.yaml" -o -name "*.yml" \) \
+          -not -path "*/schemas/*" \
+          -not -path "*/resources/*" \
+          -not -name "*.sops.yaml" \
+          -not -name "*.sops.yml" | while read -r file; do
+          ((total_yaml_files++))
+          if ! grep -q "yaml-language-server:.*\$schema=" "$file" 2>/dev/null; then
+            echo "  ${file#{{.KUBERNETES_DIR}}/}"
+            ((files_without_schema++))
+          fi
+        done
+
+        # Count total files separately since the subshell loses the variable
+        total=$(find {{.KUBERNETES_DIR}} -type f \( -name "*.yaml" -o -name "*.yml" \) \
+          -not -path "*/schemas/*" \
+          -not -path "*/resources/*" \
+          -not -name "*.sops.yaml" \
+          -not -name "*.sops.yml" | wc -l | tr -d ' ')
+
+        without=$(find {{.KUBERNETES_DIR}} -type f \( -name "*.yaml" -o -name "*.yml" \) \
+          -not -path "*/schemas/*" \
+          -not -path "*/resources/*" \
+          -not -name "*.sops.yaml" \
+          -not -name "*.sops.yml" | xargs grep -L "yaml-language-server:.*\$schema=" 2>/dev/null | wc -l | tr -d ' ')
+
+        echo
+        echo "Found $without files without schemas out of $total total YAML files"
+    silent: true

@@ -31,6 +31,7 @@ includes:
   talos: .taskfiles/talos
   volsync: .taskfiles/volsync
   workstation: .taskfiles/workstation
+  validate: .taskfiles/validation
 
 tasks:
 
