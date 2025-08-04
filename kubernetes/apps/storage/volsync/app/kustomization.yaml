@@ -5,4 +5,4 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./prometheusrule.yaml
-  - ./mutatingadmissionpolicy.yaml
+# - ./mutatingadmissionpolicy.yaml # TODO: re-apply after 1.32
