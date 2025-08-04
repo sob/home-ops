@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.31.0/configmap-v1.json
+# This configuration tells Kustomize to update ConfigMap name references
+# in HelmRelease valuesFrom when ConfigMaps are transformed with hash suffixes
+nameReference:
+  - kind: ConfigMap
+    version: v1
+    fieldSpecs:
+      - path: spec/valuesFrom/name
+        kind: HelmRelease

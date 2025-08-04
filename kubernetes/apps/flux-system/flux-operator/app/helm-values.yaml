@@ -1,4 +1,3 @@
 ---
 serviceMonitor:
   create: true
-priorityClassName: system-cluster-critical
