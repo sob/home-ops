@@ -392,6 +392,9 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@v2.4.0
+
       - name: Install flux-local
         run: pip install flux-local[helm]
 
@@ -400,6 +403,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Run diff and capture exit code
+          exit_code=0
           flux-local diff ${{ matrix.resource }} \
             --unified 6 \
             --path ./pr/kubernetes/flux/cluster \
@@ -408,7 +413,14 @@ jobs:
             --limit-bytes 50000 \
             --all-namespaces \
             --sources flux-system \
-            --output-file diff.patch || true
+            --output-file diff.patch || exit_code=$?
+          
+          # Check if the command failed (exit code not 0 or 1)
+          # flux-local diff returns 1 when there are differences, which is expected
+          if [ $exit_code -gt 1 ]; then
+            echo "::error::flux-local diff failed with exit code $exit_code"
+            exit $exit_code
+          fi
 
           if [ -s diff.patch ]; then
             echo "has_diff=true" >> $GITHUB_OUTPUT
