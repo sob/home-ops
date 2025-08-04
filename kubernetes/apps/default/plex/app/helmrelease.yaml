@@ -98,10 +98,7 @@ spec:
                       - "true"
     service:
       app:
-        controller: *app
-        type: LoadBalancer
-        annotations:
-          io.cilium/lb-ipam-ips: ${SECRET_VIP_PLEX}
+        controller: plex
         ports:
           http:
             port: 32400
