@@ -1,44 +1,151 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "packageRules": [
+    // Critical Infrastructure Groups
     {
-      "description": ["1Password Connect Group"],
-      "groupName": "1Password Connnect",
+      "description": "Flux Controllers Group",
+      "groupName": "flux-controllers",
+      "matchPackagePatterns": ["fluxcd/.*-controller"],
+      "matchDatasources": ["docker", "github-releases"],
+      "group": {
+        "commitMessageTopic": "Flux controllers"
+      },
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Rook-Ceph Group",
+      "groupName": "rook-ceph",
+      "matchPackagePatterns": ["rook/rook", "rook/ceph", "quay.io/ceph/.*"],
+      "matchDatasources": ["docker", "helm"],
+      "group": {
+        "commitMessageTopic": "Rook-Ceph storage"
+      },
+      "separateMinorPatch": true
+    },
+    
+    // Application Groups
+    {
+      "description": "Media Apps - Arr Stack",
+      "groupName": "arr-stack",
+      "matchPackageNames": [
+        "ghcr.io/onedr0p/sonarr",
+        "ghcr.io/onedr0p/radarr",
+        "ghcr.io/onedr0p/lidarr",
+        "ghcr.io/onedr0p/readarr",
+        "ghcr.io/onedr0p/bazarr",
+        "ghcr.io/onedr0p/prowlarr"
+      ],
+      "group": {
+        "commitMessageTopic": "*arr media stack"
+      },
+      "separateMinorPatch": false
+    },
+    {
+      "description": "Media Apps - Downloaders",
+      "groupName": "media-downloaders",
+      "matchPackageNames": [
+        "ghcr.io/onedr0p/sabnzbd",
+        "ghcr.io/onedr0p/qbittorrent"
+      ],
+      "group": {
+        "commitMessageTopic": "media downloaders"
+      },
+      "separateMinorPatch": true
+    },
+    
+    // Observability Stack
+    {
+      "description": "Prometheus Stack",
+      "groupName": "kube-prometheus-stack",
+      "matchPackagePatterns": [
+        "prometheus-community/kube-prometheus-stack",
+        "quay.io/prometheus/.*",
+        "grafana/grafana"
+      ],
+      "group": {
+        "commitMessageTopic": "monitoring stack"
+      },
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Loki Stack",
+      "groupName": "loki-stack",
+      "matchPackagePatterns": [
+        "grafana/loki.*",
+        "grafana/promtail"
+      ],
+      "group": {
+        "commitMessageTopic": "Loki logging"
+      }
+    },
+    
+    // Security Groups
+    {
+      "description": "Cert-manager Group",
+      "groupName": "cert-manager",
+      "matchPackagePatterns": ["cert-manager/.*", "quay.io/jetstack/.*"],
+      "group": {
+        "commitMessageTopic": "cert-manager"
+      },
+      "separateMinorPatch": true
+    },
+    {
+      "description": "External Secrets Group",
+      "groupName": "external-secrets",
+      "matchPackagePatterns": [
+        "external-secrets/external-secrets",
+        "1password/connect.*"
+      ],
+      "group": {
+        "commitMessageTopic": "secrets management"
+      },
+      "separateMinorPatch": true
+    },
+    
+    // Infrastructure Groups
+    {
+      "description": "Storage CSI Drivers",
+      "groupName": "csi-drivers",
+      "matchPackagePatterns": [
+        ".*csi.*",
+        "democratic-csi/.*",
+        "openebs/.*"
+      ],
+      "matchDatasources": ["docker", "helm"],
+      "group": {
+        "commitMessageTopic": "CSI storage drivers"
+      },
+      "separateMinorPatch": true
+    },
+    
+    // Keep existing groups
+    {
+      "description": "1Password Connect Group",
+      "groupName": "1password-connect",
       "matchPackagePatterns": ["1password/connect"],
       "matchDatasources": ["docker"],
       "group": {
-        "commitMessageTopic": "{{{groupName}}} group"
+        "commitMessageTopic": "1Password Connect"
       },
       "separateMinorPatch": true
     },
     {
-      "description": ["Flux Group"],
-      "groupName": "Flux",
-      "matchPackagePatterns": ["fluxcd"],
-      "matchDatasources": ["docker", "github-tags"],
-      "versioning": "semver",
-      "group": {
-        "commitMessageTopic": "{{{groupName}}} group"
-      },
-      "separateMinorPatch": true
-    },
-    {
-      "description": ["Intel Device Plugins Group"],
-      "groupName": "Intel-Device-Plugins",
+      "description": "Intel Device Plugins Group",
+      "groupName": "intel-device-plugins",
       "matchPackagePatterns": ["intel-device-plugins"],
       "matchDatasources": ["helm"],
       "group": {
-        "commitMessageTopic": "{{{groupName}}} group"
+        "commitMessageTopic": "Intel device plugins"
       },
       "separateMinorPatch": true
     },
     {
-      "description": ["Talos Group"],
-      "groupName": "Talos",
+      "description": "Talos Group",
+      "groupName": "talos",
       "matchPackagePatterns": ["siderolabs/talosctl", "siderolabs/installer"],
       "matchDatasources": ["docker"],
       "group": {
-        "commitMessageTopic": "{{{groupName}}} group"
+        "commitMessageTopic": "Talos"
       },
       "separateMinorPatch": true
     }
