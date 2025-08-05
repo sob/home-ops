@@ -102,13 +102,18 @@ spec:
         ports:
           http:
             port: 32400
-    route:
+    ingress:
       app:
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
-        parentRefs:
-          - name: external-gateway
-            namespace: network
-            sectionName: https
+        className: external
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+        hosts:
+          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
     persistence:
       config:
         existingClaim: plex
