@@ -51,6 +51,8 @@ spec:
       - --events
       - --ignore-ingress-tls-spec
       - --ingress-class=external
+      - --gateway-namespace=network
+      - --gateway-name=external-gateway
     policy: sync
     sources: ["ingress", "gateway-httproute", "service"]
     txtPrefix: k8s.
