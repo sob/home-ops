@@ -77,8 +77,7 @@ spec:
                 matchLabels:
                   app.kubernetes.io/name: dragonfly-operator
     serviceAccount:
-      dragonfly-operator:
-        enabled: true
+      dragonfly-operator: {}
     service:
       app:
         controller: dragonfly-operator
