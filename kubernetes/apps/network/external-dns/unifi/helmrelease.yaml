@@ -69,8 +69,11 @@ spec:
           timeoutSeconds: 5
     extraArgs:
       - --ignore-ingress-tls-spec
+      - --ingress-class=internal
+      - --gateway-namespace=network
+      - --gateway-name=internal-gateway
     policy: sync
-    sources: ["ingress", "gateway-httproute", "service"]
+    sources: ["ingress", "gateway-httproute"]
     txtOwnerId: stone
     txtPrefix: k8s.
     domainFilters: ["${SECRET_DOMAIN}"]
