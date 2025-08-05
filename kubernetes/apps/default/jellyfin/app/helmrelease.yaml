@@ -91,6 +91,10 @@ spec:
           - name: external-gateway
             namespace: network
             sectionName: https
+        rules:
+          - backendRefs:
+              - name: app
+                port: 8096
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
