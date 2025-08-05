@@ -3,8 +3,8 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-dns-resolver-shared
-  namespace: flux-system
+  name: dns-resolver-shared
+  namespace: network
 spec:
   interval: 30m
   path: ./kubernetes/apps/network/dns-resolver/shared/app
@@ -12,11 +12,15 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
   wait: true
   dependsOn:
-    - name: cluster-apps-cert-manager
-    - name: cluster-apps-cert-manager-issuers
-    - name: cluster-apps-external-secrets-stores
+    - name: cert-manager
+      namespace: cert-manager
+    - name: cert-manager-issuers
+      namespace: cert-manager
+    - name: external-secrets
+      namespace: external-secrets
   postBuild:
     substituteFrom:
       - kind: ConfigMap
