@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: network
+resources:
+  # HelmRelease will be added here
+  # ConfigMap will be added here
+  # PVC will be added here
+  # ServiceMonitor will be added here
