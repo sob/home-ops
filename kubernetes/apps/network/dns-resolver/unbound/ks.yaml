@@ -3,8 +3,8 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-dns-resolver-unbound
-  namespace: flux-system
+  name: dns-resolver-unbound
+  namespace: network
 spec:
   interval: 30m
   path: ./kubernetes/apps/network/dns-resolver/unbound/app
@@ -12,10 +12,11 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
   wait: true
   dependsOn:
-    - name: cluster-apps-dns-resolver-shared
-    - name: cluster-apps-dns-resolver-dnscrypt-proxy
+    - name: dns-resolver-shared
+    - name: dnscrypt-proxy
   postBuild:
     substituteFrom:
       - kind: ConfigMap
