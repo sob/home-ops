@@ -3,30 +3,24 @@ originRequest:
   originServerName: "external.${SECRET_DOMAIN}"
 
 ingress:
-  # Services with self-authentication or public access via Gateway API
-  # These services handle their own authentication or are meant to be public
-  - hostname: "sso.${SECRET_DOMAIN}"  # Authentik SSO - must be accessible!
+  - hostname: "sso.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
   - hostname: "plex.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
   - hostname: "jellyfin.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
-  - hostname: "jelly.${SECRET_DOMAIN}"  # Jellyfin alias
+  - hostname: "jelly.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
   - hostname: "flux-webhook.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
   - hostname: "wizarr.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
-  - hostname: "join.${SECRET_DOMAIN}"  # Wizarr alias
+  - hostname: "join.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
   - hostname: "kromgo.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
   - hostname: "status.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
-  # Add more self-auth/public services here as you migrate them
-  
-  # Everything else (including Authentik-protected services) via nginx
-  # This includes all *arr apps, admin panels, and other protected services
   - hostname: "${SECRET_DOMAIN}"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "*.${SECRET_DOMAIN}"
