@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app dns-resolver-shared
+  name: &app resolver-shared
   namespace: flux-system
 spec:
   targetNamespace: network
@@ -31,7 +31,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app dnscrypt-proxy
+  name: &app resolver-dnscrypt-proxy
   namespace: flux-system
 spec:
   targetNamespace: network
@@ -39,7 +39,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: dns-resolver-shared
+    - name: resolver-shared
   path: ./kubernetes/apps/network/dns-resolver/dnscrypt-proxy/app
   prune: true
   sourceRef:
@@ -54,7 +54,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app dns-resolver-unbound
+  name: &app resolver-unbound
   namespace: flux-system
 spec:
   targetNamespace: network
@@ -62,8 +62,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: dns-resolver-shared
-    - name: dnscrypt-proxy
+    - name: resolver-shared
+    - name: resolver-dnscrypt-proxy
   path: ./kubernetes/apps/network/dns-resolver/unbound/app
   prune: true
   sourceRef:
