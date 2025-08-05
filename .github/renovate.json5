@@ -63,10 +63,5 @@
     "labels": [
       "security"
     ]
-  },
-  "abandonedPrConfig": {
-    "enabled": true,
-    "addLabel": "abandoned",
-    "closeWhenAbandoned": true
   }
 }
