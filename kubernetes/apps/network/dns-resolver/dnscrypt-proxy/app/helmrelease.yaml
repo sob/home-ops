@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app dnscrypt-proxy
 spec:
-  interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 4.2.0
-      sourceRef:
-        kind: OCIRepository
-        name: app-template
-        namespace: network
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
   install:
     remediation:
       retries: 3
