@@ -55,10 +55,9 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /health
-                    port: &metrics 8080
-                  initialDelaySeconds: 0
+                  tcpSocket:
+                    port: 5053
+                  initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
@@ -66,10 +65,9 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /health
-                    port: *metrics
-                  initialDelaySeconds: 0
+                  tcpSocket:
+                    port: 5053
+                  initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
@@ -99,11 +97,6 @@ spec:
             port: 8443
             protocol: TCP
             targetPort: 8443
-          metrics:
-            enabled: true
-            port: *metrics
-            protocol: TCP
-            targetPort: *metrics
 
     persistence:
       config:
