@@ -121,8 +121,8 @@ cache_neg_max_ttl = 600
 #                                            #
 ##############################################
 
-## Bootstrap resolvers
-bootstrap_resolvers = ['9.9.9.11:53', '1.1.1.1:53', '8.8.8.8:53']
+## Bootstrap resolvers - using cluster DNS first
+bootstrap_resolvers = ['10.96.0.10:53', '9.9.9.11:53', '1.1.1.1:53']
 
 ## Always use the bootstrap resolvers before the system DNS settings
 ignore_system_dns = true
