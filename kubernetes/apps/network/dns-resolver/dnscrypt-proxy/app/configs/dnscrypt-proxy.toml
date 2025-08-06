@@ -117,6 +117,36 @@ cache_neg_max_ttl = 600
 
 ##############################################
 #                                            #
+#        Bootstrap resolvers                 #
+#                                            #
+##############################################
+
+## Bootstrap resolvers
+bootstrap_resolvers = ['9.9.9.11:53', '1.1.1.1:53', '8.8.8.8:53']
+
+## Always use the bootstrap resolvers before the system DNS settings
+ignore_system_dns = true
+
+## Maximum time (in seconds) to wait before initializing the proxy
+netprobe_timeout = 60
+
+## Address and port to try initializing a connection to, just to check if the network is up
+netprobe_address = '9.9.9.9:53'
+
+##############################################
+#                                            #
+#        Load-balancing                      #
+#                                            #
+##############################################
+
+## Load-balancing strategy: 'p2' (default), 'ph', 'p<n>', 'first' or 'random'
+lb_strategy = 'p2'
+
+## Set to true to constantly try to estimate the latency of all the resolvers
+lb_estimator = true
+
+##############################################
+#                                            #
 #        Query logging                       #
 #                                            #
 ##############################################
@@ -162,36 +192,6 @@ cache_neg_max_ttl = 600
 # [routes]
 #   [routes.'example.com']
 #     servers = ['example-server-1', 'example-server-2']
-
-##############################################
-#                                            #
-#        Bootstrap resolvers                 #
-#                                            #
-##############################################
-
-## Bootstrap resolvers
-bootstrap_resolvers = ['9.9.9.11:53', '1.1.1.1:53', '8.8.8.8:53']
-
-## Always use the bootstrap resolvers before the system DNS settings
-ignore_system_dns = true
-
-## Maximum time (in seconds) to wait before initializing the proxy
-netprobe_timeout = 60
-
-## Address and port to try initializing a connection to, just to check if the network is up
-netprobe_address = '9.9.9.9:53'
-
-##############################################
-#                                            #
-#        Load-balancing                      #
-#                                            #
-##############################################
-
-## Load-balancing strategy: 'p2' (default), 'ph', 'p<n>', 'first' or 'random'
-lb_strategy = 'p2'
-
-## Set to true to constantly try to estimate the latency of all the resolvers
-lb_estimator = true
 
 ##############################################
 #                                            #
