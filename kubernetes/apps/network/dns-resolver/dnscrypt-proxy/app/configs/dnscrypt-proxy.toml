@@ -32,11 +32,11 @@ dnscrypt_relay_names = ['anon-cs-fr', 'anon-uk', 'anon-tiarap', 'anon-meganerd']
 relay_randomize = true
 
 # Local DoH server
-local_doh = true
-local_doh_port = 8443
-local_doh_path = '/dns-query'
-local_doh_cert_file = ''
-local_doh_cert_key_file = ''
+[local_doh]
+  listen_addresses = ['0.0.0.0:8443']
+  path = '/dns-query'
+  cert_file = ''
+  cert_key_file = ''
 
 # Query logging
 [query_log]
