@@ -29,7 +29,7 @@ dnscrypt_servers = true
 doh_servers = true
 
 ## Use servers implementing the Oblivious DoH protocol
-odoh_servers = true
+odoh_servers = false
 
 ## Require servers defined by remote sources to satisfy specific properties
 require_dnssec = true
@@ -216,19 +216,6 @@ lb_estimator = true
     refresh_delay = 72
     prefix = ''
 
-  [sources.'odoh-resolvers']
-    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/refs/heads/master/v3/odoh-resolvers.md', 'https://download.dnscrypt.info/resolvers-list/v3/odoh-resolvers.md']
-    cache_file = '/var/cache/dnscrypt-proxy/odoh-resolvers.md'
-    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
-    refresh_delay = 72
-    prefix = ''
-
-  [sources.'odoh-relays']
-    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/refs/heads/master/v3/odoh-relays.md', 'https://download.dnscrypt.info/resolvers-list/v3/odoh-relays.md']
-    cache_file = '/var/cache/dnscrypt-proxy/odoh-relays.md'
-    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
-    refresh_delay = 72
-    prefix = ''
 
 ##############################################
 #                                            #
