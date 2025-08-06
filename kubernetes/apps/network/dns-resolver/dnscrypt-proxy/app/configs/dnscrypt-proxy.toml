@@ -1,67 +1,207 @@
 # DNSCrypt-proxy configuration
 # https://github.com/DNSCrypt/dnscrypt-proxy/blob/master/dnscrypt-proxy/example-dnscrypt-proxy.toml
 
-# Global settings
+##############################################
+#                                            #
+#        Global settings                     #
+#                                            #
+##############################################
+
+## List of servers to use
 server_names = ['quad9-dnscrypt-ip4-nofilter-pri', 'cloudflare', 'nextdns']
+
+## List of local addresses and ports to listen to
 listen_addresses = ['0.0.0.0:5053']
+
+## Maximum number of simultaneous client connections to accept
 max_clients = 250
+
+## Use servers reachable over IPv4
 ipv4_servers = true
+
+## Use servers reachable over IPv6
 ipv6_servers = false
+
+## Use servers implementing the DNSCrypt protocol
 dnscrypt_servers = true
+
+## Use servers implementing the DNS-over-HTTPS protocol
 doh_servers = true
+
+## Use servers implementing the Oblivious DoH protocol
 odoh_servers = true
+
+## Require servers defined by remote sources to satisfy specific properties
 require_dnssec = true
 require_nolog = true
 require_nofilter = false
+
+## Always use TCP to connect to upstream servers
 force_tcp = false
+
+## How long a DNS query will wait for a response, in milliseconds
 timeout = 5000
+
+## Keepalive for HTTP (HTTPS, HTTP/2, HTTP/3) servers
 keepalive = 30
+
+## Delay, in minutes, after which certificates are reloaded
 cert_refresh_delay = 240
+
+## Use a different set of keys for every query sent to a DNSCrypt server
 dnscrypt_ephemeral_keys = true
+
+## Enable TLS session tickets - uses less CPU, but TLS session tickets are not anonymous
 tls_disable_session_tickets = true
+
+## TLS cipher suite for TLS 1.3
 tls_cipher_suite = [52392, 49199]
+
+## Enable support for HTTP/3 (HTTP over QUIC)
 http3 = true
+
+## Response for blocked queries
 blocked_query_response = 'refused'
+
+## Log level (0-6, default: 2 - 0 is very verbose, 6 only contains fatal errors)
 log_level = 2
+
+## Log file for the application, use 'syslog' for syslog
 log_file = '/dev/stdout'
-log_file_latest = false
+
+## When using a log file, only keep logs from the most recent launch
+# log_file_latest = true
+
+## Use the system logger (syslog on Unix, Event Log on Windows)
 use_syslog = false
 
-# DNSCrypt settings - configured in anonymized_dns section
+##############################################
+#                                            #
+#        DNS cache                           #
+#                                            #
+##############################################
 
-# Local DoH server
-[local_doh]
-  listen_addresses = ['0.0.0.0:8443']
-  path = '/dns-query'
-  cert_file = ''
-  cert_key_file = ''
-
-# Query logging
-[query_log]
-  file = '/dev/stdout'
-  format = 'tsv'
-  ignored_qtypes = []
-
-# Caching
+## Enable a DNS cache to reduce latency and outgoing traffic
 cache = true
+
+## Cache size
 cache_size = 262144
+
+## Minimum TTL for cached entries
 cache_min_ttl = 60
+
+## Maximum TTL for cached entries
 cache_max_ttl = 86400
+
+## Minimum TTL for negatively cached entries
 cache_neg_min_ttl = 60
+
+## Maximum TTL for negatively cached entries
 cache_neg_max_ttl = 600
 
-# Load-balancing
-lb_strategy = 'p2'
-lb_estimator = true
+##############################################
+#                                            #
+#        Query logging                       #
+#                                            #
+##############################################
 
-# Bootstrap resolvers
+[query_log]
+
+  ## Path to the query log file (absolute, or relative to the same directory as the config file)
+  file = '/dev/stdout'
+
+  ## Query log format (currently supported: tsv and ltsv)
+  format = 'tsv'
+
+  ## Do not log these query types, to reduce verbosity. Keep empty to log everything.
+  ignored_qtypes = []
+
+##############################################
+#                                            #
+#        Local DoH server                    #
+#                                            #
+##############################################
+
+[local_doh]
+
+  ## Address and port to listen to, in order to provide a local DoH server
+  listen_addresses = ['0.0.0.0:8443']
+
+  ## Path that must be prepended to queries
+  path = '/dns-query'
+
+  ## Certificate file - leave blank to disable DoH
+  cert_file = ''
+
+  ## Certificate key file
+  cert_key_file = ''
+
+##############################################
+#                                            #
+#        Filtering / Forwarding              #
+#                                            #
+##############################################
+
+## Immediately respond to IPv6-related queries with an empty response
+## This makes things faster when there is no IPv6 connectivity
+block_ipv6 = false
+
+## Immediately respond to A and AAAA queries for host names without a domain name
+block_unqualified = true
+
+## Immediately respond to queries for local zones instead of leaking them to upstream resolvers
+block_undelegated = true
+
+##############################################
+#                                            #
+#        Route queries                       #
+#                                            #
+##############################################
+
+## Enable this feature to route queries according to specific domains
+# [routes]
+#   [routes.'example.com']
+#     servers = ['example-server-1', 'example-server-2']
+
+##############################################
+#                                            #
+#        Bootstrap resolvers                 #
+#                                            #
+##############################################
+
+## Bootstrap resolvers
 bootstrap_resolvers = ['9.9.9.11:53', '1.1.1.1:53', '8.8.8.8:53']
+
+## Always use the bootstrap resolvers before the system DNS settings
 ignore_system_dns = true
+
+## Maximum time (in seconds) to wait before initializing the proxy
 netprobe_timeout = 60
+
+## Address and port to try initializing a connection to, just to check if the network is up
 netprobe_address = '9.9.9.9:53'
 
-# Sources
+##############################################
+#                                            #
+#        Load-balancing                      #
+#                                            #
+##############################################
+
+## Load-balancing strategy: 'p2' (default), 'ph', 'p<n>', 'first' or 'random'
+lb_strategy = 'p2'
+
+## Set to true to constantly try to estimate the latency of all the resolvers
+lb_estimator = true
+
+##############################################
+#                                            #
+#        Sources                             #
+#                                            #
+##############################################
+
 [sources]
+
+  ## An example of a remote source from https://github.com/DNSCrypt/dnscrypt-resolvers
   [sources.'public-resolvers']
     urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md', 'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md']
     cache_file = '/var/cache/dnscrypt-proxy/public-resolvers.md'
@@ -90,21 +230,52 @@ netprobe_address = '9.9.9.9:53'
     refresh_delay = 72
     prefix = ''
 
-# Anonymized queries
+##############################################
+#                                            #
+#        Anonymized queries                  #
+#                                            #
+##############################################
+
 [anonymized_dns]
+
+  ## Routes are indirect ways to reach DNSCrypt servers
   routes = [
     { server_name = 'quad9-dnscrypt-ip4-nofilter-pri', via = ['anon-cs-fr', 'anon-uk'] },
     { server_name = 'cloudflare', via = ['anon-cs-fr', 'anon-uk', 'anon-tiarap'] },
     { server_name = 'nextdns', via = ['anon-cs-fr', 'anon-uk', 'anon-meganerd'] },
     { server_name = '*', via = ['anon-cs-fr', 'anon-uk'] }
   ]
+
+  ## Skip resolvers incompatible with anonymization instead of displaying an error
   skip_incompatible = true
 
-# DNS64
+##############################################
+#                                            #
+#        DNS64                               #
+#                                            #
+##############################################
+
 [dns64]
+
+  ## (Option 1) Manually specify the address of a DNS64 resolver
+  ## If this method is used, only IPv4 addresses will be resolved
+  # resolver = '[2001:67c:2b0::4]:53'
+
+  ## (Option 2) Automatically discover and use the first available DNS64 resolver
+  ## Ignored if `resolver` is set
+  # auto = false
+
+  ## DNS64 prefix used when no resolver is configured
   prefix = ['64:ff9b::/96']
 
-# Static entries
+##############################################
+#                                            #
+#        Static entries                      #
+#                                            #
+##############################################
+
 [static]
+
+  ## Example map entries (one entry per line)
   [static.'localhost']
     address = ['127.0.0.1']
