@@ -268,14 +268,3 @@ lb_estimator = true
   ## DNS64 prefix used when no resolver is configured
   prefix = ['64:ff9b::/96']
 
-##############################################
-#                                            #
-#        Static entries                      #
-#                                            #
-##############################################
-
-[static]
-
-  ## Example map entries (one entry per line)
-  [static.'localhost']
-    address = ['127.0.0.1']
