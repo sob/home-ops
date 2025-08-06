@@ -77,6 +77,22 @@ use_syslog = false
 
 ##############################################
 #                                            #
+#        Filtering / Forwarding              #
+#                                            #
+##############################################
+
+## Immediately respond to IPv6-related queries with an empty response
+## This makes things faster when there is no IPv6 connectivity
+block_ipv6 = false
+
+## Immediately respond to A and AAAA queries for host names without a domain name
+block_unqualified = true
+
+## Immediately respond to queries for local zones instead of leaking them to upstream resolvers
+block_undelegated = true
+
+##############################################
+#                                            #
 #        DNS cache                           #
 #                                            #
 ##############################################
@@ -135,22 +151,6 @@ cache_neg_max_ttl = 600
 
   ## Certificate key file
   cert_key_file = ''
-
-##############################################
-#                                            #
-#        Filtering / Forwarding              #
-#                                            #
-##############################################
-
-## Immediately respond to IPv6-related queries with an empty response
-## This makes things faster when there is no IPv6 connectivity
-block_ipv6 = false
-
-## Immediately respond to A and AAAA queries for host names without a domain name
-block_unqualified = true
-
-## Immediately respond to queries for local zones instead of leaking them to upstream resolvers
-block_undelegated = true
 
 ##############################################
 #                                            #
