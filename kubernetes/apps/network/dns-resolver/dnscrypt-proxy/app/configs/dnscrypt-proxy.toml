@@ -27,9 +27,7 @@ log_file = '/dev/stdout'
 log_file_latest = false
 use_syslog = false
 
-# DNSCrypt settings
-dnscrypt_relay_names = ['anon-cs-fr', 'anon-uk', 'anon-tiarap', 'anon-meganerd']
-relay_randomize = true
+# DNSCrypt settings - configured in anonymized_dns section
 
 # Local DoH server
 [local_doh]
