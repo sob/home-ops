@@ -1,0 +1,112 @@
+# DNSCrypt-proxy configuration
+# https://github.com/DNSCrypt/dnscrypt-proxy/blob/master/dnscrypt-proxy/example-dnscrypt-proxy.toml
+
+# Global settings
+server_names = ['quad9-dnscrypt-ip4-nofilter-pri', 'cloudflare', 'nextdns']
+listen_addresses = ['0.0.0.0:5053']
+max_clients = 250
+ipv4_servers = true
+ipv6_servers = false
+dnscrypt_servers = true
+doh_servers = true
+odoh_servers = true
+require_dnssec = true
+require_nolog = true
+require_nofilter = false
+force_tcp = false
+timeout = 5000
+keepalive = 30
+cert_refresh_delay = 240
+dnscrypt_ephemeral_keys = true
+tls_disable_session_tickets = true
+tls_cipher_suite = [52392, 49199]
+http3 = true
+blocked_query_response = 'refused'
+log_level = 2
+log_file = '/dev/stdout'
+log_file_latest = false
+use_syslog = false
+
+# DNSCrypt settings
+dnscrypt_relay_names = ['anon-cs-fr', 'anon-uk', 'anon-tiarap', 'anon-meganerd']
+relay_randomize = true
+
+# Local DoH server
+local_doh = true
+local_doh_port = 8443
+local_doh_path = '/dns-query'
+local_doh_cert_file = ''
+local_doh_cert_key_file = ''
+
+# Query logging
+[query_log]
+  file = '/dev/stdout'
+  format = 'tsv'
+  ignored_qtypes = []
+
+# Caching
+cache = true
+cache_size = 262144
+cache_min_ttl = 60
+cache_max_ttl = 86400
+cache_neg_min_ttl = 60
+cache_neg_max_ttl = 600
+
+# Load-balancing
+lb_strategy = 'p2'
+lb_estimator = true
+
+# Bootstrap resolvers
+bootstrap_resolvers = ['9.9.9.11:53', '1.1.1.1:53', '8.8.8.8:53']
+ignore_system_dns = true
+netprobe_timeout = 60
+netprobe_address = '9.9.9.9:53'
+
+# Sources
+[sources]
+  [sources.'public-resolvers']
+    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md', 'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md']
+    cache_file = '/var/cache/dnscrypt-proxy/public-resolvers.md'
+    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+    refresh_delay = 72
+    prefix = ''
+
+  [sources.'relays']
+    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md', 'https://download.dnscrypt.info/resolvers-list/v3/relays.md']
+    cache_file = '/var/cache/dnscrypt-proxy/relays.md'
+    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+    refresh_delay = 72
+    prefix = ''
+
+  [sources.'odoh-resolvers']
+    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/odoh-resolvers.md', 'https://download.dnscrypt.info/resolvers-list/v3/odoh-resolvers.md']
+    cache_file = '/var/cache/dnscrypt-proxy/odoh-resolvers.md'
+    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+    refresh_delay = 72
+    prefix = ''
+
+  [sources.'odoh-relays']
+    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/odoh-relays.md', 'https://download.dnscrypt.info/resolvers-list/v3/odoh-relays.md']
+    cache_file = '/var/cache/dnscrypt-proxy/odoh-relays.md'
+    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+    refresh_delay = 72
+    prefix = ''
+
+# Anonymized queries
+[anonymized_dns]
+  routes = [
+    { server_name = 'quad9-dnscrypt-ip4-nofilter-pri', via = ['anon-cs-fr', 'anon-uk'] },
+    { server_name = 'cloudflare', via = ['anon-cs-fr', 'anon-uk', 'anon-tiarap'] },
+    { server_name = 'nextdns', via = ['anon-cs-fr', 'anon-uk', 'anon-meganerd'] },
+    { server_name = '*', via = ['anon-cs-fr', 'anon-uk'] }
+  ]
+  skip_incompatible = true
+
+# DNS64
+[dns64]
+  prefix = ['64:ff9b::/96']
+
+# Static entries
+[static]
+  [static.'localhost']
+    address = ['127.0.0.1']
