@@ -83,7 +83,6 @@ spec:
     service:
       app:
         controller: dnscrypt-proxy
-        nameOverride: dnscrypt-proxy
         ports:
           dns-tcp:
             enabled: true
