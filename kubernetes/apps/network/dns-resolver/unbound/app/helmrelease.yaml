@@ -149,3 +149,11 @@ spec:
           - path: /opt/unbound/etc/unbound/root.hints
             subPath: root.hints
             readOnly: true
+      root-key:
+        enabled: true
+        type: configMap
+        name: unbound-root-key
+        globalMounts:
+          - path: /opt/unbound/etc/unbound/root.key
+            subPath: root.key
+            readOnly: true
