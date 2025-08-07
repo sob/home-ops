@@ -26,10 +26,9 @@ spec:
             matchLabels:
               app.kubernetes.io/name: *app
       securityContext:
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
 
     controllers:
       unbound:
@@ -136,16 +135,10 @@ spec:
           - path: /opt/unbound/etc/unbound/unbound.conf
             subPath: unbound.conf
             readOnly: true
-      cache:
-        enabled: true
-        type: emptyDir
-        globalMounts:
-          - path: /opt/unbound/etc/unbound/var
       root-hints:
         enabled: true
         type: configMap
         name: unbound-root-hints
-        defaultMode: 0644
         globalMounts:
           - path: /opt/unbound/etc/unbound/root.hints
             subPath: root.hints
