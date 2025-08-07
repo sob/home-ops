@@ -8,7 +8,7 @@
 ##############################################
 
 ## List of servers to use
-server_names = ['quad9-dnscrypt-ip4-nofilter-pri', 'cloudflare', 'nextdns']
+server_names = ['quad9-dnscrypt-ip4-nofilter-pri', 'cloudflare-security', 'adguard-dns-doh']
 
 ## List of local addresses and ports to listen to
 listen_addresses = ['0.0.0.0:5053']
@@ -168,19 +168,19 @@ lb_estimator = true
 #                                            #
 ##############################################
 
-[local_doh]
-
-  ## Address and port to listen to, in order to provide a local DoH server
-  listen_addresses = ['0.0.0.0:8443']
-
-  ## Path that must be prepended to queries
-  path = '/dns-query'
-
-  ## Certificate file - leave blank to disable DoH
-  cert_file = ''
-
-  ## Certificate key file
-  cert_key_file = ''
+# [local_doh]
+# 
+#   ## Address and port to listen to, in order to provide a local DoH server
+#   listen_addresses = ['0.0.0.0:8443']
+# 
+#   ## Path that must be prepended to queries
+#   path = '/dns-query'
+# 
+#   ## Certificate file - leave blank to disable DoH
+#   cert_file = ''
+# 
+#   ## Certificate key file
+#   cert_key_file = ''
 
 ##############################################
 #                                            #
@@ -228,8 +228,6 @@ lb_estimator = true
   ## Routes are indirect ways to reach DNSCrypt servers
   routes = [
     { server_name = 'quad9-dnscrypt-ip4-nofilter-pri', via = ['anon-cs-fr', 'anon-uk'] },
-    { server_name = 'cloudflare', via = ['anon-cs-fr', 'anon-uk', 'anon-tiarap'] },
-    { server_name = 'nextdns', via = ['anon-cs-fr', 'anon-uk', 'anon-meganerd'] },
     { server_name = '*', via = ['anon-cs-fr', 'anon-uk'] }
   ]
 
