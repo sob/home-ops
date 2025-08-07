@@ -97,24 +97,6 @@ spec:
                   - DAC_OVERRIDE
                 drop:
                   - ALL
-          exporter:
-            image:
-              repository: docker.io/egguy/unbound-prometheus-exporter
-              tag: latest
-            env:
-              UNBOUND_HOST: tcp://localhost:8953
-            resources:
-              requests:
-                cpu: 10m
-                memory: 50Mi
-              limits:
-                memory: 100Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
 
     service:
       app:
