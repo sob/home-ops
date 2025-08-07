@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: unbound
+  labels:
+    app.kubernetes.io/name: unbound
+    app.kubernetes.io/instance: unbound
+spec:
+  endpoints:
+    - port: metrics
+      scheme: http
+      path: /metrics
+      interval: 1m
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - network
+  selector:
+    matchLabels:
+      app.kubernetes.io/service: unbound-metrics
