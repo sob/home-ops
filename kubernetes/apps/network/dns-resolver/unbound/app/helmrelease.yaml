@@ -106,7 +106,7 @@ spec:
         controller: unbound
         type: LoadBalancer
         annotations:
-          io.cilium/lb-ipam-ips: "${LB_RESOLVER}"
+          io.cilium/lb-ipam-ips: "10.1.100.53"
         ports:
           dns-tcp:
             enabled: true
