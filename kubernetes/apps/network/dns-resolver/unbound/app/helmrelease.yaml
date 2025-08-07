@@ -138,10 +138,9 @@ spec:
             readOnly: true
       cache:
         enabled: true
-        type: persistentVolumeClaim
-        existingClaim: unbound-cache
+        type: emptyDir
         globalMounts:
-          - path: /var/lib/unbound
+          - path: /opt/unbound/etc/unbound/var
       root-hints:
         enabled: true
         type: configMap
