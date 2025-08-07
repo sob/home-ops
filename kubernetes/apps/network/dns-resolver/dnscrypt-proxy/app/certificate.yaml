@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dnscrypt-proxy-doh
+spec:
+  secretName: dnscrypt-proxy-doh-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: dns.${SECRET_DOMAIN}
+  dnsNames:
+    - dns.${SECRET_DOMAIN}
+    - doh.${SECRET_DOMAIN}
+  duration: 2160h # 90 days
+  renewBefore: 720h # 30 days
