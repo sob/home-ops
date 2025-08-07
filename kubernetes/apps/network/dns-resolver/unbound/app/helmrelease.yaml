@@ -99,8 +99,8 @@ spec:
                   - ALL
           exporter:
             image:
-              repository: ghcr.io/letsencrypt/unbound_exporter
-              tag: 0.4.6
+              repository: docker.io/egguy/unbound-prometheus-exporter
+              tag: latest
             args:
               - -unbound.host=tcp://localhost:8953
               - -unbound.ca=
