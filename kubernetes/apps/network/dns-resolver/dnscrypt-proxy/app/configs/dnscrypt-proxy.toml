@@ -54,8 +54,8 @@ dnscrypt_ephemeral_keys = true
 ## Enable TLS session tickets - uses less CPU, but TLS session tickets are not anonymous
 tls_disable_session_tickets = true
 
-## TLS cipher suite for TLS 1.3
-tls_cipher_suite = [4865, 4866, 4867]
+## TLS cipher suite - leave undefined to auto-negotiate
+# tls_cipher_suite = [52392, 49199]
 
 ## Enable support for HTTP/3 (HTTP over QUIC)
 http3 = true
