@@ -37,6 +37,18 @@ spec:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          init-dnssec:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - |
+                echo "Copying DNSSEC root key to writable location..."
+                cp /opt/unbound/etc/unbound/root.key /opt/unbound/etc/unbound/var/root.key
+                echo "DNSSEC root key copied successfully"
         containers:
           app:
             image:
@@ -157,3 +169,8 @@ spec:
           - path: /opt/unbound/etc/unbound/root.key
             subPath: root.key
             readOnly: true
+      dnssec-cache:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /opt/unbound/etc/unbound/var
