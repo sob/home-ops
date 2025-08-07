@@ -55,7 +55,7 @@ dnscrypt_ephemeral_keys = true
 tls_disable_session_tickets = true
 
 ## TLS cipher suite for TLS 1.3
-tls_cipher_suite = [52392, 49199]
+tls_cipher_suite = [4865, 4866, 4867]
 
 ## Enable support for HTTP/3 (HTTP over QUIC)
 http3 = true
