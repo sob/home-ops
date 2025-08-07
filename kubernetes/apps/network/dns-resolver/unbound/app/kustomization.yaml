@@ -15,6 +15,6 @@ configMapGenerator:
       - ./configs/root.hints
   - name: unbound-root-key
     files:
-      - ./configs/root.key
+      - root.key=./configs/root-trust-anchor
 generatorOptions:
   disableNameSuffixHash: true
