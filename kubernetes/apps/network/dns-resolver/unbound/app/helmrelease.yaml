@@ -29,6 +29,7 @@ spec:
         runAsUser: 0
         runAsGroup: 0
         fsGroup: 0
+        runAsNonRoot: false
 
     controllers:
       unbound:
@@ -72,11 +73,16 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 3
             securityContext:
-              allowPrivilegeEscalation: false
+              allowPrivilegeEscalation: true
               readOnlyRootFilesystem: false
               capabilities:
                 add:
                   - NET_BIND_SERVICE
+                  - SYS_CHROOT
+                  - SETUID
+                  - SETGID
+                  - MKNOD
+                  - DAC_OVERRIDE
                 drop:
                   - ALL
           exporter:
