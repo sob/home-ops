@@ -54,7 +54,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app resolver-unbound
+  name: &app resolver-blocky
   namespace: flux-system
 spec:
   targetNamespace: network
@@ -64,7 +64,7 @@ spec:
   dependsOn:
     - name: resolver-shared
     - name: resolver-dnscrypt-proxy
-  path: ./kubernetes/apps/network/dns-resolver/unbound/app
+  path: ./kubernetes/apps/network/dns-resolver/blocky/app
   prune: true
   sourceRef:
     kind: GitRepository
