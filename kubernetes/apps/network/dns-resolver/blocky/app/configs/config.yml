@@ -113,7 +113,7 @@ filtering:
 minTlsServeVersion: 1.3
 
 # Connection settings
-connectIPVersion: dual
+connectIPVersion: v4
 
 # FQDNs only - ensure domains have proper formatting
 fqdnOnly:

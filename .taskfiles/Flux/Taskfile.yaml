@@ -62,14 +62,27 @@ tasks:
     aliases: ["hr", "helm"]
     desc: Force reconcile a helmrelease record
     cmds:
-      - kubectl patch helmrelease --namespace {{.NS | default "default"}} {{.APP}} -p $'metadata:\n finalizers:\n  []' --type=merge || exit 1
+      - task: .patch
+        vars: {TYPE: "helmrelease", APP: "{{.APP}}", NS: "{{.NS}}"}
+      - task: .patch
+        vars: {TYPE: "kustomization", APP: "{{.KS}}", NS: "{{.NS}}"}
+      - task: .delete
+        vars: {TYPE: "configmap", LABEL: "app.kubernetes.io/name={{.KS}}", NS: "{{.NS}}"}
+      - task: .delete
+        vars: {TYPE: "deployment", APP: "{{.APP}}", NS: "{{.NS}}"}
+      - task: .delete
+        vars: {TYPE: "helmrelease", APP: "{{.APP}}", NS: "{{.NS}}"}
+      - task: .delete
+        vars: {TYPE: "kustomization", APP: "{{.KS}}", NS: "{{.NS}}"}
       - task: .reconcile
-        vars: {TYPE: "helmrelease"}
+        vars: {TYPE: "kustomization", APP: "cluster-apps", NS: "flux-system"}
     requires:
       vars: ["APP"]
     vars:
       NS:
         sh: kubectl get -A helmrelease --no-headers --field-selector=metadata.name={{.APP}} | awk '{print $1}'
+      KS:
+        sh: kubectl get helmrelease --namespace {{.NS}} {{.APP}} -o json 2>/dev/null | jq -r '.metadata.labels."kustomize.toolkit.fluxcd.io/name" // ""' || echo ""
 
   cluster-apps:
     aliases: ["apps"]
@@ -212,6 +225,17 @@ tasks:
     preconditions:
       - msg: Missing kubeconfig
         sh: test -f {{.KUBECONFIG}}
+
+  .patch:
+    internal: true
+    silent: true
+    cmds:
+      - kubectl patch {{.TYPE}} -n {{.NS}} {{.APP}} -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
+    preconditions:
+      - msg: Missing kubeconfig
+        sh: test -f {{.KUBECONFIG}}
+      - msg: Missing APP
+        sh: '[ -n "{{.APP}}" ]'
 
   .delete:
     internal: true
