@@ -78,7 +78,7 @@ spec:
 
     service:
       dns:
-        controller: *app
+        controller: blocky
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: "10.1.100.53"
@@ -87,22 +87,20 @@ spec:
             enabled: true
             port: 53
             protocol: TCP
-            targetPort: 53
           dns-udp:
             enabled: true
             port: 53
             protocol: UDP
-            targetPort: 53
       app:
-        controller: *app
+        controller: blocky
         ports:
           http:
-            port: *port
+            port: 4000
 
     serviceMonitor:
       app:
         enabled: true
-        serviceName: *app
+        serviceName: blocky
         endpoints:
           - port: http
             scheme: http
@@ -119,9 +117,3 @@ spec:
           - path: /app/config.yml
             subPath: config.yml
             readOnly: true
-      cache:
-        enabled: true
-        type: emptyDir
-        sizeLimit: 4Gi
-        globalMounts:
-          - path: /app/cache
