@@ -109,7 +109,7 @@ spec:
             targetPort: 4000
 
     serviceMonitor:
-      app:
+      api:
         enabled: true
         serviceName: blocky-api
         endpoints:
