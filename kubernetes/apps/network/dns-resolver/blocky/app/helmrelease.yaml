@@ -131,3 +131,14 @@ spec:
           - path: /app/config.yml
             subPath: config.yml
             readOnly: true
+      tls:
+        enabled: true
+        type: secret
+        name: resolver-blocky-tls
+        globalMounts:
+          - path: /app/cert/tls.crt
+            subPath: tls.crt
+            readOnly: true
+          - path: /app/cert/tls.key
+            subPath: tls.key
+            readOnly: true

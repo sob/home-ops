@@ -110,6 +110,8 @@ filtering:
 
 # TLS configuration for client connections
 minTlsServeVersion: 1.3
+certFile: /app/cert/tls.crt
+keyFile: /app/cert/tls.key
 
 # Connection settings
 connectIPVersion: v4

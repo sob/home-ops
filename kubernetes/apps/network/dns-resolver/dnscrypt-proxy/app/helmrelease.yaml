@@ -112,10 +112,4 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /var/cache/dnscrypt-proxy
-      tls:
-        enabled: true
-        type: secret
-        name: dnscrypt-proxy-doh-tls
-        globalMounts:
-          - path: /etc/dnscrypt-proxy/tls
 
