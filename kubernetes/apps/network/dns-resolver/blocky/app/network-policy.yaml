@@ -1,0 +1,98 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: resolver-blocky
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: resolver-blocky
+      app.kubernetes.io/instance: resolver-blocky
+  ingress:
+    # Allow DNS queries from private networks
+    - fromCIDR:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: TCP
+            - port: "53"
+              protocol: UDP
+            - port: "853"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"  # Allow all DNS queries
+    # Allow metrics scraping from Prometheus
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+    # Allow health checks from any pod in network namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+  egress:
+    # Allow DNS queries to DNSCrypt-proxy
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: resolver-dnscrypt-proxy
+      toPorts:
+        - ports:
+            - port: "5053"
+              protocol: TCP
+            - port: "5053"
+              protocol: UDP
+    # Allow DNS queries to CoreDNS for cluster.local
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Allow HTTPS for downloading blocklists (using FQDN policies)
+    - toFQDNs:
+        - matchName: "raw.githubusercontent.com"
+        - matchName: "github.com"
+        - matchPattern: "*.githubusercontent.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Allow DNS resolution for FQDNs (required for toFQDNs to work)
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # Allow general HTTPS for any other blocklist sources
+    - toCIDR:
+        - 0.0.0.0/0
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "80"
+              protocol: TCP

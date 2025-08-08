@@ -5,6 +5,7 @@ kind: Kustomization
 namespace: network
 resources:
   - ./helmrelease.yaml
+  - ./network-policy.yaml
 configMapGenerator:
   - name: blocky-config
     files:

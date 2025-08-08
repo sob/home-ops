@@ -82,6 +82,12 @@ spec:
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: "10.1.100.53"
+          external-dns.alpha.kubernetes.io/hostname: dns.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/ttl: "300"
+        sessionAffinity: ClientIP
+        sessionAffinityConfig:
+          clientIP:
+            timeoutSeconds: 10800
         ports:
           dns-tcp:
             enabled: true
@@ -91,6 +97,14 @@ spec:
             enabled: true
             port: 53
             protocol: UDP
+          dot:
+            enabled: true
+            port: 853
+            protocol: TCP
+          https:
+            enabled: true
+            port: 443
+            protocol: TCP
       app:
         controller: blocky
         ports:
