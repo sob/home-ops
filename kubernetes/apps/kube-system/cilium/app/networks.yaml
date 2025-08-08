@@ -28,7 +28,7 @@ spec:
   disabled: false
   serviceSelector:
     matchLabels:
-      app.kubernetes.io/name: blocky
+      app.kubernetes.io/name: resolver-blocky
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliuml2announcementpolicy_v2alpha1.json
 apiVersion: cilium.io/v2alpha1
