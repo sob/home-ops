@@ -111,6 +111,7 @@ spec:
     serviceMonitor:
       app:
         enabled: true
+        serviceName: blocky-api
         endpoints:
           - port: http
             scheme: http
