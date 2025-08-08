@@ -113,15 +113,13 @@ hostsFile:
 
 # Client lookup for identifying requests
 clientLookup:
-  upstream: ""
   singleNameOrder:
     - 2
     - 1
-  clients: {}
 
 # Bootstrap DNS (for resolving upstream hostnames)
 bootstrapDns:
-  - tcp+udp:10.96.0.10:53  # Use CoreDNS for bootstrap
+  - tcp+udp:10.96.0.10  # Use CoreDNS for bootstrap
 
 # Filtering configuration
 filtering:
