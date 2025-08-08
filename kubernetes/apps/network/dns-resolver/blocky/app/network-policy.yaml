@@ -25,9 +25,6 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
-          rules:
-            dns:
-              - matchPattern: "*"  # Allow all DNS queries
     # Allow metrics scraping from Prometheus
     - fromEndpoints:
         - matchLabels:
