@@ -171,16 +171,17 @@ lb_estimator = true
 [local_doh]
 
   ## Address and port to listen to, in order to provide a local DoH server
-  listen_addresses = ['0.0.0.0:8443']
+  ## Disabled - DNSCrypt-proxy is internal only, Blocky handles DoH
+  # listen_addresses = ['0.0.0.0:8443']
 
   ## Path that must be prepended to queries
   path = '/dns-query'
 
   ## Certificate file - leave blank to disable DoH
-  cert_file = '/etc/dnscrypt-proxy/tls/tls.crt'
+  cert_file = ''
 
   ## Certificate key file
-  cert_key_file = '/etc/dnscrypt-proxy/tls/tls.key'
+  cert_key_file = ''
 
 ##############################################
 #                                            #
