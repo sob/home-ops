@@ -26,7 +26,7 @@ spec:
           whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
-              app.kubernetes.io/name: *app
+              app.kubernetes.io/name: blocky
       securityContext:
         runAsUser: 100
         runAsGroup: 100
