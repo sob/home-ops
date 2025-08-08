@@ -11,11 +11,13 @@ spec:
     name: app-template
   install:
     remediation:
-      retries: 3
+      retries: -1
   upgrade:
     cleanupOnFail: true
     remediation:
+      remediateLastFailure: true
       retries: 3
+      strategy: rollback
   values:
     defaultPodOptions:
       topologySpreadConstraints:
@@ -44,6 +46,7 @@ spec:
               tag: v0.24
             env:
               TZ: America/Chicago
+              HTTP_PORT: &port 4000
             resources:
               requests:
                 cpu: 100m
@@ -57,10 +60,10 @@ spec:
                 spec:
                   httpGet:
                     path: /healthz
-                    port: 4000
-                  initialDelaySeconds: 30
-                  periodSeconds: 30
-                  timeoutSeconds: 5
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
             securityContext:
@@ -73,8 +76,8 @@ spec:
                   - ALL
 
     service:
-      app:
-        controller: blocky
+      dns:
+        controller: *app
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: "10.1.100.53"
@@ -89,46 +92,22 @@ spec:
             port: 53
             protocol: UDP
             targetPort: 53
-      api:
-        controller: blocky
+      app:
+        controller: *app
         ports:
           http:
-            enabled: true
-            port: 4000
-            protocol: TCP
-            targetPort: 4000
+            port: *port
 
     serviceMonitor:
-      api:
+      app:
         enabled: true
-        serviceName: blocky-api
+        serviceName: *app
         endpoints:
           - port: http
             scheme: http
             path: /metrics
             interval: 30s
             scrapeTimeout: 10s
-
-    ingress:
-      app:
-        enabled: true
-        className: internal
-        annotations:
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "dns"
-          hajimari.io/group: "network"
-          hajimari.io/appName: "Blocky DNS"
-        hosts:
-          - host: &host blocky.56kbps.io
-            paths:
-              - path: /
-                pathType: Prefix
-                service:
-                  identifier: api
-                  port: http
-        tls:
-          - hosts:
-              - *host
 
     persistence:
       config:
