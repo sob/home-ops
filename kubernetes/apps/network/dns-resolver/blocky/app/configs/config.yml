@@ -125,15 +125,11 @@ bootstrapDns:
 filtering:
   queryTypes: []  # Empty to allow all query types
 
-# Rate limiting
-ratelimit:
-  enable: false
-  responsesPerSec: 0
-  allowlistsOnly: false
+# Rate limiting - NOT SUPPORTED IN BLOCKY
+# ratelimit functionality is not available
 
-# EDNS configuration
-edns:
-  useContainerName: false
+# EDNS configuration - NOT SUPPORTED IN BLOCKY
+# EDNS is handled automatically
 
 # Minimal TLS config (not used since we forward to DNSCrypt-proxy)
 minTlsServeVersion: 1.3
@@ -145,4 +141,4 @@ fqdnOnly:
 
 # Special use domains
 specialUseDomains:
-  rfc6762_appendixG: true
+  rfc6762-appendixG: true
