@@ -23,7 +23,6 @@ blocking:
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.medium.txt
     adult:
-      - https://nsfw.oisd.nl/domainswild
   # Allow lists (formerly whiteLists)
   allowlists:
     self:
