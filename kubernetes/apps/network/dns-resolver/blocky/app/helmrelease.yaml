@@ -43,7 +43,7 @@ spec:
               repository: ghcr.io/0xerr0r/blocky
               tag: v0.24
             env:
-              TZ: America/New_York
+              TZ: America/Chicago
             resources:
               requests:
                 cpu: 100m
@@ -51,28 +51,18 @@ spec:
               limits:
                 memory: 1Gi  # Allow for blocklist storage
             probes:
-              liveness:
+              liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /healthcheck
+                    path: /healthz
                     port: 4000
                   initialDelaySeconds: 30
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 3
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /healthcheck
-                    port: 4000
-                  initialDelaySeconds: 5
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  failureThreshold: 3
+              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false  # Needs write for cache
