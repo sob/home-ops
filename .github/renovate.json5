@@ -30,14 +30,6 @@
   rollbackPrs: true,
   ignoreTests: false,
   recreateWhen: 'always',
-  schedule: [
-    'after 10pm on monday',
-    'after 10pm on wednesday',
-    'after 10pm on friday',
-    'before 5am on monday',
-    'before 5am on wednesday',
-    'before 5am on friday',
-  ],
   ignorePaths: [
     '**/*.sops.*',
     '**/*.secret.yaml',
