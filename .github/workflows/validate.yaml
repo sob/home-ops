@@ -522,6 +522,8 @@ jobs:
 
       - name: Setup yq
         uses: mikefarah/yq@v4
+        with:
+          cmd: yq --version
 
       - name: Setup jq
         run: |
