@@ -3,116 +3,74 @@
   "packageRules": [
     // Bootstrap and Kubernetes Sync Groups
     {
+      "description": "CoreDNS - Bootstrap and Kubernetes Sync",
+      "groupName": "coredns-all",
+      "matchPackageNames": [
+        "coredns",
+        "ghcr.io/coredns/charts/coredns"
+      ],
+      "matchDatasources": ["helm", "docker"],
+      "commitMessageTopic": "coredns"
+    },
+    {
+      "description": "External Secrets - Bootstrap and Kubernetes Sync", 
+      "groupName": "external-secrets-all",
+      "matchPackageNames": [
+        "external-secrets",
+        "ghcr.io/external-secrets/charts/external-secrets"
+      ],
+      "matchDatasources": ["helm", "docker"],
+      "commitMessageTopic": "external-secrets"
+    },
+    {
       "description": "Flux Operator - Bootstrap and Kubernetes Sync",
-      "groupName": "flux-operator-sync",
-      "matchPackagePatterns": [
+      "groupName": "flux-operator-all",
+      "matchPackageNames": [
         "flux-operator",
-        "controlplaneio-fluxcd/charts/flux-operator"
+        "ghcr.io/controlplaneio-fluxcd/charts/flux-operator"
       ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/flux-system/flux-operator/app/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile"],
-      "commitMessageTopic": "flux-operator (bootstrap + k8s)"
+      "matchDatasources": ["helm", "docker"],
+      "commitMessageTopic": "flux-operator"
     },
     {
       "description": "Flux Instance - Bootstrap and Kubernetes Sync",
-      "groupName": "flux-instance-sync",
-      "matchPackagePatterns": [
+      "groupName": "flux-instance-all",
+      "matchPackageNames": [
         "flux-instance",
-        "controlplaneio-fluxcd/charts/flux-instance"
+        "ghcr.io/controlplaneio-fluxcd/charts/flux-instance"
       ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/flux-system/flux-operator/instance/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile", "docker"],
-      "commitMessageTopic": "flux-instance (bootstrap + k8s)"
+      "matchDatasources": ["helm", "docker"],
+      "commitMessageTopic": "flux-instance"
     },
     {
       "description": "Cilium - Bootstrap and Kubernetes Sync",
-      "groupName": "cilium-sync",
-      "matchPackagePatterns": [
-        "^cilium$",
+      "groupName": "cilium-all",
+      "matchPackageNames": [
+        "cilium",
         "cilium/cilium"
       ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/kube-system/cilium/app/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile"],
-      "commitMessageTopic": "cilium (bootstrap + k8s)"
-    },
-    {
-      "description": "CoreDNS - Bootstrap and Kubernetes Sync",
-      "groupName": "coredns-sync",
-      "matchPackagePatterns": [
-        "^coredns$",
-        "coredns/charts/coredns"
-      ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/kube-system/coredns/app/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile"],
-      "commitMessageTopic": "coredns (bootstrap + k8s)"
+      "matchDatasources": ["helm"],
+      "commitMessageTopic": "cilium"
     },
     {
       "description": "Spegel - Bootstrap and Kubernetes Sync",
-      "groupName": "spegel-sync",
-      "matchPackagePatterns": [
-        "^spegel$",
-        "spegel-org/helm-charts/spegel"
+      "groupName": "spegel-all",
+      "matchPackageNames": [
+        "spegel",
+        "ghcr.io/spegel-org/helm-charts/spegel"
       ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/kube-system/spegel/app/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile"],
-      "commitMessageTopic": "spegel (bootstrap + k8s)"
+      "matchDatasources": ["helm", "docker"],
+      "commitMessageTopic": "spegel"
     },
     {
       "description": "Cert-Manager - Bootstrap and Kubernetes Sync",
-      "groupName": "cert-manager-sync",
-      "matchPackagePatterns": [
-        "^cert-manager$",
-        "jetstack/charts/cert-manager"
+      "groupName": "cert-manager-all",
+      "matchPackageNames": [
+        "cert-manager",
+        "quay.io/jetstack/charts/cert-manager"
       ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/cert-manager/cert-manager/app/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile"],
-      "commitMessageTopic": "cert-manager (bootstrap + k8s)"
-    },
-    {
-      "description": "External Secrets - Bootstrap and Kubernetes Sync",
-      "groupName": "external-secrets-sync",
-      "matchPackagePatterns": [
-        "^external-secrets$",
-        "external-secrets/charts/external-secrets"
-      ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/external-secrets/external-secrets/app/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile"],
-      "commitMessageTopic": "external-secrets (bootstrap + k8s)"
-    },
-    {
-      "description": "OnePassword Connect - Bootstrap and Kubernetes Sync",
-      "groupName": "onepassword-connect-sync",
-      "matchPackagePatterns": [
-        "^onepassword-connect$",
-        "bjw-s-labs/helm/app-template"
-      ],
-      "matchFiles": [
-        "bootstrap/helmfile.yaml",
-        "kubernetes/apps/external-secrets/onepassword-connect/app/helmrelease.yaml"
-      ],
-      "matchDatasources": ["helm", "helmfile"],
-      "commitMessageTopic": "onepassword-connect (bootstrap + k8s)"
+      "matchDatasources": ["helm", "docker"],
+      "commitMessageTopic": "cert-manager"
     },
     // Critical Infrastructure Groups
     {
