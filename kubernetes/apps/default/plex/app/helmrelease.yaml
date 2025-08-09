@@ -102,18 +102,24 @@ spec:
         ports:
           http:
             port: 32400
-    ingress:
+    route:
       app:
-        className: external
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        hosts:
-          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+        enabled: true
+        className: cilium
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - port: 32400
+                identifier: app
     persistence:
       config:
         existingClaim: plex
