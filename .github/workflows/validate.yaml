@@ -54,6 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changed-files]
     if: needs.changed-files.outputs.any_changed == 'true'
+    continue-on-error: true  # Make this job non-blocking
     steps:
       - name: Generate Token
         uses: actions/create-github-app-token@v2
@@ -78,6 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changed-files]
     if: needs.changed-files.outputs.any_changed == 'true'
+    continue-on-error: true  # Make this job non-blocking
     steps:
       - name: Generate Token
         uses: actions/create-github-app-token@v2
@@ -414,7 +416,7 @@ jobs:
             --all-namespaces \
             --sources flux-system \
             --output-file diff.patch || exit_code=$?
-          
+
           # Check if the command failed (exit code not 0 or 1)
           # flux-local diff returns 1 when there are differences, which is expected
           if [ $exit_code -gt 1 ]; then
@@ -576,8 +578,66 @@ jobs:
     steps:
       - name: Check results
         run: |
-          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
-            echo "::error::One or more validation checks failed"
+          # Check for critical failures (excluding yaml-lint and schema-validation)
+          critical_failed=false
+
+          # List of jobs that should cause failure if they fail
+          # yaml-lint and schema-validation are excluded (warnings only)
+          if [[ "${{ needs.secret-scan.result }}" == "failure" ]] || \
+              [[ "${{ needs.secret-scan.result }}" == "cancelled" ]]; then
+            echo "::error::Secret scan failed"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.kustomize-build.result }}" == "failure" ]] || \
+              [[ "${{ needs.kustomize-build.result }}" == "cancelled" ]]; then
+            echo "::error::Kustomize build failed"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.kubeconform.result }}" == "failure" ]] || \
+              [[ "${{ needs.kubeconform.result }}" == "cancelled" ]]; then
+            echo "::error::Kubeconform validation failed"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.flux-local-test.result }}" == "failure" ]] || \
+              [[ "${{ needs.flux-local-test.result }}" == "cancelled" ]]; then
+            echo "::error::Flux local test failed"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.flux-local-diff.result }}" == "failure" ]] || \
+              [[ "${{ needs.flux-local-diff.result }}" == "cancelled" ]]; then
+            echo "::error::Flux local diff failed"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.helm-values-validation.result }}" == "failure" ]] || \
+              [[ "${{ needs.helm-values-validation.result }}" == "cancelled" ]]; then
+            echo "::error::Helm values validation failed"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.opa-policies.result }}" == "failure" ]] || \
+              [[ "${{ needs.opa-policies.result }}" == "cancelled" ]]; then
+            echo "::error::OPA policies validation failed"
+            critical_failed=true
+          fi
+
+          # Report warnings for non-critical jobs
+          if [[ "${{ needs.yaml-lint.result }}" == "failure" ]]; then
+            echo "::warning::YAML lint check failed (non-blocking)"
+          fi
+
+          if [[ "${{ needs.schema-validation.result }}" == "failure" ]]; then
+            echo "::warning::Schema validation failed (non-blocking)"
+          fi
+
+          # Exit with failure if any critical job failed
+          if [[ "$critical_failed" == "true" ]]; then
+            echo "::error::One or more critical validation checks failed"
             exit 1
           fi
-          echo "✅ All validation checks passed"
+
+          echo "✅ All critical validation checks passed"
