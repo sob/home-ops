@@ -105,15 +105,15 @@ spec:
             namespace: network
             sectionName: https
         hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "plex.${SECRET_DOMAIN}"
         rules:
           - matches:
               - path:
                   type: PathPrefix
                   value: /
             backendRefs:
-              - port: 32400
-                identifier: app
+              - name: "{{ .Release.Name }}"
+                port: 32400
     persistence:
       config:
         existingClaim: plex
