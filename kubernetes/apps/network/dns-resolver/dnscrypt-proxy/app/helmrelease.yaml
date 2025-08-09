@@ -107,4 +107,3 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /var/cache/dnscrypt-proxy
-
