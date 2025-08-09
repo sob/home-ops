@@ -100,7 +100,6 @@ spec:
     route:
       app:
         enabled: true
-        className: cilium
         parentRefs:
           - name: external-gateway
             namespace: network
