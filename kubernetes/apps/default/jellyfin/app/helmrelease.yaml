@@ -120,6 +120,10 @@ spec:
         globalMounts:
           - path: /media
             readOnly: true
+      transcode:
+        type: emptyDir
+        medium: Memory  # Use RAM for transcoding
+        sizeLimit: 8Gi  # Adjust based on available RAM
       tmpfs:
         type: emptyDir
         advancedMounts:
