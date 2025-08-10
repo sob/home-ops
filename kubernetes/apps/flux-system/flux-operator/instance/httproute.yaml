@@ -7,8 +7,8 @@ metadata:
 spec:
   hostnames: ["flux-webhook.56kbps.io"]
   parentRefs:
-    - name: external
-      namespace: kube-system
+    - name: external-gateway
+      namespace: network
       sectionName: https
   rules:
     - backendRefs:
