@@ -97,14 +97,19 @@ spec:
         ports:
           http:
             port: 32400
+      lb:
+        controller: plex
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: ${SECRET_VIP_PLEX}
+        ports:
+          http:
+            port: 32400
     route:
       app:
         enabled: true
         parentRefs:
           - name: external-gateway
-            namespace: network
-            sectionName: https
-          - name: internal-gateway
             namespace: network
             sectionName: https
         hostnames:
