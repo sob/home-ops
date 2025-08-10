@@ -112,6 +112,9 @@ spec:
           - name: external-gateway
             namespace: network
             sectionName: https
+          - name: internal-gateway
+            namespace: network
+            sectionName: https
         hostnames:
           - "plex.${SECRET_DOMAIN}"
         rules:
@@ -120,7 +123,7 @@ spec:
                   type: PathPrefix
                   value: /
             backendRefs:
-              - name: "{{ .Release.Name }}-app"
+              - name: app
                 port: 32400
     persistence:
       config:
