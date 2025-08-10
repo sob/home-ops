@@ -123,7 +123,7 @@ spec:
                   type: PathPrefix
                   value: /
             backendRefs:
-              - name: app
+              - name: plex-app
                 port: 32400
     persistence:
       config:
