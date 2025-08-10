@@ -1,35 +1,35 @@
 ---
 ingress:
   - hostname: "sso.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "sso.${SECRET_DOMAIN}"
   - hostname: "jellyfin.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "jellyfin.${SECRET_DOMAIN}"
   - hostname: "jelly.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "jelly.${SECRET_DOMAIN}"
   - hostname: "flux-webhook.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "flux-webhook.${SECRET_DOMAIN}"
   - hostname: "wizarr.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "wizarr.${SECRET_DOMAIN}"
   - hostname: "join.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "join.${SECRET_DOMAIN}"
   - hostname: "kromgo.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "kromgo.${SECRET_DOMAIN}"
   - hostname: "status.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "status.${SECRET_DOMAIN}"
   - hostname: "${SECRET_DOMAIN}"
