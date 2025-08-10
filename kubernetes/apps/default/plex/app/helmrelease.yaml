@@ -126,6 +126,7 @@ spec:
         retain: false
         accessMode: ReadWriteOnce
         size: 20Gi
+        suffix: cache  # Force PVC to be named plex-cache due to app-template bug
         globalMounts:
           - path: /config/Library/Application Support/Plex Media Server/Cache
       logs:
