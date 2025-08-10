@@ -28,6 +28,7 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-  addresses:
-    - type: IPAddress
-      value: ${SECRET_CILIUM_EXTERNAL_VIP}
+  # Removing static IP to let Cilium allocate dynamically
+  # addresses:
+  #   - type: IPAddress
+  #     value: ${SECRET_CILIUM_EXTERNAL_VIP}
