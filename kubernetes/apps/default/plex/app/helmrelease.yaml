@@ -120,7 +120,7 @@ spec:
                   type: PathPrefix
                   value: /
             backendRefs:
-              - name: "{{ .Release.Name }}"
+              - name: "{{ .Release.Name }}-app"
                 port: 32400
     persistence:
       config:
