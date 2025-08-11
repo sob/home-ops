@@ -5,6 +5,8 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./networks.yaml
+  # BGP resources will be added after Cilium restarts with BGP enabled
+  # - ./bgp-config.yaml
 configMapGenerator:
   - name: cilium-values
     files:
