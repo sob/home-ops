@@ -68,7 +68,7 @@ spec:
       peers:
         - name: udm-pro
           peerASN: 64512
-          peerAddress: 10.1.0.1
+          peerAddress: 10.1.100.1
           peerConfigRef:
             name: bgp-peer-config
 ---
