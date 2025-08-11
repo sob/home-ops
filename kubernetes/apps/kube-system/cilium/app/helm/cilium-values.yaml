@@ -131,6 +131,6 @@ externalWorkloads:
 # Security policies
 policyEnforcementMode: default
 
-# BGP disabled for UDM Pro
+# BGP enabled for UDM Pro
 bgpControlPlane:
-  enabled: false
+  enabled: true
