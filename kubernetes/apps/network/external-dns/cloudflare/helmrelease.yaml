@@ -54,7 +54,7 @@ spec:
       - --gateway-namespace=network
       - --gateway-name=external-gateway
     policy: sync
-    sources: ["ingress", "gateway-httproute"]
+    sources: ["ingress", "gateway-httproute", "crd"]
     txtPrefix: k8s.
     txtOwnerId: default
     domainFilters: ["${SECRET_DOMAIN}"]
