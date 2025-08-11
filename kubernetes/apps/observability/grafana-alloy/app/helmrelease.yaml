@@ -33,7 +33,7 @@ spec:
         key: config.alloy
       clustering:
         enabled: false
-      stabilityLevel: "generally_available"
+      stabilityLevel: "generally-available"
     controller:
       type: statefulset
       replicas: 1
