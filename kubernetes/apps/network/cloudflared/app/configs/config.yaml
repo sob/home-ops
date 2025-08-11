@@ -5,11 +5,11 @@ ingress:
     originRequest:
       originServerName: "sso.${SECRET_DOMAIN}"
   - hostname: "jellyfin.${SECRET_DOMAIN}"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "jellyfin.${SECRET_DOMAIN}"
   - hostname: "jelly.${SECRET_DOMAIN}"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "jelly.${SECRET_DOMAIN}"
   - hostname: "flux-webhook.${SECRET_DOMAIN}"
