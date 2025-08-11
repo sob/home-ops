@@ -5,9 +5,14 @@ kind: HTTPRoute
 metadata:
   name: authentik-server
   namespace: security
+  annotations:
+    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
 spec:
   parentRefs:
     - name: external-gateway
+      namespace: network
+      sectionName: https
+    - name: internal-gateway
       namespace: network
       sectionName: https
   hostnames:
