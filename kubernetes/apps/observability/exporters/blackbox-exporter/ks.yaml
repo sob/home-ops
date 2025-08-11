@@ -33,6 +33,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: blackbox-exporter
+      namespace: observability
   path: ./kubernetes/apps/observability/exporters/blackbox-exporter/probes
   prune: true
   sourceRef:

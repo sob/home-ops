@@ -12,7 +12,9 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: radarr
+      namespace: default
     - name: external-secrets-stores
+      namespace: external-secrets
   path: ./kubernetes/apps/observability/exporters/radarr-exporter/app
   prune: true
   sourceRef:
