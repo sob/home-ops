@@ -48,6 +48,8 @@ spec:
               - tunnel
               - --config
               - /etc/cloudflared/config/config.yaml
+              - --loglevel
+              - debug
               - run
               - "$(TUNNEL_ID)"
             probes:
