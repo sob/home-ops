@@ -1,0 +1,160 @@
+// Prometheus Remote Write to Grafana Cloud
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = env("PROMETHEUS_URL")
+    basic_auth {
+      username = env("PROMETHEUS_USERNAME")
+      password = env("PROMETHEUS_PASSWORD")
+    }
+  }
+}
+
+// Loki Write to Grafana Cloud
+loki.write "grafana_cloud" {
+  endpoint {
+    url = env("LOKI_URL")
+    basic_auth {
+      username = env("LOKI_USERNAME")
+      password = env("LOKI_PASSWORD")
+    }
+  }
+}
+
+// Service Discovery for Kubernetes
+discovery.kubernetes "services" {
+  role = "service"
+}
+
+discovery.kubernetes "pods" {
+  role = "pod"
+}
+
+discovery.kubernetes "nodes" {
+  role = "node"
+}
+
+// Relabel services to scrape based on annotations
+discovery.relabel "services" {
+  targets = discovery.kubernetes.services.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_scrape"]
+    regex         = "true"
+    action        = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_scheme"]
+    target_label  = "__scheme__"
+    regex         = "(https?)"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_path"]
+    target_label  = "__metrics_path__"
+    regex         = "(.+)"
+  }
+
+  rule {
+    source_labels = ["__address__", "__meta_kubernetes_service_annotation_prometheus_io_port"]
+    regex         = "([^:]+)(?::\\d+)?;(\\d+)"
+    replacement   = "$1:$2"
+    target_label  = "__address__"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_service_name"]
+    target_label  = "service"
+  }
+}
+
+// Relabel pods to scrape based on annotations
+discovery.relabel "pods" {
+  targets = discovery.kubernetes.pods.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+    regex         = "true"
+    action        = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scheme"]
+    target_label  = "__scheme__"
+    regex         = "(https?)"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+    target_label  = "__metrics_path__"
+    regex         = "(.+)"
+  }
+
+  rule {
+    source_labels = ["__address__", "__meta_kubernetes_pod_annotation_prometheus_io_port"]
+    regex         = "([^:]+)(?::\\d+)?;(\\d+)"
+    replacement   = "$1:$2"
+    target_label  = "__address__"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+}
+
+// Scrape services
+prometheus.scrape "services" {
+  targets    = discovery.relabel.services.output
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+  honor_labels = true
+  scrape_interval = "60s"
+}
+
+// Scrape pods
+prometheus.scrape "pods" {
+  targets = discovery.relabel.pods.output
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+  honor_labels = true
+  scrape_interval = "60s"
+}
+
+// Scrape kubelet metrics
+prometheus.scrape "kubelet" {
+  targets = discovery.kubernetes.nodes.targets
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+  scheme = "https"
+  tls_config {
+    ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    insecure_skip_verify = true
+  }
+  bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  honor_labels = true
+  scrape_interval = "60s"
+}
+
+// Collect logs from Kubernetes pods
+loki.source.kubernetes "pods" {
+  targets    = discovery.kubernetes.pods.targets
+  forward_to = [loki.write.grafana_cloud.receiver]
+}
+
+// Prometheus Operator CRD support for ServiceMonitors
+prometheus.operator.servicemonitors "servicemonitors" {
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// Prometheus Operator CRD support for PodMonitors
+prometheus.operator.podmonitors "podmonitors" {
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
