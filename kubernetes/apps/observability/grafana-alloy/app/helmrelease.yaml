@@ -34,6 +34,9 @@ spec:
       clustering:
         enabled: false
       stabilityLevel: "generally-available"
+      envFrom:
+        - secretRef:
+            name: alloy-secret
     controller:
       type: statefulset
       replicas: 1
@@ -54,9 +57,6 @@ spec:
         memory: 256Mi
       limits:
         memory: 1Gi
-    envFrom:
-      - secretRef:
-          name: alloy-secret
     serviceAccount:
       create: true
     rbac:
