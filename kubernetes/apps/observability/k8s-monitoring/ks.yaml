@@ -19,4 +19,6 @@ spec:
   wait: false
   dependsOn:
     - name: external-secrets-stores
+      namespace: external-secrets
     - name: openebs
+      namespace: storage
