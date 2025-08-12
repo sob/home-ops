@@ -20,126 +20,111 @@ loki.write "grafana_cloud" {
   }
 }
 
-// CRITICAL: Filter metrics to stay under 10K series limit
-// Only keep essential metrics for alerting and basic monitoring
-prometheus.relabel "metric_filter" {
-  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-  
-  // Only keep essential metrics - drop everything else first
-  rule {
-    source_labels = ["__name__"]
-    regex = "up|node_cpu_seconds_total|node_memory_MemAvailable_bytes|node_memory_MemTotal_bytes|node_filesystem_avail_bytes|node_filesystem_size_bytes|node_network_up|node_network_receive_errs_total|node_network_transmit_errs_total|node_load1|node_load5|node_load15|container_memory_usage_bytes|container_cpu_usage_seconds_total|kube_pod_container_status_restarts_total|kube_pod_container_status_last_terminated_reason|kube_deployment_status_replicas_available|kube_statefulset_status_replicas_ready|kube_daemonset_status_number_ready|ceph_health_status|ceph_osd_down|ceph_pg_degraded|ceph_pool_bytes_used|ceph_pool_max_avail|smartctl_device_temperature|smartctl_device_smart_status|smartctl_device_critical_warning|smartctl_device_media_errors|smartctl_device_available_spare.*|volsync_failures_total|volsync_volume_last_sync_time|certmanager_certificate_expiration_timestamp_seconds|certmanager_certificate_ready_status|certmanager_http_acme_client_request_count|fluxcd_controller_ready|upsOnBattery|upsBatteryChargePercent|upsBatteryReplaceIndicator|upsLoadPercent|ePDULoadStatusLoad|container_last_seen"
-    action = "keep"
-  }
-
-  // Drop high-cardinality labels we don't need
-  rule {
-    regex = "pod_ip|uid|container_id|image_id|annotation_.*|label_.*_hash|label_.*_revision"
-    action = "labeldrop"
-  }
-
-}
-
-// ServiceMonitor discovery
+// ServiceMonitor discovery - ONLY Authentik for now
 prometheus.operator.servicemonitors "servicemonitors" {
-  forward_to = [prometheus.relabel.metric_filter.receiver]
-}
-
-// PodMonitor discovery  
-prometheus.operator.podmonitors "podmonitors" {
-  forward_to = [prometheus.relabel.metric_filter.receiver]
-}
-
-// Node exporter - critical for infrastructure monitoring
-discovery.kubernetes "nodes" {
-  role = "node"
-}
-
-discovery.relabel "node_exporter" {
-  targets = discovery.kubernetes.nodes.targets
-
-  rule {
-    target_label = "__address__"
-    replacement  = "kubernetes.default.svc.cluster.local:443"
-  }
-
-  rule {
-    source_labels = ["__meta_kubernetes_node_name"]
-    regex         = "(.+)"
-    replacement   = "/api/v1/nodes/${1}/proxy/metrics"
-    target_label  = "__metrics_path__"
-  }
-
-  rule {
-    source_labels = ["__meta_kubernetes_node_name"]
-    target_label  = "instance"
-  }
-
-  rule {
-    target_label = "job"
-    replacement  = "node-exporter"
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+  scrape_interval = "60s"
+  
+  // Only scrape Authentik ServiceMonitor
+  selector {
+    match_labels = {
+      "app.kubernetes.io/name" = "authentik"
+    }
   }
 }
 
-prometheus.scrape "node_exporter" {
-  targets    = discovery.relabel.node_exporter.output
-  forward_to = [prometheus.relabel.metric_filter.receiver]
-  bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-  tls_config {
-    ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-  }
-  scrape_interval = "60s"  // Reduce scrape frequency
-}
+// PodMonitor discovery - DISABLED for now
+// prometheus.operator.podmonitors "podmonitors" {
+//   forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+//   scrape_interval = "60s"
+// }
 
-// Collect critical logs only
-discovery.kubernetes "pods_logs" {
-  role = "pod"
-}
+// Node exporter - DISABLED for now
+// discovery.kubernetes "nodes" {
+//   role = "node"
+// }
 
-discovery.relabel "pods_logs" {
-  targets = discovery.kubernetes.pods_logs.targets
+// discovery.relabel "node_exporter" {
+//   targets = discovery.kubernetes.nodes.targets
 
-  rule {
-    source_labels = ["__meta_kubernetes_pod_node_name"]
-    target_label  = "__host__"
-  }
+//   rule {
+//     target_label = "__address__"
+//     replacement  = "kubernetes.default.svc.cluster.local:443"
+//   }
 
-  rule {
-    source_labels = ["__meta_kubernetes_namespace"]
-    target_label  = "namespace"
-  }
+//   rule {
+//     source_labels = ["__meta_kubernetes_node_name"]
+//     regex         = "(.+)"
+//     replacement   = "/api/v1/nodes/${1}/proxy/metrics"
+//     target_label  = "__metrics_path__"
+//   }
 
-  rule {
-    source_labels = ["__meta_kubernetes_pod_name"]
-    target_label  = "pod"
-  }
+//   rule {
+//     source_labels = ["__meta_kubernetes_node_name"]
+//     target_label  = "instance"
+//   }
 
-  rule {
-    source_labels = ["__meta_kubernetes_pod_container_name"]
-    target_label  = "container"
-  }
+//   rule {
+//     target_label = "job"
+//     replacement  = "node-exporter"
+//   }
+// }
 
-  rule {
-    source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-    target_label  = "__path__"
-    separator     = "/"
-    replacement   = "/var/log/pods/*$1/*.log"
-  }
+// prometheus.scrape "node_exporter" {
+//   targets    = discovery.relabel.node_exporter.output
+//   forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+//   bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+//   tls_config {
+//     ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+//   }
+//   scrape_interval = "60s"
+// }
 
-}
+// Logs collection - DISABLED for now
+// discovery.kubernetes "pods_logs" {
+//   role = "pod"
+// }
 
-// Collect logs from Kubernetes pods
-loki.source.kubernetes "pods" {
-  targets    = discovery.relabel.pods_logs.output
-  forward_to = [loki.process.filter_logs.receiver]
-}
+// discovery.relabel "pods_logs" {
+//   targets = discovery.kubernetes.pods_logs.targets
 
-// Filter logs to reduce volume
-loki.process "filter_logs" {
-  forward_to = [loki.write.grafana_cloud.receiver]
+//   rule {
+//     source_labels = ["__meta_kubernetes_pod_node_name"]
+//     target_label  = "__host__"
+//   }
 
-  // Only keep error, warning, and critical logs
-  stage.regex {
-    expression = "(?i)(error|warn|critical|fail|exception|panic)"
-  }
-}
+//   rule {
+//     source_labels = ["__meta_kubernetes_namespace"]
+//     target_label  = "namespace"
+//   }
+
+//   rule {
+//     source_labels = ["__meta_kubernetes_pod_name"]
+//     target_label  = "pod"
+//   }
+
+//   rule {
+//     source_labels = ["__meta_kubernetes_pod_container_name"]
+//     target_label  = "container"
+//   }
+
+//   rule {
+//     source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+//     target_label  = "__path__"
+//     separator     = "/"
+//     replacement   = "/var/log/pods/*$1/*.log"
+//   }
+// }
+
+// loki.source.kubernetes "pods" {
+//   targets    = discovery.relabel.pods_logs.output
+//   forward_to = [loki.process.filter_logs.receiver]
+// }
+
+// loki.process "filter_logs" {
+//   forward_to = [loki.write.grafana_cloud.receiver]
+
+//   stage.regex {
+//     expression = "(?i)(error|warn|critical|fail|exception|panic)"
+//   }
+// }
