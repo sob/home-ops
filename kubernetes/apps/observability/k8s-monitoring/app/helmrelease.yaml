@@ -56,14 +56,33 @@ spec:
     prometheusOperatorCRDs:
       enabled: true  # Discover ServiceMonitors and PodMonitors
     
-    # Alloy configuration
-    alloy:
+    # Alloy collectors configuration
+    alloy-metrics:
+      enabled: true
       controller:
         type: statefulset
         replicas: 1
+      alloy:
+        storagePath: /var/lib/alloy/data
+        mounts:
+          varlog: true
       storage:
         enabled: true
         type: persistentVolumeClaim
         persistentVolumeClaim:
-          storageClass: openebs-hostpath
+          storageClassName: openebs-hostpath
           size: 5Gi
+    
+    alloy-logs:
+      enabled: true
+      controller:
+        type: daemonset
+      alloy:
+        mounts:
+          varlog: true
+    
+    alloy-events:
+      enabled: true
+      controller:
+        type: deployment
+        replicas: 1
