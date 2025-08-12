@@ -40,6 +40,8 @@ spec:
     controller:
       type: statefulset
       replicas: 1
+      podAnnotations:
+        reloader.stakater.com/auto: "true"
       volumeClaimTemplates:
         - metadata:
             name: storage
