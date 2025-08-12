@@ -23,14 +23,9 @@ loki.write "grafana_cloud" {
 // ServiceMonitor discovery - ONLY Authentik for now
 prometheus.operator.servicemonitors "servicemonitors" {
   forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-  scrape_interval = "60s"
   
-  // Only scrape Authentik ServiceMonitor
-  selector {
-    match_labels = {
-      "app.kubernetes.io/name" = "authentik"
-    }
-  }
+  // Only scrape from security namespace where Authentik is
+  namespaces = ["security"]
 }
 
 // PodMonitor discovery - DISABLED for now
