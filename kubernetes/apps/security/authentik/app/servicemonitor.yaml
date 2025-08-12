@@ -28,6 +28,7 @@ metadata:
     app.kubernetes.io/instance: authentik
     app.kubernetes.io/name: authentik
 spec:
+  jobLabel: app.kubernetes.io/name
   endpoints:
     - port: http-metrics
       interval: 60s
