@@ -1,10 +1,10 @@
 // Prometheus Remote Write to Grafana Cloud
 prometheus.remote_write "grafana_cloud" {
   endpoint {
-    url = std.env("PROMETHEUS_URL")
+    url = sys.env("PROMETHEUS_URL")
     basic_auth {
-      username = std.env("PROMETHEUS_USERNAME")
-      password = std.env("PROMETHEUS_PASSWORD")
+      username = sys.env("PROMETHEUS_USERNAME")
+      password = sys.env("PROMETHEUS_PASSWORD")
     }
   }
 }
@@ -12,10 +12,10 @@ prometheus.remote_write "grafana_cloud" {
 // Loki Write to Grafana Cloud
 loki.write "grafana_cloud" {
   endpoint {
-    url = std.env("LOKI_URL")
+    url = sys.env("LOKI_URL")
     basic_auth {
-      username = std.env("LOKI_USERNAME")
-      password = std.env("LOKI_PASSWORD")
+      username = sys.env("LOKI_USERNAME")
+      password = sys.env("LOKI_PASSWORD")
     }
   }
 }
