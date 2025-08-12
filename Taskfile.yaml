@@ -17,6 +17,7 @@ env:
   TALOSCONFIG: '{{.ROOT_DIR}}/.talosconfig'
 
 includes:
+  alerting: .taskfiles/alerting
   authentik: .taskfiles/authentik
   bootstrap: .taskfiles/bootstrap
   bucket: .taskfiles/bucket
