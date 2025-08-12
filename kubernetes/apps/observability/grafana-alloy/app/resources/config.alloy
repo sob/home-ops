@@ -38,20 +38,14 @@ prometheus.relabel "metric_filter" {
     action = "labeldrop"
   }
 
-  // Limit namespace labels to only important ones
-  rule {
-    source_labels = ["namespace"]
-    regex = "security|network|media|observability|flux-system|storage|database|kube-system|rook-ceph|cert-manager"
-    action = "keep"
-  }
 }
 
-// ServiceMonitor discovery with filtering
+// ServiceMonitor discovery
 prometheus.operator.servicemonitors "servicemonitors" {
   forward_to = [prometheus.relabel.metric_filter.receiver]
 }
 
-// PodMonitor discovery with filtering  
+// PodMonitor discovery  
 prometheus.operator.podmonitors "podmonitors" {
   forward_to = [prometheus.relabel.metric_filter.receiver]
 }
@@ -132,12 +126,6 @@ discovery.relabel "pods_logs" {
     replacement   = "/var/log/pods/*$1/*.log"
   }
 
-  // Only keep error and warning logs
-  rule {
-    source_labels = ["__meta_kubernetes_namespace"]
-    regex = "security|flux-system|cert-manager|rook-ceph"
-    action = "keep"
-  }
 }
 
 // Collect logs from Kubernetes pods
