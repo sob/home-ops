@@ -7,7 +7,7 @@ components:
   - ../../components/common
 resources:
   - ./gatus/ks.yaml
-  - ./grafana-alloy/ks.yaml
+  - ./k8s-monitoring/ks.yaml
   - ./kromgo/ks.yaml
 # - ./kube-prometheus-stack/ks.yaml
 # - ./loki/ks.yaml
