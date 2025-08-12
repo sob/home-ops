@@ -49,17 +49,11 @@ prometheus.relabel "metric_filter" {
 // ServiceMonitor discovery with filtering
 prometheus.operator.servicemonitors "servicemonitors" {
   forward_to = [prometheus.relabel.metric_filter.receiver]
-  
-  // Only scrape from specific namespaces
-  namespaces = ["security", "network", "media", "observability", "flux-system", "storage", "database", "kube-system", "rook-ceph", "cert-manager"]
 }
 
 // PodMonitor discovery with filtering  
 prometheus.operator.podmonitors "podmonitors" {
   forward_to = [prometheus.relabel.metric_filter.receiver]
-  
-  // Only scrape from specific namespaces
-  namespaces = ["security", "network", "media", "observability", "flux-system", "storage", "database", "kube-system", "rook-ceph", "cert-manager"]
 }
 
 // Node exporter - critical for infrastructure monitoring
@@ -106,9 +100,6 @@ prometheus.scrape "node_exporter" {
 // Collect critical logs only
 discovery.kubernetes "pods_logs" {
   role = "pod"
-  
-  // Only collect logs from critical namespaces
-  namespaces = ["security", "flux-system", "cert-manager", "rook-ceph"]
 }
 
 discovery.relabel "pods_logs" {
