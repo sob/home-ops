@@ -12,7 +12,6 @@ locals {
     authentik_provider_proxy.main["echo_server"].id,
     authentik_provider_proxy.main["homeassistant"].id,
     authentik_provider_proxy.main["wizarr"].id,
-    authentik_provider_proxy.main["prometheus"].id,
   ]
 }
 
