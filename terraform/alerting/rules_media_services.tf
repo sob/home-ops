@@ -30,6 +30,9 @@ resource "grafana_rule_group" "media_apps" {
       model = jsonencode({
         expr  = "up{job=\"plex\",namespace=\"default\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -61,6 +64,9 @@ resource "grafana_rule_group" "media_apps" {
       model = jsonencode({
         expr  = "up{job=\"jellyfin\",namespace=\"default\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -92,6 +98,9 @@ resource "grafana_rule_group" "media_apps" {
       model = jsonencode({
         expr  = "up{job=\"overseerr\",namespace=\"default\"} < 1 AND up{job=\"overseerr-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -123,6 +132,9 @@ resource "grafana_rule_group" "media_apps" {
       model = jsonencode({
         expr  = "up{job=\"sabnzbd\",namespace=\"default\"} < 1 AND up{job=\"sabnzbd-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -160,6 +172,9 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "up{job=\"sonarr\",namespace=\"default\"} < 1 AND up{job=\"sonarr-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -191,6 +206,9 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "up{job=\"radarr\",namespace=\"default\"} < 1 AND up{job=\"radarr-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -222,6 +240,9 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "up{job=\"prowlarr\",namespace=\"default\"} < 1 AND up{job=\"prowlarr-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -253,6 +274,9 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "up{job=\"bazarr\",namespace=\"default\"} < 1 AND up{job=\"bazarr-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -284,6 +308,9 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "up{job=\"lidarr\",namespace=\"default\"} < 1 AND up{job=\"lidarr-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -315,6 +342,9 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "up{job=\"readarr\",namespace=\"default\"} < 1 AND up{job=\"readarr-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -345,6 +375,9 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "count(up{job=~\"(sonarr|radarr|prowlarr|bazarr|lidarr|readarr)\",namespace=\"default\"} < 1) > 2"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }

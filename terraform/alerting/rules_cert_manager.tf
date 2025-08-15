@@ -30,6 +30,9 @@ resource "grafana_rule_group" "cert_manager" {
       model          = jsonencode({
         expr = "up{job=\"cert-manager\"} == 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -58,6 +61,9 @@ resource "grafana_rule_group" "cert_manager" {
       model          = jsonencode({
         expr = "certmanager_certificate_expiration_timestamp_seconds - time() < 7*24*60*60"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -86,6 +92,9 @@ resource "grafana_rule_group" "cert_manager" {
       model          = jsonencode({
         expr = "certmanager_certificate_ready_status{condition=\"False\"} == 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -114,6 +123,9 @@ resource "grafana_rule_group" "cert_manager" {
       model          = jsonencode({
         expr = "sum by (host) (rate(certmanager_http_acme_client_request_count{status=\"429\"}[5m])) > 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }

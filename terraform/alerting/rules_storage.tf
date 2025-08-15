@@ -31,6 +31,9 @@ resource "grafana_rule_group" "smartctl" {
       model          = jsonencode({
         expr = "smartctl_device_temperature > 60"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -59,6 +62,9 @@ resource "grafana_rule_group" "smartctl" {
       model          = jsonencode({
         expr = "smartctl_device_smart_status != 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -87,6 +93,9 @@ resource "grafana_rule_group" "smartctl" {
       model          = jsonencode({
         expr = "smartctl_device_critical_warning != 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -115,6 +124,9 @@ resource "grafana_rule_group" "smartctl" {
       model          = jsonencode({
         expr = "smartctl_device_media_errors > 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -143,6 +155,9 @@ resource "grafana_rule_group" "smartctl" {
       model          = jsonencode({
         expr = "smartctl_device_available_spare_threshold > smartctl_device_available_spare"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -177,6 +192,9 @@ resource "grafana_rule_group" "volsync" {
       model          = jsonencode({
         expr = "increase(volsync_failures_total[1h]) > 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -205,6 +223,9 @@ resource "grafana_rule_group" "volsync" {
       model          = jsonencode({
         expr = "time() - volsync_volume_last_sync_time > 259200"  # 3 days
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -239,6 +260,9 @@ resource "grafana_rule_group" "ceph" {
       model          = jsonencode({
         expr = "ceph_health_status == 2"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -267,6 +291,9 @@ resource "grafana_rule_group" "ceph" {
       model          = jsonencode({
         expr = "ceph_osd_down > 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -295,6 +322,9 @@ resource "grafana_rule_group" "ceph" {
       model          = jsonencode({
         expr = "ceph_pg_degraded > 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -323,6 +353,9 @@ resource "grafana_rule_group" "ceph" {
       model          = jsonencode({
         expr = "(ceph_pool_bytes_used / ceph_pool_max_avail) * 100 > 85"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }

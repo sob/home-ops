@@ -31,6 +31,9 @@ resource "grafana_rule_group" "ups" {
       model          = jsonencode({
         expr = "upsOnBattery == 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -59,6 +62,9 @@ resource "grafana_rule_group" "ups" {
       model          = jsonencode({
         expr = "upsBatteryChargePercent < 25"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -87,6 +93,9 @@ resource "grafana_rule_group" "ups" {
       model          = jsonencode({
         expr = "upsBatteryReplaceIndicator == 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -115,6 +124,9 @@ resource "grafana_rule_group" "ups" {
       model          = jsonencode({
         expr = "upsLoadPercent > 80"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -143,6 +155,9 @@ resource "grafana_rule_group" "ups" {
       model          = jsonencode({
         expr = "up{job=~\"snmp-exporter-cyberpower.*\"} == 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -177,6 +192,9 @@ resource "grafana_rule_group" "pdu" {
       model          = jsonencode({
         expr = "ePDULoadStatusLoad / 10 > 12"  # Assuming 15A PDU, alert at 80% (12A)
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }

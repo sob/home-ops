@@ -30,6 +30,9 @@ resource "grafana_rule_group" "flux" {
       model          = jsonencode({
         expr = "up{job=~\"flux.*\"} == 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -58,6 +61,9 @@ resource "grafana_rule_group" "flux" {
       model          = jsonencode({
         expr = "fluxcd_controller_ready != 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -92,6 +98,9 @@ resource "grafana_rule_group" "external_secrets" {
       model          = jsonencode({
         expr = "increase(sync_calls{status=\"error\"}[5m]) > 0"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
