@@ -34,7 +34,7 @@ resource "grafana_rule_group" "application_health" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "sonarr_queue_total > 10 or radarr_queue_total > 10"
         refId = "A"
@@ -65,7 +65,7 @@ resource "grafana_rule_group" "application_health" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "increase(sabnzbd_article_cache_misses[1h]) > 5"
         refId = "A"
@@ -96,7 +96,7 @@ resource "grafana_rule_group" "application_health" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "prowlarr_indexer_status{status!=\"enabled\"} > 2"
         refId = "A"
@@ -127,7 +127,7 @@ resource "grafana_rule_group" "application_health" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "tautulli_stream_count > 10"
         refId = "A"

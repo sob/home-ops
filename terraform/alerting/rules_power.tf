@@ -27,7 +27,7 @@ resource "grafana_rule_group" "ups" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "upsOnBattery == 1"
         refId = "A"
@@ -55,7 +55,7 @@ resource "grafana_rule_group" "ups" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "upsBatteryChargePercent < 25"
         refId = "A"
@@ -83,7 +83,7 @@ resource "grafana_rule_group" "ups" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "upsBatteryReplaceIndicator == 1"
         refId = "A"
@@ -111,7 +111,7 @@ resource "grafana_rule_group" "ups" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "upsLoadPercent > 80"
         refId = "A"
@@ -139,7 +139,7 @@ resource "grafana_rule_group" "ups" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "up{job=~\"snmp-exporter-cyberpower.*\"} == 0"
         refId = "A"
@@ -173,7 +173,7 @@ resource "grafana_rule_group" "pdu" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "ePDULoadStatusLoad / 10 > 12"  # Assuming 15A PDU, alert at 80% (12A)
         refId = "A"

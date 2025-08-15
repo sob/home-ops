@@ -26,7 +26,7 @@ resource "grafana_rule_group" "cert_manager" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "up{job=\"cert-manager\"} == 0"
         refId = "A"
@@ -54,7 +54,7 @@ resource "grafana_rule_group" "cert_manager" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "certmanager_certificate_expiration_timestamp_seconds - time() < 7*24*60*60"
         refId = "A"
@@ -82,7 +82,7 @@ resource "grafana_rule_group" "cert_manager" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "certmanager_certificate_ready_status{condition=\"False\"} == 1"
         refId = "A"
@@ -110,7 +110,7 @@ resource "grafana_rule_group" "cert_manager" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "sum by (host) (rate(certmanager_http_acme_client_request_count{status=\"429\"}[5m])) > 0"
         refId = "A"

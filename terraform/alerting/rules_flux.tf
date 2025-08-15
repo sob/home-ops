@@ -26,7 +26,7 @@ resource "grafana_rule_group" "flux" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "up{job=~\"flux.*\"} == 0"
         refId = "A"
@@ -54,7 +54,7 @@ resource "grafana_rule_group" "flux" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "fluxcd_controller_ready != 1"
         refId = "A"
@@ -88,7 +88,7 @@ resource "grafana_rule_group" "external_secrets" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "increase(sync_calls{status=\"error\"}[5m]) > 0"
         refId = "A"
