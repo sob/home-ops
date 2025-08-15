@@ -29,18 +29,12 @@ spec:
       
       configMap:
         create: false
-      
-      extraArgs:
-        - --config.file=/etc/alloy/config.alloy
+        name: alloy-config
+        key: config.alloy
       
       envFrom:
         - secretRef:
             name: alloy-secret
-      
-      mounts:
-        extra:
-          - name: alloy-config
-            mountPath: /etc/alloy
       
       resources:
         requests:
@@ -53,12 +47,6 @@ spec:
     controller:
       type: deployment
       replicas: 1
-      
-      volumes:
-        extra:
-          - name: alloy-config
-            configMap:
-              name: alloy-config
       
     # Service monitor for self-monitoring
     serviceMonitor:
