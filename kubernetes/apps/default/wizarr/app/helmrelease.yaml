@@ -49,6 +49,13 @@ spec:
         ports:
           http:
             port: 5690
+    serviceMonitor:
+      app:
+        serviceName: wizarr
+        labels:
+          prometheus.io/forward: "true"
+        endpoints:
+          - port: http
     ingress:
       app:
         className: external
