@@ -32,10 +32,6 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "status.${SECRET_DOMAIN}"
-  - hostname: "prometheus.${SECRET_DOMAIN}"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "prometheus.${SECRET_DOMAIN}"
   - hostname: "${SECRET_DOMAIN}"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "*.${SECRET_DOMAIN}"
