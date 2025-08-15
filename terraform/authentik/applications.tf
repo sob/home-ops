@@ -46,6 +46,12 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
       group         = resource.authentik_group.network
     },
+    prometheus = {
+      external_host   = "https://prometheus.${local.cluster_domain}"
+      icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prometheus.png"
+      group           = resource.authentik_group.observability
+      skip_path_regex = "^/api([/?].*)?"
+    },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
