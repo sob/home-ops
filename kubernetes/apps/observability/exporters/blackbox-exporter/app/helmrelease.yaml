@@ -63,6 +63,8 @@ spec:
       defaults:
         interval: 1m
         scrapeTimeout: 10s
+        labels:
+          prometheus.io/forward: "false"  # Keep local - mostly internal probes
     resources:
       requests:
         cpu: 10m
