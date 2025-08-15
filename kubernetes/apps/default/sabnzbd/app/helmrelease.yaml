@@ -100,6 +100,13 @@ spec:
         ports:
           http:
             port: *port
+    serviceMonitor:
+      app:
+        serviceName: sabnzbd
+        labels:
+          prometheus.io/forward: "true"
+        endpoints:
+          - port: http
     ingress:
       app:
         annotations:

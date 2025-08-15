@@ -76,6 +76,8 @@ spec:
     serviceMonitor:
       app:
         serviceName: *app
+        labels:
+          prometheus.io/forward: "true"
         endpoints:
           - port: http
             scheme: http

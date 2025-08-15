@@ -115,6 +115,8 @@ spec:
       app:
         enabled: true
         serviceName: blocky
+        labels:
+          prometheus.io/forward: "true"
         endpoints:
           - port: http
             scheme: http

@@ -68,6 +68,8 @@ spec:
         prometheus:
           serviceMonitor:
             enabled: true
+            labels:
+              prometheus.io/forward: "true"
       ingress:
         enabled: false
     worker:

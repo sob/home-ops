@@ -97,6 +97,13 @@ spec:
         ports:
           http:
             port: *port
+    serviceMonitor:
+      app:
+        serviceName: main
+        labels:
+          prometheus.io/forward: "true"
+        endpoints:
+          - port: http
     ingress:
       app:
         annotations:

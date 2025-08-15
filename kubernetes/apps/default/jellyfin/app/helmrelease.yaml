@@ -82,6 +82,13 @@ spec:
         ports:
           http:
             port: *port
+    serviceMonitor:
+      app:
+        serviceName: jellyfin
+        labels:
+          prometheus.io/forward: "true"
+        endpoints:
+          - port: http
     route:
       app:
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]

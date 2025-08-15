@@ -100,6 +100,8 @@ spec:
     serviceMonitor:
       app:
         serviceName: main
+        labels:
+          prometheus.io/forward: "true"
         endpoints:
           - port: http
     ingress:
