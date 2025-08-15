@@ -22,20 +22,11 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  valuesFrom:
-    - targetPath: token
-      kind: Secret
-      name: grafana-pdc-secret
-      valuesKey: token
-    - targetPath: cluster
-      kind: Secret
-      name: grafana-pdc-secret
-      valuesKey: cluster
-    - targetPath: hostedGrafanaId
-      kind: Secret
-      name: grafana-pdc-secret
-      valuesKey: hosted-grafana-id
   values:
+    tokenSecretName: grafana-pdc-secret
+    cluster: prod-us-east-0
+    hostedGrafanaId: "1348624"
+    
     resources:
       requests:
         cpu: 100m
