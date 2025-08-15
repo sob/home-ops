@@ -105,6 +105,13 @@ spec:
         ports:
           http:
             port: 32400
+    serviceMonitor:
+      app:
+        serviceName: plex-app
+        labels:
+          prometheus.io/forward: "true"
+        endpoints:
+          - port: http
     route:
       app:
         enabled: true

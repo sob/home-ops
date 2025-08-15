@@ -78,6 +78,8 @@ spec:
           enabled: true
           namespaceSelector:
             any: true
+          labels:
+            prometheus.io/forward: "true"
       extraArgs:
         default-ssl-certificate: "network/${SECRET_DOMAIN/./-}-production-tls"
       resources:

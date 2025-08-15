@@ -89,6 +89,8 @@ spec:
     serviceMonitor:
       app:
         serviceName: cloudflared
+        labels:
+          prometheus.io/forward: "true"
         endpoints:
           - port: http
             scheme: http

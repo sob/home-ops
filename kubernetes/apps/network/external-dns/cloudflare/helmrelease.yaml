@@ -60,5 +60,7 @@ spec:
     domainFilters: ["${SECRET_DOMAIN}"]
     serviceMonitor:
       enabled: true
+      labels:
+        prometheus.io/forward: "false"  # Keep local - operational metrics only
     podAnnotations:
       secret.reloader.stakater.com/reload: *secret

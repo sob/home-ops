@@ -97,6 +97,8 @@ spec:
     serviceMonitor:
       app:
         serviceName: gatus
+        labels:
+          prometheus.io/forward: "true"
         endpoints:
           - port: http
             scheme: http
