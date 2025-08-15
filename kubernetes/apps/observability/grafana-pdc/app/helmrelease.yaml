@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: pdc-agent
-      version: 0.0.14
+      version: 0.0.1
       sourceRef:
         kind: HelmRepository
         name: grafana
