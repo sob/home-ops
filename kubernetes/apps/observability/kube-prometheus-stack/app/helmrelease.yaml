@@ -35,23 +35,7 @@ spec:
       enabled: false
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
-      ingress:
-        enabled: true
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-        ingressClassName: internal
-        hosts: ["alertmanager.${SECRET_DOMAIN}"]
-        pathType: Prefix
-      alertmanagerSpec:
-        useExistingSecret: true
-        configSecret: alertmanager-secret
-        storage:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: openebs-hostpath
-              resources:
-                requests:
-                  storage: 1Gi
+      enabled: false  # Alerts will be handled by Grafana Cloud
     kubelet:
       enabled: true
     kubeApiServer:
@@ -74,12 +58,18 @@ spec:
       ingress:
         enabled: true
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-        ingressClassName: internal
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-external.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+          nginx.ingress.kubernetes.io/auth-signin: /outpost.goauthentik.io/start?rd=$escaped_request_uri
+          nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid
+          nginx.ingress.kubernetes.io/auth-snippet: |
+            # Pass Authorization header to Authentik for API token validation
+            proxy_set_header Authorization $http_authorization;
+        ingressClassName: external
         hosts: ["prometheus.${SECRET_DOMAIN}"]
         pathType: Prefix
       prometheusSpec:
-        scrapeInterval: 1m # Must match interval in Grafana Helm chart
+        scrapeInterval: 30s # More frequent for local monitoring
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
@@ -91,8 +81,8 @@ spec:
           - auto-gomemlimit
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
-        retention: 14d
-        retentionSize: 70GB
+        retention: 7d  # Shorter retention for local metrics
+        retentionSize: 50GB
         resources:
           requests:
             cpu: 415m
@@ -147,5 +137,4 @@ spec:
               sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
     grafana:
-      enabled: false
-      forceDeployDashboards: true
+      enabled: false  # Using Grafana Cloud instead
