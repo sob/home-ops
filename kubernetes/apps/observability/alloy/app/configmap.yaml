@@ -107,9 +107,9 @@ data:
     // Scrape critical app endpoints directly
     prometheus.scrape "critical_apps" {
       targets = [
-        {"__address__" = "authentik-metrics.security.svc.cluster.local:9300", "app" = "authentik"},
-        {"__address__" = "gatus.observability.svc.cluster.local:80", "app" = "gatus"},
-        {"__address__" = "home-assistant.home.svc.cluster.local:8123", "app" = "home-assistant"},
+        {"__address__" = "authentik-metrics.security.svc.cluster.local:9300", "app" = "authentik", "namespace" = "security"},
+        {"__address__" = "gatus.observability.svc.cluster.local:80", "app" = "gatus", "namespace" = "observability"},
+        {"__address__" = "home-assistant.home.svc.cluster.local:8123", "app" = "home-assistant", "namespace" = "home"},
       ]
       
       forward_to = [prometheus.relabel.critical.receiver]
@@ -132,6 +132,12 @@ data:
       rule {
         source_labels = ["app"]
         target_label = "application"
+      }
+      
+      // Add job label from app
+      rule {
+        source_labels = ["app"]
+        target_label = "job"
       }
     }
     
