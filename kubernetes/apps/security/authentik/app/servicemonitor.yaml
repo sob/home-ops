@@ -27,6 +27,7 @@ metadata:
     app.kubernetes.io/component: server
     app.kubernetes.io/instance: authentik
     app.kubernetes.io/name: authentik
+    prometheus.io/forward: "true"
 spec:
   jobLabel: app.kubernetes.io/name
   endpoints:
