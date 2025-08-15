@@ -1,0 +1,43 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: recyclarr
+spec:
+  groups:
+    - name: recyclarr.rules
+      interval: 5m
+      rules:
+        - alert: RecyclarrJobNotRunning
+          annotations:
+            summary: Recyclarr hasn't synced configurations in over 25 hours
+            description: "Recyclarr last ran {{ $value | humanizeDuration }} ago. It should run daily to sync quality profiles."
+          expr: |
+            time() - kube_cronjob_status_last_schedule_time{cronjob="recyclarr", namespace="default"} > 90000
+          for: 15m
+          labels:
+            severity: warning
+            app: recyclarr
+            
+        - alert: RecyclarrJobFailed
+          annotations:
+            summary: Recyclarr sync job failed
+            description: "Recyclarr job {{ $labels.job_name }} failed. Check logs for configuration sync errors."
+          expr: |
+            kube_job_failed{job_name=~"recyclarr-.*", namespace="default"} > 0
+          for: 5m
+          labels:
+            severity: warning
+            app: recyclarr
+            
+        - alert: RecyclarrMultipleFailures
+          annotations:
+            summary: Recyclarr has failed multiple times
+            description: "Recyclarr has failed {{ $value }} times in the last 3 days. Manual intervention may be required."
+          expr: |
+            increase(kube_job_failed{job_name=~"recyclarr-.*", namespace="default"}[3d]) > 2
+          for: 5m
+          labels:
+            severity: critical
+            app: recyclarr
