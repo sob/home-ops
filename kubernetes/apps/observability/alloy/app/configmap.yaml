@@ -1,0 +1,143 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: observability
+data:
+  config.alloy: |
+    // Prometheus remote write to Grafana Cloud
+    prometheus.remote_write "grafana_cloud" {
+      endpoint {
+        url = env("GRAFANA_CLOUD_METRICS_URL")
+        
+        basic_auth {
+          username = env("GRAFANA_CLOUD_METRICS_ID")
+          password = env("GRAFANA_CLOUD_API_KEY")
+        }
+        
+        write_relabel_config {
+          // Drop high cardinality labels
+          regex = "(__name__|container_id|pod_ip|uid)"
+          action = "labeldrop"
+        }
+      }
+    }
+    
+    // Scrape application metrics from service monitors
+    prometheus.operator.servicemonitors "apps" {
+      forward_to = [prometheus.relabel.applications.receiver]
+      
+      // Only scrape from specific namespaces
+      namespaces = ["default", "media", "home", "security", "network"]
+      
+      // Only scrape services with specific labels
+      selector {
+        match_labels = {
+          "prometheus.io/forward" = "true",
+        }
+      }
+    }
+    
+    // Relabel and filter application metrics
+    prometheus.relabel "applications" {
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      
+      // Keep only essential metrics for applications
+      rule {
+        source_labels = ["__name__"]
+        regex = "up|.*_info|.*_requests_total|.*_request_duration_seconds.*|.*_errors_total|.*_restart_total|.*_ready"
+        action = "keep"
+      }
+      
+      // Drop metrics from non-critical pods
+      rule {
+        source_labels = ["namespace"]
+        regex = "kube-system|rook-ceph|flux-system|storage|external-secrets"
+        action = "drop"
+      }
+      
+      // Aggregate by removing pod name for deployments (keep for statefulsets)
+      rule {
+        source_labels = ["__name__", "statefulset"]
+        regex = ".*;$"
+        target_label = "__tmp_keep_pod"
+        replacement = "false"
+      }
+      
+      rule {
+        source_labels = ["__tmp_keep_pod", "pod"]
+        regex = "false;.*"
+        target_label = "pod"
+        replacement = ""
+      }
+    }
+    
+    // Scrape ingress metrics
+    prometheus.scrape "ingress" {
+      targets = [
+        {"__address__" = "ingress-nginx-internal-controller-metrics.network.svc.cluster.local:10254"},
+        {"__address__" = "ingress-nginx-external-controller-metrics.network.svc.cluster.local:10254"},
+      ]
+      
+      forward_to = [prometheus.relabel.ingress.receiver]
+      
+      scrape_interval = "30s"
+    }
+    
+    // Filter ingress metrics
+    prometheus.relabel "ingress" {
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      
+      // Keep only essential ingress metrics
+      rule {
+        source_labels = ["__name__"]
+        regex = "nginx_ingress_controller_requests|nginx_ingress_controller_request_duration_seconds.*|nginx_ingress_controller_ssl_expire_time_seconds"
+        action = "keep"
+      }
+      
+      // Keep only important status codes
+      rule {
+        source_labels = ["status"]
+        regex = "([45]..|total)"
+        action = "keep"
+      }
+    }
+    
+    // Scrape critical app endpoints directly
+    prometheus.scrape "critical_apps" {
+      targets = [
+        {"__address__" = "authentik-metrics.security.svc.cluster.local:9300", "app" = "authentik"},
+        {"__address__" = "gatus.observability.svc.cluster.local:80", "app" = "gatus"},
+        {"__address__" = "home-assistant.home.svc.cluster.local:8123", "app" = "home-assistant"},
+      ]
+      
+      forward_to = [prometheus.relabel.critical.receiver]
+      
+      scrape_interval = "60s"
+      metrics_path = "/metrics"
+    }
+    
+    // Minimal filtering for critical apps
+    prometheus.relabel "critical" {
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      
+      // Add environment label
+      rule {
+        target_label = "environment"
+        replacement = "production"
+      }
+      
+      // Keep app label
+      rule {
+        source_labels = ["app"]
+        target_label = "application"
+      }
+    }
+    
+    // Self-monitoring
+    prometheus.scrape "alloy" {
+      targets = [{"__address__" = "127.0.0.1:12345"}]
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      scrape_interval = "60s"
+    }
