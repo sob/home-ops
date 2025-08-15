@@ -30,6 +30,9 @@ resource "grafana_rule_group" "infrastructure" {
       model = jsonencode({
         expr  = "up{job=\"authentik\",namespace=\"security\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -61,6 +64,9 @@ resource "grafana_rule_group" "infrastructure" {
       model = jsonencode({
         expr  = "up{job=~\"ingress-nginx-.+\",namespace=\"network\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -92,6 +98,9 @@ resource "grafana_rule_group" "infrastructure" {
       model = jsonencode({
         expr  = "up{job=\"resolver-blocky\",namespace=\"network\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -123,6 +132,9 @@ resource "grafana_rule_group" "infrastructure" {
       model = jsonencode({
         expr  = "up{job=\"cloudflared\",namespace=\"network\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -154,6 +166,9 @@ resource "grafana_rule_group" "infrastructure" {
       model = jsonencode({
         expr  = "up{job=\"gatus\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -185,6 +200,9 @@ resource "grafana_rule_group" "infrastructure" {
       model = jsonencode({
         expr  = "up{job=\"emqx-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -221,6 +239,9 @@ resource "grafana_rule_group" "response_times" {
       model = jsonencode({
         expr  = "histogram_quantile(0.95, rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])) > 5"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -251,6 +272,9 @@ resource "grafana_rule_group" "response_times" {
       model = jsonencode({
         expr  = "rate(nginx_ingress_controller_requests{status=~\"5..\"}[5m]) / rate(nginx_ingress_controller_requests[5m]) > 0.05"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }

@@ -38,6 +38,9 @@ resource "grafana_rule_group" "application_health" {
       model = jsonencode({
         expr  = "sonarr_queue_total > 10 or radarr_queue_total > 10"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -69,6 +72,9 @@ resource "grafana_rule_group" "application_health" {
       model = jsonencode({
         expr  = "increase(sabnzbd_article_cache_misses[1h]) > 5"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -100,6 +106,9 @@ resource "grafana_rule_group" "application_health" {
       model = jsonencode({
         expr  = "prowlarr_indexer_status{status!=\"enabled\"} > 2"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
@@ -131,6 +140,9 @@ resource "grafana_rule_group" "application_health" {
       model = jsonencode({
         expr  = "tautulli_stream_count > 10"
         refId = "A"
+        instant = true
+        intervalMs = 1000
+        maxDataPoints = 43200
       })
     }
   }
