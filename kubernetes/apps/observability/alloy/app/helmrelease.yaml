@@ -29,8 +29,9 @@ spec:
       
       configMap:
         create: false
-        name: alloy-config
-        key: config.alloy
+      
+      extraArgs:
+        - --config.file=/etc/alloy/config.alloy
       
       envFrom:
         - secretRef:
@@ -39,8 +40,7 @@ spec:
       mounts:
         extra:
           - name: alloy-config
-            mountPath: /etc/alloy/config.alloy
-            subPath: config.alloy
+            mountPath: /etc/alloy
       
       resources:
         requests:
