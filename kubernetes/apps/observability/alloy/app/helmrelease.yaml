@@ -39,8 +39,8 @@ spec:
       mounts:
         extra:
           - name: alloy-config
-            configMap:
-              name: alloy-config
+            mountPath: /etc/alloy/config.alloy
+            subPath: config.alloy
       
       resources:
         requests:
@@ -53,6 +53,12 @@ spec:
     controller:
       type: deployment
       replicas: 1
+      
+      volumes:
+        extra:
+          - name: alloy-config
+            configMap:
+              name: alloy-config
       
     # Service monitor for self-monitoring
     serviceMonitor:
