@@ -1,0 +1,2 @@
+onepassword_account = "my.1password.com"
+prometheus_datasource_uid = "grafanacloud-prom"

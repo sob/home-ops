@@ -26,7 +26,7 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "up{job=\"authentik\",namespace=\"security\"} < 1"
         refId = "A"
@@ -57,7 +57,7 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "up{job=~\"ingress-nginx-.+\",namespace=\"network\"} < 1"
         refId = "A"
@@ -88,7 +88,7 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
         expr  = "up{job=\"resolver-blocky\",namespace=\"network\"} < 1"
         refId = "A"
@@ -119,7 +119,7 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
         expr  = "up{job=\"cloudflared\",namespace=\"network\"} < 1"
         refId = "A"
@@ -150,7 +150,7 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "up{job=\"gatus\",namespace=\"observability\"} < 1"
         refId = "A"
@@ -181,7 +181,7 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "up{job=\"emqx-exporter\",namespace=\"observability\"} < 1"
         refId = "A"
@@ -217,7 +217,7 @@ resource "grafana_rule_group" "response_times" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "histogram_quantile(0.95, rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])) > 5"
         refId = "A"
@@ -247,7 +247,7 @@ resource "grafana_rule_group" "response_times" {
         to   = 0
       }
       
-      datasource_uid = var.prometheus_datasource_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "rate(nginx_ingress_controller_requests{status=~\"5..\"}[5m]) / rate(nginx_ingress_controller_requests[5m]) > 0.05"
         refId = "A"

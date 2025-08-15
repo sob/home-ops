@@ -29,7 +29,7 @@ data:
       forward_to = [prometheus.relabel.applications.receiver]
       
       // Only scrape from specific namespaces
-      namespaces = ["default", "media", "home", "security", "network"]
+      namespaces = ["default", "media", "home", "security", "network", "observability"]
       
       // Only scrape services with specific labels
       selector {
