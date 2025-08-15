@@ -9,16 +9,16 @@ data:
     // Prometheus remote write to Grafana Cloud
     prometheus.remote_write "grafana_cloud" {
       endpoint {
-        url = env("GRAFANA_CLOUD_METRICS_URL")
+        url = sys.env("GRAFANA_CLOUD_METRICS_URL")
         
         basic_auth {
-          username = env("GRAFANA_CLOUD_METRICS_ID")
-          password = env("GRAFANA_CLOUD_API_KEY")
+          username = sys.env("GRAFANA_CLOUD_METRICS_ID")
+          password = sys.env("GRAFANA_CLOUD_API_KEY")
         }
         
         write_relabel_config {
-          // Drop high cardinality labels
-          regex = "(__name__|container_id|pod_ip|uid)"
+          // Drop high cardinality labels (but NOT __name__)
+          regex = "(container_id|pod_ip|uid|id|image_id)"
           action = "labeldrop"
         }
       }
