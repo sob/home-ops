@@ -36,6 +36,13 @@ servers:
       - name: loop
       - name: reload
       - name: loadbalance
+  - zones:
+      - zone: stonehedges.net
+        scheme: dns://
+    port: 53
+    plugins:
+      - name: forward
+        parameters: stonehedges.net 10.1.0.1
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
