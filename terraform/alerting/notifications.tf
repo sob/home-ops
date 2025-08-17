@@ -3,8 +3,8 @@ resource "grafana_contact_point" "slack_critical" {
 
   slack {
     url   = module.secrets.items["alertmanager"]["ALERTMANAGER_SLACK_URL"]
-    title = "🚨 [CRITICAL] {{ .GroupLabels.alertname }}"
-    text  = "{{ range .Alerts }}*{{ .Annotations.summary }}*\n{{ .Annotations.description }}{{ end }}"
+    title = "🚨 {{ .GroupLabels.alertname }}{{ if .GroupLabels.service }} - {{ .GroupLabels.service }}{{ end }}"
+    text  = "{{ range .Alerts }}{{ if .Annotations.description }}• {{ .Annotations.description }}{{ else }}• {{ .Labels.alertname }}: {{ .Annotations.summary }}{{ end }}\n{{ end }}"
     disable_resolve_message = false
   }
 }
@@ -14,28 +14,41 @@ resource "grafana_contact_point" "slack_warnings" {
 
   slack {
     url   = module.secrets.items["alertmanager"]["ALERTMANAGER_SLACK_URL"]
-    title = "⚠️ Weekly Warning Summary"
-    text  = "{{ len .Alerts }} warning alerts:\n{{ range .Alerts }}- {{ .Labels.alertname }}: {{ .Annotations.summary }}\n{{ end }}"
+    title = "⚠️ Warning - {{ .GroupLabels.alertname }}"
+    text  = "{{ range .Alerts }}{{ if .Annotations.description }}• {{ .Annotations.description }}{{ else }}• {{ .Labels.service }}: {{ .Annotations.summary }}{{ end }}\n{{ end }}"
     disable_resolve_message = true
   }
 }
 
 resource "grafana_notification_policy" "main" {
-  group_by        = ["alertname", "instance"]
+  group_by        = ["alertname", "service"]  # Group by both alert name and service
   group_wait      = "30s"
   group_interval  = "5m"
   repeat_interval = "4h"
 
   contact_point = grafana_contact_point.slack_critical.name
 
-  # Critical alerts - immediate notification
+  # DatasourceNoData errors - group them together
+  policy {
+    matcher {
+      label = "alertname"
+      match = "="
+      value = "DatasourceNoData"
+    }
+    group_by        = ["alertname"]  # Group all datasource errors together
+    contact_point   = grafana_contact_point.slack_critical.name
+    repeat_interval = "12h"  # Less frequent for system errors
+    mute_timings    = []
+  }
+
+  # Critical alerts - individual notifications
   policy {
     matcher {
       label = "severity"
       match = "="
       value = "critical"
     }
-    group_by        = ["alertname", "instance", "service"]
+    group_by        = ["alertname", "instance", "service"]  # Group by alert, instance, and service
     contact_point   = grafana_contact_point.slack_critical.name
     repeat_interval = "4h"
   }

@@ -1,8 +1,15 @@
-# Datasource UIDs from 1Password
+# Look up PDC datasource by name
+data "grafana_data_source" "prometheus_pdc" {
+  name = "prometheus-metal"
+}
+
+# Datasource UIDs
 locals {
   # Grafana Cloud Prometheus (for forwarded metrics)
-  prometheus_cloud_uid = module.secrets.items["grafana-cloud"]["GRAFANA_CLOUD_DATASOURCE_ID"]
+  # The default managed datasource uses "grafanacloud-prom" as both name and UID
+  prometheus_cloud_uid = "grafanacloud-prom"
   
   # PDC-connected local Prometheus (for infrastructure metrics)
-  prometheus_pdc_uid = module.secrets.items["grafana-cloud"]["GRAFANA_CLOUD_PDC_DATASOURCE_ID"]
+  # Dynamically retrieved: bev3fbylz6dc0f
+  prometheus_pdc_uid = data.grafana_data_source.prometheus_pdc.uid
 }

@@ -16,24 +16,22 @@ resource "grafana_rule_group" "infrastructure" {
       category = "infrastructure"
     }
     for       = "3m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
       ref_id = "A"
       
       relative_time_range {
-        from = 180
+        from = 600
         to   = 0
       }
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"authentik\",namespace=\"security\"} < 1"
+        expr  = "min(up{job=\"authentik\",namespace=\"security\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -50,6 +48,7 @@ resource "grafana_rule_group" "infrastructure" {
       category = "infrastructure"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -62,12 +61,9 @@ resource "grafana_rule_group" "infrastructure" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=~\"ingress-nginx-.+\",namespace=\"network\"} < 1"
+        expr  = "min(up{job=~\"ingress-nginx-.+\",namespace=\"network\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -84,6 +80,7 @@ resource "grafana_rule_group" "infrastructure" {
       category = "infrastructure"
     }
     for       = "3m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -94,14 +91,11 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_pdc_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"resolver-blocky\",namespace=\"network\"} < 1"
+        expr  = "min(up{job=\"resolver-blocky\",namespace=\"network\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -118,6 +112,7 @@ resource "grafana_rule_group" "infrastructure" {
       category = "infrastructure"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -128,14 +123,11 @@ resource "grafana_rule_group" "infrastructure" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_pdc_uid
+      datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"cloudflared\",namespace=\"network\"} < 1"
+        expr  = "min(up{job=\"cloudflared\",namespace=\"network\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -152,6 +144,7 @@ resource "grafana_rule_group" "infrastructure" {
       category = "infrastructure"
     }
     for       = "10m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -164,12 +157,9 @@ resource "grafana_rule_group" "infrastructure" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"gatus\",namespace=\"observability\"} < 1"
+        expr  = "min(up{job=\"gatus\",namespace=\"observability\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -181,11 +171,12 @@ resource "grafana_rule_group" "infrastructure" {
       description = "EMQX has been unreachable for 5 minutes. IoT/Home automation may be impacted."
     }
     labels = {
-      severity = "warning"
+      severity = "critical"
       service  = "emqx"
       category = "infrastructure"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -198,12 +189,9 @@ resource "grafana_rule_group" "infrastructure" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"emqx-exporter\",namespace=\"observability\"} < 1"
+        expr  = "min(up{job=\"emqx-exporter\",namespace=\"observability\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 }
@@ -225,6 +213,7 @@ resource "grafana_rule_group" "response_times" {
       category = "performance"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -237,12 +226,9 @@ resource "grafana_rule_group" "response_times" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "histogram_quantile(0.95, rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])) > 5"
+        expr  = "histogram_quantile(0.95, sum by (le, ingress) (rate(nginx_ingress_controller_request_duration_seconds_bucket[5m]))) > 5"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -258,6 +244,7 @@ resource "grafana_rule_group" "response_times" {
       category = "performance"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -270,12 +257,9 @@ resource "grafana_rule_group" "response_times" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "rate(nginx_ingress_controller_requests{status=~\"5..\"}[5m]) / rate(nginx_ingress_controller_requests[5m]) > 0.05"
+        expr  = "sum by (ingress) (rate(nginx_ingress_controller_requests{status=~\"5..\"}[5m])) / sum by (ingress) (rate(nginx_ingress_controller_requests[5m])) > 0.05"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 }
