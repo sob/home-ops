@@ -88,7 +88,7 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "max by (instance) (upsAdvanceBatteryReplaceIndicator) == 1"
+        expr = "max by (instance) (upsAdvanceBatteryReplaceIndicator) == 2"
         refId = "A"
         instant = true      })
     }
@@ -212,7 +212,7 @@ resource "grafana_rule_group" "pdu" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "max by (instance) (ePDU2BankStatusLoad) > 12"  # Assuming 15A PDU, alert at 80% (12A)
+        expr = "max by (instance) (ePDU2BankStatusLoad) > 13.5"  # 15A PDU, alert at 90% (13.5A)
         refId = "A"
         instant = true
       })
