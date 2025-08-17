@@ -104,6 +104,7 @@ resource "grafana_rule_group" "cert_manager" {
     }
     for      = "5m"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
