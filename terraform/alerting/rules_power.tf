@@ -134,7 +134,7 @@ resource "grafana_rule_group" "ups" {
     }
     for      = "2m"
     condition = "A"
-    no_data_state = "NoData"  # Keep as NoData - we want to know if metrics disappear
+    no_data_state = "OK"  # No results means device is up
 
     data {
       ref_id = "A"
@@ -146,7 +146,7 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "up{job=\"snmp-exporter-cyberpower-ups\"} < 1"
+        expr = "up{job=\"snmp-exporter-cyberpower-ups\"} == 0 or absent(up{job=\"snmp-exporter-cyberpower-ups\"})"
         refId = "A"
         instant = true
       })
@@ -164,7 +164,7 @@ resource "grafana_rule_group" "ups" {
     }
     for      = "2m"
     condition = "A"
-    no_data_state = "NoData"  # Keep as NoData - we want to know if metrics disappear
+    no_data_state = "OK"  # No results means device is up
 
     data {
       ref_id = "A"
@@ -176,7 +176,7 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "up{job=\"snmp-exporter-cyberpower-pdu\"} < 1"
+        expr = "up{job=\"snmp-exporter-cyberpower-pdu\"} == 0 or absent(up{job=\"snmp-exporter-cyberpower-pdu\"})"
         refId = "A"
         instant = true
       })
