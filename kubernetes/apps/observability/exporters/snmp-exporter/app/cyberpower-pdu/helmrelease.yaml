@@ -27,6 +27,9 @@ spec:
     fullnameOverride: *app
     image:
       repository: quay.io/prometheus/snmp-exporter
+    service:
+      labels:
+        snmp-exporter-cyberpower-pdu: "snmp-exporter-cyberpower-pdu"
     serviceMonitor:
       enabled: true
       namespace: observability
