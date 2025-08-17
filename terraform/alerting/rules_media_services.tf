@@ -16,6 +16,7 @@ resource "grafana_rule_group" "media_apps" {
       category = "media"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -28,12 +29,9 @@ resource "grafana_rule_group" "media_apps" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"plex\",namespace=\"default\"} < 1"
+        expr  = "min(up{job=\"plex\",namespace=\"default\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -45,11 +43,12 @@ resource "grafana_rule_group" "media_apps" {
       description = "Jellyfin has been unreachable for 5 minutes"
     }
     labels = {
-      severity = "warning"
+      severity = "critical"
       service  = "jellyfin"
       category = "media"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -62,12 +61,9 @@ resource "grafana_rule_group" "media_apps" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"jellyfin\",namespace=\"default\"} < 1"
+        expr  = "min(up{job=\"jellyfin\",namespace=\"default\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -84,6 +80,7 @@ resource "grafana_rule_group" "media_apps" {
       category = "media"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -96,12 +93,9 @@ resource "grafana_rule_group" "media_apps" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"overseerr\",namespace=\"default\"} < 1 AND up{job=\"overseerr-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"overseerr\",namespace=\"default\"}) < 1) or (min(up{job=\"overseerr-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -118,6 +112,7 @@ resource "grafana_rule_group" "media_apps" {
       category = "media"
     }
     for       = "10m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -130,12 +125,9 @@ resource "grafana_rule_group" "media_apps" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"sabnzbd\",namespace=\"default\"} < 1 AND up{job=\"sabnzbd-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"sabnzbd\",namespace=\"default\"}) < 1) or (min(up{job=\"sabnzbd-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 }
@@ -158,6 +150,7 @@ resource "grafana_rule_group" "arr_stack" {
       category = "arr-stack"
     }
     for       = "10m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -170,12 +163,9 @@ resource "grafana_rule_group" "arr_stack" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"sonarr\",namespace=\"default\"} < 1 AND up{job=\"sonarr-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"sonarr\",namespace=\"default\"}) < 1) or (min(up{job=\"sonarr-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -192,6 +182,7 @@ resource "grafana_rule_group" "arr_stack" {
       category = "arr-stack"
     }
     for       = "10m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -204,12 +195,9 @@ resource "grafana_rule_group" "arr_stack" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"radarr\",namespace=\"default\"} < 1 AND up{job=\"radarr-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"radarr\",namespace=\"default\"}) < 1) or (min(up{job=\"radarr-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -226,6 +214,7 @@ resource "grafana_rule_group" "arr_stack" {
       category = "arr-stack"
     }
     for       = "10m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -238,12 +227,9 @@ resource "grafana_rule_group" "arr_stack" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"prowlarr\",namespace=\"default\"} < 1 AND up{job=\"prowlarr-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"prowlarr\",namespace=\"default\"}) < 1) or (min(up{job=\"prowlarr-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -260,6 +246,7 @@ resource "grafana_rule_group" "arr_stack" {
       category = "arr-stack"
     }
     for       = "15m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -272,12 +259,9 @@ resource "grafana_rule_group" "arr_stack" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"bazarr\",namespace=\"default\"} < 1 AND up{job=\"bazarr-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"bazarr\",namespace=\"default\"}) < 1) or (min(up{job=\"bazarr-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -294,6 +278,7 @@ resource "grafana_rule_group" "arr_stack" {
       category = "arr-stack"
     }
     for       = "15m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -306,12 +291,9 @@ resource "grafana_rule_group" "arr_stack" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"lidarr\",namespace=\"default\"} < 1 AND up{job=\"lidarr-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"lidarr\",namespace=\"default\"}) < 1) or (min(up{job=\"lidarr-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -328,6 +310,7 @@ resource "grafana_rule_group" "arr_stack" {
       category = "arr-stack"
     }
     for       = "15m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -340,12 +323,9 @@ resource "grafana_rule_group" "arr_stack" {
       
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
-        expr  = "up{job=\"readarr\",namespace=\"default\"} < 1 AND up{job=\"readarr-exporter\",namespace=\"observability\"} < 1"
+        expr  = "(min(up{job=\"readarr\",namespace=\"default\"}) < 1) or (min(up{job=\"readarr-exporter\",namespace=\"observability\"}) < 1)"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -361,6 +341,7 @@ resource "grafana_rule_group" "arr_stack" {
       category = "arr-stack"
     }
     for       = "5m"
+    no_data_state = "OK"
     condition = "A"
 
     data {
@@ -375,10 +356,7 @@ resource "grafana_rule_group" "arr_stack" {
       model = jsonencode({
         expr  = "count(up{job=~\"(sonarr|radarr|prowlarr|bazarr|lidarr|readarr)\",namespace=\"default\"} < 1) > 2"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 }

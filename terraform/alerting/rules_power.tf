@@ -11,13 +11,14 @@ resource "grafana_rule_group" "ups" {
     name        = "UPSOnBattery"
     annotations = {
       summary     = "UPS running on battery"
-      description = "UPS $${labels.ups} is running on battery power"
+      description = "UPS rack-ups.stonehedges.net is running on battery power"
     }
     labels = {
       severity = "critical"
     }
     for      = "30s"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -29,12 +30,9 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "upsOnBattery == 1"
+        expr = "max by (instance) (upsBaseBatteryTimeOnBattery) > 0"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -42,13 +40,14 @@ resource "grafana_rule_group" "ups" {
     name        = "UPSBatteryLow"
     annotations = {
       summary     = "UPS battery low"
-      description = "UPS $${labels.ups} battery is below 25% (current: $${values.A.Value}%)"
+      description = "UPS rack-ups.stonehedges.net battery is below 25% (current: {{ $values.A.Value }}%)"
     }
     labels = {
       severity = "critical"
     }
     for      = "1m"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -60,12 +59,9 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "upsBatteryChargePercent < 25"
+        expr = "min by (instance) (upsAdvanceBatteryCapacity) < 25"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -73,13 +69,14 @@ resource "grafana_rule_group" "ups" {
     name        = "UPSBatteryReplaceNeeded"
     annotations = {
       summary     = "UPS battery needs replacement"
-      description = "UPS $${labels.ups} battery needs to be replaced"
+      description = "UPS rack-ups.stonehedges.net battery needs to be replaced"
     }
     labels = {
       severity = "warning"
     }
     for      = "24h"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -91,12 +88,9 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "upsBatteryReplaceIndicator == 1"
+        expr = "max by (instance) (upsAdvanceBatteryReplaceIndicator) == 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -104,13 +98,14 @@ resource "grafana_rule_group" "ups" {
     name        = "UPSOverload"
     annotations = {
       summary     = "UPS overloaded"
-      description = "UPS $${labels.ups} load is above 80% (current: $${values.A.Value}%)"
+      description = "UPS rack-ups.stonehedges.net load is above 80% (current: {{ $values.A.Value }}%)"
     }
     labels = {
       severity = "critical"
     }
     for      = "5m"
     condition = "A"
+    no_data_state = "OK"  # When query returns no results (load < 80%), treat as Normal/OK
 
     data {
       ref_id = "A"
@@ -122,12 +117,9 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "upsLoadPercent > 80"
+        expr = "max by (instance) (upsAdvanceOutputLoad) > 80"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -135,13 +127,14 @@ resource "grafana_rule_group" "ups" {
     name        = "UPSCommunicationLost"
     annotations = {
       summary     = "Lost communication with UPS"
-      description = "Cannot communicate with UPS $${labels.ups}"
+      description = "Cannot communicate with UPS rack-ups.stonehedges.net"
     }
     labels = {
       severity = "critical"
     }
     for      = "2m"
     condition = "A"
+    no_data_state = "NoData"  # Keep as NoData - we want to know if metrics disappear
 
     data {
       ref_id = "A"
@@ -153,11 +146,39 @@ resource "grafana_rule_group" "ups" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "up{job=~\"snmp-exporter-cyberpower.*\"} == 0"
+        expr = "up{job=\"snmp-exporter-cyberpower-ups\"} < 1"
         refId = "A"
         instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
+      })
+    }
+  }
+
+  rule {
+    name        = "PDUCommunicationLost"
+    annotations = {
+      summary     = "Lost communication with PDU"
+      description = "Cannot communicate with PDU rack-pdu.stonehedges.net"
+    }
+    labels = {
+      severity = "critical"
+    }
+    for      = "2m"
+    condition = "A"
+    no_data_state = "NoData"  # Keep as NoData - we want to know if metrics disappear
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 120
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "up{job=\"snmp-exporter-cyberpower-pdu\"} < 1"
+        refId = "A"
+        instant = true
       })
     }
   }
@@ -172,13 +193,14 @@ resource "grafana_rule_group" "pdu" {
     name        = "PDUHighLoad"
     annotations = {
       summary     = "PDU high load"
-      description = "PDU $${labels.instance} load is above 80% (current: $${values.A.Value}A)"
+      description = "PDU rack-pdu.stonehedges.net load is above 80% (current: {{ $values.A.Value }}A)"
     }
     labels = {
       severity = "warning"
     }
     for      = "10m"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -190,11 +212,9 @@ resource "grafana_rule_group" "pdu" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "ePDULoadStatusLoad / 10 > 12"  # Assuming 15A PDU, alert at 80% (12A)
+        expr = "max by (instance) (ePDU2BankStatusLoad) > 12"  # Assuming 15A PDU, alert at 80% (12A)
         refId = "A"
         instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
       })
     }
   }

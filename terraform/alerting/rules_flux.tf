@@ -17,6 +17,7 @@ resource "grafana_rule_group" "flux" {
     }
     for      = "10m"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -28,12 +29,9 @@ resource "grafana_rule_group" "flux" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "up{job=~\"flux.*\"} == 0"
+        expr = "min(up{job=~\"flux.*\"}) < 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 
@@ -41,13 +39,14 @@ resource "grafana_rule_group" "flux" {
     name        = "FluxInstanceNotReady"
     annotations = {
       summary     = "Flux instance not ready"
-      description = "Flux instance $${labels.instance} is not ready"
+      description = "Flux instance {{ $labels.instance }} is not ready"
     }
     labels = {
       severity = "critical"
     }
     for      = "10m"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -59,12 +58,9 @@ resource "grafana_rule_group" "flux" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "fluxcd_controller_ready != 1"
+        expr = "min by (instance) (fluxcd_controller_ready) != 1"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 }
@@ -78,13 +74,14 @@ resource "grafana_rule_group" "external_secrets" {
     name        = "SecretSyncError"
     annotations = {
       summary     = "External Secret sync error"
-      description = "External secret $${labels.name} in namespace $${labels.namespace} has sync errors"
+      description = "External secret {{ $labels.name }} in namespace {{ $labels.namespace }} has sync errors"
     }
     labels = {
       severity = "critical"
     }
     for      = "5m"
     condition = "A"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -96,12 +93,9 @@ resource "grafana_rule_group" "external_secrets" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "increase(sync_calls{status=\"error\"}[5m]) > 0"
+        expr = "increase(sync_calls{status=\"error\"}[5m]) by (name, namespace) > 0"
         refId = "A"
-        instant = true
-        intervalMs = 1000
-        maxDataPoints = 43200
-      })
+        instant = true      })
     }
   }
 }
