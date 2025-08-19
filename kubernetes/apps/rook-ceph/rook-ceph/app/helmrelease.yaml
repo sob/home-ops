@@ -45,16 +45,78 @@ spec:
       # Allow CSI plugins to run on all nodes
       pluginTolerations:
         - operator: "Exists"
+      # CSI RBD provisioner resources
       csiRBDProvisioner:
         resources:
           requests:
-            cpu: 50m
+            cpu: 25m
             memory: 128Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi
+      # CSI RBD plugin (daemonset) resources  
       csiRBDPlugin:
         resources:
           requests:
-            cpu: 50m
+            cpu: 25m
             memory: 128Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi
+      # CSI CephFS provisioner resources
+      csiCephFSProvisioner:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 128Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi
+      # CSI CephFS plugin (daemonset) resources
+      csiCephFSPlugin:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 128Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi
+      # Attacher sidecar
+      csiAttacher:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      # Snapshotter sidecar
+      csiSnapshotter:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      # Resizer sidecar
+      csiResizer:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      # Driver registrar sidecar
+      registrar:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi
       serviceMonitor:
         enabled: true
       snapshotter:
