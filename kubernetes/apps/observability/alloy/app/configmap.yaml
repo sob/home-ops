@@ -42,7 +42,7 @@ data:
     
     // Scrape blackbox-exporter probes for node monitoring - one scrape per target
     prometheus.scrape "blackbox_node_probe_101" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.101"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
@@ -54,7 +54,7 @@ data:
     }
     
     prometheus.scrape "blackbox_node_probe_102" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.102"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
@@ -66,7 +66,7 @@ data:
     }
     
     prometheus.scrape "blackbox_node_probe_103" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.103"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
@@ -78,7 +78,7 @@ data:
     }
     
     prometheus.scrape "blackbox_node_probe_104" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.104"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
@@ -90,7 +90,7 @@ data:
     }
     
     prometheus.scrape "blackbox_node_probe_105" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.105"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
@@ -102,7 +102,7 @@ data:
     }
     
     prometheus.scrape "blackbox_node_probe_106" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.106"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
@@ -114,7 +114,7 @@ data:
     }
     
     prometheus.scrape "blackbox_node_probe_107" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.107"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
@@ -169,12 +169,6 @@ data:
         source_labels = ["__name__"]
         regex = "probe_.*"
         action = "keep"
-      }
-      
-      // Set instance label from the target parameter
-      rule {
-        source_labels = ["target"]
-        target_label = "instance"
       }
       
       // Add probe type label for easy filtering
