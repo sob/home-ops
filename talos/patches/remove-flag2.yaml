@@ -1,0 +1,2 @@
+- op: remove
+  path: /cluster/controllerManager/extraArgs/default-unreachable-toleration-seconds

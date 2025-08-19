@@ -20,3 +20,7 @@ spec:
         - 10.1.100.105  # metal-05
         - 10.1.100.106  # metal-06
         - 10.1.100.107  # metal-07
+        # IoT devices
+        - hue.stonehedges.net        # Philips Hue bridge
+        - lutron.stonehedges.net     # Lutron Caseta hub
+        - chamberlain.stonehedges.net # Chamberlain MyQ gateway

@@ -1,0 +1,6 @@
+- op: replace
+  path: /cluster/controllerManager/extraArgs
+  value:
+    bind-address: "0.0.0.0"
+    node-monitor-grace-period: "20s"
+    node-monitor-period: "5s"

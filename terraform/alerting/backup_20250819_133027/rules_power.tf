@@ -1,8 +1,10 @@
-# Folder defined in folders.tf
+resource "grafana_folder" "power" {
+  title = "Power & UPS"
+}
 
 resource "grafana_rule_group" "ups" {
   name             = "ups"
-  folder_uid       = grafana_folder.infrastructure.uid
+  folder_uid       = grafana_folder.power.uid
   interval_seconds = 60
 
   rule {
@@ -190,7 +192,7 @@ resource "grafana_rule_group" "ups" {
 
 resource "grafana_rule_group" "pdu" {
   name             = "pdu"
-  folder_uid       = grafana_folder.infrastructure.uid
+  folder_uid       = grafana_folder.power.uid
   interval_seconds = 60
 
   rule {

@@ -1,6 +1,6 @@
 resource "grafana_rule_group" "infrastructure" {
   name             = "infrastructure"
-  folder_uid       = grafana_folder.monitoring.uid
+  folder_uid       = grafana_folder.services.uid
   interval_seconds = 60
 
   # Authentik - Critical SSO service
@@ -198,7 +198,7 @@ resource "grafana_rule_group" "infrastructure" {
 
 resource "grafana_rule_group" "response_times" {
   name             = "response-times"
-  folder_uid       = grafana_folder.monitoring.uid
+  folder_uid       = grafana_folder.services.uid
   interval_seconds = 60
 
   # High ingress latency

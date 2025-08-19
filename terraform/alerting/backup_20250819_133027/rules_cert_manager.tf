@@ -1,8 +1,10 @@
-# Folder defined in folders.tf
+resource "grafana_folder" "cert_manager" {
+  title = "Cert Manager"
+}
 
 resource "grafana_rule_group" "cert_manager" {
   name             = "cert-manager"
-  folder_uid       = grafana_folder.applications.uid
+  folder_uid       = grafana_folder.cert_manager.uid
   interval_seconds = 60
 
   rule {

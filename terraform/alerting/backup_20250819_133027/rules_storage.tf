@@ -1,4 +1,6 @@
-# Folder defined in folders.tf
+resource "grafana_folder" "storage" {
+  title = "Storage"
+}
 
 resource "grafana_rule_group" "smartctl" {
   name             = "smartctl"

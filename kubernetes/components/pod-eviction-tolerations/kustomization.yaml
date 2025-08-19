@@ -1,0 +1,39 @@
+---
+# Component to add fast eviction tolerations to pods
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - target:
+      kind: Deployment
+    patch: |
+      - op: add
+        path: /spec/template/spec/tolerations/-
+        value:
+          key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 60
+      - op: add
+        path: /spec/template/spec/tolerations/-
+        value:
+          key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 60
+  - target:
+      kind: StatefulSet
+    patch: |
+      - op: add
+        path: /spec/template/spec/tolerations/-
+        value:
+          key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 60
+      - op: add
+        path: /spec/template/spec/tolerations/-
+        value:
+          key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 60

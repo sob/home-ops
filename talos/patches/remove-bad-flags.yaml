@@ -1,0 +1,4 @@
+- op: remove
+  path: /cluster/controllerManager/extraArgs/default-not-ready-toleration-seconds
+- op: remove  
+  path: /cluster/controllerManager/extraArgs/default-unreachable-toleration-seconds
