@@ -179,14 +179,11 @@ spec:
 
     placement:
       mds:
-        tolerations: *controlPlaneToleration
-        nodeAffinity: *controlPlaneAffinity
+        nodeAffinity: *controlPlanePreferredAffinity
       mon:
-        tolerations: *controlPlaneToleration
-        nodeAffinity: *controlPlaneAffinity
+        nodeAffinity: *controlPlanePreferredAffinity
       mgr:
-        tolerations: *controlPlaneToleration
-        nodeAffinity: *controlPlaneAffinity
+        nodeAffinity: *controlPlanePreferredAffinity
       osd:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

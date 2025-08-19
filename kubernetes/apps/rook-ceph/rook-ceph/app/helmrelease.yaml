@@ -38,10 +38,6 @@ spec:
       enableLiveness: true
       pluginPriorityClassName: system-node-critical
       provisionerPriorityClassName: system-cluster-critical
-      provisionerTolerations:
-        - key: "node-role.kubernetes.io/control-plane"
-          operator: "Exists"
-          effect: "NoSchedule"
       # Allow CSI plugins to run on all nodes
       pluginTolerations:
         - operator: "Exists"
