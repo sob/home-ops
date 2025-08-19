@@ -4,24 +4,18 @@ replicaCount: 1
 leaderElect: true
 image:
   repository: ghcr.io/external-secrets/external-secrets
-tolerations: &tolerations
-  - key: "node-role.kubernetes.io/control-plane"
-    operator: "Exists"
-    effect: "NoSchedule"
 webhook:
   image:
     repository: ghcr.io/external-secrets/external-secrets
   serviceMonitor:
     enabled: true
     interval: 1m
-  tolerations: *tolerations
 certController:
   image:
     repository: ghcr.io/external-secrets/external-secrets
   serviceMonitor:
     enabled: true
     interval: 1m
-  tolerations: *tolerations
 serviceMonitor:
   enabled: true
   interval: 1m

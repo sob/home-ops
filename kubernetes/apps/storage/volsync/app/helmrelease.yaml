@@ -31,10 +31,6 @@ spec:
     manageCRDs: true
     metrics:
       disableAuth: true
-    tolerations: &tolerations
-      - key: "node-role.kubernetes.io/control-plane"
-        operator: "Exists"
-        effect: "NoSchedule"
   postRenderers:
     - kustomize:
         patches:
