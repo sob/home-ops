@@ -24,18 +24,27 @@ data:
       }
     }
     
-    // Scrape node metrics specifically
-    prometheus.operator.servicemonitors "node_metrics" {
-      forward_to = [prometheus.relabel.node_metrics.receiver]
+    // Scrape infrastructure metrics (node-exporter and kube-state-metrics)
+    prometheus.operator.servicemonitors "infrastructure_metrics" {
+      forward_to = [prometheus.relabel.infrastructure_metrics.receiver]
       
-      // Only scrape node-exporter
+      // Only scrape infrastructure monitoring
       namespaces = ["observability"]
       
       selector {
-        match_labels = {
-          "app.kubernetes.io/name" = "prometheus-node-exporter",
+        match_expression {
+          key = "app.kubernetes.io/name"
+          operator = "In"
+          values = ["prometheus-node-exporter", "kube-state-metrics"]
         }
       }
+    }
+    
+    // Scrape blackbox-exporter probes for node monitoring
+    prometheus.operator.probes "blackbox_probes" {
+      forward_to = [prometheus.relabel.blackbox.receiver]
+      
+      namespaces = ["observability"]
     }
     
     // Scrape application metrics from service monitors
@@ -53,23 +62,48 @@ data:
       }
     }
     
-    // Filter node metrics to essential ones only
-    prometheus.relabel "node_metrics" {
+    // Filter infrastructure metrics to essential ones only
+    prometheus.relabel "infrastructure_metrics" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
       
-      // Keep only essential node metrics
+      // Keep only essential metrics
       rule {
         source_labels = ["__name__"]
-        regex = "up|node_cpu_seconds_total|node_memory_MemAvailable_bytes|node_memory_MemTotal_bytes|node_filesystem_avail_bytes|node_filesystem_size_bytes|node_disk_io_time_seconds_total|node_network_receive_bytes_total|node_network_transmit_bytes_total|node_load1|node_load5|node_load15"
+        regex = "up|node_cpu_seconds_total|node_memory_MemAvailable_bytes|node_memory_MemTotal_bytes|node_filesystem_avail_bytes|node_filesystem_size_bytes|node_disk_io_time_seconds_total|node_network_receive_bytes_total|node_network_transmit_bytes_total|node_load1|node_load5|node_load15|kube_node_status_condition|kube_node_info|kube_node_status_allocatable|kube_node_status_capacity"
         action = "keep"
       }
       
-      // Keep instance and job labels
+      // Keep instance and job labels  
       rule {
         source_labels = ["instance"]
         target_label = "node"
         regex = "([^:]+):.*"
         replacement = "${1}"
+      }
+    }
+    
+    // Forward blackbox probe metrics to Grafana Cloud
+    prometheus.relabel "blackbox" {
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      
+      // Keep only probe metrics for node monitoring
+      rule {
+        source_labels = ["__name__"]
+        regex = "probe_success|probe_duration_seconds|probe_icmp_duration_seconds"
+        action = "keep"
+      }
+      
+      // Only keep node probes (IPs in 10.1.100.x range)
+      rule {
+        source_labels = ["instance"]
+        regex = "10\\.1\\.100\\..*"
+        action = "keep"
+      }
+      
+      // Add probe type label
+      rule {
+        target_label = "probe_type"
+        replacement = "node_icmp"
       }
     }
     
