@@ -24,18 +24,52 @@ data:
       }
     }
     
+    // Scrape node metrics specifically
+    prometheus.operator.servicemonitors "node_metrics" {
+      forward_to = [prometheus.relabel.node_metrics.receiver]
+      
+      // Only scrape node-exporter
+      namespaces = ["observability"]
+      
+      selector {
+        match_labels = {
+          "app.kubernetes.io/name" = "prometheus-node-exporter",
+        }
+      }
+    }
+    
     // Scrape application metrics from service monitors
     prometheus.operator.servicemonitors "apps" {
       forward_to = [prometheus.relabel.applications.receiver]
       
       // Only scrape from specific namespaces
-      namespaces = ["default", "media", "home", "security", "network", "observability"]
+      namespaces = ["default", "media", "home", "security", "network"]
       
       // Only scrape services with specific labels
       selector {
         match_labels = {
           "prometheus.io/forward" = "true",
         }
+      }
+    }
+    
+    // Filter node metrics to essential ones only
+    prometheus.relabel "node_metrics" {
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      
+      // Keep only essential node metrics
+      rule {
+        source_labels = ["__name__"]
+        regex = "up|node_cpu_seconds_total|node_memory_MemAvailable_bytes|node_memory_MemTotal_bytes|node_filesystem_avail_bytes|node_filesystem_size_bytes|node_disk_io_time_seconds_total|node_network_receive_bytes_total|node_network_transmit_bytes_total|node_load1|node_load5|node_load15"
+        action = "keep"
+      }
+      
+      // Keep instance and job labels
+      rule {
+        source_labels = ["instance"]
+        target_label = "node"
+        regex = "([^:]+):.*"
+        replacement = "${1}"
       }
     }
     
