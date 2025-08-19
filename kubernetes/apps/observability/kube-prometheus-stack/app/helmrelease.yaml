@@ -105,6 +105,8 @@ spec:
       prometheus:
         monitor:
           enabled: true
+          additionalLabels:
+            prometheus.io/forward: "true"
           relabelings:
             - action: replace
               regex: (.*)
@@ -122,6 +124,8 @@ spec:
       prometheus:
         monitor:
           enabled: true
+          additionalLabels:
+            prometheus.io/forward: "true"
           relabelings:
             - action: replace
               regex: (.*)
