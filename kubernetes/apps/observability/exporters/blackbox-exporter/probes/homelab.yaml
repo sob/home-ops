@@ -24,3 +24,11 @@ spec:
         - hue.stonehedges.net        # Philips Hue bridge
         - lutron.stonehedges.net     # Lutron Caseta hub
         - chamberlain.stonehedges.net # Chamberlain MyQ gateway
+        # Sonos devices
+        - sonos-back-deck.stonehedges.net
+        - sonos-fire-pit.stonehedges.net
+        - sonos-hottub.stonehedges.net
+        - sonos-kitchen.stonehedges.net
+        - sonos-livingroom.stonehedges.net
+        - sonos-office.stonehedges.net
+        - sonos-trampoline.stonehedges.net

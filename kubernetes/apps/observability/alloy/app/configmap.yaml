@@ -162,6 +162,91 @@ data:
       }
     }
     
+    // Scrape Sonos device probes
+    prometheus.scrape "blackbox_sonos_back_deck" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-back-deck.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_sonos.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["sonos-back-deck.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_sonos_fire_pit" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-fire-pit.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_sonos.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["sonos-fire-pit.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_sonos_hottub" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-hottub.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_sonos.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["sonos-hottub.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_sonos_kitchen" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-kitchen.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_sonos.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["sonos-kitchen.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_sonos_livingroom" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-livingroom.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_sonos.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["sonos-livingroom.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_sonos_office" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-office.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_sonos.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["sonos-office.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_sonos_trampoline" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-trampoline.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_sonos.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["sonos-trampoline.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
     // Scrape application metrics from service monitors
     prometheus.operator.servicemonitors "apps" {
       forward_to = [prometheus.relabel.applications.receiver]
@@ -242,6 +327,36 @@ data:
       rule {
         target_label = "job"
         replacement = "blackbox-iot-probes"
+      }
+    }
+    
+    // Forward Sonos blackbox probe metrics to Grafana Cloud
+    prometheus.relabel "blackbox_sonos" {
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      
+      // Keep only probe metrics
+      rule {
+        source_labels = ["__name__"]
+        regex = "probe_.*"
+        action = "keep"
+      }
+      
+      // Add probe type label for easy filtering
+      rule {
+        target_label = "probe_type"
+        replacement = "sonos_icmp"
+      }
+      
+      // Set job name
+      rule {
+        target_label = "job"
+        replacement = "blackbox-sonos-probes"
+      }
+      
+      // Add device type label
+      rule {
+        target_label = "device_type"
+        replacement = "sonos"
       }
     }
     
