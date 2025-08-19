@@ -12,3 +12,11 @@ spec:
     staticConfig:
       static:
         - doom.stonehedges.net
+        # Kubernetes nodes
+        - 10.1.100.101  # metal-01
+        - 10.1.100.102  # metal-02
+        - 10.1.100.103  # metal-03
+        - 10.1.100.104  # metal-04
+        - 10.1.100.105  # metal-05
+        - 10.1.100.106  # metal-06
+        - 10.1.100.107  # metal-07
