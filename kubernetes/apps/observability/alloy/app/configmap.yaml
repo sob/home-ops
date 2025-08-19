@@ -41,10 +41,49 @@ data:
     }
     
     // Scrape blackbox-exporter probes for node monitoring
-    prometheus.operator.probes "blackbox_probes" {
+    prometheus.scrape "blackbox_node_probes" {
+      targets = [
+        {"__address__" = "10.1.100.101", "__param_module" = "icmp"},
+        {"__address__" = "10.1.100.102", "__param_module" = "icmp"},
+        {"__address__" = "10.1.100.103", "__param_module" = "icmp"},
+        {"__address__" = "10.1.100.104", "__param_module" = "icmp"},
+        {"__address__" = "10.1.100.105", "__param_module" = "icmp"},
+        {"__address__" = "10.1.100.106", "__param_module" = "icmp"},
+        {"__address__" = "10.1.100.107", "__param_module" = "icmp"},
+      ]
+      
       forward_to = [prometheus.relabel.blackbox.receiver]
       
-      namespaces = ["observability"]
+      scrape_interval = "30s"
+      scrape_timeout = "10s"
+      
+      // Point to blackbox-exporter service
+      params = {
+        "module" = ["icmp"],
+      }
+      
+      // Rewrite to use blackbox-exporter endpoint
+      relabel {
+        source_labels = ["__address__"]
+        target_label = "__param_target"
+      }
+      
+      relabel {
+        target_label = "__address__"
+        replacement = "blackbox-exporter.observability.svc.cluster.local:9115"
+      }
+      
+      relabel {
+        source_labels = ["__param_target"]
+        target_label = "instance"
+      }
+      
+      relabel {
+        target_label = "job"
+        replacement = "blackbox-node-probes"
+      }
+      
+      metrics_path = "/probe"
     }
     
     // Scrape application metrics from service monitors
@@ -89,18 +128,11 @@ data:
       // Keep only probe metrics for node monitoring
       rule {
         source_labels = ["__name__"]
-        regex = "probe_success|probe_duration_seconds|probe_icmp_duration_seconds"
+        regex = "probe_success|probe_duration_seconds|probe_icmp_duration_seconds.*"
         action = "keep"
       }
       
-      // Only keep node probes (IPs in 10.1.100.x range)
-      rule {
-        source_labels = ["instance"]
-        regex = "10\\.1\\.100\\..*"
-        action = "keep"
-      }
-      
-      // Add probe type label
+      // Add probe type label for easy filtering
       rule {
         target_label = "probe_type"
         replacement = "node_icmp"
