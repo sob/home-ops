@@ -4,7 +4,7 @@ resource "grafana_contact_point" "slack_critical" {
   slack {
     url   = module.secrets.items["alertmanager"]["ALERTMANAGER_SLACK_URL"]
     title = "🚨 {{ .GroupLabels.alertname }}{{ if .GroupLabels.service }} - {{ .GroupLabels.service }}{{ end }}"
-    text  = "{{ range .Alerts }}{{ if .Annotations.description }}• {{ .Annotations.description }}{{ else }}• {{ .Labels.alertname }}: {{ .Annotations.summary }}{{ end }}\n{{ end }}"
+    text  = "{{ if or (gt (len .Alerts) 5) (eq .GroupLabels.alertname \"PrometheusDataSourceDown\") }}{{ (index .Alerts 0).Annotations.description }}{{ if gt (len .Alerts) 1 }}\n({{ len .Alerts }} instances){{ end }}{{ else }}{{ range .Alerts }}{{ if .Annotations.description }}• {{ .Annotations.description }}{{ else }}• {{ .Labels.alertname }}: {{ .Annotations.summary }}{{ end }}\n{{ end }}{{ end }}"
     disable_resolve_message = false
   }
 }
@@ -28,6 +28,33 @@ resource "grafana_notification_policy" "main" {
 
   contact_point = grafana_contact_point.slack_critical.name
 
+  # PRIORITY 1: Prometheus connectivity issues - single alert
+  policy {
+    matcher {
+      label = "alertname"
+      match = "="
+      value = "PrometheusDataSourceDown"
+    }
+    group_by        = ["alertname"]
+    contact_point   = grafana_contact_point.slack_critical.name
+    group_wait      = "10s"  # Alert quickly for infrastructure
+    repeat_interval = "1h"   # Remind hourly until fixed
+  }
+
+  # PRIORITY 2: All Prometheus-dependent alerts - batch together
+  policy {
+    matcher {
+      label = "depends_on_prometheus"
+      match = "="
+      value = "true"
+    }
+    group_by        = ["severity"]  # Group all together by severity only
+    contact_point   = grafana_contact_point.slack_critical.name
+    group_wait      = "2m"   # Wait to see if it's Prometheus issue
+    group_interval  = "10m"  # Less frequent updates
+    repeat_interval = "6h"   # Much less frequent reminders
+  }
+
   # DatasourceNoData errors - group them together
   policy {
     matcher {
@@ -41,12 +68,30 @@ resource "grafana_notification_policy" "main" {
     mute_timings    = []
   }
 
-  # Critical alerts - individual notifications
+  # Node alerts - immediate notification
+  policy {
+    matcher {
+      label = "alertname"
+      match = "=~"
+      value = "NodeDown|ControlPlaneNodeDown"
+    }
+    group_by        = ["alertname", "instance"]
+    contact_point   = grafana_contact_point.slack_critical.name
+    group_wait      = "10s"  # Alert quickly for nodes
+    repeat_interval = "2h"   # Remind every 2 hours
+  }
+
+  # Critical alerts (non-Prometheus dependent) - individual notifications
   policy {
     matcher {
       label = "severity"
       match = "="
       value = "critical"
+    }
+    matcher {
+      label = "depends_on_prometheus"
+      match = "!="
+      value = "true"
     }
     group_by        = ["alertname", "instance", "service"]  # Group by alert, instance, and service
     contact_point   = grafana_contact_point.slack_critical.name

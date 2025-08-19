@@ -125,6 +125,43 @@ data:
       }
     }
     
+    // Scrape IoT device probes for monitoring
+    prometheus.scrape "blackbox_iot_hue" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "hue.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_iot.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["hue.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_iot_lutron" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "lutron.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_iot.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["lutron.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
+    prometheus.scrape "blackbox_iot_chamberlain" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "chamberlain.stonehedges.net"}]
+      forward_to = [prometheus.relabel.blackbox_iot.receiver]
+      scrape_interval = "60s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["chamberlain.stonehedges.net"],
+        "module" = ["icmp"],
+      }
+    }
+    
     // Scrape application metrics from service monitors
     prometheus.operator.servicemonitors "apps" {
       forward_to = [prometheus.relabel.applications.receiver]
@@ -181,6 +218,30 @@ data:
       rule {
         target_label = "job"
         replacement = "blackbox-node-probes"
+      }
+    }
+    
+    // Forward IoT blackbox probe metrics to Grafana Cloud
+    prometheus.relabel "blackbox_iot" {
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+      
+      // Keep only probe metrics
+      rule {
+        source_labels = ["__name__"]
+        regex = "probe_.*"
+        action = "keep"
+      }
+      
+      // Add probe type label for easy filtering
+      rule {
+        target_label = "probe_type"
+        replacement = "iot_icmp"
+      }
+      
+      // Set job name
+      rule {
+        target_label = "job"
+        replacement = "blackbox-iot-probes"
       }
     }
     

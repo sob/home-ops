@@ -1,5 +1,7 @@
 # Service monitoring folder
-# Folder defined in folders.tf
+resource "grafana_folder" "services" {
+  title = "Critical Services"
+}
 
 # Media services are in rules_media_services.tf
 # Infrastructure services are in rules_infrastructure.tf
@@ -7,7 +9,7 @@
 
 resource "grafana_rule_group" "application_health" {
   name             = "application-health"
-  folder_uid       = grafana_folder.applications.uid
+  folder_uid       = grafana_folder.services.uid
   interval_seconds = 60
 
   # Queue backup detection for *arr apps

@@ -1,0 +1,46 @@
+From: Assistant
+Date: Fri, 9 Aug 2025
+Subject: [PATCH] Fix PVC naming when using existingClaim with multiple persistence entries
+
+When multiple persistence entries are defined but some use existingClaim,
+the PVC count logic incorrectly counts only PVCs being created rather than
+total persistence entries. This causes PVCs to be named without their
+identifier suffix, leading to naming conflicts.
+
+This patch changes the logic to count all persistence entries when
+determining whether to append the identifier to the PVC name.
+
+---
+ charts/library/common/templates/lib/pvc/_enabled_pvcs.tpl | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/charts/library/common/templates/lib/pvc/_enabled_pvcs.tpl b/charts/library/common/templates/lib/pvc/_enabled_pvcs.tpl
+index 1234567..abcdefg 100644
+--- a/charts/library/common/templates/lib/pvc/_enabled_pvcs.tpl
++++ b/charts/library/common/templates/lib/pvc/_enabled_pvcs.tpl
+@@ -4,6 +4,7 @@ Return the enabled PVCs.
+ {{- define "bjw-s.common.lib.pvc.enabledPVCs" -}}
+   {{- $rootContext := .rootContext -}}
+   {{- $enabledPVCs := dict -}}
++  {{- $totalPersistenceCount := 0 -}}
+ 
+   {{- range $identifier, $persistenceItem := $rootContext.Values.persistence -}}
+     {{- if kindIs "map" $persistenceItem -}}
+@@ -12,8 +13,11 @@ Return the enabled PVCs.
+       {{- if hasKey $persistenceItem "enabled" -}}
+         {{- $pvcEnabled = $persistenceItem.enabled -}}
+       {{- end -}}
++      
++      {{- /* Count all persistence entries that are PVC type, not just ones creating PVCs */ -}}
++      {{- if and $pvcEnabled (eq (default "persistentVolumeClaim" $persistenceItem.type) "persistentVolumeClaim") -}}
++        {{- $totalPersistenceCount = add $totalPersistenceCount 1 -}}
+ 
+-      {{- if and $pvcEnabled (eq (default "persistentVolumeClaim" $persistenceItem.type) "persistentVolumeClaim") (not $persistenceItem.existingClaim) -}}
+-        {{- $_ := set $enabledPVCs $identifier . -}}
++        {{- if not $persistenceItem.existingClaim -}}
++          {{- /* Use the total count for naming logic instead of just created PVCs count */ -}}
++          {{- $_ := set $enabledPVCs $identifier (merge (dict "_totalCount" $totalPersistenceCount) $persistenceItem) -}}
++        {{- end -}}
+       {{- end -}}
+     {{- end -}}
+   {{- end -}}

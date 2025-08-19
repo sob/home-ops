@@ -1,0 +1,15 @@
+# Patch to improve pod eviction when nodes become unreachable
+# Apply this to control plane nodes to speed up pod rescheduling
+cluster:
+  controllerManager:
+    extraArgs:
+      # Faster detection of unreachable nodes (default 40s)
+      node-monitor-grace-period: "20s"
+      # How often to check node status (default 5s)
+      node-monitor-period: "5s"
+      # Default tolerations for pods that don't specify any
+      # This ensures pods get evicted after 60s when node is unreachable
+      default-unreachable-toleration-seconds: "60"
+      default-not-ready-toleration-seconds: "60"
+      # Enable feature gates for better pod management
+      feature-gates: "GracefulNodeShutdown=true,GracefulNodeShutdownBasedOnPodPriority=true"

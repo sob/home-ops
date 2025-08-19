@@ -613,5 +613,5 @@ resource "grafana_dashboard" "power_ups" {
     ]
   })
   
-  folder = grafana_folder.power.id
+  folder = grafana_folder.infrastructure.id
 }

@@ -1,0 +1,176 @@
+resource "grafana_synthetic_monitoring_check" "plex_transaction" {
+  job     = "Plex Media Server"
+  target  = "https://plex.56kbps.io"
+  frequency = 300000  # 5 minutes
+  timeout   = 30000   # 30 seconds
+  enabled   = true
+  alert_sensitivity = "medium"
+  
+  labels = {
+    environment = "production"
+    service     = "plex"
+    type        = "transaction"
+  }
+
+  settings {
+    browser {
+      script = <<-EOT
+        import { browser } from 'k6/browser';
+        import { check } from 'k6';
+
+        export default async function() {
+          const page = await browser.newPage();
+          
+          try {
+            // Step 1: Navigate to Plex
+            await page.goto('https://plex.56kbps.io', {
+              waitUntil: 'networkidle',
+              timeout: 10000
+            });
+            
+            // Step 2: Login (if needed)
+            const loginButton = await page.$('button[data-testid="signIn"]');
+            if (loginButton) {
+              await loginButton.click();
+              
+              // Wait for login form
+              await page.waitForSelector('input[type="email"]', { timeout: 5000 });
+              
+              // Enter credentials (you'll need to set these as secure variables)
+              await page.type('input[type="email"]', __ENV.PLEX_EMAIL);
+              await page.type('input[type="password"]', __ENV.PLEX_PASSWORD);
+              
+              // Submit login
+              await page.click('button[type="submit"]');
+              
+              // Wait for dashboard to load
+              await page.waitForSelector('[data-testid="hub-cell"]', { timeout: 10000 });
+            }
+            
+            // Step 3: Browse to Movies library
+            await page.click('a[href*="/web/index.html#!/media"]');
+            await page.waitForSelector('[data-testid="metadata-poster"]', { timeout: 5000 });
+            
+            // Step 4: Select a movie
+            const moviePosters = await page.$$('[data-testid="metadata-poster"]');
+            if (moviePosters.length > 0) {
+              // Click on the first available movie
+              await moviePosters[0].click();
+              
+              // Wait for movie details to load
+              await page.waitForSelector('button[data-testid="play-button"]', { timeout: 5000 });
+              
+              // Step 5: Start streaming
+              await page.click('button[data-testid="play-button"]');
+              
+              // Wait for video player to initialize
+              await page.waitForSelector('video', { timeout: 10000 });
+              
+              // Verify video is playing
+              const video = await page.$('video');
+              const isPlaying = await video.evaluate(vid => !vid.paused);
+              
+              check(isPlaying, {
+                'video is playing': (playing) => playing === true
+              });
+              
+              // Let it stream for a few seconds to verify
+              await page.waitForTimeout(5000);
+              
+              // Check if video has progressed
+              const currentTime = await video.evaluate(vid => vid.currentTime);
+              check(currentTime, {
+                'video has progressed': (time) => time > 0
+              });
+            }
+            
+          } finally {
+            await page.close();
+          }
+        }
+      EOT
+    }
+  }
+
+  probes = [
+    data.grafana_synthetic_monitoring_probes.main.probes.Amsterdam,
+    data.grafana_synthetic_monitoring_probes.main.probes.London
+  ]
+}
+
+# Data source for available probes
+data "grafana_synthetic_monitoring_probes" "main" {}
+
+# Create alert rule for the synthetic check
+resource "grafana_rule_group" "plex_synthetic" {
+  name             = "plex-synthetic"
+  folder_uid       = grafana_folder.media.uid
+  interval_seconds = 60
+
+  rule {
+    name = "PlexTransactionFailed"
+    annotations = {
+      summary     = "Plex transaction test failed"
+      description = "Synthetic transaction for Plex login and streaming failed from {{ $labels.probe }}"
+    }
+    labels = {
+      severity = "warning"
+      service  = "plex"
+    }
+    for           = "5m"
+    condition     = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_cloud_uid
+      model = jsonencode({
+        expr  = "probe_success{job=\"Plex Media Server\"} == 0"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name = "PlexTransactionSlow"
+    annotations = {
+      summary     = "Plex transaction is slow"
+      description = "Plex transaction taking > 20s from {{ $labels.probe }}"
+    }
+    labels = {
+      severity = "warning"
+      service  = "plex"
+    }
+    for           = "10m"
+    condition     = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 600
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_cloud_uid
+      model = jsonencode({
+        expr  = "probe_duration_seconds{job=\"Plex Media Server\"} > 20"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+}
+
+# Create folder for media services
+resource "grafana_folder" "media" {
+  title = "Media Services"
+}

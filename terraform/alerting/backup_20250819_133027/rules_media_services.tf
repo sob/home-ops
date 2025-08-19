@@ -1,6 +1,6 @@
 resource "grafana_rule_group" "media_apps" {
   name             = "media-apps"
-  folder_uid       = grafana_folder.applications.uid
+  folder_uid       = grafana_folder.services.uid
   interval_seconds = 60
 
   # Plex - Critical media server
@@ -134,7 +134,7 @@ resource "grafana_rule_group" "media_apps" {
 
 resource "grafana_rule_group" "arr_stack" {
   name             = "arr-stack"
-  folder_uid       = grafana_folder.applications.uid
+  folder_uid       = grafana_folder.services.uid
   interval_seconds = 60
 
   # Sonarr - TV management

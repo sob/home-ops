@@ -1,8 +1,10 @@
-# Folder defined in folders.tf
+resource "grafana_folder" "flux" {
+  title = "Flux"
+}
 
 resource "grafana_rule_group" "flux" {
   name             = "flux"
-  folder_uid       = grafana_folder.infrastructure.uid
+  folder_uid       = grafana_folder.flux.uid
   interval_seconds = 60
 
   rule {
@@ -67,7 +69,7 @@ resource "grafana_rule_group" "flux" {
 
 resource "grafana_rule_group" "external_secrets" {
   name             = "external-secrets"
-  folder_uid       = grafana_folder.infrastructure.uid
+  folder_uid       = grafana_folder.flux.uid
   interval_seconds = 60
 
   rule {
