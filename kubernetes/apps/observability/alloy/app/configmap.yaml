@@ -63,22 +63,22 @@ data:
       }
       
       // Rewrite to use blackbox-exporter endpoint
-      relabel {
+      rule {
         source_labels = ["__address__"]
         target_label = "__param_target"
       }
       
-      relabel {
+      rule {
         target_label = "__address__"
         replacement = "blackbox-exporter.observability.svc.cluster.local:9115"
       }
       
-      relabel {
+      rule {
         source_labels = ["__param_target"]
         target_label = "instance"
       }
       
-      relabel {
+      rule {
         target_label = "job"
         replacement = "blackbox-node-probes"
       }
