@@ -43,47 +43,60 @@ data:
     // Scrape blackbox-exporter probes for node monitoring
     prometheus.scrape "blackbox_node_probes" {
       targets = [
-        {"__address__" = "10.1.100.101", "__param_module" = "icmp"},
-        {"__address__" = "10.1.100.102", "__param_module" = "icmp"},
-        {"__address__" = "10.1.100.103", "__param_module" = "icmp"},
-        {"__address__" = "10.1.100.104", "__param_module" = "icmp"},
-        {"__address__" = "10.1.100.105", "__param_module" = "icmp"},
-        {"__address__" = "10.1.100.106", "__param_module" = "icmp"},
-        {"__address__" = "10.1.100.107", "__param_module" = "icmp"},
+        {"__address__" = "10.1.100.101"},
+        {"__address__" = "10.1.100.102"},
+        {"__address__" = "10.1.100.103"},
+        {"__address__" = "10.1.100.104"},
+        {"__address__" = "10.1.100.105"},
+        {"__address__" = "10.1.100.106"},
+        {"__address__" = "10.1.100.107"},
       ]
       
-      forward_to = [prometheus.relabel.blackbox.receiver]
+      forward_to = [prometheus.relabel.blackbox_targets.receiver]
       
       scrape_interval = "30s"
       scrape_timeout = "10s"
+    }
+    
+    // Relabel blackbox targets to route through blackbox-exporter
+    prometheus.relabel "blackbox_targets" {
+      forward_to = [prometheus.relabel.blackbox.receiver]
       
-      // Point to blackbox-exporter service
-      params = {
-        "module" = ["icmp"],
-      }
-      
-      // Rewrite to use blackbox-exporter endpoint
+      // Copy target to param
       rule {
         source_labels = ["__address__"]
         target_label = "__param_target"
       }
       
+      // Set module param
+      rule {
+        target_label = "__param_module"
+        replacement = "icmp"
+      }
+      
+      // Point to blackbox-exporter service
       rule {
         target_label = "__address__"
         replacement = "blackbox-exporter.observability.svc.cluster.local:9115"
       }
       
+      // Set instance to original target
       rule {
         source_labels = ["__param_target"]
         target_label = "instance"
       }
       
+      // Set metrics path
+      rule {
+        target_label = "__metrics_path__"
+        replacement = "/probe"
+      }
+      
+      // Set job name
       rule {
         target_label = "job"
         replacement = "blackbox-node-probes"
       }
-      
-      metrics_path = "/probe"
     }
     
     // Scrape application metrics from service monitors
