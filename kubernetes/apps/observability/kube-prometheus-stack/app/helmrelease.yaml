@@ -77,9 +77,10 @@ spec:
         retentionSize: 10GB
         resources:
           requests:
-            cpu: 415m
+            cpu: 200m
             memory: 2.20Gi
           limits:
+            cpu: 500m
             memory: 4.39Gi
         storageSpec: {}
         # Enable Thanos sidecar for R2 upload
