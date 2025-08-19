@@ -73,8 +73,8 @@ spec:
           - auto-gomemlimit
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
-        retention: 7d  # Shorter retention for local metrics
-        retentionSize: 50GB
+        retention: 2h  # Short local retention since we upload to R2
+        retentionSize: 10GB
         resources:
           requests:
             cpu: 415m
@@ -82,12 +82,16 @@ spec:
           limits:
             memory: 4.39Gi
         storageSpec:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: openebs-hostpath
-              resources:
-                requests:
-                  storage: 75Gi
+          emptyDir:
+            sizeLimit: 10Gi
+        # Enable Thanos sidecar for R2 upload
+        thanos:
+          image: quay.io/thanos/thanos:v0.37.2
+          version: v0.37.2
+          objectStorageConfig:
+            existingSecret:
+              name: kube-prometheus-stack-secret
+              key: objstore.yml
     prometheusOperator:
       prometheusConfigReloader:
         resources:
