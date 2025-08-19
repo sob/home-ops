@@ -40,62 +40,88 @@ data:
       }
     }
     
-    // Scrape blackbox-exporter probes for node monitoring
-    prometheus.scrape "blackbox_node_probes" {
-      targets = [
-        {"__address__" = "10.1.100.101"},
-        {"__address__" = "10.1.100.102"},
-        {"__address__" = "10.1.100.103"},
-        {"__address__" = "10.1.100.104"},
-        {"__address__" = "10.1.100.105"},
-        {"__address__" = "10.1.100.106"},
-        {"__address__" = "10.1.100.107"},
-      ]
-      
-      forward_to = [prometheus.relabel.blackbox_targets.receiver]
-      
+    // Scrape blackbox-exporter probes for node monitoring - one scrape per target
+    prometheus.scrape "blackbox_node_probe_101" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      forward_to = [prometheus.relabel.blackbox.receiver]
       scrape_interval = "30s"
       scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["10.1.100.101"],
+        "module" = ["icmp"],
+      }
     }
     
-    // Relabel blackbox targets to route through blackbox-exporter
-    prometheus.relabel "blackbox_targets" {
+    prometheus.scrape "blackbox_node_probe_102" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
-      
-      // Copy target to param
-      rule {
-        source_labels = ["__address__"]
-        target_label = "__param_target"
+      scrape_interval = "30s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["10.1.100.102"],
+        "module" = ["icmp"],
       }
-      
-      // Set module param
-      rule {
-        target_label = "__param_module"
-        replacement = "icmp"
+    }
+    
+    prometheus.scrape "blackbox_node_probe_103" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      forward_to = [prometheus.relabel.blackbox.receiver]
+      scrape_interval = "30s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["10.1.100.103"],
+        "module" = ["icmp"],
       }
-      
-      // Point to blackbox-exporter service
-      rule {
-        target_label = "__address__"
-        replacement = "blackbox-exporter.observability.svc.cluster.local:9115"
+    }
+    
+    prometheus.scrape "blackbox_node_probe_104" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      forward_to = [prometheus.relabel.blackbox.receiver]
+      scrape_interval = "30s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["10.1.100.104"],
+        "module" = ["icmp"],
       }
-      
-      // Set instance to original target
-      rule {
-        source_labels = ["__param_target"]
-        target_label = "instance"
+    }
+    
+    prometheus.scrape "blackbox_node_probe_105" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      forward_to = [prometheus.relabel.blackbox.receiver]
+      scrape_interval = "30s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["10.1.100.105"],
+        "module" = ["icmp"],
       }
-      
-      // Set metrics path
-      rule {
-        target_label = "__metrics_path__"
-        replacement = "/probe"
+    }
+    
+    prometheus.scrape "blackbox_node_probe_106" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      forward_to = [prometheus.relabel.blackbox.receiver]
+      scrape_interval = "30s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["10.1.100.106"],
+        "module" = ["icmp"],
       }
-      
-      // Set job name
-      rule {
-        target_label = "job"
-        replacement = "blackbox-node-probes"
+    }
+    
+    prometheus.scrape "blackbox_node_probe_107" {
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115"}]
+      forward_to = [prometheus.relabel.blackbox.receiver]
+      scrape_interval = "30s"
+      scrape_timeout = "10s"
+      metrics_path = "/probe"
+      params = {
+        "target" = ["10.1.100.107"],
+        "module" = ["icmp"],
       }
     }
     
@@ -141,14 +167,26 @@ data:
       // Keep only probe metrics for node monitoring
       rule {
         source_labels = ["__name__"]
-        regex = "probe_success|probe_duration_seconds|probe_icmp_duration_seconds.*"
+        regex = "probe_.*"
         action = "keep"
+      }
+      
+      // Set instance label from the target parameter
+      rule {
+        source_labels = ["target"]
+        target_label = "instance"
       }
       
       // Add probe type label for easy filtering
       rule {
         target_label = "probe_type"
         replacement = "node_icmp"
+      }
+      
+      // Set job name
+      rule {
+        target_label = "job"
+        replacement = "blackbox-node-probes"
       }
     }
     
