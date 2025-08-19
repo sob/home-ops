@@ -52,4 +52,52 @@ resource "grafana_rule_group" "iot_availability" {
       })
     }
   }
+
+  # Alert when Sonos speaker is unreachable
+  rule {
+    name        = "SonosDeviceDown"
+    annotations = {
+      summary     = "Sonos speaker is unreachable"  
+      description = "Sonos {{ .Labels.instance }} has been unreachable for 15 minutes"
+    }
+    labels = {
+      severity = "info"
+    }
+    for      = "15m"
+    condition = "B"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 900
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_cloud_uid
+      model          = jsonencode({
+        expr = "probe_success{probe_type=\"sonos_icmp\"}"
+        refId = "A"
+        instant = true
+      })
+    }
+    
+    data {
+      ref_id = "B"
+      
+      datasource_uid = "__expr__"
+      
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      
+      model = jsonencode({
+        type = "math"
+        expression = "$A == 0"
+        refId = "B"
+      })
+    }
+  }
 }
