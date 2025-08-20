@@ -5,7 +5,57 @@ resource "grafana_rule_group" "iot_availability" {
   folder_uid       = grafana_folder.infrastructure.uid
   interval_seconds = 60
 
-  # Alert when IoT device is unreachable
+  # Alert when Chamberlain MyQ is disconnected from UniFi
+  rule {
+    name        = "ChamberlainMyQOffline"
+    annotations = {
+      summary     = "Chamberlain MyQ garage door opener is offline"
+      description = "MyQ device has been disconnected from WiFi for 10 minutes"
+    }
+    labels = {
+      severity = "warning"
+      device   = "chamberlain-myq"
+    }
+    for      = "10m"
+    condition = "B"
+    no_data_state = "Alerting"  # Alert if no data (UniFi poller down)
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 600
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        # Monitor Chamberlain MyQ by MAC address (ethernet connected)
+        expr = "unifi_client_uptime_seconds{mac=\"64:52:99:07:a8:59\"}"
+        refId = "A"
+        instant = true
+      })
+    }
+    
+    data {
+      ref_id = "B"
+      
+      datasource_uid = "__expr__"
+      
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      
+      model = jsonencode({
+        type = "math"
+        expression = "$A == 0 OR $A < 1"  # Device offline or just connected
+        refId = "B"
+      })
+    }
+  }
+
+  # Alert when IoT device is unreachable (keeping existing for other devices)
   rule {
     name        = "IoTDeviceDown"
     annotations = {
