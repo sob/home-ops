@@ -23,7 +23,7 @@ spec:
         # IoT devices
         - hue.stonehedges.net        # Philips Hue bridge
         - lutron.stonehedges.net     # Lutron Caseta hub
-        - chamberlain.stonehedges.net # Chamberlain MyQ gateway
+        # Chamberlain MyQ monitored via UniFi Poller instead (doesn't respond to ICMP)
         # Sonos devices
         - sonos-back-deck.stonehedges.net
         - sonos-fire-pit.stonehedges.net

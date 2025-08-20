@@ -150,18 +150,6 @@ data:
       }
     }
     
-    prometheus.scrape "blackbox_iot_chamberlain" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "chamberlain.stonehedges.net"}]
-      forward_to = [prometheus.relabel.blackbox_iot.receiver]
-      scrape_interval = "60s"
-      scrape_timeout = "10s"
-      metrics_path = "/probe"
-      params = {
-        "target" = ["chamberlain.stonehedges.net"],
-        "module" = ["icmp"],
-      }
-    }
-    
     // Scrape Sonos device probes
     prometheus.scrape "blackbox_sonos_back_deck" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-back-deck.stonehedges.net"}]
