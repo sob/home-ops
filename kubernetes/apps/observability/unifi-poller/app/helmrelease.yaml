@@ -33,8 +33,12 @@ spec:
               repository: ghcr.io/unpoller/unpoller
               tag: v2.11.2
             env:
-              UP_UNIFI_DEFAULT_URL: "https://unifi.${SECRET_DOMAIN}"
-              UP_UNIFI_DEFAULT_USER: 
+              UP_UNIFI_DEFAULT_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: unifi-poller-secret
+                    key: url
+              UP_UNIFI_DEFAULT_USER:
                 valueFrom:
                   secretKeyRef:
                     name: unifi-poller-secret
