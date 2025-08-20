@@ -73,7 +73,7 @@ spec:
       - --gateway-namespace=network
       - --gateway-name=internal-gateway
     policy: sync
-    sources: ["ingress", "gateway-httproute", "crd"]
+    sources: ["service", "ingress", "gateway-httproute", "crd"]
     txtOwnerId: stone
     txtPrefix: k8s.
     domainFilters: ["${SECRET_DOMAIN}"]
