@@ -14,5 +14,5 @@ resources:
   - ./loki/ks.yaml
   - ./prometheus-operator-crds/ks.yaml
   - ./promtail/ks.yaml
-# - ./unpoller/ks.yaml
+  - ./unifi-poller/ks.yaml
   - ./exporters
