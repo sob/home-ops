@@ -29,5 +29,9 @@ wiki
 
 **/.terraform/*
 **/terraform.tfstate*
+*.tfplan
+tfplan
+*.plan
+terraform.plan
 
 .codegpt
