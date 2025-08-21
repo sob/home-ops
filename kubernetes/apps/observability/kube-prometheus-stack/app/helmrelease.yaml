@@ -73,6 +73,7 @@ spec:
           - auto-gomemlimit
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
+          - remote-write-receiver
         retention: 2h  # Short local retention since we upload to R2
         retentionSize: 10GB
         resources:
