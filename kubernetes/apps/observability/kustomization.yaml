@@ -15,4 +15,5 @@ resources:
   - ./prometheus-operator-crds/ks.yaml
   - ./promtail/ks.yaml
   - ./unifi-poller/ks.yaml
+  - ./k6-operator/ks.yaml
   - ./exporters
