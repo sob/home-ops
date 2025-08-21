@@ -34,5 +34,6 @@ spec:
           cpu: 100m
           memory: 128Mi
     
-    serviceMonitor:
-      enabled: true
+    metrics:
+      serviceMonitor:
+        enabled: true
