@@ -61,6 +61,7 @@ spec:
         hosts: ["prometheus.${SECRET_DOMAIN}"]
         pathType: Prefix
       prometheusSpec:
+        enableRemoteWriteReceiver: true
         scrapeInterval: 30s # More frequent for local monitoring
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
@@ -72,7 +73,6 @@ spec:
         enableFeatures:
           - memory-snapshot-on-shutdown
           - native-histograms
-          - remote-write-receiver
         retention: 2h  # Short local retention since we upload to R2
         retentionSize: 10GB
         resources:
