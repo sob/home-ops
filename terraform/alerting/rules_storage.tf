@@ -346,4 +346,252 @@ resource "grafana_rule_group" "ceph" {
         instant = true      })
     }
   }
+
+  rule {
+    name        = "CephMonitorDown"
+    annotations = {
+      summary     = "Ceph monitor down"
+      description = "{{ .Values.A }} Ceph monitor(s) out of quorum"
+    }
+    labels = {
+      severity = "critical"
+      depends_on_prometheus = "true"
+    }
+    for      = "5m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "(ceph_mon_quorum_status == 0) > 0"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name        = "CephTooManyPGsPerOSD"
+    annotations = {
+      summary     = "Too many PGs per OSD"
+      description = "Cluster has {{ .Values.A }} PGs per OSD (max recommended: 250)"
+    }
+    labels = {
+      severity = "warning"
+      depends_on_prometheus = "true"
+    }
+    for      = "30m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 1800
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "(sum(ceph_pool_pg_num) / count(ceph_osd_up)) > 250"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name        = "CephOSDSlowOps"
+    annotations = {
+      summary     = "Ceph cluster experiencing slow operations"
+      description = "Ceph cluster has {{ .Values.A }} slow operations detected"
+    }
+    labels = {
+      severity = "warning"
+      depends_on_prometheus = "true"
+    }
+    for      = "10m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 600
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "ceph_healthcheck_slow_ops > 0"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name        = "CephOSDNearFull"
+    annotations = {
+      summary     = "Ceph OSD near full"
+      description = "OSD {{ .Labels.ceph_daemon }} is {{ .Values.A }}% full"
+    }
+    labels = {
+      severity = "warning"
+      depends_on_prometheus = "true"
+    }
+    for      = "5m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "max by (ceph_daemon) ((ceph_osd_stat_bytes_used / ceph_osd_stat_bytes) * 100) > 80"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name        = "CephMgrDown"
+    annotations = {
+      summary     = "Ceph Manager daemon down"
+      description = "No active Ceph Manager daemon"
+    }
+    labels = {
+      severity = "critical"
+      depends_on_prometheus = "true"
+    }
+    for      = "5m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "up{job=\"rook-ceph-mgr\"} == 0"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name        = "CephClusterUtilizationHigh"
+    annotations = {
+      summary     = "Ceph cluster utilization high"
+      description = "Cluster is {{ .Values.A }}% full"
+    }
+    labels = {
+      severity = "warning"
+      depends_on_prometheus = "true"
+    }
+    for      = "5m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "(sum(ceph_cluster_total_used_bytes) / sum(ceph_cluster_total_bytes)) * 100 > 70"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name        = "CephPGsInactive"
+    annotations = {
+      summary     = "Ceph PGs inactive"
+      description = "{{ .Values.A }} PGs are inactive"
+    }
+    labels = {
+      severity = "critical"
+      depends_on_prometheus = "true"
+    }
+    for      = "5m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "sum(ceph_pg_inactive) > 0"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
+
+  rule {
+    name        = "CephPGsUnclean"
+    annotations = {
+      summary     = "Ceph PGs unclean"
+      description = "{{ .Values.A }} PGs are not clean"
+    }
+    labels = {
+      severity = "warning"
+      depends_on_prometheus = "true"
+    }
+    for      = "15m"
+    condition = "A"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 900
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "sum(ceph_pg_total - ceph_pg_clean) > 0"
+        refId = "A"
+        instant = true
+      })
+    }
+  }
 }
