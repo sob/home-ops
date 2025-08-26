@@ -13,7 +13,7 @@ resource "grafana_rule_group" "iot_availability" {
       description = "MyQ device has been disconnected from WiFi for 10 minutes"
     }
     labels = {
-      severity = "warning"
+      severity = "critical"
       device   = "chamberlain-myq"
     }
     for      = "10m"
@@ -31,7 +31,7 @@ resource "grafana_rule_group" "iot_availability" {
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         # Monitor Chamberlain MyQ by MAC address (ethernet connected)
-        expr = "unifi_client_uptime_seconds{mac=\"64:52:99:07:a8:59\"}"
+        expr = "unpoller_client_uptime_seconds{mac=\"64:52:99:07:a8:59\"}"
         refId = "A"
         instant = true
       })
@@ -49,7 +49,7 @@ resource "grafana_rule_group" "iot_availability" {
       
       model = jsonencode({
         type = "math"
-        expression = "$A == 0 OR $A < 1"  # Device offline or just connected
+        expression = "$A < 1"  # Device offline (no metric or value is 0)
         refId = "B"
       })
     }
