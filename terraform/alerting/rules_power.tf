@@ -197,7 +197,7 @@ resource "grafana_rule_group" "pdu" {
     name        = "PDUHighLoad"
     annotations = {
       summary     = "PDU high load"
-      description = "PDU rack-pdu.stonehedges.net load is above 80% (current: $${values.A}A)"
+      description = "PDU rack-pdu.stonehedges.net load is above 90% (current: $${values.A}dA = $${$${values.A}/10}A)"
     }
     labels = {
       severity = "warning"
@@ -217,7 +217,7 @@ resource "grafana_rule_group" "pdu" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "max by (instance) (ePDU2BankStatusLoad) > 13.5"  # 15A PDU, alert at 90% (13.5A)
+        expr = "(ePDU2BankStatusLoad / 10) > 10.8"  # 12A PDU, alert at 90% (10.8A). Metric is in deciamps, divide by 10
         refId = "A"
         instant = true
       })
