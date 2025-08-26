@@ -19,8 +19,8 @@ resource "grafana_rule_group" "prometheus_connectivity" {
       datasource   = "prometheus-metal"
       inhibit_alerts = "prometheus_dependent"  # Tag to identify this inhibits other alerts
     }
-    for           = "1m"  # Quick detection
-    condition     = "A"
+    for           = "3m"  # Give it more time to avoid transient issues
+    condition     = "B"
     no_data_state = "Alerting"  # Alert when no data (means Prometheus is down)
     exec_err_state = "Alerting"  # Alert on query errors too
 
@@ -40,6 +40,24 @@ resource "grafana_rule_group" "prometheus_connectivity" {
         expr    = "vector(1)"
         refId   = "A"
         instant = true
+      })
+    }
+    
+    # Check if Prometheus is DOWN (invert the result)
+    data {
+      ref_id = "B"
+      
+      datasource_uid = "__expr__"
+      
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      
+      model = jsonencode({
+        type = "math"
+        expression = "$A != 1"  # Alert when vector(1) doesn't return 1
+        refId = "B"
       })
     }
   }
