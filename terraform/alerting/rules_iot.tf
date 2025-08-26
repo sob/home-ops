@@ -111,7 +111,8 @@ resource "grafana_rule_group" "iot_availability" {
       description = "Sonos {{ .Labels.instance }} has been unreachable for 15 minutes"
     }
     labels = {
-      severity = "info"
+      severity = "warning"
+      instance = "{{ .Labels.instance }}"
     }
     for      = "15m"
     condition = "B"
