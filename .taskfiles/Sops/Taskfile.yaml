@@ -14,16 +14,16 @@ tasks:
     cmds:
       - task: .decrypt-file
         vars:
-          file: "{{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.secret.sops.yaml"
-      - cat "{{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.secret.sops.yaml"
+          file: "{{.KUBERNETES_DIR}}/flux/components/sops/cluster-secrets.secret.sops.yaml"
+      - cat "{{.KUBERNETES_DIR}}/flux/components/sops/cluster-secrets.secret.sops.yaml"
 
   lock:
     desc: Encrypt cluster-secrtes.sops.yaml file
     cmds:
       - task: .encrypt-file
         vars:
-          file: "{{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.secret.sops.yaml"
-      - cat "{{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.secret.sops.yaml"
+          file: "{{.KUBERNETES_DIR}}/flux/components/sops/cluster-secrets.secret.sops.yaml"
+      - cat "{{.KUBERNETES_DIR}}/flux/components/sops/cluster-secrets.secret.sops.yaml"
 
   decrypt:
     desc: Decrypt all Kubernetes SOPS secrets
