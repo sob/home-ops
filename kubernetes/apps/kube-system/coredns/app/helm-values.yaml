@@ -46,6 +46,13 @@ servers:
     plugins:
       - name: forward
         parameters: stonehedges.net 10.1.0.1
+  - zones:
+      - zone: 56kbps.io
+        scheme: dns://
+    port: 53
+    plugins:
+      - name: forward
+        parameters: 56kbps.io 10.1.0.1
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
