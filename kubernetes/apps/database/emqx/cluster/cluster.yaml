@@ -72,6 +72,5 @@ spec:
     metadata:
       annotations:
         coredns.io/hostname: "emqx.${SECRET_DOMAIN}"
-        io.cilium/lb-ipam-ips: "${SECRET_VIP_EMQX}"
     spec:
       type: LoadBalancer
