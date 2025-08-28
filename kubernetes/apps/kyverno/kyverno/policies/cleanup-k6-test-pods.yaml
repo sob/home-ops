@@ -1,7 +1,7 @@
 ---
 # Clean up succeeded k6 test initializer and starter pods after 1 minute
 apiVersion: kyverno.io/v2
-kind: CleanupPolicy
+kind: ClusterCleanupPolicy
 metadata:
   name: k6-initializer-starter-cleanup
 spec:
@@ -11,6 +11,8 @@ spec:
       - resources:
           kinds:
             - Pod
+          namespaces:
+            - observability
           selector:
             matchExpressions:
               - key: app.kubernetes.io/component
@@ -27,7 +29,7 @@ spec:
 ---
 # Clean up succeeded k6 runner pods after 1 hour
 apiVersion: kyverno.io/v2
-kind: CleanupPolicy
+kind: ClusterCleanupPolicy
 metadata:
   name: k6-runner-cleanup
 spec:
@@ -37,6 +39,8 @@ spec:
       - resources:
           kinds:
             - Pod
+          namespaces:
+            - observability
           selector:
             matchLabels:
               app.kubernetes.io/component: runner
@@ -51,7 +55,7 @@ spec:
 ---
 # Clean up failed k6 pods after 1 hour for debugging
 apiVersion: kyverno.io/v2
-kind: CleanupPolicy
+kind: ClusterCleanupPolicy
 metadata:
   name: k6-failed-cleanup
 spec:
@@ -61,6 +65,8 @@ spec:
       - resources:
           kinds:
             - Pod
+          namespaces:
+            - observability
           selector:
             matchExpressions:
               - key: app.kubernetes.io/name
