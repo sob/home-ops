@@ -70,9 +70,9 @@ spec:
                 operator: Exists
   conditions:
     all:
-      - key: "{{ target.status.failed }}"
-        operator: GreaterThan
-        value: 0
+      - key: "{{ contains(target.status.conditions[?type=='Failed'].status[], 'True') }}"
+        operator: Equals
+        value: true
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
         operator: GreaterThan
         value: 2h
