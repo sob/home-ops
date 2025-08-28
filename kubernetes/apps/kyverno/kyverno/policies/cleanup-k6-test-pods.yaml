@@ -82,3 +82,29 @@ spec:
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
         operator: GreaterThan
         value: 30m
+---
+# Clean up k6 scheduler pods (CronJob pods that create TestRuns)
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-scheduler-cleanup
+spec:
+  schedule: "*/1 * * * *"  # Run every minute
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+          namespaces:
+            - observability
+          selector:
+            matchLabels:
+              app: k6-scheduler
+  conditions:
+    all:
+      - key: "{{ target.status.phase == 'Succeeded' || target.status.phase == 'Failed' || target.status.phase == 'Completed' }}"
+        operator: Equals
+        value: true
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 5m
