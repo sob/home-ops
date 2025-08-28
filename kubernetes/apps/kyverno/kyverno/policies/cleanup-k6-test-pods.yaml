@@ -4,7 +4,6 @@ apiVersion: kyverno.io/v2
 kind: CleanupPolicy
 metadata:
   name: k6-initializer-starter-cleanup
-  namespace: observability
 spec:
   schedule: "*/1 * * * *"  # Run every minute
   match:
@@ -12,8 +11,6 @@ spec:
       - resources:
           kinds:
             - Pod
-          namespaces:
-            - observability
           selector:
             matchExpressions:
               - key: app.kubernetes.io/component
@@ -33,7 +30,6 @@ apiVersion: kyverno.io/v2
 kind: CleanupPolicy
 metadata:
   name: k6-runner-cleanup
-  namespace: observability
 spec:
   schedule: "*/2 * * * *"  # Run every 2 minutes
   match:
@@ -41,8 +37,6 @@ spec:
       - resources:
           kinds:
             - Pod
-          namespaces:
-            - observability
           selector:
             matchLabels:
               app.kubernetes.io/component: runner
@@ -60,7 +54,6 @@ apiVersion: kyverno.io/v2
 kind: CleanupPolicy
 metadata:
   name: k6-failed-cleanup
-  namespace: observability
 spec:
   schedule: "*/2 * * * *"  # Run every 2 minutes
   match:
@@ -68,8 +61,6 @@ spec:
       - resources:
           kinds:
             - Pod
-          namespaces:
-            - observability
           selector:
             matchExpressions:
               - key: app.kubernetes.io/name
