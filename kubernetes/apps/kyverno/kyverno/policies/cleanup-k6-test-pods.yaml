@@ -28,13 +28,13 @@ spec:
         operator: Equals
         value: true
 ---
-# Clean up succeeded k6 runner pods after 1 hour
+# Clean up succeeded k6 runner pods after 10 minutes
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
   name: k6-runner-cleanup
 spec:
-  schedule: "*/2 * * * *"  # Run every 2 minutes
+  schedule: "*/1 * * * *"  # Run every minute
   match:
     any:
       - resources:
@@ -52,12 +52,12 @@ spec:
         value: Succeeded
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
         operator: GreaterThan
-        value: 1h
+        value: 10m
       - key: "{{ !contains(target.metadata.name, 'initializer') && !contains(target.metadata.name, 'starter') }}"
         operator: Equals
         value: true
 ---
-# Clean up failed k6 pods after 1 hour for debugging
+# Clean up failed k6 pods after 30 minutes for debugging
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
@@ -81,4 +81,4 @@ spec:
         value: Failed
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
         operator: GreaterThan
-        value: 1h
+        value: 30m
