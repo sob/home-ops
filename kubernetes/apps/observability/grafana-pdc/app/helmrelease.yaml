@@ -50,3 +50,18 @@ spec:
                     values:
                       - pdc-agent
               topologyKey: kubernetes.io/hostname
+    
+    # Security context to allow SSH tunnel creation
+    podSecurityContext:
+      runAsUser: 30000
+      runAsGroup: 30000
+      fsGroup: 30000
+    
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        add:
+          - NET_BIND_SERVICE
+        drop:
+          - ALL
+      runAsNonRoot: true
