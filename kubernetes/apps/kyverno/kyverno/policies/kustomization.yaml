@@ -6,3 +6,4 @@ resources:
   - ./add-authentik-ingress-annotations.yaml
   - ./add-reflector-cert-annotations.yaml
   - ./cleanup-k6-test-pods.yaml
+  - ./cleanup-k6-testruns.yaml

@@ -1,0 +1,61 @@
+---
+# Clean up finished TestRun resources after 1 hour
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-testrun-cleanup
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
+    any:
+      - resources:
+          kinds:
+            - TestRun
+          namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+  conditions:
+    all:
+      - key: "{{ target.status.stage }}"
+        operator: Equals
+        value: finished
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 1h
+---
+# Clean up old jobs created by k6 tests
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-jobs-cleanup
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
+    any:
+      - resources:
+          kinds:
+            - Job
+          namespaces:
+            - observability
+          selector:
+            matchExpressions:
+              - key: k6_cr
+                operator: Exists
+  conditions:
+    any:
+      # Cleanup succeeded jobs after 30 minutes
+      - all:
+        - key: "{{ target.status.succeeded }}"
+          operator: GreaterThan
+          value: 0
+        - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+          operator: GreaterThan
+          value: 30m
+      # Cleanup failed jobs after 2 hours (keep longer for debugging)
+      - all:
+        - key: "{{ target.status.failed }}"
+          operator: GreaterThan
+          value: 0
+        - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+          operator: GreaterThan
+          value: 2h
