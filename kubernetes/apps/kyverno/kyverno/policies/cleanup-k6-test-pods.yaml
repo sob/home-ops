@@ -17,17 +17,16 @@ spec:
             matchLabels:
               app: k6
   conditions:
-    any:
-      - all:
-        - key: "{{ target.status.phase }}"
-          operator: Equals
-          value: Succeeded
-        - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-          operator: GreaterThan
-          value: 1m
-        - key: "{{ contains(target.metadata.name, 'initializer') || contains(target.metadata.name, 'starter') }}"
-          operator: Equals
-          value: true
+    all:
+      - key: "{{ target.status.phase }}"
+        operator: Equals
+        value: Succeeded
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 1m
+      - key: "{{ contains(target.metadata.name, 'initializer') || contains(target.metadata.name, 'starter') }}"
+        operator: Equals
+        value: true
 ---
 # Clean up succeeded k6 runner pods after 1 hour
 apiVersion: kyverno.io/v2
