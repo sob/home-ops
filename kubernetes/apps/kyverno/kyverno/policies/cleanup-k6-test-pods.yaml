@@ -1,9 +1,9 @@
 ---
-# Clean up succeeded k6 test initializer and starter pods after 1 minute
+# Clean up all succeeded k6 test pods after 1 minute
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
-  name: k6-initializer-starter-cleanup
+  name: k6-succeeded-cleanup
 spec:
   schedule: "*/1 * * * *"  # Run every minute
   match:
@@ -24,38 +24,6 @@ spec:
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
         operator: GreaterThan
         value: 1m
-      - key: "{{ contains(target.metadata.name, 'initializer') || contains(target.metadata.name, 'starter') }}"
-        operator: Equals
-        value: true
----
-# Clean up succeeded k6 runner pods after 10 minutes
-apiVersion: kyverno.io/v2
-kind: ClusterCleanupPolicy
-metadata:
-  name: k6-runner-cleanup
-spec:
-  schedule: "*/1 * * * *"  # Run every minute
-  match:
-    any:
-      - resources:
-          kinds:
-            - Pod
-          namespaces:
-            - observability
-          selector:
-            matchLabels:
-              app: k6
-  conditions:
-    all:
-      - key: "{{ target.status.phase }}"
-        operator: Equals
-        value: Succeeded
-      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-        operator: GreaterThan
-        value: 10m
-      - key: "{{ !contains(target.metadata.name, 'initializer') && !contains(target.metadata.name, 'starter') }}"
-        operator: Equals
-        value: true
 ---
 # Clean up failed k6 pods after 30 minutes for debugging
 apiVersion: kyverno.io/v2
