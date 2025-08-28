@@ -57,5 +57,11 @@ spec:
           - apiGroups: [""]
             resources: ["pods"]
             verbs: ["get", "list", "delete"]
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
       serviceMonitor:
         enabled: true
