@@ -14,18 +14,20 @@ spec:
           namespaces:
             - observability
           selector:
-            matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values: ["initializer", "starter"]
+            matchLabels:
+              app: k6
   conditions:
-    all:
-      - key: "{{ target.status.phase }}"
-        operator: Equals
-        value: Succeeded
-      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-        operator: GreaterThan
-        value: 1m
+    any:
+      - all:
+        - key: "{{ target.status.phase }}"
+          operator: Equals
+          value: Succeeded
+        - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+          operator: GreaterThan
+          value: 1m
+        - key: "{{ contains(target.metadata.name, 'initializer') || contains(target.metadata.name, 'starter') }}"
+          operator: Equals
+          value: true
 ---
 # Clean up succeeded k6 runner pods after 1 hour
 apiVersion: kyverno.io/v2
@@ -43,7 +45,7 @@ spec:
             - observability
           selector:
             matchLabels:
-              app.kubernetes.io/component: runner
+              app: k6
   conditions:
     all:
       - key: "{{ target.status.phase }}"
@@ -52,6 +54,9 @@ spec:
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
         operator: GreaterThan
         value: 1h
+      - key: "{{ !contains(target.metadata.name, 'initializer') && !contains(target.metadata.name, 'starter') }}"
+        operator: Equals
+        value: true
 ---
 # Clean up failed k6 pods after 1 hour for debugging
 apiVersion: kyverno.io/v2
@@ -68,10 +73,8 @@ spec:
           namespaces:
             - observability
           selector:
-            matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values: ["k6-test"]
+            matchLabels:
+              app: k6
   conditions:
     all:
       - key: "{{ target.status.phase }}"
