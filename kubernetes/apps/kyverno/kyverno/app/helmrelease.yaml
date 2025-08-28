@@ -52,5 +52,10 @@ spec:
       serviceMonitor:
         enabled: true
     cleanupController:
+      clusterRole:
+        extraResources:
+          - apiGroups: [""]
+            resources: ["pods"]
+            verbs: ["get", "list", "delete"]
       serviceMonitor:
         enabled: true
