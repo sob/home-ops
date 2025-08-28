@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/kyverno/main/schemas/json/cleanuppolicy-kyverno-v1.json
+apiVersion: kyverno.io/v1
+kind: CleanupPolicy
+metadata:
+  name: k6-test-pods-cleanup
+  namespace: observability
+spec:
+  schedule: "*/2 * * * *"  # Run every 2 minutes
+  match:
+    any:
+      # Clean up succeeded initializer and starter pods after 1 minute
+      - resources:
+          kinds:
+            - v1/Pod
+          namespaces:
+            - observability
+          selector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values: ["initializer", "starter"]
+      # Clean up succeeded runner pods after 1 hour
+      - resources:
+          kinds:
+            - v1/Pod
+          namespaces:
+            - observability
+          selector:
+            matchLabels:
+              app.kubernetes.io/component: runner
+  conditions:
+    any:
+      - key: "{{ pod.status.phase }}"
+        operator: Equals
+        value: Succeeded
+        duration: 1m  # For initializer/starter pods
+      - key: "{{ pod.status.phase }}"
+        operator: Equals
+        value: Succeeded
+        duration: 1h  # For runner pods
+      - key: "{{ pod.status.phase }}"
+        operator: Equals
+        value: Failed
+        duration: 1h  # Keep failed pods for debugging
+  cleanup:
+    ttl: 0s  # Delete immediately when conditions are met
+---
+# Keep only last 3 failed runner pods per test
+apiVersion: kyverno.io/v1
+kind: CleanupPolicy
+metadata:
+  name: k6-failed-pods-limit
+  namespace: observability
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
+    any:
+      - resources:
+          kinds:
+            - v1/Pod
+          namespaces:
+            - observability
+          selector:
+            matchLabels:
+              app.kubernetes.io/component: runner
+  conditions:
+    any:
+      - key: "{{ pod.status.phase }}"
+        operator: Equals
+        value: Failed
+  cleanup:
+    limit: 3  # Keep only 3 most recent
+    order: CreationTimestamp
+    direction: Descending  # Keep newest
