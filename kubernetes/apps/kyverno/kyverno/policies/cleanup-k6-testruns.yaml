@@ -40,7 +40,7 @@ spec:
               kubernetes.io/metadata.name: observability
   conditions:
     all:
-      - key: "{{ target.status.stage in ['created', 'initialization'] }}"
+      - key: "{{ target.status.stage == 'created' || target.status.stage == 'initialization' }}"
         operator: Equals
         value: true
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
