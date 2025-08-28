@@ -57,6 +57,12 @@ spec:
           - apiGroups: [""]
             resources: ["pods"]
             verbs: ["get", "list", "delete"]
+          - apiGroups: ["batch"]
+            resources: ["jobs"]
+            verbs: ["get", "list", "delete"]
+          - apiGroups: ["k6.io"]
+            resources: ["testruns"]
+            verbs: ["get", "list", "delete"]
       resources:
         requests:
           cpu: 100m
