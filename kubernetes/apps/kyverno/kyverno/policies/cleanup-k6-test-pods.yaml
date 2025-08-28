@@ -1,5 +1,5 @@
 ---
-# Clean up all succeeded k6 test pods after 1 minute
+# Clean up all succeeded k6 test and scheduler pods after 1 minute
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
@@ -16,6 +16,14 @@ spec:
           selector:
             matchLabels:
               app: k6
+      - resources:
+          kinds:
+            - Pod
+          namespaces:
+            - observability
+          selector:
+            matchLabels:
+              app: k6-scheduler
   conditions:
     all:
       - key: "{{ target.status.phase }}"
@@ -25,7 +33,7 @@ spec:
         operator: GreaterThan
         value: 1m
 ---
-# Clean up failed k6 pods after 30 minutes for debugging
+# Clean up failed k6 test and scheduler pods after 30 minutes for debugging
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
@@ -42,24 +50,6 @@ spec:
           selector:
             matchLabels:
               app: k6
-  conditions:
-    all:
-      - key: "{{ target.status.phase }}"
-        operator: Equals
-        value: Failed
-      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-        operator: GreaterThan
-        value: 30m
----
-# Clean up k6 scheduler pods (CronJob pods that create TestRuns)
-apiVersion: kyverno.io/v2
-kind: ClusterCleanupPolicy
-metadata:
-  name: k6-scheduler-cleanup
-spec:
-  schedule: "*/1 * * * *"  # Run every minute
-  match:
-    any:
       - resources:
           kinds:
             - Pod
@@ -70,9 +60,9 @@ spec:
               app: k6-scheduler
   conditions:
     all:
-      - key: "{{ target.status.phase == 'Succeeded' || target.status.phase == 'Failed' || target.status.phase == 'Completed' }}"
+      - key: "{{ target.status.phase }}"
         operator: Equals
-        value: true
+        value: Failed
       - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
         operator: GreaterThan
-        value: 5m
+        value: 30m
