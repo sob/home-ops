@@ -1,0 +1,35 @@
+# Example Terraform variables for synthetic monitoring
+# Copy this file to terraform.tfvars or terraform.auto.tfvars and customize as needed
+
+# Override domain from 1Password if needed (for testing)
+# domain = "example.com"
+
+# Override k6 image version if needed
+# k6_version = "0.47.0"
+
+# Override Prometheus remote write URL if different from default
+# prometheus_remote_write_url = "http://prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+
+# Override specific test configurations
+# k6_tests = {
+#   plex-internal = {
+#     schedule = "*/3 * * * *"  # Run more frequently
+#     script   = file("${path.module}/tests/custom-plex.js")  # Use custom script
+#     env_vars = {
+#       CUSTOM_VAR = "value"
+#     }
+#     secret_env_vars = {}
+#     resources = {
+#       memory_request = "128Mi"
+#       memory_limit   = "256Mi"
+#       cpu_request    = "100m"
+#       cpu_limit      = "200m"
+#     }
+#   }
+# }
+
+# 1Password configuration (usually set via environment variables)
+# onepassword_account = "my-account"  # Usually from TF_VAR_onepassword_account
+# onepassword_vault = "STONEHEDGES"    # Default vault name
+# onepassword_item = "k6"              # Item containing domain and other k6 secrets
+# onepassword_grafana_item = "grafana-cloud"  # Item containing Grafana Cloud credentials

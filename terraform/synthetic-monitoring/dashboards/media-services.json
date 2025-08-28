@@ -1,0 +1,574 @@
+{
+  "title": "Media Services - Synthetic Monitoring", 
+  "uid": "media-services-synthetic",
+  "description": "K6 synthetic monitoring dashboard for media services",
+  "tags": ["k6", "synthetic", "media", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 30,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER"
+        }
+      },
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER"
+        },
+        "query": "label_values(k6_checks_rate, service)",
+        "definition": "label_values(k6_checks_rate, service)",
+        "current": {
+          "selected": true,
+          "text": ["All"],
+          "value": ["$__all"]
+        },
+        "multi": true,
+        "includeAll": true,
+        "refresh": 1,
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Overview",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Overall Check Success Rate",
+      "gridPos": { "x": 0, "y": 1, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "avg(avg_over_time(k6_checks_rate{service=~\"$service\"}[$__range])) * 100",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 95, "color": "yellow" },
+              { "value": 99, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Services Tested",
+      "gridPos": { "x": 4, "y": 1, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "count(count by (service) (k6_checks_rate{service=~\"$service\"}))",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 5, "color": "yellow" },
+              { "value": 10, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Avg Response Time (5m)",
+      "gridPos": { "x": 8, "y": 1, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds{service=~\"$service\"}[5m]))) * 1000",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 1000, "color": "yellow" },
+              { "value": 3000, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Failed Requests",
+      "gridPos": { "x": 12, "y": 1, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(increase(k6_http_reqs_total{service=~\"$service\", status=~\"[45]..\"}[$__range]))",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 1, "color": "yellow" },
+              { "value": 10, "color": "red" }
+            ]
+          },
+          "links": [
+            {
+              "title": "View Failed Requests Details",
+              "targetBlank": true,
+              "url": "/explore?orgId=1&left=%7B%22datasource%22:%22PROMETHEUS_DATASOURCE_UID_PLACEHOLDER%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22sum%20by%20(service,status,endpoint_type,name)%20(increase(k6_http_reqs_total%7Bservice%3D~%5C%22${service:regex}%5C%22,%20status%3D~%5C%22%5B45%5D..%5C%22%7D%5B${__range}%5D))%22,%22format%22:%22table%22,%22instant%22:true%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Test Iterations",
+      "gridPos": { "x": 16, "y": 1, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(increase(k6_iterations_total{job_name=~\"(jellyfin|jellyseerr|lidarr|overseerr|plex-external|plex-internal|prowlarr|radarr|readarr|sabnzbd|sonarr|tautulli)-.*\"}[$__range]))",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Active Test Runs",
+      "gridPos": { "x": 20, "y": 1, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "count(count by (job_name) (rate(k6_data_sent_bytes_total[1m]) > 0)) OR vector(0)",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "text" },
+              { "value": 1, "color": "green" },
+              { "value": 5, "color": "yellow" },
+              { "value": 10, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Service Availability",
+      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 }
+    },
+    {
+      "id": 11,
+      "type": "bargauge",
+      "title": "Service Check Success Rate (Last Test)",
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 },
+      "targets": [
+        {
+          "expr": "avg by (service) (k6_checks_rate{service=~\"$service\"}) * 100",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" },
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 90, "color": "orange" },
+              { "value": 95, "color": "yellow" },
+              { "value": 99, "color": "green" }
+            ]
+          }
+        }
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Response Times",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 1 }
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Service Response Times",
+      "gridPos": { "x": 0, "y": 13, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (service) (rate(k6_http_req_duration_seconds{service=~\"$service\"}[5m]))) * 1000",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" },
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "min": 0,
+          "custom": {
+            "spanNulls": 900000,
+            "lineInterpolation": "linear",
+            "showPoints": "always",
+            "pointSize": 4
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 22,
+      "type": "heatmap",
+      "title": "Response Time Distribution",
+      "gridPos": { "x": 12, "y": 13, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (service) (rate(k6_http_req_duration_seconds{service=~\"$service\"}[5m]))) * 1000",
+          "format": "heatmap",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "mode": "scheme",
+          "scheme": "Spectral"
+        }
+      }
+    },
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Check Details",
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 1 }
+    },
+    {
+      "id": 31,
+      "type": "table",
+      "title": "Service Response Times (Latest)",
+      "gridPos": { "x": 0, "y": 22, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (service) (rate(k6_http_req_duration_seconds{service=~\"$service\"}[15m]))) * 1000",
+          "format": "table",
+          "instant": true,
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" },
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (service) (rate(k6_http_req_duration_seconds{service=~\"$service\"}[15m]))) * 1000",
+          "format": "table",
+          "instant": true,
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" },
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (service) (rate(k6_http_req_duration_seconds{service=~\"$service\"}[15m]))) * 1000",
+          "format": "table",
+          "instant": true,
+          "refId": "C",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" },
+          "legendFormat": "p99"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "service": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3
+            },
+            "renameByName": {
+              "service": "Service",
+              "Value #A": "Median (ms)",
+              "Value #B": "P95 (ms)",
+              "Value #C": "P99 (ms)"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "unit": "ms",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Service" },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byRegexp", "options": "/.*ms.*/" },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "value": 0, "color": "green" },
+                    { "value": 500, "color": "yellow" },
+                    { "value": 1000, "color": "orange" },
+                    { "value": 3000, "color": "red" }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 32,
+      "type": "timeseries",
+      "title": "HTTP Request Failure Rate",
+      "gridPos": { "x": 12, "y": 22, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum by (service) (rate(k6_http_reqs_total{service=~\"$service\", status=~\"[45]..\"}[15m])) / sum by (service) (rate(k6_http_reqs_total{service=~\"$service\"}[15m])) * 100",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" },
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "spanNulls": 900000,
+            "lineInterpolation": "linear",
+            "showPoints": "always",
+            "pointSize": 4,
+            "fillOpacity": 10
+          }
+        }
+      }
+    },
+    {
+      "id": 40,
+      "type": "row",
+      "title": "Test Execution",
+      "gridPos": { "x": 0, "y": 28, "w": 24, "h": 1 }
+    },
+    {
+      "id": 41,
+      "type": "timeseries",
+      "title": "Test Iterations per Service",
+      "gridPos": { "x": 0, "y": 29, "w": 24, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum by (job_name) (rate(k6_iterations_total{job_name=~\"(jellyfin|jellyseerr|lidarr|overseerr|plex-external|plex-internal|prowlarr|radarr|readarr|sabnzbd|sonarr|tautulli)-.*\"}[15m]))",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" },
+          "legendFormat": "{{job_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "custom": {
+            "spanNulls": 900000,
+            "lineInterpolation": "linear",
+            "showPoints": "always",
+            "pointSize": 4
+          }
+        }
+      }
+    },
+    {
+      "id": 42,
+      "type": "table",
+      "title": "Failed Request Details",
+      "gridPos": { "x": 0, "y": 35, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "topk(20, sum by (service, status, endpoint_type, name) (increase(k6_http_reqs_total{service=~\"$service\", status=~\"[45]..\"}[$__range])) > 0)",
+          "format": "table",
+          "instant": true,
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "PROMETHEUS_DATASOURCE_UID_PLACEHOLDER" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "400": { "text": "400 Bad Request", "color": "orange" },
+                      "401": { "text": "401 Unauthorized", "color": "orange" },
+                      "403": { "text": "403 Forbidden", "color": "orange" },
+                      "404": { "text": "404 Not Found", "color": "yellow" },
+                      "500": { "text": "500 Internal Error", "color": "red" },
+                      "502": { "text": "502 Bad Gateway", "color": "red" },
+                      "503": { "text": "503 Unavailable", "color": "red" }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Value" },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Count"
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "gradient-gauge"
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "service": 0,
+              "status": 1,
+              "endpoint_type": 2,
+              "name": 3,
+              "Value": 4
+            },
+            "renameByName": {
+              "service": "Service",
+              "status": "Status",
+              "endpoint_type": "Endpoint Type",
+              "name": "URL",
+              "Value": "Failed Count"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

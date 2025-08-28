@@ -1,0 +1,12 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.plan
+
+# Local variable overrides
+terraform.auto.tfvars
+*.auto.tfvars
+
+# Keep only the example file
+!terraform.tfvars.example
