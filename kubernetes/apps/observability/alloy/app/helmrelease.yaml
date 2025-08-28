@@ -38,11 +38,11 @@ spec:
       
       resources:
         requests:
-          cpu: 50m
-          memory: 128Mi
+          cpu: 100m
+          memory: 512Mi
         limits:
-          memory: 256Mi
-          cpu: 200m
+          memory: 1Gi
+          cpu: 500m
     
     controller:
       type: deployment
