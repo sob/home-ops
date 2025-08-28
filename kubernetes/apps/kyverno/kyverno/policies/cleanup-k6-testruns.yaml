@@ -23,11 +23,11 @@ spec:
         operator: GreaterThan
         value: 1h
 ---
-# Clean up old jobs created by k6 tests
+# Clean up succeeded jobs created by k6 tests after 30 minutes
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
-  name: k6-jobs-cleanup
+  name: k6-jobs-cleanup-succeeded
 spec:
   schedule: "*/5 * * * *"  # Run every 5 minutes
   match:
@@ -42,20 +42,37 @@ spec:
               - key: k6_cr
                 operator: Exists
   conditions:
+    all:
+      - key: "{{ target.status.succeeded }}"
+        operator: GreaterThan
+        value: 0
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 30m
+---
+# Clean up failed jobs created by k6 tests after 2 hours
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-jobs-cleanup-failed
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
     any:
-      # Cleanup succeeded jobs after 30 minutes
-      - all:
-        - key: "{{ target.status.succeeded }}"
-          operator: GreaterThan
-          value: 0
-        - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-          operator: GreaterThan
-          value: 30m
-      # Cleanup failed jobs after 2 hours (keep longer for debugging)
-      - all:
-        - key: "{{ target.status.failed }}"
-          operator: GreaterThan
-          value: 0
-        - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-          operator: GreaterThan
-          value: 2h
+      - resources:
+          kinds:
+            - Job
+          namespaces:
+            - observability
+          selector:
+            matchExpressions:
+              - key: k6_cr
+                operator: Exists
+  conditions:
+    all:
+      - key: "{{ target.status.failed }}"
+        operator: GreaterThan
+        value: 0
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 2h
