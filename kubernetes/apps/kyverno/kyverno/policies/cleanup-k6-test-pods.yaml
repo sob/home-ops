@@ -1,6 +1,6 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/kyverno/main/schemas/json/cleanuppolicy-kyverno-v1.json
-apiVersion: kyverno.io/v1
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/kyverno/main/schemas/json/cleanuppolicy-kyverno-v2.json
+apiVersion: kyverno.io/v2
 kind: CleanupPolicy
 metadata:
   name: k6-test-pods-cleanup
@@ -47,7 +47,7 @@ spec:
     ttl: 0s  # Delete immediately when conditions are met
 ---
 # Keep only last 3 failed runner pods per test
-apiVersion: kyverno.io/v1
+apiVersion: kyverno.io/v2
 kind: CleanupPolicy
 metadata:
   name: k6-failed-pods-limit
