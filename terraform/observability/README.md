@@ -1,6 +1,6 @@
-# Synthetic Monitoring with K6
+# Observability
 
-This Terraform module deploys K6-based synthetic monitoring for media services in the Kubernetes cluster.
+This Terraform module manages observability infrastructure including synthetic monitoring with K6 and application performance dashboards for media services in the Kubernetes cluster.
 
 ## Features
 
@@ -183,18 +183,20 @@ locals {
 ## File Structure
 
 ```
-terraform/synthetic-monitoring/
+terraform/observability/
 ├── .gitignore                 # Excludes sensitive tfvars
 ├── terraform.tfvars.example   # Configuration template
 ├── variables.tf               # Variable definitions
 ├── main.tf                    # Core k6 infrastructure
 ├── tests.tf                   # Service test configurations
-├── dashboard.tf               # Grafana dashboard
+├── dashboard_synthetic.tf     # Synthetic monitoring dashboard
+├── dashboard_media.tf         # Media application dashboards
 ├── externalsecret.tf          # Kubernetes secrets
 ├── tests/                     # Test scripts
 │   ├── base-media.js         # Generic service test
 │   ├── plex-internal.js      # Plex internal test
 │   └── plex-external.js      # Plex external test
 └── dashboards/
-    └── media-services.json   # Dashboard definition
+    ├── synthetic.json         # Synthetic monitoring dashboard
+    └── media-services.json   # Media services dashboard
 ```

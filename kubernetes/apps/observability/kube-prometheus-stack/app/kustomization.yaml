@@ -5,5 +5,7 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ./prometheusrule.yaml
+  - ./rules/dockerhub.yaml
+  - ./rules/container-health.yaml
+  - ./rules/media-services.yaml
 #  - ./scrapeconfig.yaml

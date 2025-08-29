@@ -1,0 +1,96 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: media-services-metrics
+  namespace: observability
+spec:
+  groups:
+    - name: media.services.cpu
+      interval: 30s
+      rules:
+        # CPU usage in millicores for each service
+        - record: media:cpu_usage_millicores
+          expr: |
+            round(
+              sum by (pod, namespace) (
+                rate(container_cpu_usage_seconds_total{
+                  namespace="default",
+                  pod=~"jellyfin.*|jellyseerr.*|lidarr.*|overseerr.*|plex.*|prowlarr.*|radarr.*|readarr.*|sabnzbd.*|sonarr.*|tautulli.*",
+                  container!="",
+                  container!="POD"
+                }[5m])
+              ) * 1000
+            )
+          labels:
+            unit: "millicores"
+
+        # CPU limits in millicores for each service
+        - record: media:cpu_limit_millicores
+          expr: |
+            sum by (pod, namespace) (
+              kube_pod_container_resource_limits{
+                namespace="default",
+                pod=~"jellyfin.*|jellyseerr.*|lidarr.*|overseerr.*|plex.*|prowlarr.*|radarr.*|readarr.*|sabnzbd.*|sonarr.*|tautulli.*",
+                resource="cpu",
+                unit="core"
+              } * 1000
+            )
+          labels:
+            unit: "millicores"
+
+        # CPU usage percentage
+        - record: media:cpu_usage_percent
+          expr: |
+            round(
+              (media:cpu_usage_millicores / media:cpu_limit_millicores) * 100,
+              0.1
+            )
+          labels:
+            unit: "percent"
+
+    - name: media.services.memory
+      interval: 30s
+      rules:
+        # Memory usage in MB
+        - record: media:memory_usage_mb
+          expr: |
+            round(
+              sum by (pod, namespace) (
+                container_memory_working_set_bytes{
+                  namespace="default",
+                  pod=~"jellyfin.*|jellyseerr.*|lidarr.*|overseerr.*|plex.*|prowlarr.*|radarr.*|readarr.*|sabnzbd.*|sonarr.*|tautulli.*",
+                  container!="",
+                  container!="POD"
+                }
+              ) / 1024 / 1024
+            )
+          labels:
+            unit: "megabytes"
+
+        # Memory limits in MB
+        - record: media:memory_limit_mb
+          expr: |
+            round(
+              sum by (pod, namespace) (
+                kube_pod_container_resource_limits{
+                  namespace="default",
+                  pod=~"jellyfin.*|jellyseerr.*|lidarr.*|overseerr.*|plex.*|prowlarr.*|radarr.*|readarr.*|sabnzbd.*|sonarr.*|tautulli.*",
+                  resource="memory",
+                  unit="byte"
+                }
+              ) / 1024 / 1024
+            )
+          labels:
+            unit: "megabytes"
+
+        # Memory usage percentage
+        - record: media:memory_usage_percent
+          expr: |
+            round(
+              (media:memory_usage_mb / media:memory_limit_mb) * 100,
+              0.1
+            )
+          labels:
+            unit: "percent"
