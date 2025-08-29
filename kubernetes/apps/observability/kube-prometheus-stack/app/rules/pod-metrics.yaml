@@ -13,13 +13,15 @@ spec:
         # CPU usage in millicores for all pods
         - record: pod:cpu_usage_millicores
           expr: |
-            label_replace(
-              round(
-                sum by (pod, namespace) (
-                  rate(container_cpu_usage_seconds_total[5m])
-                ) * 1000
-              ),
-              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+            sum by (pod, namespace, workload) (
+              label_replace(
+                round(
+                  sum by (pod, namespace) (
+                    rate(container_cpu_usage_seconds_total[5m])
+                  ) * 1000
+                ),
+                "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+              )
             )
           labels:
             unit: "millicores"
@@ -27,14 +29,16 @@ spec:
         # CPU limits in millicores for all pods
         - record: pod:cpu_limit_millicores
           expr: |
-            label_replace(
-              sum by (pod, namespace) (
-                kube_pod_container_resource_limits{
-                  resource="cpu",
-                  unit="core"
-                } * 1000
-              ),
-              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+            sum by (pod, namespace, workload) (
+              label_replace(
+                sum by (pod, namespace) (
+                  kube_pod_container_resource_limits{
+                    resource="cpu",
+                    unit="core"
+                  } * 1000
+                ),
+                "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+              )
             )
           labels:
             unit: "millicores"
@@ -55,13 +59,15 @@ spec:
         # Memory usage in MB for all pods
         - record: pod:memory_usage_mb
           expr: |
-            label_replace(
-              round(
-                sum by (pod, namespace) (
-                  container_memory_working_set_bytes
-                ) / 1024 / 1024
-              ),
-              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+            sum by (pod, namespace, workload) (
+              label_replace(
+                round(
+                  sum by (pod, namespace) (
+                    container_memory_working_set_bytes
+                  ) / 1024 / 1024
+                ),
+                "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+              )
             )
           labels:
             unit: "megabytes"
@@ -69,16 +75,18 @@ spec:
         # Memory limits in MB for all pods
         - record: pod:memory_limit_mb
           expr: |
-            label_replace(
-              round(
-                sum by (pod, namespace) (
-                  kube_pod_container_resource_limits{
-                    resource="memory",
-                    unit="byte"
-                  }
-                ) / 1024 / 1024
-              ),
-              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+            sum by (pod, namespace, workload) (
+              label_replace(
+                round(
+                  sum by (pod, namespace) (
+                    kube_pod_container_resource_limits{
+                      resource="memory",
+                      unit="byte"
+                    }
+                  ) / 1024 / 1024
+                ),
+                "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+              )
             )
           labels:
             unit: "megabytes"
