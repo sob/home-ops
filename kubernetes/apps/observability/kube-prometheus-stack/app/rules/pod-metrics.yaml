@@ -19,7 +19,7 @@ spec:
                   rate(container_cpu_usage_seconds_total[5m])
                 ) * 1000
               ),
-              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
+              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
             )
           labels:
             unit: "millicores"
@@ -34,7 +34,7 @@ spec:
                   unit="core"
                 } * 1000
               ),
-              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
+              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
             )
           labels:
             unit: "millicores"
@@ -61,7 +61,7 @@ spec:
                   container_memory_working_set_bytes
                 ) / 1024 / 1024
               ),
-              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
+              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
             )
           labels:
             unit: "megabytes"
@@ -78,7 +78,7 @@ spec:
                   }
                 ) / 1024 / 1024
               ),
-              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
+              "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
             )
           labels:
             unit: "megabytes"
