@@ -161,6 +161,7 @@ spec:
                       type: StateSet
                       stateSet:
                         path: [status, stage]
+                        labelName: stage
                         list:
                           - created
                           - initialization
