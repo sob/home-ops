@@ -26,23 +26,33 @@ spec:
           labels:
             unit: "millicores"
 
-        # CPU limits in millicores for all pods (uses requests if limits not set)
+        # CPU requests in millicores for all pods
+        - record: pod:cpu_request_millicores
+          expr: |
+            sum by (pod, namespace, workload) (
+              label_replace(
+                sum by (pod, namespace) (
+                  kube_pod_container_resource_requests{
+                    resource="cpu",
+                    unit="core"
+                  } * 1000
+                ),
+                "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+              )
+            )
+          labels:
+            unit: "millicores"
+            
+        # CPU limits in millicores for all pods
         - record: pod:cpu_limit_millicores
           expr: |
             sum by (pod, namespace, workload) (
               label_replace(
                 sum by (pod, namespace) (
-                  (
-                    kube_pod_container_resource_limits{
-                      resource="cpu",
-                      unit="core"
-                    }
-                    or
-                    kube_pod_container_resource_requests{
-                      resource="cpu",
-                      unit="core"
-                    }
-                  ) * 1000
+                  kube_pod_container_resource_limits{
+                    resource="cpu",
+                    unit="core"
+                  } * 1000
                 ),
                 "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
               )
@@ -50,8 +60,18 @@ spec:
           labels:
             unit: "millicores"
 
-        # CPU usage percentage
-        - record: pod:cpu_usage_percent
+        # CPU usage percentage against request
+        - record: pod:cpu_request_percent
+          expr: |
+            round(
+              (pod:cpu_usage_millicores / on(pod, namespace, workload) pod:cpu_request_millicores) * 100,
+              0.1
+            )
+          labels:
+            unit: "percent"
+            
+        # CPU usage percentage against limit (NaN if no limit)
+        - record: pod:cpu_limit_percent
           expr: |
             round(
               (pod:cpu_usage_millicores / on(pod, namespace, workload) pod:cpu_limit_millicores) * 100,
@@ -63,7 +83,7 @@ spec:
     - name: pod.memory
       interval: 30s
       rules:
-        # Memory usage in MB for all pods
+        # Memory usage in MiB for all pods
         - record: pod:memory_usage_mb
           expr: |
             sum by (pod, namespace, workload) (
@@ -77,9 +97,28 @@ spec:
               )
             )
           labels:
-            unit: "megabytes"
+            unit: "mebibytes"
 
-        # Memory limits in MB for all pods
+        # Memory requests in MiB for all pods
+        - record: pod:memory_request_mb
+          expr: |
+            sum by (pod, namespace, workload) (
+              label_replace(
+                round(
+                  sum by (pod, namespace) (
+                    kube_pod_container_resource_requests{
+                      resource="memory",
+                      unit="byte"
+                    }
+                  ) / 1024 / 1024
+                ),
+                "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
+              )
+            )
+          labels:
+            unit: "mebibytes"
+            
+        # Memory limits in MiB for all pods
         - record: pod:memory_limit_mb
           expr: |
             sum by (pod, namespace, workload) (
@@ -96,10 +135,20 @@ spec:
               )
             )
           labels:
-            unit: "megabytes"
+            unit: "mebibytes"
 
-        # Memory usage percentage
-        - record: pod:memory_usage_percent
+        # Memory usage percentage against request (NaN if no request)
+        - record: pod:memory_request_percent
+          expr: |
+            round(
+              (pod:memory_usage_mb / on(pod, namespace, workload) pod:memory_request_mb) * 100,
+              0.1
+            )
+          labels:
+            unit: "percent"
+            
+        # Memory usage percentage against limit (NaN if no limit)
+        - record: pod:memory_limit_percent
           expr: |
             round(
               (pod:memory_usage_mb / on(pod, namespace, workload) pod:memory_limit_mb) * 100,
@@ -108,28 +157,4 @@ spec:
           labels:
             unit: "percent"
 
-    - name: pod.formatted
-      interval: 30s  
-      rules:
-        # CPU formatted as a concatenated value that can be parsed in Grafana
-        # Format: usage|limit|percent (e.g., 150|500|30)
-        - record: pod:cpu_formatted
-          expr: |
-            # Concatenate as a single number: usage + (limit * 10000) + (percent * 100000000)
-            # Example: 150m + (500m * 10000) + (30% * 100000000) = 150 + 5000000 + 3000000000
-            round(pod:cpu_usage_millicores) 
-            + on(pod, namespace, workload) group_left() (round(pod:cpu_limit_millicores) * 10000) 
-            + on(pod, namespace, workload) group_left() (round(pod:cpu_usage_percent * 100) * 1000000)
-          labels:
-            unit: "formatted_cpu"
-
-        # Memory formatted as a concatenated value
-        # Format: usage + (limit * 100000) + (percent * 10000000000)
-        - record: pod:memory_formatted
-          expr: |
-            round(pod:memory_usage_mb) 
-            + on(pod, namespace, workload) group_left() (round(pod:memory_limit_mb) * 100000) 
-            + on(pod, namespace, workload) group_left() (round(pod:memory_usage_percent * 100) * 100000000)
-          labels:
-            unit: "formatted_memory"
 
