@@ -86,3 +86,29 @@ spec:
             )
           labels:
             unit: "percent"
+
+    - name: pod.formatted
+      interval: 30s  
+      rules:
+        # CPU formatted as a concatenated value that can be parsed in Grafana
+        # Format: usage|limit|percent (e.g., 150|500|30)
+        - record: pod:cpu_formatted
+          expr: |
+            # Concatenate as a single number: usage + (limit * 10000) + (percent * 100000000)
+            # Example: 150m + (500m * 10000) + (30% * 100000000) = 150 + 5000000 + 3000000000
+            round(pod:cpu_usage_millicores) 
+            + (round(pod:cpu_limit_millicores) * 10000) 
+            + (round(pod:cpu_usage_percent, 0.1) * 100000000)
+          labels:
+            unit: "formatted_cpu"
+
+        # Memory formatted as a concatenated value
+        # Format: usage + (limit * 100000) + (percent * 10000000000)
+        - record: pod:memory_formatted
+          expr: |
+            round(pod:memory_usage_mb) 
+            + (round(pod:memory_limit_mb) * 100000) 
+            + (round(pod:memory_usage_percent, 0.1) * 10000000000)
+          labels:
+            unit: "formatted_memory"
+
