@@ -155,24 +155,13 @@ spec:
                   name: [metadata, name]
                   namespace: [metadata, namespace]
                 metrics:
-                  - name: stage
-                    help: "TestRun current stage"
-                    each:
-                      type: StateSet
-                      stateSet:
-                        path: [status, stage]
-                        labelName: stage
-                        list:
-                          - created
-                          - initialization
-                          - started
-                          - finished
-                          - error
                   - name: created_timestamp
                     help: "TestRun creation timestamp"
                     each:
                       type: Gauge
                       gauge:
                         path: [metadata, creationTimestamp]
+                        labelsFromPath:
+                          stage: [status, stage]
     grafana:
       enabled: false  # Using Grafana Cloud instead
