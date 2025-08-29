@@ -151,26 +151,27 @@ spec:
                   version: v1alpha1
                   kind: TestRun
                 metricNamePrefix: k6_testrun
+                labelsFromPath:
+                  name: [metadata, name]
+                  namespace: [metadata, namespace]
                 metrics:
-                  - name: info
-                    help: "Information about TestRun"
+                  - name: stage
+                    help: "TestRun current stage"
                     each:
-                      type: Info
-                      info:
-                        labelsFromPath:
-                          name: [metadata, name]
-                          namespace: [metadata, namespace]
-                          stage: [status, stage]
-                  - name: stage_started_seconds_ago
-                    help: "Time since TestRun entered started stage"
+                      type: StateSet
+                      stateSet:
+                        path: [status, stage]
+                        list:
+                          - created
+                          - initialization
+                          - started
+                          - finished
+                          - error
+                  - name: created_timestamp
+                    help: "TestRun creation timestamp"
                     each:
                       type: Gauge
                       gauge:
                         path: [metadata, creationTimestamp]
-                        # This will give us Unix timestamp, we'll calculate age in Prometheus
-                        labelsFromPath:
-                          name: [metadata, name]
-                          namespace: [metadata, namespace]
-                          stage: [status, stage]
     grafana:
       enabled: false  # Using Grafana Cloud instead
