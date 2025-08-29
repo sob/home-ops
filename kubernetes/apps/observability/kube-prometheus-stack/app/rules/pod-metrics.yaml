@@ -13,13 +13,16 @@ spec:
         # CPU usage in millicores for all pods
         - record: pod:cpu_usage_millicores
           expr: |
-            round(
-              sum by (pod, namespace) (
-                rate(container_cpu_usage_seconds_total{
-                  container!="",
-                  container!="POD"
-                }[5m])
-              ) * 1000
+            label_replace(
+              round(
+                sum by (pod, namespace) (
+                  rate(container_cpu_usage_seconds_total{
+                    container!="",
+                    container!="POD"
+                  }[5m])
+                ) * 1000
+              ),
+              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
             )
           labels:
             unit: "millicores"
@@ -27,11 +30,14 @@ spec:
         # CPU limits in millicores for all pods
         - record: pod:cpu_limit_millicores
           expr: |
-            sum by (pod, namespace) (
-              kube_pod_container_resource_limits{
-                resource="cpu",
-                unit="core"
-              } * 1000
+            label_replace(
+              sum by (pod, namespace) (
+                kube_pod_container_resource_limits{
+                  resource="cpu",
+                  unit="core"
+                } * 1000
+              ),
+              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
             )
           labels:
             unit: "millicores"
@@ -40,7 +46,7 @@ spec:
         - record: pod:cpu_usage_percent
           expr: |
             round(
-              (pod:cpu_usage_millicores / pod:cpu_limit_millicores) * 100,
+              (pod:cpu_usage_millicores / on(pod, namespace) pod:cpu_limit_millicores) * 100,
               0.1
             )
           labels:
@@ -52,13 +58,16 @@ spec:
         # Memory usage in MB for all pods
         - record: pod:memory_usage_mb
           expr: |
-            round(
-              sum by (pod, namespace) (
-                container_memory_working_set_bytes{
-                  container!="",
-                  container!="POD"
-                }
-              ) / 1024 / 1024
+            label_replace(
+              round(
+                sum by (pod, namespace) (
+                  container_memory_working_set_bytes{
+                    container!="",
+                    container!="POD"
+                  }
+                ) / 1024 / 1024
+              ),
+              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
             )
           labels:
             unit: "megabytes"
@@ -66,13 +75,16 @@ spec:
         # Memory limits in MB for all pods
         - record: pod:memory_limit_mb
           expr: |
-            round(
-              sum by (pod, namespace) (
-                kube_pod_container_resource_limits{
-                  resource="memory",
-                  unit="byte"
-                }
-              ) / 1024 / 1024
+            label_replace(
+              round(
+                sum by (pod, namespace) (
+                  kube_pod_container_resource_limits{
+                    resource="memory",
+                    unit="byte"
+                  }
+                ) / 1024 / 1024
+              ),
+              "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
             )
           labels:
             unit: "megabytes"
@@ -81,7 +93,7 @@ spec:
         - record: pod:memory_usage_percent
           expr: |
             round(
-              (pod:memory_usage_mb / pod:memory_limit_mb) * 100,
+              (pod:memory_usage_mb / on(pod, namespace) pod:memory_limit_mb) * 100,
               0.1
             )
           labels:
@@ -97,8 +109,8 @@ spec:
             # Concatenate as a single number: usage + (limit * 10000) + (percent * 100000000)
             # Example: 150m + (500m * 10000) + (30% * 100000000) = 150 + 5000000 + 3000000000
             round(pod:cpu_usage_millicores) 
-            + (round(pod:cpu_limit_millicores) * 10000) 
-            + (round(pod:cpu_usage_percent, 0.1) * 100000000)
+            + (round(pod:cpu_limit_millicores) * on(pod, namespace) 10000) 
+            + (round(pod:cpu_usage_percent, 0.1) * on(pod, namespace) 100000000)
           labels:
             unit: "formatted_cpu"
 
@@ -107,8 +119,8 @@ spec:
         - record: pod:memory_formatted
           expr: |
             round(pod:memory_usage_mb) 
-            + (round(pod:memory_limit_mb) * 100000) 
-            + (round(pod:memory_usage_percent, 0.1) * 10000000000)
+            + (round(pod:memory_limit_mb) * on(pod, namespace) 100000) 
+            + (round(pod:memory_usage_percent, 0.1) * on(pod, namespace) 10000000000)
           labels:
             unit: "formatted_memory"
 
