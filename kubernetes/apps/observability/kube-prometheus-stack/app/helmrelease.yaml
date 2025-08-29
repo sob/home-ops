@@ -135,5 +135,42 @@ spec:
               replacement: $1
               sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
+      # Enable custom resource state metrics for k6 TestRuns
+      rbac:
+        extraRules:
+          - apiGroups: ["k6.io"]
+            resources: ["testruns"]
+            verbs: ["list", "watch", "get"]
+      customResourceState:
+        enabled: true
+        config:
+          spec:
+            resources:
+              - groupVersionKind:
+                  group: k6.io
+                  version: v1alpha1
+                  kind: TestRun
+                metricNamePrefix: k6_testrun
+                metrics:
+                  - name: info
+                    help: "Information about TestRun"
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                          namespace: [metadata, namespace]
+                          stage: [status, stage]
+                  - name: stage_started_seconds_ago
+                    help: "Time since TestRun entered started stage"
+                    each:
+                      type: Gauge
+                      gauge:
+                        path: [metadata, creationTimestamp]
+                        # This will give us Unix timestamp, we'll calculate age in Prometheus
+                        labelsFromPath:
+                          name: [metadata, name]
+                          namespace: [metadata, namespace]
+                          stage: [status, stage]
     grafana:
       enabled: false  # Using Grafana Cloud instead
