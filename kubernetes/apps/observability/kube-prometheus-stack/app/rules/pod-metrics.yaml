@@ -118,8 +118,8 @@ spec:
             # Concatenate as a single number: usage + (limit * 10000) + (percent * 100000000)
             # Example: 150m + (500m * 10000) + (30% * 100000000) = 150 + 5000000 + 3000000000
             round(pod:cpu_usage_millicores) 
-            + (round(pod:cpu_limit_millicores) * 10000) 
-            + (round(pod:cpu_usage_percent * 100) * 1000000)
+            + on(pod, namespace, workload) group_left() (round(pod:cpu_limit_millicores) * 10000) 
+            + on(pod, namespace, workload) group_left() (round(pod:cpu_usage_percent * 100) * 1000000)
           labels:
             unit: "formatted_cpu"
 
@@ -128,8 +128,8 @@ spec:
         - record: pod:memory_formatted
           expr: |
             round(pod:memory_usage_mb) 
-            + (round(pod:memory_limit_mb) * 100000) 
-            + (round(pod:memory_usage_percent * 100) * 100000000)
+            + on(pod, namespace, workload) group_left() (round(pod:memory_limit_mb) * 100000) 
+            + on(pod, namespace, workload) group_left() (round(pod:memory_usage_percent * 100) * 100000000)
           labels:
             unit: "formatted_memory"
 
