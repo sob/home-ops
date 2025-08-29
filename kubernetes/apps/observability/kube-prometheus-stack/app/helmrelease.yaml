@@ -151,6 +151,10 @@ spec:
                   version: v1alpha1
                   kind: TestRun
                 metricNamePrefix: k6_testrun
+                labelsFromPath:
+                  name: [metadata, name]
+                  namespace: [metadata, namespace]
+                  stage: [status, stage]
                 metrics:
                   - name: created_timestamp
                     help: "TestRun creation timestamp"
@@ -158,9 +162,6 @@ spec:
                       type: Gauge
                       gauge:
                         path: [metadata, creationTimestamp]
-                      labelsFromPath:
-                        name: [metadata, name]
-                        namespace: [metadata, namespace]
-                        stage: [status, stage]
+                        nilIsZero: true
     grafana:
       enabled: false  # Using Grafana Cloud instead
