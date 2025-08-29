@@ -45,7 +45,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
     name        = "SyntheticServiceDown"
     annotations = {
       summary     = "Service {{ $labels.service }} is failing tests"
-      description = "{{ $labels.service }} has {{ $values.B.Value | printf \"%.1f\" }}% failed checks (threshold < 95% success)"
+      description = "{{ $labels.service }} has {{ $values.A.Value | printf \"%.1f\" }}% success rate (threshold < 95%)"
       runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticServiceDown"
     }
     labels = {
@@ -54,8 +54,8 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       depends_on_prometheus = "true"
     }
     for      = "10m"
-    condition = "C"
-    no_data_state = "NoData"
+    condition = "B"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -67,7 +67,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "avg by (service) (k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"})"
+        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) * 100"
         refId = "A"
       })
     }
@@ -80,27 +80,10 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         to   = 0
       }
       
-      datasource_uid = "-100"  # Math expression
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expression = "($A * 100)"
-        type = "math"
+        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) < 0.95"
         refId = "B"
-      })
-    }
-
-    data {
-      ref_id = "C"
-      
-      relative_time_range {
-        from = 900
-        to   = 0
-      }
-      
-      datasource_uid = "-100"  # Math expression
-      model          = jsonencode({
-        expression = "$B < 95"
-        type = "math"
-        refId = "C"
       })
     }
   }
@@ -110,7 +93,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
     name        = "CriticalServiceDown"
     annotations = {
       summary     = "Critical service {{ $labels.service }} is down"
-      description = "{{ $labels.service }} has {{ $values.B.Value | printf \"%.1f\" }}% failed checks"
+      description = "{{ $labels.service }} has {{ $values.A.Value | printf \"%.1f\" }}% success rate (threshold < 90%)"
       runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/CriticalServiceDown"
     }
     labels = {
@@ -119,8 +102,8 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       depends_on_prometheus = "true"
     }
     for      = "5m"  # Alert faster for critical services
-    condition = "C"
-    no_data_state = "NoData"
+    condition = "B"
+    no_data_state = "OK"
 
     data {
       ref_id = "A"
@@ -132,7 +115,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "avg by (service) (k6_checks_rate{service=~\"${join("|", local.critical_services)}\"})"
+        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.critical_services)}\"}[15m]))) * 100"
         refId = "A"
       })
     }
@@ -145,26 +128,10 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         to   = 0
       }
       
-      datasource_uid = "-100"
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expression = "($A * 100)"
+        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.critical_services)}\"}[15m]))) < 0.90"
         refId = "B"
-      })
-    }
-
-    data {
-      ref_id = "C"
-      
-      relative_time_range {
-        from = 900
-        to   = 0
-      }
-      
-      datasource_uid = "-100"
-      model          = jsonencode({
-        expression = "$B < 90"  # Lower threshold for critical
-        type = "math"
-        refId = "C"
       })
     }
   }
@@ -196,7 +163,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "histogram_quantile(0.95, sum by (service) (rate(k6_http_req_duration_seconds{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) * 1000"
+        expr = "histogram_quantile(0.95, sum by (service, le) (rate(k6_http_req_duration_seconds_bucket{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) * 1000"
         refId = "A"
       })
     }
@@ -223,7 +190,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
     name        = "ServiceHTTPFailures"
     annotations = {
       summary     = "Service {{ $labels.service }} has HTTP failures"
-      description = "{{ $labels.service }} has {{ $values.B.Value | printf \"%.1f\" }}% failed HTTP requests (4xx/5xx)"
+      description = "{{ $labels.service }} has {{ $values.A.Value | printf \"%.1f\" }}% failed HTTP requests (4xx/5xx)"
       runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/ServiceHTTPFailures"
     }
     labels = {
@@ -232,7 +199,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       depends_on_prometheus = "true"
     }
     for      = "10m"
-    condition = "C"
+    condition = "B"
     no_data_state = "OK"
 
     data {
@@ -245,7 +212,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "(sum by (service) (rate(k6_http_reqs_total{service=~\"${join("|", local.synthetic_services)}\", status=~\"[45]..\"}[15m])) / sum by (service) (rate(k6_http_reqs_total{service=~\"${join("|", local.synthetic_services)}\"}[15m])))"
+        expr = "(avg by (service) (avg_over_time(k6_http_req_failed_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) * 100"
         refId = "A"
       })
     }
@@ -258,26 +225,10 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         to   = 0
       }
       
-      datasource_uid = "-100"
+      datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expression = "($A * 100)"
+        expr = "(avg by (service) (avg_over_time(k6_http_req_failed_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) > 0.10"
         refId = "B"
-      })
-    }
-
-    data {
-      ref_id = "C"
-      
-      relative_time_range {
-        from = 900
-        to   = 0
-      }
-      
-      datasource_uid = "-100"
-      model          = jsonencode({
-        expression = "$B > 10"  # More than 10% failures
-        type = "math"
-        refId = "C"
       })
     }
   }
@@ -287,41 +238,8 @@ resource "grafana_rule_group" "synthetic_monitoring" {
     name        = "SyntheticTestsMissing"
     annotations = {
       summary     = "Synthetic tests are not running"
-      description = "No synthetic test data received in the last 20 minutes"
+      description = "Only {{ $values.A.Value | printf \"%.0f\" }} test iterations in the last 20 minutes (expected > 60)"
       runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticTestsMissing"
-    }
-    labels = {
-      severity = "warning"
-      type     = "synthetic"
-      depends_on_prometheus = "true"
-    }
-    for      = "20m"
-    condition = "A"
-    no_data_state = "Alerting"  # Alert when no data
-
-    data {
-      ref_id = "A"
-      
-      relative_time_range {
-        from = 1200  # 20 minutes
-        to   = 0
-      }
-      
-      datasource_uid = local.prometheus_pdc_uid
-      model          = jsonencode({
-        expr = "sum(increase(k6_iterations_total[20m])) == 0"
-        refId = "A"
-      })
-    }
-  }
-
-  # Test Pod Stuck Alert
-  rule {
-    name        = "SyntheticTestStuck"
-    annotations = {
-      summary     = "Too many synthetic tests running concurrently"
-      description = "{{ $values.A.Value }} tests are running (normal max is 2-3)"
-      runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticTestStuck"
     }
     labels = {
       severity = "warning"
@@ -336,13 +254,13 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       ref_id = "A"
       
       relative_time_range {
-        from = 300
+        from = 1200  # 20 minutes
         to   = 0
       }
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "count(count by (job_name) (rate(k6_data_sent_bytes_total[1m]) > 0))"
+        expr = "sum(increase(k6_iterations_total[20m])) or vector(0)"
         refId = "A"
       })
     }
@@ -351,13 +269,61 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       ref_id = "B"
       
       relative_time_range {
-        from = 300
+        from = 1200
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "(sum(increase(k6_iterations_total[20m])) or vector(0)) < 60"
+        refId = "B"
+      })
+    }
+  }
+
+  # Test Pod Stuck Alert - Detects TestRuns stuck in "started" state for >5 minutes
+  rule {
+    name        = "SyntheticTestStuck"
+    annotations = {
+      summary     = "K6 tests are stuck in started state"
+      description = "{{ $values.A.Value }} TestRuns have been in 'started' state for more than 5 minutes"
+      runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticTestStuck"
+    }
+    labels = {
+      severity = "warning"
+      type     = "synthetic"
+      depends_on_prometheus = "true"
+    }
+    for      = "2m"
+    condition = "B"
+    no_data_state = "OK"
+
+    data {
+      ref_id = "A"
+      
+      relative_time_range {
+        from = 600
+        to   = 0
+      }
+      
+      datasource_uid = local.prometheus_pdc_uid
+      model          = jsonencode({
+        expr = "count((time() - k6_testrun_created_timestamp{stage=\"started\"}) > 300)"
+        refId = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      
+      relative_time_range {
+        from = 600
         to   = 0
       }
       
       datasource_uid = "-100"
       model          = jsonencode({
-        expression = "$A > 5"  # More than 5 concurrent tests is unusual
+        expression = "$A > 0"  # Any TestRun stuck for >5 minutes is a problem
         type = "math"
         refId = "B"
       })
