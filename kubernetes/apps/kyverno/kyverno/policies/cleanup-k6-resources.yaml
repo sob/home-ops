@@ -25,29 +25,53 @@ spec:
             matchLabels:
               app: k6-scheduler
   conditions:
-    any:
-      # Clean up succeeded pods after 5 minutes
-      - all:
-          - key: "{{ target.status.phase }}"
-            operator: Equals
-            value: Succeeded
-          - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-            operator: GreaterThan
-            value: 5m
-      # Clean up failed pods after 1 hour for debugging
-      - all:
-          - key: "{{ target.status.phase }}"
-            operator: Equals
-            value: Failed
-          - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-            operator: GreaterThan
-            value: 1h
+    all:
+      - key: "{{ target.status.phase }}"
+        operator: Equals
+        value: Succeeded
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 5m
 ---
-# Clean up TestRun CRDs based on their status
+# Clean up failed k6 pods
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
-  name: k6-testruns-cleanup
+  name: k6-pods-cleanup-failed
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+          namespaces:
+            - observability
+          selector:
+            matchLabels:
+              app: k6
+      - resources:
+          kinds:
+            - Pod
+          namespaces:
+            - observability
+          selector:
+            matchLabels:
+              app: k6-scheduler
+  conditions:
+    all:
+      - key: "{{ target.status.phase }}"
+        operator: Equals
+        value: Failed
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 1h
+---
+# Clean up finished TestRun CRDs
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-testruns-cleanup-finished
 spec:
   schedule: "*/5 * * * *"  # Run every 5 minutes
   match:
@@ -59,37 +83,67 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: observability
   conditions:
-    any:
-      # Clean up finished TestRuns after 5 minutes
-      - all:
-          - key: "{{ target.status.stage }}"
-            operator: Equals
-            value: finished
-          - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-            operator: GreaterThan
-            value: 5m
-      # Clean up error TestRuns after 1 hour for debugging
-      - all:
-          - key: "{{ target.status.stage }}"
-            operator: Equals
-            value: error
-          - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-            operator: GreaterThan
-            value: 1h
-      # Clean up stuck TestRuns (created/initialization) after 30 minutes
-      - all:
-          - key: "{{ target.status.stage == 'created' || target.status.stage == 'initialization' }}"
-            operator: Equals
-            value: true
-          - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-            operator: GreaterThan
-            value: 30m
+    all:
+      - key: "{{ target.status.stage }}"
+        operator: Equals
+        value: finished
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 5m
 ---
-# Clean up k6 Jobs
+# Clean up error TestRuns
 apiVersion: kyverno.io/v2
 kind: ClusterCleanupPolicy
 metadata:
-  name: k6-jobs-cleanup
+  name: k6-testruns-cleanup-error
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
+    any:
+      - resources:
+          kinds:
+            - TestRun
+          namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+  conditions:
+    all:
+      - key: "{{ target.status.stage }}"
+        operator: Equals
+        value: error
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 1h
+---
+# Clean up stuck TestRuns
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-testruns-cleanup-stuck
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
+    any:
+      - resources:
+          kinds:
+            - TestRun
+          namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+  conditions:
+    all:
+      - key: "{{ target.status.stage == 'created' || target.status.stage == 'initialization' }}"
+        operator: Equals
+        value: true
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 30m
+---
+# Clean up succeeded k6 Jobs
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-jobs-cleanup-succeeded
 spec:
   schedule: "*/5 * * * *"  # Run every 5 minutes
   match:
@@ -104,20 +158,37 @@ spec:
               - key: k6_cr
                 operator: Exists
   conditions:
+    all:
+      - key: "{{ target.status.succeeded }}"
+        operator: GreaterThan
+        value: 0
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 5m
+---
+# Clean up failed k6 Jobs
+apiVersion: kyverno.io/v2
+kind: ClusterCleanupPolicy
+metadata:
+  name: k6-jobs-cleanup-failed
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  match:
     any:
-      # Clean up succeeded jobs after 5 minutes
-      - all:
-          - key: "{{ target.status.succeeded }}"
-            operator: GreaterThan
-            value: 0
-          - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-            operator: GreaterThan
-            value: 5m
-      # Clean up failed jobs after 1 hour for debugging
-      - all:
-          - key: "{{ contains(target.status.conditions[?type=='Failed'].status[], 'True') }}"
-            operator: Equals
-            value: true
-          - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
-            operator: GreaterThan
-            value: 1h
+      - resources:
+          kinds:
+            - Job
+          namespaces:
+            - observability
+          selector:
+            matchExpressions:
+              - key: k6_cr
+                operator: Exists
+  conditions:
+    all:
+      - key: "{{ contains(target.status.conditions[?type=='Failed'].status[], 'True') }}"
+        operator: Equals
+        value: true
+      - key: "{{ time_since('', target.metadata.creationTimestamp, '') }}"
+        operator: GreaterThan
+        value: 1h
