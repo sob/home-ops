@@ -16,10 +16,7 @@ spec:
             label_replace(
               round(
                 sum by (pod, namespace) (
-                  rate(container_cpu_usage_seconds_total{
-                    container!="",
-                    container!="POD"
-                  }[5m])
+                  rate(container_cpu_usage_seconds_total[5m])
                 ) * 1000
               ),
               "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
@@ -61,10 +58,7 @@ spec:
             label_replace(
               round(
                 sum by (pod, namespace) (
-                  container_memory_working_set_bytes{
-                    container!="",
-                    container!="POD"
-                  }
+                  container_memory_working_set_bytes
                 ) / 1024 / 1024
               ),
               "workload", "$1", "pod", "([^-]+(-[^-]+)?)"
