@@ -54,7 +54,7 @@ spec:
         - record: pod:cpu_usage_percent
           expr: |
             round(
-              (pod:cpu_usage_millicores / on(pod, namespace) pod:cpu_limit_millicores) * 100,
+              (pod:cpu_usage_millicores / on(pod, namespace, workload) pod:cpu_limit_millicores) * 100,
               0.1
             )
           labels:
@@ -102,7 +102,7 @@ spec:
         - record: pod:memory_usage_percent
           expr: |
             round(
-              (pod:memory_usage_mb / on(pod, namespace) pod:memory_limit_mb) * 100,
+              (pod:memory_usage_mb / on(pod, namespace, workload) pod:memory_limit_mb) * 100,
               0.1
             )
           labels:
