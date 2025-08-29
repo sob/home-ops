@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pod-metrics
+  namespace: observability
+spec:
+  groups:
+    - name: pod.cpu
+      interval: 30s
+      rules:
+        # CPU usage in millicores for all pods
+        - record: pod:cpu_usage_millicores
+          expr: |
+            round(
+              sum by (pod, namespace) (
+                rate(container_cpu_usage_seconds_total{
+                  container!="",
+                  container!="POD"
+                }[5m])
+              ) * 1000
+            )
+          labels:
+            unit: "millicores"
+
+        # CPU limits in millicores for all pods
+        - record: pod:cpu_limit_millicores
+          expr: |
+            sum by (pod, namespace) (
+              kube_pod_container_resource_limits{
+                resource="cpu",
+                unit="core"
+              } * 1000
+            )
+          labels:
+            unit: "millicores"
+
+        # CPU usage percentage
+        - record: pod:cpu_usage_percent
+          expr: |
+            round(
+              (pod:cpu_usage_millicores / pod:cpu_limit_millicores) * 100,
+              0.1
+            )
+          labels:
+            unit: "percent"
+
+    - name: pod.memory
+      interval: 30s
+      rules:
+        # Memory usage in MB for all pods
+        - record: pod:memory_usage_mb
+          expr: |
+            round(
+              sum by (pod, namespace) (
+                container_memory_working_set_bytes{
+                  container!="",
+                  container!="POD"
+                }
+              ) / 1024 / 1024
+            )
+          labels:
+            unit: "megabytes"
+
+        # Memory limits in MB for all pods
+        - record: pod:memory_limit_mb
+          expr: |
+            round(
+              sum by (pod, namespace) (
+                kube_pod_container_resource_limits{
+                  resource="memory",
+                  unit="byte"
+                }
+              ) / 1024 / 1024
+            )
+          labels:
+            unit: "megabytes"
+
+        # Memory usage percentage
+        - record: pod:memory_usage_percent
+          expr: |
+            round(
+              (pod:memory_usage_mb / pod:memory_limit_mb) * 100,
+              0.1
+            )
+          labels:
+            unit: "percent"

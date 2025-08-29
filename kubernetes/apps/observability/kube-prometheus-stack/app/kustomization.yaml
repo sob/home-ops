@@ -7,5 +7,5 @@ resources:
   - ./helmrelease.yaml
   - ./rules/dockerhub.yaml
   - ./rules/container-health.yaml
-  - ./rules/media-services.yaml
+  - ./rules/pod-metrics.yaml
 #  - ./scrapeconfig.yaml
