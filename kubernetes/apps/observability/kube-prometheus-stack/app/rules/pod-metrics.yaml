@@ -17,7 +17,7 @@ spec:
               label_replace(
                 round(
                   sum by (pod, namespace) (
-                    rate(container_cpu_usage_seconds_total[5m])
+                    rate(container_cpu_usage_seconds_total[1m])
                   ) * 1000
                 ),
                 "workload", "$1", "pod", "^([a-z-]+)-[0-9a-z]+-[0-9a-z]+$"
