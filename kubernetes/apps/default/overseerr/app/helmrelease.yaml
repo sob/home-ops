@@ -106,15 +106,11 @@ spec:
                 identifier: app
     persistence:
       config:
-        type: persistentVolumeClaim
         existingClaim: overseerr
         globalMounts:
           - path: /app/config
       cache:
-        type: persistentVolumeClaim
         existingClaim: overseerr-cache
-        accessMode: ReadWriteOnce
-        size: 10Gi
         globalMounts:
           - path: /app/config/cache
       logs:
