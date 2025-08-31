@@ -50,7 +50,7 @@ resource "prowlarr_indexer" "nzbplanet" {
     },
     {
       name = "baseSettings.grabLimit"
-      number_value = 0  # Platinum tier: unlimited downloads
+      number_value = 999999  # Platinum tier: effectively unlimited downloads
     },
     {
       name = "baseSettings.queryLimit"
@@ -121,7 +121,7 @@ resource "prowlarr_indexer" "nzbgeek" {
   tags = []
 }
 
-# NZBFinder (Usenet indexer)
+# NZBFinder (Usenet indexer - Premium tier expires 2026-07-27)
 resource "prowlarr_indexer" "nzbfinder" {
   enable         = true
   name           = "NZBFinder"
@@ -170,11 +170,11 @@ resource "prowlarr_indexer" "nzbfinder" {
     },
     {
       name = "baseSettings.grabLimit"
-      number_value = 100
+      number_value = 999999  # Premium tier: unlimited downloads
     },
     {
       name = "baseSettings.queryLimit"
-      number_value = 100
+      number_value = 20000  # Premium tier: 20,000 API calls per day
     }
   ]
 
