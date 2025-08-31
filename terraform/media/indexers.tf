@@ -1,7 +1,7 @@
 # Prowlarr Indexers Configuration
 # Credentials are stored in 1Password in the prowlarr item
 
-# NZBPlanet (Usenet indexer)
+# NZBPlanet (Usenet indexer - Platinum tier)
 resource "prowlarr_indexer" "nzbplanet" {
   enable         = true
   name           = "NZBPlanet"
@@ -50,11 +50,11 @@ resource "prowlarr_indexer" "nzbplanet" {
     },
     {
       name = "baseSettings.grabLimit"
-      number_value = 100
+      number_value = 0  # Platinum tier: unlimited downloads
     },
     {
       name = "baseSettings.queryLimit"
-      number_value = 100
+      number_value = 20000  # Platinum tier: 20,000 API calls per day
     }
   ]
 
