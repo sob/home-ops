@@ -111,6 +111,7 @@ spec:
           - path: /app/config
       cache:
         existingClaim: overseerr-cache
+        suffix: cache  # Workaround for app-template v4.2.0 PVC naming bug
         globalMounts:
           - path: /app/config/cache
       logs:
