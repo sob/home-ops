@@ -99,12 +99,12 @@
       "description": "Media Apps - Arr Stack",
       "groupName": "arr-stack",
       "matchPackageNames": [
-        "ghcr.io/onedr0p/sonarr",
-        "ghcr.io/onedr0p/radarr",
-        "ghcr.io/onedr0p/lidarr",
-        "ghcr.io/onedr0p/readarr",
+        "ghcr.io/onedr0p/sonarr-develop",
+        "ghcr.io/onedr0p/radarr-develop",
+        "ghcr.io/onedr0p/lidarr-develop",
+        "ghcr.io/onedr0p/readarr-develop",
         "ghcr.io/onedr0p/bazarr",
-        "ghcr.io/onedr0p/prowlarr"
+        "ghcr.io/onedr0p/prowlarr-develop"
       ],
       "group": {
         "commitMessageTopic": "*arr media stack"
