@@ -13,8 +13,8 @@ SPINNER_IDX=0
 trap 'printf "\n"' EXIT
 
 while true; do
-    if [[ $JOB == volsync-dst-wipe-* ]]; then
-        # Get pod status first for wipe jobs
+    if [[ $JOB == volsync-dst-wipe-* ]] || [[ $JOB == volsync-list-* ]] || [[ $JOB == volsync-unlock-* ]]; then
+        # Get pod status first for wipe/list/unlock jobs
         POD_STATUS="$(kubectl --namespace "${NAMESPACE}" get pod --selector="job-name=${JOB}" --output="jsonpath='{.items[*].status.phase}'" 2>/dev/null)"
         if [ "${POD_STATUS}" == "'Succeeded'" ]; then
             printf "\r✓ Job completed successfully\n"

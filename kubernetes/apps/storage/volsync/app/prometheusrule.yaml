@@ -3,26 +3,75 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: volsync
+  name: volsync-monitoring
 spec:
   groups:
     - name: volsync.rules
+      interval: 10m
       rules:
-        - alert: VolSyncComponentAbsent
-          annotations:
-            summary: VolSync component has disappeared from Prometheus target discovery.
+        # Note: Empty directory detection would require custom metrics or log parsing
+        # For now, we can detect suspiciously fast backups which might indicate empty dirs
+        - alert: VolsyncSuspiciouslyFastBackup
           expr: |
-            absent(up{job="volsync-metrics"})
+            volsync_replication_mover_duration_seconds{direction="source"} < 5
+            and volsync_replication_mover_status{direction="source", result="Successful"} == 1
+          for: 5m
+          labels:
+            severity: warning
+            category: backup
+          annotations:
+            summary: "VolSync backup completed suspiciously fast for {{ $labels.namespace }}/{{ $labels.name }}"
+            description: |
+              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }} 
+              completed in under 5 seconds, which might indicate:
+              - The directory being backed up is empty
+              - The application is using emptyDir instead of a PVC
+              - Very little data is being backed up
+              
+              Duration: {{ $value }}s
+              Check the application's persistence configuration and ReplicationSource logs.
+
+        - alert: VolsyncBackupFailed
+          expr: |
+            volsync_replication_mover_status{direction="source", result="Failed"} == 1
           for: 15m
           labels:
             severity: critical
-        - alert: VolSyncVolumeOutOfSync
+            category: backup
           annotations:
-            summary: >-
-              {{ $labels.obj_namespace }}/{{ $labels.obj_name }} volume
-              is out of sync.
+            summary: "VolSync backup failed for {{ $labels.namespace }}/{{ $labels.name }}"
+            description: |
+              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }} 
+              has failed its backup operation.
+              
+              Check the ReplicationSource logs for details.
+
+        - alert: VolsyncBackupStale
           expr: |
-            volsync_volume_out_of_sync == 1
-          for: 15m
+            (time() - volsync_replication_mover_result_time{direction="source"}) > 86400
+          for: 1h
+          labels:
+            severity: warning
+            category: backup
+          annotations:
+            summary: "VolSync backup is stale for {{ $labels.namespace }}/{{ $labels.name }}"
+            description: |
+              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }} 
+              hasn't completed a backup in over 24 hours.
+              
+              Last backup was {{ $value | humanizeDuration }} ago.
+
+        - alert: VolsyncRestoreFailed
+          expr: |
+            volsync_replication_mover_status{direction="destination", result="Failed"} == 1
+          for: 5m
           labels:
             severity: critical
+            category: restore
+          annotations:
+            summary: "VolSync restore failed for {{ $labels.namespace }}/{{ $labels.name }}"
+            description: |
+              VolSync replication destination {{ $labels.namespace }}/{{ $labels.name }} 
+              has failed its restore operation.
+              
+              Check the ReplicationDestination logs for details.

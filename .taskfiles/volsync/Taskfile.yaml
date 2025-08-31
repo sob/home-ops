@@ -45,7 +45,7 @@ tasks:
       NS: Namespace the PVC is in (default: default)
       APP: Application to list snapshots for (required)
     cmds:
-      - /usr/local/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/list.tmpl.yaml) | kubectl apply -f -
+      - envsubst < {{.VOLSYNC_RESOURCES_DIR}}/list.tmpl.yaml | kubectl apply -f -
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
@@ -57,7 +57,7 @@ tasks:
     requires:
       vars: ['APP']
     preconditions:
-      - test -f /usr/local/bin/envsubst
+      - which envsubst
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/list.tmpl.yaml
     silent: true
@@ -68,7 +68,7 @@ tasks:
       NS: Namespace the PVC is in (default: default)
       APP: Application to unlock (required)
     cmds:
-      - /usr/local/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml) | kubectl apply -f -
+      - envsubst < {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml | kubectl apply -f -
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container minio
@@ -81,7 +81,7 @@ tasks:
     requires:
       vars: ['APP']
     preconditions:
-      - test -f /usr/local/bin/envsubst
+      - which envsubst
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml
     silent: true
@@ -120,6 +120,7 @@ tasks:
       APP: Application to restore (required)
       PREVIOUS: Previous number of snapshots to restore (default: 2)
     cmds:
+      - { task: .check-backup, vars: *vars }
       - { task: .suspend, vars: *vars }
       - { task: .wipe, vars: *vars }
       - { task: .restore, vars: *vars }
@@ -214,6 +215,39 @@ tasks:
         sh: kubectl get volumesnapshot --all-namespaces --no-headers | grep "dst-dest" | awk '{print $1 "/" $2}'
     env: *vars
 
+  # Check if backup exists before restore
+  .check-backup:
+    internal: true
+    cmds:
+      - |
+        echo "Checking backup status for {{.APP}}..."
+        LAST_STATUS=$(kubectl --namespace {{.NS}} get replicationsource {{.APP}}-r2 -o jsonpath='{.status.latestMoverStatus.logs}' 2>/dev/null)
+        if echo "$LAST_STATUS" | grep -q "Directory is empty"; then
+          echo "❌ ERROR: No backup exists for {{.APP}}"
+          echo "   The directory was empty during the last backup attempt."
+          echo "   This usually means the application was using emptyDir instead of a PVC."
+          echo ""
+          echo "   To fix this:"
+          echo "   1. Ensure the application is using existingClaim instead of emptyDir"
+          echo "   2. Manually restore data if you have it elsewhere"
+          echo "   3. Run 'task volsync:snapshot APP={{.APP}}' after fixing to create a backup"
+          exit 1
+        fi
+        
+        LAST_SYNC=$(kubectl --namespace {{.NS}} get replicationsource {{.APP}}-r2 -o jsonpath='{.status.lastSyncTime}' 2>/dev/null)
+        if [ -z "$LAST_SYNC" ]; then
+          echo "⚠️  WARNING: No successful backups found for {{.APP}}"
+          echo "   Continue anyway? (y/N)"
+          read -r response
+          if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            echo "Restore cancelled."
+            exit 1
+          fi
+        else
+          echo "✓ Last successful backup: $LAST_SYNC"
+        fi
+    env: *vars
+
   # Suspend the Flux ks and hr
   .suspend:
     internal: true
@@ -228,7 +262,7 @@ tasks:
   .wipe:
     internal: true
     cmds:
-      - /usr/local/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/wipe.tmpl.yaml) | kubectl apply -f -
+      - envsubst < {{.VOLSYNC_RESOURCES_DIR}}/wipe.tmpl.yaml | kubectl apply -f -
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=120m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
@@ -237,7 +271,7 @@ tasks:
       JOB: volsync-dst-wipe-{{.APP}}  # Created exactly as specified
     env: *vars
     preconditions:
-      - test -f /usr/local/bin/envsubst
+      - which envsubst
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wipe.tmpl.yaml
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
 
@@ -245,7 +279,7 @@ tasks:
   .restore:
     internal: true
     cmds:
-      - /usr/local/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml) | kubectl apply -f -
+      - envsubst < {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml | kubectl apply -f -
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh restore-{{.APP}} {{.NS}}
       - kubectl --namespace {{.NS}} wait replicationdestination/restore-{{.APP}} --for=condition=synchronizing=false --timeout=120m
       - kubectl --namespace {{.NS}} delete replicationdestination restore-{{.APP}}
@@ -253,7 +287,7 @@ tasks:
       JOB: restore-{{.APP}}
     env: *vars
     preconditions:
-      - test -f /usr/local/bin/envsubst
+      - which envsubst
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
 
