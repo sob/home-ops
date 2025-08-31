@@ -40,6 +40,7 @@
       "description": "Media applications - fast updates",
       "matchPackagePatterns": [
         "ghcr.io/onedr0p/.*",
+        "ghcr.io/home-operations/.*",
         "jellyfin/jellyfin",
         "wizarrrr/wizarr"
       ],

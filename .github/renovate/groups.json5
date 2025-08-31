@@ -99,12 +99,12 @@
       "description": "Media Apps - Arr Stack",
       "groupName": "arr-stack",
       "matchPackageNames": [
-        "ghcr.io/onedr0p/sonarr-develop",
-        "ghcr.io/onedr0p/radarr-develop",
-        "ghcr.io/onedr0p/lidarr-develop",
-        "ghcr.io/onedr0p/readarr-develop",
-        "ghcr.io/onedr0p/bazarr",
-        "ghcr.io/onedr0p/prowlarr-develop"
+        "ghcr.io/home-operations/sonarr",
+        "ghcr.io/home-operations/radarr",
+        "ghcr.io/home-operations/lidarr",
+        "ghcr.io/home-operations/readarr",
+        "ghcr.io/home-operations/bazarr",
+        "ghcr.io/home-operations/prowlarr"
       ],
       "group": {
         "commitMessageTopic": "*arr media stack"
@@ -115,8 +115,8 @@
       "description": "Media Apps - Downloaders",
       "groupName": "media-downloaders",
       "matchPackageNames": [
-        "ghcr.io/onedr0p/sabnzbd",
-        "ghcr.io/onedr0p/qbittorrent"
+        "ghcr.io/home-operations/sabnzbd",
+        "ghcr.io/home-operations/qbittorrent"
       ],
       "group": {
         "commitMessageTopic": "media downloaders"

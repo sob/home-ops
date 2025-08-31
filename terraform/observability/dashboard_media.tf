@@ -30,26 +30,9 @@ resource "grafana_dashboard" "media_services" {
             text  = "prometheus-metal"
             value = "prometheus-metal"
           }
-          hide       = 0
+          hide       = 2
           refresh    = 1
           regex      = ""
-        },
-        {
-          name       = "service"
-          type       = "query"
-          datasource = "$prometheus"
-          query      = "label_values(up{namespace=\"media\"}, job)"
-          current    = {
-            selected = true
-            text     = ["All"]
-            value    = ["$__all"]
-          }
-          hide       = 0
-          includeAll = true
-          multi      = true
-          refresh    = 2
-          regex      = ""
-          sort       = 1
         }
       ]
     }
@@ -1006,6 +989,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Queue"
+                url = "https://radarr.56kbps.io/activity/queue"
+              }
+            ]
           }
         }
         
@@ -1051,6 +1041,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Wanted"
+                url = "https://radarr.56kbps.io/wanted/missing"
+              }
+            ]
           }
         }
         
@@ -1096,6 +1093,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Missing"
+                url = "https://radarr.56kbps.io/wanted/missing"
+              }
+            ]
           }
         }
         
@@ -1250,7 +1254,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(sonarr_queue_total[10m]))"
+            expr = "max(last_over_time(sonarr_queue_total[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1269,6 +1273,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Queue"
+                url = "https://sonarr.56kbps.io/activity/queue"
+              }
+            ]
           }
         }
         
@@ -1294,7 +1305,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(sonarr_series_monitored_total[10m]))"
+            expr = "max(last_over_time(sonarr_series_monitored_total[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1311,6 +1322,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Series"
+                url = "https://sonarr.56kbps.io/series"
+              }
+            ]
           }
         }
         
@@ -1356,6 +1374,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Missing"
+                url = "https://sonarr.56kbps.io/wanted/missing"
+              }
+            ]
           }
         }
         
@@ -1510,7 +1535,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(lidarr_queue_records_total[10m]))"
+            expr = "max(last_over_time(lidarr_queue_records_total[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1529,6 +1554,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Queue"
+                url = "https://lidarr.56kbps.io/activity/queue"
+              }
+            ]
           }
         }
         
@@ -1554,7 +1586,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(lidarr_artist_monitored[10m]))"
+            expr = "max(last_over_time(lidarr_artist_monitored[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1571,6 +1603,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Artists"
+                url = "https://lidarr.56kbps.io/artist"
+              }
+            ]
           }
         }
         
@@ -1596,7 +1635,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(lidarr_album_missing[10m]))"
+            expr = "max(last_over_time(lidarr_album_missing[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1615,6 +1654,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Missing"
+                url = "https://lidarr.56kbps.io/wanted/missing"
+              }
+            ]
           }
         }
         
@@ -1768,7 +1814,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(readarr_queue_total[10m]))"
+            expr = "max(last_over_time(readarr_queue_total[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1787,6 +1833,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Queue"
+                url = "https://readarr.56kbps.io/activity/queue"
+              }
+            ]
           }
         }
         
@@ -1812,7 +1865,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(readarr_author_monitored[10m]))"
+            expr = "max(last_over_time(readarr_author_monitored[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1829,6 +1882,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Authors"
+                url = "https://readarr.56kbps.io/author"
+              }
+            ]
           }
         }
         
@@ -1854,7 +1914,7 @@ resource "grafana_dashboard" "media_services" {
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(readarr_book_missing[10m]))"
+            expr = "max(last_over_time(readarr_book_missing[10m])) or vector(0)"
             refId = "A"
           }
         ]
@@ -1873,6 +1933,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Missing"
+                url = "https://readarr.56kbps.io/wanted/missing"
+              }
+            ]
           }
         }
         
@@ -2045,6 +2112,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Indexers"
+                url = "https://prowlarr.56kbps.io/indexers"
+              }
+            ]
           }
         }
         
@@ -2087,6 +2161,13 @@ resource "grafana_dashboard" "media_services" {
             unit = "none"
             decimals = 0
             noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Indexers"
+                url = "https://prowlarr.56kbps.io/indexers"
+              }
+            ]
           }
         }
         
@@ -2106,7 +2187,7 @@ resource "grafana_dashboard" "media_services" {
       {
         type = "stat"
         title = "Issues"
-        gridPos = { h = 4, w = 5, x = 13, y = 43 }
+        gridPos = { h = 4, w = 11, x = 13, y = 43 }
         id = 74
         
         targets = [
@@ -2153,66 +2234,6 @@ resource "grafana_dashboard" "media_services" {
         }
       },
       
-      # Prowlarr System Status
-      {
-        type = "stat"
-        title = "System Status"
-        gridPos = { h = 4, w = 6, x = 18, y = 43 }
-        id = 75
-        
-        targets = [
-          {
-            datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "max(last_over_time(prowlarr_system_status[10m]))"
-            refId = "A"
-          }
-        ]
-        
-        fieldConfig = {
-          defaults = {
-            mappings = [
-              {
-                type = "value"
-                value = "0"
-                options = {
-                  text = "OK"
-                  color = "green"
-                }
-              },
-              {
-                type = "value"
-                value = "1"
-                options = {
-                  text = "Error"
-                  color = "red"
-                }
-              }
-            ]
-            thresholds = {
-              mode = "absolute"
-              steps = [
-                { color = "green", value = null },
-                { color = "red", value = 1 }
-              ]
-            }
-            unit = "none"
-            decimals = 0
-            noValue = "Unknown"
-          }
-        }
-        
-        options = {
-          textMode = "value"
-          graphMode = "none"
-          orientation = "auto"
-          reduceOptions = {
-            values = false
-            fields = ""
-            calcs = ["lastNotNull"]
-          }
-        }
-      },
-      
       # Row: Download Activity
       {
         type      = "row"
@@ -2226,7 +2247,7 @@ resource "grafana_dashboard" "media_services" {
       {
         type = "timeseries"
         title = "Download Queue Activity"
-        gridPos = { h = 8, w = 12, x = 0, y = 48 }
+        gridPos = { h = 8, w = 12, x = 0, y = 56 }
         id = 31
         
         targets = [
@@ -2305,22 +2326,22 @@ resource "grafana_dashboard" "media_services" {
       # SABnzbd Activity
       {
         type = "timeseries"
-        title = "SABnzbd Download Rate"
-        gridPos = { h = 8, w = 12, x = 12, y = 48 }
+        title = "SABnzbd Download Speed"
+        gridPos = { h = 8, w = 12, x = 12, y = 56 }
         id = 32
         
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "sabnzbd_download_rate / 1024"
+            expr = "max(sabnzbd_speed_bps) / 1024 / 1024"
             refId = "A"
-            legendFormat = "Download Rate"
+            legendFormat = "Download Speed"
           },
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "sabnzbd_queue_size_mb"
+            expr = "max(sabnzbd_queue_length)"
             refId = "B"
-            legendFormat = "Queue Size (MB)"
+            legendFormat = "Queue Items"
           }
         ]
         
@@ -2355,11 +2376,11 @@ resource "grafana_dashboard" "media_services" {
           }
           overrides = [
             {
-              matcher = { id = "byName", options = "Queue Size (MB)" }
+              matcher = { id = "byName", options = "Queue Items" }
               properties = [
                 {
                   id = "unit"
-                  value = { mode = "absolute", fixedUnit = "decmbytes" }
+                  value = "none"
                 },
                 {
                   id = "custom.axisPlacement"
@@ -2384,137 +2405,252 @@ resource "grafana_dashboard" "media_services" {
         }
       },
       
-      # Row: System Resources
+      # SABnzbd Stats Row
+      # SABnzbd Logo
       {
-        type      = "row"
-        title     = "System Resources"
-        gridPos   = { h = 1, w = 24, x = 0, y = 56 }
-        id        = 40
-        collapsed = false
+        type = "text"
+        title = ""
+        gridPos = { h = 4, w = 3, x = 0, y = 48 }
+        id = 80
+        transparent = true
+        
+        options = {
+          mode = "html"
+          content = <<-EOT
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+              <a href="https://sabnzbd.56kbps.io" target="_blank" style="text-decoration: none;">
+                <img src="https://raw.githubusercontent.com/sabnzbd/sabnzbd/develop/icons/logo-arrow.svg" style="width: 64px; height: 64px; margin-bottom: 8px;">
+                <div style="text-align: center; color: #FFA500; font-weight: bold; font-size: 16px;">SABnzbd</div>
+              </a>
+            </div>
+          EOT
+        }
       },
       
-      # CPU Usage by Service
+      # SABnzbd Queue Length
       {
-        type = "timeseries"
-        title = "CPU Usage by Service"
-        gridPos = { h = 8, w = 12, x = 0, y = 57 }
-        id = 41
+        type = "stat"
+        title = "Queue"
+        gridPos = { h = 4, w = 3, x = 3, y = 48 }
+        id = 81
         
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "sum(rate(container_cpu_usage_seconds_total{namespace=\"media\", container!=\"\", container!=\"POD\"}[5m])) by (container) * 100"
+            expr = "max(sabnzbd_queue_length) or vector(0)"
             refId = "A"
-            legendFormat = "{{ container }}"
           }
         ]
         
         fieldConfig = {
           defaults = {
-            custom = {
-              drawStyle = "line"
-              lineInterpolation = "smooth"
-              lineWidth = 2
-              fillOpacity = 10
-              gradientMode = "opacity"
-              spanNulls = false
-              showPoints = "never"
-              pointSize = 5
-              stacking = { mode = "none", group = "A" }
-              axisPlacement = "auto"
-              axisLabel = ""
-              axisColorMode = "text"
-              scaleDistribution = { type = "linear" }
-              axisCenteredZero = false
-              hideFrom = { tooltip = false, viz = false, legend = false }
-              thresholdsStyle = { mode = "off" }
-            }
             mappings = []
             thresholds = {
               mode = "absolute"
               steps = [
                 { color = "green", value = null },
-                { color = "yellow", value = 50 },
-                { color = "red", value = 80 }
+                { color = "yellow", value = 5 },
+                { color = "red", value = 10 }
+              ]
+            }
+            unit = "none"
+            decimals = 0
+            noValue = "0"
+            links = [
+              {
+                targetBlank = true
+                title = "View Queue"
+                url = "https://sabnzbd.56kbps.io/sabnzbd/"
+              }
+            ]
+          }
+        }
+        
+        options = {
+          textMode = "value"
+          graphMode = "none"
+          orientation = "auto"
+          reduceOptions = {
+            values = false
+            fields = ""
+            calcs = ["lastNotNull"]
+          }
+        }
+      },
+      
+      # SABnzbd Download Speed
+      {
+        type = "stat"
+        title = "Download Speed"
+        gridPos = { h = 4, w = 3, x = 6, y = 48 }
+        id = 82
+        
+        targets = [
+          {
+            datasource = { type = "prometheus", uid = "$prometheus" }
+            expr = "max(sabnzbd_speed_bps) / 1024 / 1024"
+            refId = "A"
+          }
+        ]
+        
+        fieldConfig = {
+          defaults = {
+            mappings = []
+            thresholds = {
+              mode = "absolute"
+              steps = [
+                { color = "red", value = null },
+                { color = "yellow", value = 10 },
+                { color = "green", value = 50 }
+              ]
+            }
+            unit = "MBs"
+            decimals = 1
+            noValue = "0 MB/s"
+          }
+        }
+        
+        options = {
+          textMode = "value"
+          graphMode = "area"
+          orientation = "auto"
+          reduceOptions = {
+            values = false
+            fields = ""
+            calcs = ["lastNotNull"]
+          }
+        }
+      },
+      
+      # SABnzbd Remaining
+      {
+        type = "stat"
+        title = "Remaining"
+        gridPos = { h = 4, w = 3, x = 9, y = 48 }
+        id = 83
+        
+        targets = [
+          {
+            datasource = { type = "prometheus", uid = "$prometheus" }
+            expr = "max(sabnzbd_remaining_bytes) / 1024 / 1024 / 1024"
+            refId = "A"
+          }
+        ]
+        
+        fieldConfig = {
+          defaults = {
+            mappings = []
+            thresholds = {
+              mode = "absolute"
+              steps = [
+                { color = "green", value = null },
+                { color = "yellow", value = 10 },
+                { color = "red", value = 50 }
+              ]
+            }
+            unit = "decgbytes"
+            decimals = 1
+            noValue = "0 GB"
+          }
+        }
+        
+        options = {
+          textMode = "value"
+          graphMode = "none"
+          orientation = "auto"
+          reduceOptions = {
+            values = false
+            fields = ""
+            calcs = ["lastNotNull"]
+          }
+        }
+      },
+      
+      # SABnzbd Disk Usage
+      {
+        type = "gauge"
+        title = "Disk Usage"
+        gridPos = { h = 4, w = 4, x = 12, y = 48 }
+        id = 84
+        
+        targets = [
+          {
+            datasource = { type = "prometheus", uid = "$prometheus" }
+            expr = "max(sabnzbd_disk_used_bytes / sabnzbd_disk_total_bytes) * 100"
+            refId = "A"
+          }
+        ]
+        
+        fieldConfig = {
+          defaults = {
+            mappings = []
+            thresholds = {
+              mode = "absolute"
+              steps = [
+                { color = "green", value = null },
+                { color = "yellow", value = 70 },
+                { color = "orange", value = 85 },
+                { color = "red", value = 95 }
               ]
             }
             unit = "percent"
+            decimals = 0
             min = 0
             max = 100
           }
         }
         
         options = {
-          tooltip = {
-            mode = "multi"
-            sort = "desc"
-          }
-          legend = {
-            showLegend = true
-            displayMode = "table"
-            placement = "right"
-            calcs = ["mean", "max"]
+          orientation = "auto"
+          showThresholdLabels = false
+          showThresholdMarkers = true
+          text = {
+            titleSize = 16
+            valueSize = 24
           }
         }
       },
       
-      # Memory Usage by Service
+      # SABnzbd ETA
       {
-        type = "timeseries"
-        title = "Memory Usage by Service"
-        gridPos = { h = 8, w = 12, x = 12, y = 57 }
-        id = 42
+        type = "stat"
+        title = "ETA"
+        gridPos = { h = 4, w = 8, x = 16, y = 48 }
+        id = 86
         
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
-            expr = "sum(container_memory_working_set_bytes{namespace=\"media\", container!=\"\", container!=\"POD\"}) by (container) / 1024 / 1024 / 1024"
+            expr = "max(sabnzbd_time_estimate_seconds)"
             refId = "A"
-            legendFormat = "{{ container }}"
           }
         ]
         
         fieldConfig = {
           defaults = {
-            custom = {
-              drawStyle = "line"
-              lineInterpolation = "smooth"
-              lineWidth = 2
-              fillOpacity = 10
-              gradientMode = "opacity"
-              spanNulls = false
-              showPoints = "never"
-              pointSize = 5
-              stacking = { mode = "normal", group = "A" }
-              axisPlacement = "auto"
-              axisLabel = ""
-              axisColorMode = "text"
-              scaleDistribution = { type = "linear" }
-              axisCenteredZero = false
-              hideFrom = { tooltip = false, viz = false, legend = false }
-              thresholdsStyle = { mode = "off" }
-            }
             mappings = []
             thresholds = {
               mode = "absolute"
               steps = [
-                { color = "green", value = null }
+                { color = "green", value = null },
+                { color = "yellow", value = 3600 },
+                { color = "red", value = 7200 }
               ]
             }
-            unit = "decgbytes"
+            unit = "dtdurations"
+            decimals = 0
+            noValue = "-"
           }
         }
         
         options = {
-          tooltip = {
-            mode = "multi"
-            sort = "desc"
-          }
-          legend = {
-            showLegend = true
-            displayMode = "table"
-            placement = "right"
-            calcs = ["mean", "max"]
+          textMode = "value"
+          graphMode = "none"
+          orientation = "auto"
+          reduceOptions = {
+            values = false
+            fields = ""
+            calcs = ["lastNotNull"]
           }
         }
       }
