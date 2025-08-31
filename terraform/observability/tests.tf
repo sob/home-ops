@@ -11,7 +11,7 @@ locals {
     cpu_limit      = "200m"
   }
 
-  default_schedule = "*/10 * * * *"  # Every 10 minutes by default
+  default_schedule = "*/5 * * * *"  # Every 5 minutes by default
 
   default_secret_env_vars = {}  # No secrets by default
 
