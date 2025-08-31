@@ -110,11 +110,7 @@ spec:
         globalMounts:
           - path: /app/config
       cache:
-        type: persistentVolumeClaim
-        storageClass: openebs-hostpath
-        retain: false
-        accessMode: ReadWriteOnce
-        size: 10Gi
+        existingClaim: overseerr-cache
         globalMounts:
           - path: /app/config/cache
       logs:
