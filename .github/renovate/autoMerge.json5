@@ -80,7 +80,17 @@
       "automerge": true,
       "automergeType": "branch",
       "ignoreTests": false,
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["major", "minor", "patch"]
+    },
+
+    // Terraform - Always automerge
+    {
+      "description": "Auto merge Terraform providers and modules",
+      "matchManagers": ["terraform"],
+      "automerge": true,
+      "automergeType": "branch",
+      "ignoreTests": false,
+      "matchUpdateTypes": ["major", "minor", "patch"]
     },
 
     // Security patches - Expedited
