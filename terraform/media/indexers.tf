@@ -61,7 +61,7 @@ resource "prowlarr_indexer" "nzbplanet" {
   tags = []
 }
 
-# NZBgeek (Usenet indexer)
+# NZBgeek (Usenet indexer - Lifetime subscription)
 resource "prowlarr_indexer" "nzbgeek" {
   enable         = true
   name           = "NZBgeek"
@@ -110,11 +110,11 @@ resource "prowlarr_indexer" "nzbgeek" {
     },
     {
       name = "baseSettings.grabLimit"
-      number_value = 100
+      number_value = 999999  # Lifetime subscription: unlimited downloads
     },
     {
       name = "baseSettings.queryLimit"
-      number_value = 100
+      number_value = 999999  # Lifetime subscription: unlimited API calls
     }
   ]
 
