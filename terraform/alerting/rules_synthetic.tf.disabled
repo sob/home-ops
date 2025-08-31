@@ -45,7 +45,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
     name        = "SyntheticServiceDown"
     annotations = {
       summary     = "Service {{ $labels.service }} is failing tests"
-      description = "{{ $labels.service }} has {{ $values.A.Value | printf \"%.1f\" }}% success rate (threshold < 95%)"
+      description = "{{ $labels.service }} has only {{ $values.A.Value | printf \"%.0f\" }} test data points in last 15 minutes (expected > 10)"
       runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticServiceDown"
     }
     labels = {
@@ -67,7 +67,8 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) * 100"
+        # Get success rate for services that have metrics, or 0 for missing ones
+        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m])) * 100) or on() vector(0)"
         refId = "A"
       })
     }
@@ -82,7 +83,8 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m]))) < 0.95"
+        # Check if metrics are absent (service down) OR success rate < 95%
+        expr = "(absent(k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"}) == 1) or (avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.synthetic_services)}\"}[15m])) < 0.95)"
         refId = "B"
       })
     }
@@ -93,7 +95,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
     name        = "CriticalServiceDown"
     annotations = {
       summary     = "Critical service {{ $labels.service }} is down"
-      description = "{{ $labels.service }} has {{ $values.A.Value | printf \"%.1f\" }}% success rate (threshold < 90%)"
+      description = "{{ $labels.service }} has only {{ $values.A.Value | printf \"%.0f\" }} test data points in last 15 minutes (expected > 10)"
       runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/CriticalServiceDown"
     }
     labels = {
@@ -115,7 +117,8 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.critical_services)}\"}[15m]))) * 100"
+        # Check if critical services have sent metrics recently
+        expr = "count by (service) (count_over_time(k6_http_req_duration_seconds{service=~\"${join("|", local.critical_services)}\"}[15m]))"
         refId = "A"
       })
     }
@@ -130,7 +133,8 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "(avg by (service) (avg_over_time(k6_checks_rate{service=~\"${join("|", local.critical_services)}\"}[15m]))) < 0.90"
+        # Alert if critical services have less than 10 metric points in 15 minutes
+        expr = "count by (service) (count_over_time(k6_http_req_duration_seconds{service=~\"${join("|", local.critical_services)}\"}[15m])) < 10"
         refId = "B"
       })
     }

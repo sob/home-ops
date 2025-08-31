@@ -133,7 +133,7 @@ resource "sonarr_notification_plex" "plex" {
   on_episode_file_delete_for_upgrade = true
   on_import_complete            = false
 
-  host        = "plex.default.svc.cluster.local"
+  host        = "plex-app.default.svc.cluster.local"
   port        = 32400
   use_ssl     = false
   auth_token  = module.secrets.items["plex"].PLEX_TOKEN

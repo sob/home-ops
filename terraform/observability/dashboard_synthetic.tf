@@ -16,8 +16,8 @@ resource "grafana_dashboard" "k6_prometheus" {
   overwrite   = true
 }
 
-# Custom Media Services Dashboard
-resource "grafana_dashboard" "media_services" {
+# Synthetic Monitoring Dashboard
+resource "grafana_dashboard" "synthetic_monitoring" {
   folder = data.grafana_folder.monitoring.id
   config_json = replace(
     file("${path.module}/dashboards/media-services.json"),

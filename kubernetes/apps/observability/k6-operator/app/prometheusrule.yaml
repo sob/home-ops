@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: k6-synthetic-monitoring
+spec:
+  groups:
+    - name: k6.recording.rules
+      interval: 30s
+      rules:
+        # Preserve k6 response time averages using last_over_time
+        # This keeps the last known value for 15 minutes (matching test interval + buffer)
+        - record: k6:http_req_duration_seconds:avg
+          expr: |
+            last_over_time(
+              histogram_avg(
+                sum by (service) (
+                  k6_http_req_duration_seconds
+                )
+              )[15m:30s]
+            )
+            
+        # Preserve k6 success rate
+        - record: k6:checks_rate:avg
+          expr: |
+            last_over_time(
+              avg by (service) (
+                k6_checks_rate
+              )[15m:30s]
+            )
+            
+        # Preserve k6 http failure rate
+        - record: k6:http_req_failed_rate:avg
+          expr: |
+            last_over_time(
+              avg by (service) (
+                k6_http_req_failed_rate
+              )[15m:30s]
+            )

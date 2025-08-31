@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/externaldns.k8s.io/dnsendpoint_v1alpha1.json
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: authentik-ipv6-block
+  namespace: security
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "::1"
+spec:
+  endpoints:
+    # Block IPv6 for SSO to prevent upstream lookups returning Cloudflare IPs
+    - dnsName: sso.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"  # IPv6 localhost - prevents upstream lookup
+    # Also block IPv6 for internal services that should never use Cloudflare
+    - dnsName: radarr.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: sonarr.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: lidarr.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: readarr.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: prowlarr.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: bazarr.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: tautulli.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"

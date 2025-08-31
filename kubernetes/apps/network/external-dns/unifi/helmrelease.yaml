@@ -72,8 +72,6 @@ spec:
       - --ingress-class=internal
       - --gateway-namespace=network
       - --gateway-name=internal-gateway
-      - --managed-record-types=A
-      - --managed-record-types=CNAME
     policy: sync
     sources: ["service", "ingress", "gateway-httproute", "crd"]
     txtOwnerId: stone

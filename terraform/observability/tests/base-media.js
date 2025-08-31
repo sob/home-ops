@@ -55,8 +55,8 @@ export default function () {
     });
     
     check(healthResponse, {
-      [`health_status_ok`]: (r) => r.status === 200,
-      [`health_has_content`]: (r) => r.body && (checkString ? r.body.includes(checkString) : r.body.length > 0),
+      'health_status_ok': (r) => r.status === 200,
+      'health_has_content': (r) => r.body && (checkString ? r.body.includes(checkString) : r.body.length > 0),
     }, tags);
   }
   
@@ -69,8 +69,8 @@ export default function () {
     });
     
     const apiChecks = check(apiResponse, {
-      [`api_status_ok`]: (r) => r.status === 200,
-      [`api_has_expected_content`]: (r) => {
+      'api_status_ok': (r) => r.status === 200,
+      'api_has_expected_content': (r) => {
         if (!r.body) return false;
         // Check for JSON response
         try {
@@ -94,7 +94,7 @@ export default function () {
       });
       
       check(response, {
-        [`additional_endpoint_ok`]: (r) => r.status === 200,
+        'additional_endpoint_ok': (r) => r.status === 200,
       }, tags);
     });
   }
