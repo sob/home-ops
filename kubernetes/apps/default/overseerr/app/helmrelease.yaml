@@ -97,18 +97,18 @@ spec:
           prometheus.io/forward: "true"
         endpoints:
           - port: http
-    ingress:
+    route:
       app:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        className: external
-        hosts:
-          - host: requests.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https
+        hostnames:
+          - requests.${SECRET_DOMAIN}
+        rules:
+          - backendRefs:
+              - port: 80
+                identifier: app
     persistence:
       config:
         existingClaim: overseerr
