@@ -94,12 +94,14 @@ spec:
           - port: http
     route:
       app:
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}", "requests.${SECRET_DOMAIN}"]
         parentRefs:
           - name: external-gateway
             namespace: network
             sectionName: https
-        hostnames:
-          - requests.${SECRET_DOMAIN}
+          - name: internal-gateway
+            namespace: network
+            sectionName: https
         rules:
           - backendRefs:
               - port: 80
