@@ -6,7 +6,6 @@ metadata:
   name: authentik-server
   namespace: security
   annotations:
-    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
     external-dns.alpha.kubernetes.io/is-public: "true"
 spec:
   parentRefs:
