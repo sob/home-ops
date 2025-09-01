@@ -94,6 +94,8 @@ spec:
           - port: http
     route:
       app:
+        annotations:
+          external-dns.alpha.kubernetes.io/is-public: "true"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}", "requests.${SECRET_DOMAIN}"]
         parentRefs:
           - name: external-gateway
