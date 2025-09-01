@@ -30,9 +30,9 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         service  = rule.key
       }
       
-      for               = contains(["plex-external", "overseerr", "jellyseerr"], rule.key) ? "5m" : "10m"
+      for               = contains(["plex-external", "overseerr", "jellyseerr"], rule.key) ? "5m" : "6m"
       condition         = "B"
-      no_data_state     = "Alerting"  # Alert if no data (service completely down)
+      no_data_state     = contains(["plex-external", "overseerr", "jellyseerr"], rule.key) ? "Alerting" : "OK"  # Only critical services alert on no data
       exec_err_state    = "Alerting"
       
       # Query A: Get success rate or 0 if no metrics
@@ -40,13 +40,13 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         ref_id = "A"
         
         relative_time_range {
-          from = 900  # 15 minutes
+          from = 600  # 10 minutes to capture 2 test runs
           to   = 0
         }
         
         datasource_uid = local.prometheus_datasource_uid
         model = jsonencode({
-          expr  = "(avg(avg_over_time(k6_checks_rate{service=\"${rule.key}\"}[15m])) * 100) or on() vector(0)"
+          expr  = "(avg(avg_over_time(k6_checks_rate{service=\"${rule.key}\"}[10m])) * 100) or on() vector(0)"
           refId = "A"
         })
       }
@@ -56,13 +56,13 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         ref_id = "B"
         
         relative_time_range {
-          from = 900
+          from = 600
           to   = 0
         }
         
         datasource_uid = local.prometheus_datasource_uid
         model = jsonencode({
-          expr  = "(absent_over_time(k6_checks_rate{service=\"${rule.key}\"}[15m]) == 1) or ((avg(avg_over_time(k6_checks_rate{service=\"${rule.key}\"}[15m])) * 100) < 95)"
+          expr  = "(absent_over_time(k6_checks_rate{service=\"${rule.key}\"}[10m]) == 1) or ((avg(avg_over_time(k6_checks_rate{service=\"${rule.key}\"}[10m])) * 100) < 95)"
           refId = "B"
         })
       }
@@ -88,7 +88,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         service  = rule.key
       }
       
-      for               = "15m"
+      for               = "10m"
       condition         = "B"
       no_data_state     = "OK"  # Don't alert on missing response time metrics
       exec_err_state    = "OK"
@@ -98,13 +98,13 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         ref_id = "A"
         
         relative_time_range {
-          from = 900
+          from = 600
           to   = 0
         }
         
         datasource_uid = local.prometheus_datasource_uid
         model = jsonencode({
-          expr  = "histogram_quantile(0.95, sum by (le) (rate(k6_http_req_duration_seconds_bucket{service=\"${rule.key}\"}[15m]))) * 1000"
+          expr  = "histogram_quantile(0.95, sum by (le) (rate(k6_http_req_duration_seconds_bucket{service=\"${rule.key}\"}[10m]))) * 1000"
           refId = "A"
         })
       }
@@ -114,7 +114,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         ref_id = "B"
         
         relative_time_range {
-          from = 900
+          from = 600
           to   = 0
         }
         
@@ -129,45 +129,5 @@ resource "grafana_rule_group" "synthetic_monitoring" {
   }
 }
 
-# Alert for when k6 operator itself is having issues
-resource "grafana_rule_group" "synthetic_infrastructure" {
-  name             = "synthetic-infrastructure"
-  folder_uid       = data.grafana_folder.monitoring_alerts.uid
-  interval_seconds = 300  # Check every 5 minutes
-
-  rule {
-    name = "K6OperatorDown"
-    
-    annotations = {
-      summary     = "K6 Operator may be down"
-      description = "No k6 test iterations detected in the last 30 minutes"
-      runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/K6OperatorDown"
-    }
-    
-    labels = {
-      severity = "critical"
-      type     = "infrastructure"
-      component = "k6-operator"
-    }
-    
-    for               = "10m"
-    condition         = "A"
-    no_data_state     = "Alerting"
-    exec_err_state    = "Alerting"
-    
-    data {
-      ref_id = "A"
-      
-      relative_time_range {
-        from = 1800  # 30 minutes
-        to   = 0
-      }
-      
-      datasource_uid = local.prometheus_datasource_uid
-      model = jsonencode({
-        expr  = "(sum(increase(k6_iterations_total[30m])) or on() vector(0)) == 0"
-        refId = "A"
-      })
-    }
-  }
-}
+# Note: K6 Operator infrastructure monitoring moved to PrometheusRules
+# This section now focuses on service-level synthetic monitoring
