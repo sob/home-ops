@@ -1,0 +1,98 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: k6-monitoring
+  namespace: observability
+spec:
+  groups:
+    - name: k6-operator.rules
+      interval: 30s
+      rules:
+        # K6 Operator controller health
+        - alert: K6OperatorReconcileErrors
+          expr: |
+            rate(controller_runtime_reconcile_errors_total{controller="testrun"}[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: warning
+            component: k6-operator
+            type: infrastructure
+          annotations:
+            summary: "K6 operator having reconcile errors"
+            description: "K6 TestRun controller has {{ $value | printf \"%.2f\" }} reconcile errors per second"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/K6OperatorReconcileErrors"
+
+        # K6 Operator down
+        - alert: K6OperatorDown
+          expr: |
+            up{job="k6-operator-controller-manager-metrics-service"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: k6-operator
+            type: infrastructure
+          annotations:
+            summary: "K6 operator is down"
+            description: "K6 operator controller manager is not responding to health checks"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/K6OperatorDown"
+
+        # K6 TestRuns stuck in started state
+        - alert: K6TestRunsStuckStarted
+          expr: |
+            count(k6_testrun_created_timestamp{stage="started"} > (time() - 600)) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: k6-operator
+            type: infrastructure
+          annotations:
+            summary: "K6 TestRuns stuck in started state"
+            description: "{{ $value }} TestRuns have been stuck in started state for >10 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/K6TestRunsStuckStarted"
+
+        # No recent K6 test executions
+        - alert: K6NoRecentTestRuns
+          expr: |
+            (time() - max(k6_testrun_created_timestamp)) > 900
+          for: 5m
+          labels:
+            severity: warning
+            component: k6-operator
+            type: infrastructure
+          annotations:
+            summary: "No recent K6 test runs"
+            description: "Last K6 TestRun was created {{ $value | printf \"%.0f\" }} seconds ago"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/K6NoRecentTestRuns"
+
+        # K6 Test Jobs failing
+        - alert: K6TestJobsFailing
+          expr: |
+            kube_job_status_failed{job_name=~".*-[0-9]+$",namespace="observability"} > 0
+          for: 2m
+          labels:
+            severity: warning
+            component: k6-operator
+            type: infrastructure
+          annotations:
+            summary: "K6 test jobs are failing"
+            description: "K6 test job {{ $labels.namespace }}/{{ $labels.job_name }} has failed"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/K6TestJobsFailing"
+
+        # K6 Operator memory usage high
+        - alert: K6OperatorMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{container="manager",pod=~"k6-operator.*"} / 
+              container_spec_memory_limit_bytes{container="manager",pod=~"k6-operator.*"} * 100
+            ) > 80
+          for: 5m
+          labels:
+            severity: warning
+            component: k6-operator
+            type: resource
+          annotations:
+            summary: "K6 operator memory usage high"
+            description: "K6 operator is using {{ $value | printf \"%.1f\" }}% of its memory limit"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/K6OperatorMemoryHigh"
