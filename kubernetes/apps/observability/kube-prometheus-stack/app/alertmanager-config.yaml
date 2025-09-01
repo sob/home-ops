@@ -1,0 +1,157 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-config
+  namespace: observability
+stringData:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'localhost:587'
+      smtp_from: 'homeops@56kbps.io'
+      # Pushover API endpoint
+      pushover_api_url: 'https://api.pushover.net/1/messages.json'
+
+    # Template definitions
+    templates:
+    - '/etc/alertmanager/templates/*.tmpl'
+
+    # Routing tree
+    route:
+      group_by: ['alertname', 'cluster', 'namespace']
+      group_wait: 10s        # Wait for additional alerts in group
+      group_interval: 5m     # Send group summary every 5 minutes  
+      repeat_interval: 12h   # Don't repeat for 12 hours
+      receiver: 'default'
+      
+      routes:
+      # Critical infrastructure alerts - immediate Pushover + Slack
+      - match:
+          severity: critical
+        receiver: 'critical-alerts'
+        group_wait: 5s
+        group_interval: 1m
+        repeat_interval: 1h
+        
+      # Flux/Infrastructure warnings - Slack only
+      - match_re:
+          component: flux|k6-operator
+        receiver: 'infrastructure-alerts'
+        
+      # Resource constraint warnings - Slack with longer interval
+      - match:
+          type: resource
+        receiver: 'resource-alerts'
+        group_interval: 15m
+        repeat_interval: 6h
+        
+      # Workload issues - Slack
+      - match:
+          type: workload
+        receiver: 'workload-alerts'
+
+    receivers:
+    # Default fallback
+    - name: 'default'
+      slack_configs:
+      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+        channel: '#alerts'
+        title: '🏠 Home-Ops Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ end }}
+
+    # Critical alerts - Both Pushover AND Slack
+    - name: 'critical-alerts'
+      pushover_configs:
+      - user_key_file: '/etc/alertmanager/secrets/pushover-user'
+        token_file: '/etc/alertmanager/secrets/pushover-token'
+        title: '🚨 CRITICAL: Home-Ops'
+        message: |
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+        priority: '2'  # Emergency priority
+        retry: '30s'
+        expire: '1h'
+      slack_configs:
+      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+        channel: '#alerts'
+        title: '🚨 CRITICAL Infrastructure Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          <{{ .Annotations.runbook_url }}|📖 Runbook>
+          {{ end }}
+          {{ end }}
+        color: 'danger'
+
+    # Infrastructure alerts - Slack only
+    - name: 'infrastructure-alerts' 
+      slack_configs:
+      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+        channel: '#alerts'
+        title: '⚙️ Infrastructure Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          <{{ .Annotations.runbook_url }}|📖 Runbook>
+          {{ end }}
+          {{ end }}
+        color: 'warning'
+
+    # Resource constraint alerts
+    - name: 'resource-alerts'
+      slack_configs:
+      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url' 
+        channel: '#alerts'
+        title: '📊 Resource Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          <{{ .Annotations.runbook_url }}|📖 Runbook>
+          {{ end }}
+          {{ end }}
+        color: '#ff9900'
+
+    # Workload alerts
+    - name: 'workload-alerts'
+      slack_configs:
+      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+        channel: '#alerts'  
+        title: '🔧 Workload Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          <{{ .Annotations.runbook_url }}|📖 Runbook>
+          {{ end }}
+          {{ end }}
+        color: 'good'
+
+    # Inhibition rules - suppress lower priority alerts when higher priority fires
+    inhibit_rules:
+    # Suppress workload alerts if infrastructure is critical
+    - source_matchers:
+      - severity="critical"
+      - component="flux"
+      target_matchers:
+      - severity="warning"
+      equal: ['namespace']
+    
+    # Suppress resource alerts if pods are crash looping
+    - source_matchers:
+      - alertname="PodCrashLooping"
+      target_matchers:
+      - alertname=~".*Memory.*|.*CPU.*"
+      equal: ['namespace', 'pod']

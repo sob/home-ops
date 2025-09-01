@@ -35,7 +35,33 @@ spec:
       enabled: false
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
-      enabled: false  # Alerts will be handled by Grafana Cloud
+      enabled: true
+      ingress:
+        enabled: true
+        ingressClassName: internal
+        hosts: ["alertmanager.${SECRET_DOMAIN}"]
+        pathType: Prefix
+      alertmanagerSpec:
+        useExistingSecret: true
+        configSecret: alertmanager-config
+        secrets:
+          - alertmanager-secret
+        configMaps:
+          - alertmanager-templates
+        storage:
+          volumeClaimTemplate:
+            spec:
+              resources:
+                requests:
+                  storage: 1Gi
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        retention: 120h  # Keep alerts for 5 days
     kubelet:
       enabled: true
     kubeApiServer:
