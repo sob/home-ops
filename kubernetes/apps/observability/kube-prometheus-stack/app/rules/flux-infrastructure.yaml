@@ -1,0 +1,81 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: flux-infrastructure
+  namespace: observability
+spec:
+  groups:
+    - name: flux.rules
+      interval: 30s
+      rules:
+        # Flux Kustomization health
+        - alert: FluxKustomizationFailed
+          expr: |
+            gotk_reconcile_condition{type="Ready",status="False",kind="Kustomization"} == 1
+          for: 5m
+          labels:
+            severity: critical
+            component: flux
+            type: infrastructure
+          annotations:
+            summary: "Flux Kustomization {{ $labels.name }} in {{ $labels.namespace }} failed"
+            description: "Kustomization {{ $labels.name }} in namespace {{ $labels.namespace }} has been failing for over 5 minutes. Reason: {{ $labels.reason }}"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/FluxKustomizationFailed"
+
+        # Flux HelmRelease health  
+        - alert: FluxHelmReleaseFailed
+          expr: |
+            gotk_reconcile_condition{type="Ready",status="False",kind="HelmRelease"} == 1
+          for: 10m
+          labels:
+            severity: warning
+            component: flux
+            type: infrastructure
+          annotations:
+            summary: "Flux HelmRelease {{ $labels.name }} in {{ $labels.namespace }} failed"
+            description: "HelmRelease {{ $labels.name }} in namespace {{ $labels.namespace }} has been failing for over 10 minutes. Reason: {{ $labels.reason }}"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/FluxHelmReleaseFailed"
+
+        # Flux reconciliation suspended
+        - alert: FluxReconciliationSuspended
+          expr: |
+            gotk_suspend_status == 1
+          for: 0m
+          labels:
+            severity: info
+            component: flux
+            type: infrastructure
+          annotations:
+            summary: "Flux {{ $labels.kind }}/{{ $labels.name }} reconciliation suspended"
+            description: "{{ $labels.kind }} {{ $labels.name }} in {{ $labels.namespace }} has reconciliation suspended"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/FluxReconciliationSuspended"
+
+        # High reconciliation error rate
+        - alert: FluxReconciliationErrors
+          expr: |
+            rate(controller_runtime_reconcile_errors_total[5m]) > 0.1
+          for: 10m
+          labels:
+            severity: warning
+            component: flux
+            type: infrastructure
+          annotations:
+            summary: "High Flux reconciliation error rate for {{ $labels.controller }}"
+            description: "Flux controller {{ $labels.controller }} has reconciliation error rate of {{ $value | printf \"%.2f\" }} errors/second"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/FluxReconciliationErrors"
+
+        # Flux controller down
+        - alert: FluxControllerDown
+          expr: |
+            up{job=~".*flux.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: flux
+            type: infrastructure
+          annotations:
+            summary: "Flux controller {{ $labels.job }} is down"
+            description: "Flux controller {{ $labels.job }} has been down for over 5 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/FluxControllerDown"

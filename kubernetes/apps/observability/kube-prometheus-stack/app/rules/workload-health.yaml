@@ -1,0 +1,129 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: workload-health
+  namespace: observability
+spec:
+  groups:
+    - name: workload.rules
+      interval: 30s
+      rules:
+        # Pod crash loops
+        - alert: PodCrashLooping
+          expr: |
+            increase(kube_pod_container_status_restarts_total[15m]) >= 3
+          for: 0m
+          labels:
+            severity: critical
+            component: pod
+            type: workload
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodCrashLooping"
+
+        # Pods not ready
+        - alert: PodsNotReady
+          expr: |
+            (
+              kube_pod_status_ready{condition="false"} * on(namespace,pod) 
+              kube_pod_info{created_by_kind!="Job"}
+            ) > 0
+          for: 10m
+          labels:
+            severity: warning
+            component: pod
+            type: workload
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} not ready"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been not ready for more than 10 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodsNotReady"
+
+        # Pod stuck in pending
+        - alert: PodStuckPending
+          expr: |
+            kube_pod_status_phase{phase="Pending"} * on(namespace,pod) 
+            kube_pod_info{created_by_kind!="Job"} > 0
+          for: 10m
+          labels:
+            severity: warning
+            component: pod
+            type: workload
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} stuck pending"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in pending state for more than 10 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodStuckPending"
+
+        # Job failures
+        - alert: JobFailed
+          expr: |
+            kube_job_status_failed > 0
+          for: 0m
+          labels:
+            severity: warning
+            component: job
+            type: workload
+          annotations:
+            summary: "Job {{ $labels.namespace }}/{{ $labels.job_name }} failed"
+            description: "Job {{ $labels.namespace }}/{{ $labels.job_name }} has failed"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/JobFailed"
+
+        # StatefulSet replicas mismatch
+        - alert: StatefulSetReplicasMismatch
+          expr: |
+            kube_statefulset_status_replicas != kube_statefulset_status_replicas_ready
+          for: 15m
+          labels:
+            severity: warning
+            component: statefulset
+            type: workload
+          annotations:
+            summary: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has mismatched replicas"
+            description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has {{ $labels.replicas }} replicas but only {{ $labels.replicas_ready }} are ready"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/StatefulSetReplicasMismatch"
+
+        # Deployment replicas mismatch
+        - alert: DeploymentReplicasMismatch
+          expr: |
+            kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+          for: 15m
+          labels:
+            severity: warning
+            component: deployment
+            type: workload
+          annotations:
+            summary: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has mismatched replicas"
+            description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has {{ $labels.spec_replicas }} desired replicas but only {{ $labels.available_replicas }} are available"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/DeploymentReplicasMismatch"
+
+        # DaemonSet rollout stuck
+        - alert: DaemonSetRolloutStuck
+          expr: |
+            kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled * 100 < 100
+          for: 15m
+          labels:
+            severity: warning
+            component: daemonset
+            type: workload
+          annotations:
+            summary: "DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} rollout stuck"
+            description: "DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has only {{ $value }}% of desired pods ready"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/DaemonSetRolloutStuck"
+
+        # Pod OOMKilled
+        - alert: PodOOMKilled
+          expr: |
+            increase(kube_pod_container_status_restarts_total[1h]) > 0 
+            and on(namespace,pod,container) 
+            kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1
+          for: 0m
+          labels:
+            severity: warning
+            component: pod
+            type: workload
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} OOMKilled"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} was OOMKilled"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodOOMKilled"

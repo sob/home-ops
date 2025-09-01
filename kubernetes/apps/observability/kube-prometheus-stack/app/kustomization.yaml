@@ -5,7 +5,13 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./alertmanager-secret.yaml
+  - ./alertmanager-config.yaml
+  - ./alertmanager-templates.yaml
   - ./rules/dockerhub.yaml
   - ./rules/container-health.yaml
   - ./rules/pod-metrics.yaml
+  - ./rules/flux-infrastructure.yaml
+  - ./rules/workload-health.yaml
+  - ./rules/resource-constraints.yaml
 #  - ./scrapeconfig.yaml

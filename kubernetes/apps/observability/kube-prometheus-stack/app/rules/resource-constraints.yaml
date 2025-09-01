@@ -1,0 +1,159 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: resource-constraints
+  namespace: observability
+spec:
+  groups:
+    - name: resource.rules
+      interval: 30s
+      rules:
+        # Pod memory usage high
+        - alert: PodMemoryUsageHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{container!="",image!=""} / 
+              container_spec_memory_limit_bytes{container!="",image!=""} * 100
+            ) > 85
+          for: 15m
+          labels:
+            severity: warning
+            component: memory
+            type: resource
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} memory usage high"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} is using {{ $value | printf \"%.1f\" }}% of its memory limit"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodMemoryUsageHigh"
+
+        # Pod memory usage critical
+        - alert: PodMemoryUsageCritical
+          expr: |
+            (
+              container_memory_working_set_bytes{container!="",image!=""} / 
+              container_spec_memory_limit_bytes{container!="",image!=""} * 100
+            ) > 95
+          for: 5m
+          labels:
+            severity: critical
+            component: memory
+            type: resource
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} memory usage critical"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} is using {{ $value | printf \"%.1f\" }}% of its memory limit"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodMemoryUsageCritical"
+
+        # Pod CPU usage high
+        - alert: PodCPUUsageHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{container!="",image!=""}[5m]) / 
+              (container_spec_cpu_quota{container!="",image!=""} / container_spec_cpu_period{container!="",image!=""}) * 100
+            ) > 90
+          for: 15m
+          labels:
+            severity: warning
+            component: cpu
+            type: resource
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} CPU usage high"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} is using {{ $value | printf \"%.1f\" }}% of its CPU limit"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodCPUUsageHigh"
+
+        # Persistent Volume usage high
+        - alert: PersistentVolumeUsageHigh
+          expr: |
+            (
+              kubelet_volume_stats_used_bytes / 
+              kubelet_volume_stats_capacity_bytes * 100
+            ) > 85
+          for: 5m
+          labels:
+            severity: warning
+            component: storage
+            type: resource
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} usage high"
+            description: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | printf \"%.1f\" }}% full"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PersistentVolumeUsageHigh"
+
+        # Persistent Volume usage critical
+        - alert: PersistentVolumeUsageCritical
+          expr: |
+            (
+              kubelet_volume_stats_used_bytes / 
+              kubelet_volume_stats_capacity_bytes * 100
+            ) > 95
+          for: 2m
+          labels:
+            severity: critical
+            component: storage
+            type: resource
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} usage critical"
+            description: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | printf \"%.1f\" }}% full"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PersistentVolumeUsageCritical"
+
+        # Node filesystem usage high
+        - alert: NodeFilesystemUsageHigh
+          expr: |
+            (
+              node_filesystem_size_bytes{fstype!="tmpfs"} - 
+              node_filesystem_free_bytes{fstype!="tmpfs"}
+            ) / node_filesystem_size_bytes{fstype!="tmpfs"} * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+            component: filesystem
+            type: resource
+          annotations:
+            summary: "Node {{ $labels.instance }} filesystem usage high"
+            description: "Filesystem {{ $labels.mountpoint }} on node {{ $labels.instance }} is {{ $value | printf \"%.1f\" }}% full"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/NodeFilesystemUsageHigh"
+
+        # Node memory usage high
+        - alert: NodeMemoryUsageHigh
+          expr: |
+            (
+              node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
+            ) / node_memory_MemTotal_bytes * 100 > 85
+          for: 15m
+          labels:
+            severity: warning
+            component: memory
+            type: resource
+          annotations:
+            summary: "Node {{ $labels.instance }} memory usage high"
+            description: "Node {{ $labels.instance }} memory usage is {{ $value | printf \"%.1f\" }}%"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/NodeMemoryUsageHigh"
+
+        # Node CPU usage high
+        - alert: NodeCPUUsageHigh
+          expr: |
+            100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+          for: 15m
+          labels:
+            severity: warning
+            component: cpu
+            type: resource
+          annotations:
+            summary: "Node {{ $labels.instance }} CPU usage high"
+            description: "Node {{ $labels.instance }} CPU usage is {{ $value | printf \"%.1f\" }}%"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/NodeCPUUsageHigh"
+
+        # Pod without resource limits
+        - alert: PodWithoutResourceLimits
+          expr: |
+            kube_pod_container_info{container!="POD"} 
+            unless on(namespace,pod,container) 
+            kube_pod_container_resource_limits{resource="memory"}
+          for: 1h
+          labels:
+            severity: info
+            component: limits
+            type: resource
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} missing resource limits"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has no memory limits set"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PodWithoutResourceLimits"
