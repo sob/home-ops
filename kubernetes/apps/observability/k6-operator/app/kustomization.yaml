@@ -4,4 +4,4 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./prometheusrule.yaml
-  - ./servicemonitor.yaml
+  - ./prometheusrule-k6-monitoring.yaml
