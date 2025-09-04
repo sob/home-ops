@@ -39,6 +39,17 @@ spec:
               TZ: America/Chicago
               QBT_WEBUI_PORT: &port 80
               QBT_TORRENTING_PORT: &torrentPort 50413
+              QBT_WEBUI_HOST_HEADER_VALIDATION: "false"
+              QBT_WEBUI_CSRF_PROTECTION: "false"
+              QBT_WEBUI_HOST_WHITELIST: >-
+                localhost,
+                127.0.0.1,
+                qbittorrent,
+                qbittorrent.default,
+                qbittorrent.default.svc,
+                qbittorrent.default.svc.cluster,
+                qbittorrent.default.svc.cluster.local,
+                qbittorrent.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
