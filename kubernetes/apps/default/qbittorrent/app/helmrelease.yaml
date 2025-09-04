@@ -39,17 +39,6 @@ spec:
               TZ: America/Chicago
               QBT_WEBUI_PORT: &port 80
               QBT_TORRENTING_PORT: &torrentPort 50413
-              QBT_WEBUI_HOST_HEADER_VALIDATION: "false"
-              QBT_WEBUI_CSRF_PROTECTION: "false"
-              QBT_WEBUI_HOST_WHITELIST: >-
-                localhost,
-                127.0.0.1,
-                qbittorrent,
-                qbittorrent.default,
-                qbittorrent.default.svc,
-                qbittorrent.default.svc.cluster,
-                qbittorrent.default.svc.cluster.local,
-                qbittorrent.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -107,14 +96,16 @@ spec:
     service:
       app:
         controller: qbittorrent
+        ports:
+          http:
+            port: *port
+      bittorrent:
+        controller: qbittorrent
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: "10.1.100.219"
         ports:
-          http:
-            port: *port
-          bittorrent:
-            enabled: true
+          bittorrent-tcp:
             port: *torrentPort
             protocol: TCP
     serviceMonitor:
