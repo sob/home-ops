@@ -131,7 +131,7 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: romm-config
+        existingClaim: romm
         globalMounts:
           - path: /romm/config
       database:
