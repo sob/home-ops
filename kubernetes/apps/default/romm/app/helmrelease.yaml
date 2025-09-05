@@ -123,20 +123,27 @@ spec:
             namespace: network
             sectionName: https
     persistence:
-      config:
-        existingClaim: romm
-        globalMounts:
-          - path: /romm
-      database:
-        existingClaim: romm-database
-        globalMounts:
-          - path: /var/lib/mysql
       config-file:
         type: configMap
         name: romm-config
         globalMounts:
           - subPath: config.yml
             path: /romm/config/config.yml
+      config:
+        existingClaim: romm
+        advancedMounts:
+          romm:
+            app:
+              - path: /romm/config
+                subPath: config
+              - path: /romm/assets
+                subPath: assets
+              - path: /romm/resources
+                subPath: resources
+      database:
+        existingClaim: romm-database
+        globalMounts:
+          - path: /var/lib/mysql
       roms:
         type: custom
         volumeSpec:
