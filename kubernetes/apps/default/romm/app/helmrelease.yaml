@@ -123,20 +123,19 @@ spec:
             namespace: network
             sectionName: https
     persistence:
-      config-file:
+      config:
         type: configMap
         name: romm-config
         globalMounts:
-          - subPath: config.yml
-            path: /romm/config/config.yml
-      config:
+          - path: /romm/config/config.yml
+            subPath: config.yml
+            readOnly: true
+      data:
         existingClaim: romm
         advancedMounts:
           romm:
             app:
-              - path: /romm/config
-                subPath: config
-              - path: /romm/assets
+              - path: /romm/assets  
                 subPath: assets
               - path: /romm/resources
                 subPath: resources
