@@ -1,0 +1,172 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/refs/heads/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: romm
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: volsync
+      namespace: storage
+  values:
+    controllers:
+      romm:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: rommapp/romm
+              tag: 3.7.3@sha256:5eeea1b1c8c6ccd8b3e5ba1d3c8cd8e59b74a9743be48d4e5b4a6ae25e8b6e25
+            env:
+              TZ: America/Chicago
+              # Metadata provider settings
+              HASHEOUS_API_ENABLED: "true"
+              PLAYMATCH_API_ENABLED: "true"
+              # Background task settings
+              ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: "true"
+              LAUNCHBOX_API_ENABLED: "true"
+              RESCAN_ON_FILESYSTEM_CHANGE_DELAY: "5"
+              ENABLE_SCHEDULED_RESCAN: "false"
+              ENABLE_SCHEDULED_UPDATE_LAUNCHBOX_METADATA: "true"
+              SCHEDULED_UPDATE_LAUNCHBOX_METADATA_CRON: "0 5 * * *"
+              SCHEDULED_RESCAN_CRON: "0 3 * * *"
+            envFrom:
+              - secretRef:
+                  name: romm-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 8080
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
+          mariadb:
+            image:
+              repository: mariadb
+              tag: 11.5.2@sha256:b1db3d1a7bbd2e3ca7b3b2e39d8b43bb6a29d96fc1fdc34c9e2b2b9a1f2e5b3d
+            envFrom:
+              - secretRef:
+                  name: romm-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: romm
+        ports:
+          http:
+            port: *port
+    serviceMonitor:
+      app:
+        serviceName: romm
+        labels:
+          prometheus.io/forward: "true"
+        endpoints:
+          - port: http
+    ingress:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        className: internal
+        hosts:
+          - host: romm.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      config:
+        existingClaim: romm-config
+        globalMounts:
+          - path: /romm/config
+      database:
+        existingClaim: romm-database
+        globalMounts:
+          - path: /var/lib/mysql
+      roms:
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${SECRET_NFS_SERVER}
+            path: /roms
+            mountOptions:
+              - nfsvers=4.1
+              - hard
+              - noatime
+              - rsize=131072
+              - wsize=131072
+        globalMounts:
+          - path: /romm/library
+      downloads:
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${SECRET_NFS_SERVER}
+            path: ${SECRET_NFS_PATH_MEDIA}/Downloads
+            mountOptions:
+              - nfsvers=4.1
+              - hard
+              - noatime
+              - rsize=131072
+              - wsize=131072
+        globalMounts:
+          - path: /media/downloads
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
