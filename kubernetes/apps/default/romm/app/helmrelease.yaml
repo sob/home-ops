@@ -137,8 +137,8 @@ spec:
         type: configMap
         name: romm-config
         globalMounts:
-          - subPath: config.yaml
-            path: /romm/config/config.yaml
+          - subPath: config.yml
+            path: /romm/config/config.yml
       roms:
         type: custom
         volumeSpec:
