@@ -128,7 +128,10 @@ spec:
         advancedMounts:
           romm:
             app:
-              - path: /romm
+              - path: /romm/config
+                subPath: config
+              - path: /romm/resources  
+                subPath: resources
       database:
         existingClaim: romm-database
         globalMounts:
