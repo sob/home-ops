@@ -55,7 +55,7 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: &port 8080
+                    port: &port 80
                   initialDelaySeconds: 30
                   periodSeconds: 30
                   timeoutSeconds: 5
@@ -64,6 +64,8 @@ spec:
               startup:
                 enabled: true
                 spec:
+                  tcpSocket:
+                    port: *port
                   failureThreshold: 30
                   periodSeconds: 10
             securityContext:
