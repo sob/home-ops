@@ -47,7 +47,7 @@ spec:
               REDIS_PORT: "6379"
             envFrom:
               - secretRef:
-                  name: romm
+                  name: romm-secret
             probes:
               liveness: &probes
                 enabled: true
