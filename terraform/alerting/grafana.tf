@@ -1,4 +1,9 @@
 provider "grafana" {
-  url  = module.secrets.items["grafana-cloud"]["GRAFANA_URL"]
-  auth = module.secrets.items["grafana-cloud"]["GRAFANA_CLOUD_TOKEN"]
+  url          = local.grafana_url
+  auth         = local.grafana_auth
+  http_headers = {
+    "Content-Type" = "application/json"
+  }
+  retries      = 3
+  retry_wait   = 5
 }

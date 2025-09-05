@@ -33,7 +33,7 @@ resource "grafana_dashboard" "cluster_overview" {
         title = "🚀 Infrastructure Health"
         type  = "row"
         gridPos = { h = 1, w = 24, x = 0, y = 0 }
-      }
+      },
       {
         title = "Cluster Status"
         type  = "stat"
@@ -43,12 +43,12 @@ resource "grafana_dashboard" "cluster_overview" {
             expr = "count(kube_node_info)"
             legendFormat = "Nodes"
             refId = "A"
-          }
+          },
           {
             expr = "sum(kube_namespace_created)"
             legendFormat = "Namespaces"  
             refId = "B"
-          }
+          },
           {
             expr = "count(kube_pod_info)"
             legendFormat = "Pods"
@@ -78,7 +78,7 @@ resource "grafana_dashboard" "cluster_overview" {
           }
           textMode = "value_and_name"
         }
-      }
+      },
       {
         title = "Flux Health"
         type  = "stat"  
@@ -88,17 +88,17 @@ resource "grafana_dashboard" "cluster_overview" {
             expr = "sum(gotk_reconcile_condition{type=\"Ready\",status=\"True\",kind=\"Kustomization\"})"
             legendFormat = "Kustomizations Ready"
             refId = "A"
-          }
+          },
           {
             expr = "sum(gotk_reconcile_condition{type=\"Ready\",status=\"False\",kind=\"Kustomization\"})"
             legendFormat = "Kustomizations Failed"
             refId = "B"
-          }
+          },
           {
             expr = "sum(gotk_reconcile_condition{type=\"Ready\",status=\"True\",kind=\"HelmRelease\"})"
             legendFormat = "HelmReleases Ready"
             refId = "C"
-          }
+          },
           {
             expr = "sum(gotk_reconcile_condition{type=\"Ready\",status=\"False\",kind=\"HelmRelease\"})"
             legendFormat = "HelmReleases Failed"
@@ -117,7 +117,7 @@ resource "grafana_dashboard" "cluster_overview" {
             ]
             thresholds = {
               steps = [
-                { color = "green", value = null }
+                { color = "green", value = null },
                 { color = "red", value = 1 }
               ]
             }
@@ -135,7 +135,7 @@ resource "grafana_dashboard" "cluster_overview" {
           }
           textMode = "value_and_name"
         }
-      }
+      },
       {
         title = "Workload Health"
         type  = "stat"
@@ -145,12 +145,12 @@ resource "grafana_dashboard" "cluster_overview" {
             expr = "sum(kube_pod_status_phase{phase=\"Running\"})"
             legendFormat = "Running Pods"
             refId = "A"
-          }
+          },
           {
             expr = "sum(kube_pod_status_phase{phase!=\"Running\",phase!=\"Succeeded\"})"
             legendFormat = "Problem Pods"
             refId = "B"
-          }
+          },
           {
             expr = "sum(kube_job_status_failed)"
             legendFormat = "Failed Jobs"
@@ -169,8 +169,8 @@ resource "grafana_dashboard" "cluster_overview" {
             ]
             thresholds = {
               steps = [
-                { color = "green", value = null }
-                { color = "yellow", value = 1 }
+                { color = "green", value = null },
+                { color = "yellow", value = 1 },
                 { color = "red", value = 5 }
               ]
             }
@@ -188,7 +188,7 @@ resource "grafana_dashboard" "cluster_overview" {
           }
           textMode = "value_and_name"
         }
-      }
+      },
       {
         title = "Synthetic Monitoring"
         type  = "stat"
@@ -198,7 +198,7 @@ resource "grafana_dashboard" "cluster_overview" {
             expr = "avg(k6:checks_rate:avg) * 100"
             legendFormat = "Avg Success Rate"
             refId = "A"
-          }
+          },
           {
             expr = "count(k6:checks_rate:avg < 0.95)"
             legendFormat = "Services Failing"
@@ -218,8 +218,8 @@ resource "grafana_dashboard" "cluster_overview" {
             unit = "percent"
             thresholds = {
               steps = [
-                { color = "red", value = null }
-                { color = "yellow", value = 95 }
+                { color = "red", value = null },
+                { color = "yellow", value = 95 },
                 { color = "green", value = 99 }
               ]
             }
@@ -237,7 +237,7 @@ resource "grafana_dashboard" "cluster_overview" {
           }
           textMode = "value_and_name"
         }
-      }
+      },
       {
         title = "Resource Usage"
         type  = "stat"
@@ -247,12 +247,12 @@ resource "grafana_dashboard" "cluster_overview" {
             expr = "sum(rate(container_cpu_usage_seconds_total{container!=\"POD\",container!=\"\"}[5m]))"
             legendFormat = "CPU Usage (cores)"
             refId = "A"
-          }
+          },
           {
             expr = "sum(container_memory_working_set_bytes{container!=\"POD\",container!=\"\"}) / 1024 / 1024 / 1024"
             legendFormat = "Memory Usage (GB)"
             refId = "B"
-          }
+          },
           {
             expr = "sum(kubelet_volume_stats_used_bytes) / sum(kubelet_volume_stats_capacity_bytes) * 100"
             legendFormat = "Storage Usage (%)"
@@ -264,8 +264,8 @@ resource "grafana_dashboard" "cluster_overview" {
             mappings = []
             thresholds = {
               steps = [
-                { color = "green", value = null }
-                { color = "yellow", value = 70 }
+                { color = "green", value = null },
+                { color = "yellow", value = 70 },
                 { color = "red", value = 90 }
               ]
             }
@@ -274,11 +274,11 @@ resource "grafana_dashboard" "cluster_overview" {
             {
               matcher = { id = "byName", options = "CPU Usage (cores)" }
               properties = [{ id = "unit", value = "short" }]
-            }
+            },
             {
               matcher = { id = "byName", options = "Memory Usage (GB)" }
               properties = [{ id = "unit", value = "decbytes" }]
-            }
+            },
             {
               matcher = { id = "byName", options = "Storage Usage (%)" }
               properties = [{ id = "unit", value = "percent" }]
@@ -297,14 +297,14 @@ resource "grafana_dashboard" "cluster_overview" {
           }
           textMode = "value_and_name"
         }
-      }
+      },
 
       # Row 2: Service Health Matrix
       {
         title = "🎯 Service Health by Namespace"
         type  = "row"
         gridPos = { h = 1, w = 24, x = 0, y = 7 }
-      }
+      },
       {
         title = "Pod Status Matrix"
         type  = "table"
@@ -326,7 +326,7 @@ resource "grafana_dashboard" "cluster_overview" {
                 "Value #A" = { aggregation = [ "sum" ], operation = "aggregate" }
               }
             }
-          }
+          },
           {
             id = "pivot"
             options = {
@@ -352,8 +352,8 @@ resource "grafana_dashboard" "cluster_overview" {
             ]
             thresholds = {
               steps = [
-                { color = "green", value = null }
-                { color = "yellow", value = 1 }
+                { color = "green", value = null },
+                { color = "yellow", value = 1 },
                 { color = "red", value = 5 }
               ]
             }
@@ -365,7 +365,7 @@ resource "grafana_dashboard" "cluster_overview" {
                 {
                   id = "custom.displayMode"
                   value = "color-text"
-                }
+                },
                 {
                   id = "thresholds"
                   value = {
@@ -387,7 +387,7 @@ resource "grafana_dashboard" "cluster_overview" {
             }
           ]
         }
-      }
+      },
       {
         title = "Recent Events"
         type  = "logs"
@@ -408,14 +408,14 @@ resource "grafana_dashboard" "cluster_overview" {
           dedupStrategy = "none"
           sortOrder = "Descending"
         }
-      }
+      },
 
       # Row 3: Resource Trends  
       {
         title = "📊 Resource Trends"
         type  = "row"
         gridPos = { h = 1, w = 24, x = 0, y = 16 }
-      }
+      },
       {
         title = "CPU Usage by Namespace"
         type  = "timeseries"
@@ -463,7 +463,7 @@ resource "grafana_dashboard" "cluster_overview" {
           }
           tooltip = { mode = "multi", sort = "desc" }
         }
-      }
+      },
       {
         title = "Memory Usage by Namespace"
         type  = "timeseries"
@@ -511,7 +511,7 @@ resource "grafana_dashboard" "cluster_overview" {
           }
           tooltip = { mode = "multi", sort = "desc" }
         }
-      }
+      },
       {
         title = "Pod Restart Rate"
         type  = "timeseries"

@@ -17,3 +17,20 @@ output "prometheus_pdc_info" {
   }
   description = "Full info for PDC Prometheus datasource"
 }
+
+output "grafana_url" {
+  value = local.grafana_url
+  description = "Grafana Cloud URL"
+}
+
+output "grafana_token" {
+  value = local.grafana_auth
+  sensitive = true
+  description = "Grafana Cloud API token"
+}
+
+output "slack_webhook_url" {
+  value = module.secrets.items["alertmanager"]["ALERTMANAGER_SLACK_URL"]
+  sensitive = true
+  description = "Slack webhook URL for testing notifications"
+}

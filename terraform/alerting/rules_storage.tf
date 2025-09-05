@@ -9,7 +9,7 @@ resource "grafana_rule_group" "smartctl" {
     name        = "SmartDeviceHighTemperature"
     annotations = {
       summary     = "SMART device high temperature"
-      description = "Device $${labels.device} on $${labels.instance} has temperature $${values.A}°C"
+      description = "Device {{ $labels.device }} on {{ $labels.instance }} has temperature {{ $values.A }}°C"
     }
     labels = {
       severity = "critical"
@@ -39,7 +39,7 @@ resource "grafana_rule_group" "smartctl" {
     name        = "SmartDeviceTestFailed"
     annotations = {
       summary     = "SMART device test failed"
-      description = "Device $${labels.device} on $${labels.instance} test failed"
+      description = "Device {{ $labels.device }} on {{ $labels.instance }} test failed"
     }
     labels = {
       severity = "critical"
@@ -69,7 +69,7 @@ resource "grafana_rule_group" "smartctl" {
     name        = "SmartDeviceCriticalWarning"
     annotations = {
       summary     = "SMART device critical warning"
-      description = "Device $${labels.device} on $${labels.instance} has critical warning"
+      description = "Device {{ $labels.device }} on {{ $labels.instance }} has critical warning"
     }
     labels = {
       severity = "critical"
@@ -99,7 +99,7 @@ resource "grafana_rule_group" "smartctl" {
     name        = "SmartDeviceMediaErrors"
     annotations = {
       summary     = "SMART device media errors"
-      description = "Device $${labels.device} on $${labels.instance} has $${values.A} media errors"
+      description = "Device {{ $labels.device }} on {{ $labels.instance }} has {{ $values.A }} media errors"
     }
     labels = {
       severity = "critical"
@@ -129,7 +129,7 @@ resource "grafana_rule_group" "smartctl" {
     name        = "SmartDeviceAvailableSpareUnderThreshold"
     annotations = {
       summary     = "SMART device spare capacity under threshold"
-      description = "Device $${labels.device} on $${labels.instance} available spare under threshold"
+      description = "Device {{ $labels.device }} on {{ $labels.instance }} available spare under threshold"
     }
     labels = {
       severity = "critical"
@@ -165,7 +165,7 @@ resource "grafana_rule_group" "volsync" {
     name        = "VolSyncBackupFailed"
     annotations = {
       summary     = "Backup failed"
-      description = "VolSync backup for $${labels.name} in namespace $${labels.namespace} has failed"
+      description = "VolSync backup for {{ $labels.name }} in namespace {{ $labels.namespace }} has failed"
     }
     labels = {
       severity = "critical"
@@ -195,7 +195,7 @@ resource "grafana_rule_group" "volsync" {
     name        = "VolSyncBackupOld"
     annotations = {
       summary     = "Backup is stale"
-      description = "Volume $${labels.name} hasn't been backed up in 3 days"
+      description = "Volume {{ $labels.name }} hasn't been backed up in 3 days"
     }
     labels = {
       severity = "critical"
@@ -261,7 +261,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephOSDDown"
     annotations = {
       summary     = "Ceph OSD down"
-      description = "$${values.A} Ceph OSD(s) are down"
+      description = "{{ $values.A }} Ceph OSD(s) are down"
     }
     labels = {
       severity = "critical"
@@ -291,7 +291,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephPGsDegraded"
     annotations = {
       summary     = "Ceph PGs degraded"
-      description = "$${values.A} PGs are in degraded state"
+      description = "{{ $values.A }} PGs are in degraded state"
     }
     labels = {
       severity = "critical"
@@ -321,7 +321,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephPoolNearFull"
     annotations = {
       summary     = "Ceph pool near full"
-      description = "Ceph pool $${labels.pool} is $${values.A}% full"
+      description = "Ceph pool {{ $labels.pool }} is {{ $values.A }}% full"
     }
     labels = {
       severity = "critical"

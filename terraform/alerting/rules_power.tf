@@ -39,7 +39,7 @@ resource "grafana_rule_group" "ups" {
     name        = "UPSBatteryLow"
     annotations = {
       summary     = "UPS battery low"
-      description = "UPS rack-ups.stonehedges.net battery is below 25% (current: $${values.A}%)"
+      description = "UPS rack-ups.stonehedges.net battery is below 25% (current: {{ $values.A }}%)"
     }
     labels = {
       severity = "critical"
@@ -99,7 +99,7 @@ resource "grafana_rule_group" "ups" {
     name        = "UPSOverload"
     annotations = {
       summary     = "UPS overloaded"
-      description = "UPS rack-ups.stonehedges.net load is above 80% (current: $${values.A}%)"
+      description = "UPS rack-ups.stonehedges.net load is above 80% (current: {{ $values.A }}%)"
     }
     labels = {
       severity = "critical"
@@ -197,7 +197,7 @@ resource "grafana_rule_group" "pdu" {
     name        = "PDUHighLoad"
     annotations = {
       summary     = "PDU high load"
-      description = "PDU rack-pdu.stonehedges.net load is above 90% (current: $${values.A}dA = $${$${values.A}/10}A)"
+      description = "PDU rack-pdu.stonehedges.net load is above 90% (current: {{ $values.A }}dA = {{ div $values.A 10 }}A)"
     }
     labels = {
       severity = "warning"

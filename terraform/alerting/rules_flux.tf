@@ -38,7 +38,7 @@ resource "grafana_rule_group" "flux" {
     name        = "FluxInstanceNotReady"
     annotations = {
       summary     = "Flux instance not ready"
-      description = "Flux instance $${labels.instance} is not ready"
+      description = "Flux instance {{ $labels.instance }} is not ready"
     }
     labels = {
       severity = "critical"
@@ -74,7 +74,7 @@ resource "grafana_rule_group" "external_secrets" {
     name        = "SecretSyncError"
     annotations = {
       summary     = "External Secret sync error"
-      description = "External secret $${labels.name} in namespace $${labels.namespace} has sync errors"
+      description = "External secret {{ $labels.name }} in namespace {{ $labels.namespace }} has sync errors"
     }
     labels = {
       severity = "critical"

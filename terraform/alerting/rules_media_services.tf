@@ -334,7 +334,7 @@ resource "grafana_rule_group" "arr_stack" {
     name = "MultipleArrServicesDown"
     annotations = {
       summary     = "Multiple *arr services are down"
-      description = "$${value} *arr services are currently down. Media automation is severely impacted."
+      description = "{{ $value }} *arr services are currently down. Media automation is severely impacted."
     }
     labels = {
       severity = "critical"

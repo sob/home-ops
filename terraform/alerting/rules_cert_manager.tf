@@ -38,7 +38,7 @@ resource "grafana_rule_group" "cert_manager" {
     name        = "CertManagerCertExpirySoon"
     annotations = {
       summary     = "Certificate expiring soon"
-      description = "Certificate $${labels.namespace}/$${labels.name} is expiring in $${values.A}"
+      description = "Certificate {{ $labels.namespace }}/{{ $labels.name }} is expiring in {{ $values.A }}"
     }
     labels = {
       severity = "critical"
@@ -68,7 +68,7 @@ resource "grafana_rule_group" "cert_manager" {
     name        = "CertManagerCertNotReady"
     annotations = {
       summary     = "Certificate not ready"
-      description = "Certificate $${labels.namespace}/$${labels.name} is not ready"
+      description = "Certificate {{ $labels.namespace }}/{{ $labels.name }} is not ready"
     }
     labels = {
       severity = "critical"

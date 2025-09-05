@@ -3,7 +3,7 @@ resource "grafana_contact_point" "slack_critical" {
 
   slack {
     url   = module.secrets.items["alertmanager"]["ALERTMANAGER_SLACK_URL"]
-    title = "🚨 {{ .GroupLabels.alertname }}{{ if .GroupLabels.service }} - {{ .GroupLabels.service }}{{ end }}"
+    title = "{{ if eq .Status \"resolved\" }}✅ RESOLVED: {{ else }}🚨 {{ end }}{{ .GroupLabels.alertname }}{{ if .GroupLabels.service }} - {{ .GroupLabels.service }}{{ end }}"
     text  = "{{ if or (gt (len .Alerts) 5) (eq .GroupLabels.alertname \"PrometheusDataSourceDown\") }}{{ (index .Alerts 0).Annotations.description }}{{ if gt (len .Alerts) 1 }}\n({{ len .Alerts }} instances){{ end }}{{ else }}{{ range .Alerts }}{{ if .Annotations.description }}• {{ .Annotations.description }}{{ else }}• {{ .Labels.alertname }}: {{ .Annotations.summary }}{{ end }}\n{{ end }}{{ end }}"
     disable_resolve_message = false
   }
@@ -14,7 +14,7 @@ resource "grafana_contact_point" "slack_warnings" {
 
   slack {
     url   = module.secrets.items["alertmanager"]["ALERTMANAGER_SLACK_URL"]
-    title = "⚠️ Warning - {{ .GroupLabels.alertname }}"
+    title = "{{ if eq .Status \"resolved\" }}✅ RESOLVED: Warning - {{ else }}⚠️ Warning - {{ end }}{{ .GroupLabels.alertname }}"
     text  = "{{ range .Alerts }}{{ if .Annotations.description }}• {{ .Annotations.description }}{{ else }}• {{ .Labels.service }}: {{ .Annotations.summary }}{{ end }}\n{{ end }}"
     disable_resolve_message = true
   }

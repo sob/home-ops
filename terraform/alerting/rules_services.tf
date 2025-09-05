@@ -15,7 +15,7 @@ resource "grafana_rule_group" "application_health" {
     name = "HighQueueBacklog"
     annotations = {
       summary     = "High download queue backlog"
-      description = "$${labels.app} has $${value} items in queue for over 30 minutes"
+      description = "{{ $labels.app }} has {{ $value }} items in queue for over 30 minutes"
     }
     labels = {
       severity = "warning"
@@ -46,7 +46,7 @@ resource "grafana_rule_group" "application_health" {
     name = "FailedDownloads"
     annotations = {
       summary     = "Multiple failed downloads detected"
-      description = "SABnzbd has $${value} failed downloads in the last hour"
+      description = "SABnzbd has {{ $value }} failed downloads in the last hour"
     }
     labels = {
       severity = "warning"
@@ -78,7 +78,7 @@ resource "grafana_rule_group" "application_health" {
     name = "IndexersFailing"
     annotations = {
       summary     = "Multiple indexers are failing"
-      description = "$${value} indexers are currently failing health checks in Prowlarr"
+      description = "{{ $value }} indexers are currently failing health checks in Prowlarr"
     }
     labels = {
       severity = "warning"
@@ -110,7 +110,7 @@ resource "grafana_rule_group" "application_health" {
     name = "HighPlexLoad"
     annotations = {
       summary     = "High Plex streaming load"
-      description = "Plex has $${value} concurrent streams (threshold: 10)"
+      description = "Plex has {{ $value }} concurrent streams (threshold: 10)"
     }
     labels = {
       severity = "info"

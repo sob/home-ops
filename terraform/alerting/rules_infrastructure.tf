@@ -40,7 +40,7 @@ resource "grafana_rule_group" "infrastructure" {
     name = "IngressControllerDown"
     annotations = {
       summary     = "Ingress controller is down"
-      description = "$${labels.job} ingress controller has been down for 5 minutes. External access may be impacted."
+      description = "{{ $labels.job }} ingress controller has been down for 5 minutes. External access may be impacted."
     }
     labels = {
       severity = "critical"
@@ -206,7 +206,7 @@ resource "grafana_rule_group" "response_times" {
     name = "HighIngressLatency"
     annotations = {
       summary     = "High ingress response times"
-      description = "95th percentile response time for $${labels.ingress} is $${value}s (threshold: 5s)"
+      description = "95th percentile response time for {{ $labels.ingress }} is {{ $value }}s (threshold: 5s)"
     }
     labels = {
       severity = "warning"
@@ -237,7 +237,7 @@ resource "grafana_rule_group" "response_times" {
     name = "HighErrorRate"
     annotations = {
       summary     = "High HTTP error rate"
-      description = "$${labels.ingress} is experiencing $${value} 5xx errors"
+      description = "{{ $labels.ingress }} is experiencing {{ $value }} 5xx errors"
     }
     labels = {
       severity = "warning"

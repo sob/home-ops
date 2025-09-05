@@ -26,3 +26,332 @@ tasks:
     dir: terraform/alerting
     cmds:
       - terraform destroy
+
+  test:contact-point:
+    desc: "Test contact point using Grafana's actual templates"
+    summary: |
+      Test notification system by creating alert that goes through Grafana's template engine.
+      Creates a new unique message each time.
+      Usage: task alerting:test:contact-point [STATE=firing|resolved] [CONTACT=slack-critical]
+    vars:
+      STATE: '{{.STATE | default "firing"}}'
+      CONTACT: '{{.CONTACT | default "slack-critical"}}'
+    dir: terraform/alerting
+    cmds:
+      - |
+        GRAFANA_URL=$(terraform output -raw grafana_url 2>/dev/null || echo "")
+        GRAFANA_TOKEN=$(terraform output -raw grafana_token 2>/dev/null || echo "")
+        
+        if [[ -z "$GRAFANA_URL" || -z "$GRAFANA_TOKEN" ]]; then
+          echo "❌ Unable to get Grafana credentials from terraform outputs"
+          exit 1
+        fi
+        
+        # Generate unique timestamp for new message each time
+        TIMESTAMP=$(date +%s)
+        UNIQUE_ID="${TIMESTAMP}-$(date +%N | cut -c1-3)"
+        
+        echo "🧪 Testing contact point: {{.CONTACT}} ({{.STATE}})"
+        echo "🆔 Unique ID: $UNIQUE_ID"
+        
+        # Determine severity and end time based on state
+        if [[ "{{.STATE}}" == "resolved" ]]; then
+          SEVERITY="info"
+          END_TIME=$(date -u -Iseconds)
+          echo "🔄 State: resolved (will show RESOLVED prefix via template)"
+        else
+          SEVERITY="critical"
+          END_TIME=""
+          echo "🔥 State: firing (will show normal alert via template)"
+        fi
+        
+        # Create contact point test payload
+        JSON_PAYLOAD="{
+          \"alert\": {
+            \"labels\": {
+              \"alertname\": \"TestAlert-ContactPoint\",
+              \"service\": \"test-service\",
+              \"severity\": \"$SEVERITY\",
+              \"test\": \"true\",
+              \"unique_id\": \"$UNIQUE_ID\"
+            },
+            \"annotations\": {
+              \"summary\": \"Test Alert - Contact Point Verification\", 
+              \"description\": \"Testing contact point {{.CONTACT}} - RESOLVED prefix and value substitution test\",
+              \"runbook_url\": \"https://github.com/seobrien/home-ops/wiki/Testing\"
+            }
+          },
+          \"receivers\": [
+            {
+              \"name\": \"{{.CONTACT}}\",
+              \"grafana_managed_receiver_configs\": [
+                {
+                  \"name\": \"{{.CONTACT}}\",
+                  \"type\": \"slack\"
+                }
+              ]
+            }
+          ]
+        }"
+        
+        echo "🚀 Posting to Grafana Alertmanager (uses actual templates)..."
+        echo "📋 JSON Payload:"
+        echo "$JSON_PAYLOAD" | jq . 2>/dev/null || echo "$JSON_PAYLOAD"
+        
+        # Post to contact point test endpoint - this will trigger Grafana's template system
+        response=$(curl -s -w "%{http_code}" -X POST \
+          "${GRAFANA_URL}/api/v1/provisioning/contact-points/test" \
+          -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "$JSON_PAYLOAD")
+        
+        http_code=${response: -3}
+        body=${response%???}
+        
+        if [[ $http_code -eq 200 ]]; then
+          echo "✅ Test alert posted to Grafana successfully!"
+          echo "📱 Grafana will process alert through actual notification templates"
+          echo "🔍 Look for notification with unique ID: $UNIQUE_ID"
+          echo "📋 Alert will be routed to: {{.CONTACT}}"
+          if [[ "{{.STATE}}" == "resolved" ]]; then
+            echo "✅ Should show: RESOLVED prefix via Grafana template"
+          else
+            echo "🚨 Should show: Normal firing alert via Grafana template"
+          fi
+        else
+          echo "❌ Failed to post alert to Grafana (HTTP $http_code)"
+          echo "$body" | jq -r '.message // .error // .' 2>/dev/null || echo "$body"
+        fi
+
+  test:alert:
+    desc: "Test an alert notification with current metric values"
+    summary: |
+      Fire a test alert notification using current metric values (no threshold modification).
+      Usage: task alerting:test:alert ALERT=SyntheticTestsFailing-jellyseerr [STATE=firing]
+      
+      ALERT: Alert rule name (e.g., SyntheticTestsFailing-jellyseerr, SyntheticSlowResponse-plex-external)
+      STATE: 'firing' or 'resolved' (default: firing)
+    vars:
+      ALERT: '{{.ALERT}}'
+      STATE: '{{.STATE | default "firing"}}'
+    dir: terraform/alerting
+    requires:
+      vars: [ALERT]
+    cmds:
+      - |
+        GRAFANA_URL=$(terraform output -raw grafana_url 2>/dev/null || echo "")
+        GRAFANA_TOKEN=$(terraform output -raw grafana_token 2>/dev/null || echo "")
+        
+        if [[ -z "$GRAFANA_URL" || -z "$GRAFANA_TOKEN" ]]; then
+          echo "❌ Unable to get Grafana credentials from terraform outputs"
+          exit 1
+        fi
+        
+        # Extract service name from alert name
+        SERVICE=$(echo "{{.ALERT}}" | sed 's/^[^-]*-//' | sed 's/^SyntheticSlowResponse-//' | sed 's/^SyntheticTestsNotRunning-//')
+        
+        echo "🧪 Testing alert: {{.ALERT}} for service: $SERVICE ({{.STATE}})"
+        
+        # Get current metric value for context
+        echo "📊 Fetching current metric value..."
+        
+        # Query current success rate
+        if [[ "{{.ALERT}}" == *"SyntheticTestsFailing"* ]]; then
+          METRIC_QUERY="(avg(avg_over_time(k6_checks_rate{service=\"$SERVICE\"}[10m])) * 100)"
+          THRESHOLD="95"
+          METRIC_NAME="success_rate"
+          UNIT="%"
+        elif [[ "{{.ALERT}}" == *"SyntheticSlowResponse"* ]]; then
+          METRIC_QUERY="histogram_quantile(0.95, sum by (le) (rate(k6_http_req_duration_seconds_bucket{service=\"$SERVICE\"}[10m]))) * 1000"
+          THRESHOLD="3000"
+          METRIC_NAME="p95_response_time"
+          UNIT="ms"
+        else
+          echo "❌ Unsupported alert type: {{.ALERT}}"
+          exit 1
+        fi
+        
+        # Query current value from observability terraform state
+        cd ../observability
+        PROMETHEUS_URL="http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090"
+        
+        # Use kubectl port-forward to query prometheus temporarily
+        echo "🔍 Querying current $METRIC_NAME for $SERVICE..."
+        kubectl port-forward -n observability svc/kube-prometheus-stack-prometheus 9090:9090 &
+        PF_PID=$!
+        sleep 3
+        
+        CURRENT_VALUE=$(curl -s "http://localhost:9090/api/v1/query?query=$METRIC_QUERY" | jq -r '.data.result[0].value[1]' 2>/dev/null || echo "unknown")
+        kill $PF_PID 2>/dev/null || true
+        
+        if [[ "$CURRENT_VALUE" == "null" || "$CURRENT_VALUE" == "unknown" ]]; then
+          CURRENT_VALUE="95"  # Default for demo
+          echo "⚠️  Could not fetch current value, using default: $CURRENT_VALUE$UNIT"
+        else
+          # Round to integer
+          CURRENT_VALUE=$(printf "%.0f" "$CURRENT_VALUE")
+          echo "📈 Current $METRIC_NAME: $CURRENT_VALUE$UNIT (threshold: $THRESHOLD$UNIT)"
+        fi
+        
+        cd ../alerting
+        
+        # Create test notification with current value
+        STATE_EMOJI="🚨"
+        SEVERITY="critical"
+        if [[ "{{.STATE}}" == "resolved" ]]; then
+          STATE_EMOJI="✅"
+          SEVERITY="info"
+        fi
+        
+        # Determine description based on alert type
+        if [[ "{{.ALERT}}" == *"SyntheticTestsFailing"* ]]; then
+          DESCRIPTION="$SERVICE synthetic tests are failing - success rate: ${CURRENT_VALUE}%"
+        elif [[ "{{.ALERT}}" == *"SyntheticSlowResponse"* ]]; then
+          DESCRIPTION="$SERVICE P95 response time is ${CURRENT_VALUE}ms (threshold > 3000ms)"
+        else
+          DESCRIPTION="$SERVICE alert triggered with current value: ${CURRENT_VALUE}${UNIT}"
+        fi
+        
+        echo "🚀 Sending test notification..."
+        
+        response=$(curl -s -w "%{http_code}" -X POST \
+          "${GRAFANA_URL}/api/alertmanager/grafana/config/api/v1/receivers/test" \
+          -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"alert\": {
+              \"annotations\": {
+                \"description\": \"$DESCRIPTION\",
+                \"summary\": \"{{.ALERT}} - $SERVICE\",
+                \"runbook_url\": \"https://github.com/seobrien/home-ops/wiki/Testing\"
+              },
+              \"labels\": {
+                \"alertname\": \"{{.ALERT}}\",
+                \"service\": \"$SERVICE\",
+                \"severity\": \"$SEVERITY\",
+                \"test\": \"true\"
+              }
+            },
+            \"receivers\": [
+              {
+                \"name\": \"slack-critical\",
+                \"grafana_managed_receiver_configs\": [
+                  {
+                    \"name\": \"slack-critical\"
+                  }
+                ]
+              }
+            ]
+          }")
+        
+        http_code=${response: -3}
+        body=${response%???}
+        
+        if [[ $http_code -eq 200 || $http_code -eq 204 ]]; then
+          echo "✅ Test alert sent successfully!"
+          echo "📱 Check Slack for: \"$STATE_EMOJI {{.ALERT}} - $SERVICE\""
+          echo "📝 Description: $DESCRIPTION"
+        else
+          echo "❌ Failed to send test alert (HTTP $http_code)"
+          echo "$body"
+        fi
+
+  test:notification:
+    desc: "Send test notification using actual Grafana templates"
+    summary: |
+      Send test notification that triggers Grafana's actual template system.
+      Creates a new message each time by posting to Alertmanager webhook directly.
+      Usage: task alerting:test:notification [ALERT=TestAlert] [SERVICE=test-service] [STATE=firing|resolved]
+    vars:
+      ALERT: '{{.ALERT | default "TestAlert-Simple"}}'
+      SERVICE: '{{.SERVICE | default "test-service"}}'
+      STATE: '{{.STATE | default "firing"}}'
+      VALUE: '{{.VALUE | default "95"}}'
+    dir: terraform/alerting
+    cmds:
+      - |
+        GRAFANA_URL=$(terraform output -raw grafana_url 2>/dev/null || echo "")
+        GRAFANA_TOKEN=$(terraform output -raw grafana_token 2>/dev/null || echo "")
+        
+        if [[ -z "$GRAFANA_URL" || -z "$GRAFANA_TOKEN" ]]; then
+          echo "❌ Unable to get Grafana credentials from terraform outputs"
+          exit 1
+        fi
+        
+        # Generate unique timestamp for new message each time
+        TIMESTAMP=$(date +%s)
+        UNIQUE_ID="${TIMESTAMP}-$(date +%N | cut -c1-3)"
+        
+        echo "🧪 Creating new test notification: {{.ALERT}} ({{.STATE}})"
+        echo "📝 Service: {{.SERVICE}}"
+        echo "🆔 Unique ID: $UNIQUE_ID"
+        
+        # Determine severity and end time based on state
+        if [[ "{{.STATE}}" == "resolved" ]]; then
+          SEVERITY="info"
+          END_TIME=$(date -u -Iseconds)
+          echo "🔄 State: resolved (will show RESOLVED prefix)"
+        else
+          SEVERITY="critical"
+          END_TIME=""
+          echo "🔥 State: firing"
+        fi
+        
+        # Create realistic alert description based on alert type
+        if [[ "{{.ALERT}}" == *"SyntheticTestsFailing"* ]]; then
+          DESCRIPTION="{{.SERVICE}} synthetic tests are failing - success rate: {{.VALUE}}%"
+          SUMMARY="K6 synthetic tests failing for {{.SERVICE}}"
+        elif [[ "{{.ALERT}}" == *"SyntheticSlowResponse"* ]]; then
+          DESCRIPTION="{{.SERVICE}} P95 response time is {{.VALUE}}ms (threshold > 3000ms)"
+          SUMMARY="Service {{.SERVICE}} has slow response times"
+        elif [[ "{{.ALERT}}" == *"SyntheticTestsNotRunning"* ]]; then
+          DESCRIPTION="{{.SERVICE}} synthetic tests have not produced metrics in the last 10 minutes"
+          SUMMARY="K6 synthetic tests not running for {{.SERVICE}}"
+        else
+          DESCRIPTION="Test alert for {{.SERVICE}} - value: {{.VALUE}}"
+          SUMMARY="{{.ALERT}} - {{.SERVICE}}"
+        fi
+        
+        echo "📄 Description: $DESCRIPTION"
+        echo "🚀 Posting to Grafana Alertmanager (will use actual templates)..."
+        
+        # Post to Alertmanager webhook API - this triggers Grafana's template system
+        response=$(curl -s -w "%{http_code}" -X POST \
+          "${GRAFANA_URL}/api/alertmanager/grafana/api/v2/alerts" \
+          -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "[{
+            \"labels\": {
+              \"alertname\": \"{{.ALERT}}\",
+              \"service\": \"{{.SERVICE}}\",
+              \"severity\": \"$SEVERITY\",
+              \"test\": \"true\",
+              \"unique_id\": \"$UNIQUE_ID\"
+            },
+            \"annotations\": {
+              \"summary\": \"$SUMMARY\",
+              \"description\": \"$DESCRIPTION\",
+              \"runbook_url\": \"https://github.com/seobrien/home-ops/wiki/Testing\",
+              \"value\": \"{{.VALUE}}\"
+            },
+            \"startsAt\": \"$(date -u -Iseconds)\",
+            \"endsAt\": \"$END_TIME\",
+            \"generatorURL\": \"https://grafana.test/alert-test-$UNIQUE_ID\"
+          }]")
+        
+        http_code=${response: -3}
+        body=${response%???}
+        
+        if [[ $http_code -eq 200 ]]; then
+          echo "✅ Test alert posted to Grafana successfully!"
+          echo "📱 Grafana will process through actual templates and send to Slack"
+          echo "🔍 Look for notification with unique ID: $UNIQUE_ID"
+          if [[ "{{.STATE}}" == "resolved" ]]; then
+            echo "✅ Should show: RESOLVED prefix in Slack"
+          else
+            echo "🚨 Should show: Normal firing alert in Slack"
+          fi
+        else
+          echo "❌ Failed to post alert to Grafana (HTTP $http_code)"
+          echo "$body" | jq -r '.message // .error // .' 2>/dev/null || echo "$body"
+        fi

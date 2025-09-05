@@ -192,6 +192,7 @@ terraform/observability/
 ├── dashboard_synthetic.tf     # Synthetic monitoring dashboard
 ├── dashboard_media.tf         # Media application dashboards
 ├── externalsecret.tf          # Kubernetes secrets
+├── README.md                  # This documentation
 ├── tests/                     # Test scripts
 │   ├── base-media.js         # Generic service test
 │   ├── plex-internal.js      # Plex internal test
@@ -200,3 +201,107 @@ terraform/observability/
     ├── synthetic.json         # Synthetic monitoring dashboard
     └── media-services.json   # Media services dashboard
 ```
+
+---
+
+# ALERT TESTING FRAMEWORK
+
+## Problem Statement
+We need to test that our Grafana alert notifications are working correctly, specifically:
+
+1. **Template Processing** - Verify Grafana's template engine processes our notification templates correctly
+2. **RESOLVED Prefix** - Confirm that resolved alerts show `✅ RESOLVED:` prefix via template logic  
+3. **Variable Substitution** - Ensure `{{ $value }}` shows actual metric values instead of template code
+4. **Real Metric Values** - Test with actual current metrics, not simulated data
+5. **New Messages** - Each test should create fresh notifications, not reuse existing ones
+
+## Why We Can't Use Other Approaches
+
+### ❌ Webhook Bypass
+- **Problem**: Bypasses Grafana's template engine entirely
+- **Issue**: Doesn't test the actual notification pipeline we're using in production
+
+### ❌ Grafana API Endpoints  
+- **Problem**: Contact point test APIs return 404/500 errors
+- **Issue**: Grafana Cloud may not expose these endpoints or requires different authentication
+
+### ❌ Separate Test Alerts
+- **Problem**: Duplicate logic maintenance  
+- **Issue**: If we change alert logic, we have to update it in two places (violates DRY)
+
+## Proposed Solution: Single-Condition Manual Trigger
+
+### Concept
+Modify existing alert conditions to include an OR clause that can be manually triggered:
+
+```hcl
+# Original condition:
+expr = "(avg(avg_over_time(k6_checks_rate{service=\"jellyseerr\"}[10m])) * 100) < 95"
+
+# Modified condition:
+expr = "((avg(avg_over_time(k6_checks_rate{service=\"jellyseerr\"}[10m])) * 100) < 95) or (vector(1) and on() kube_pod_labels{pod=\"test-trigger-jellyseerr\"})"
+```
+
+### How It Works
+1. **Fire Alert**: `kubectl run test-trigger-jellyseerr --image=nginx --restart=Never`
+   - Alert fires immediately using current real metric values
+   - Notification shows actual success rate (e.g., "success rate: 97%")
+   - Goes through Grafana's complete template system
+
+2. **Resolve Alert**: `kubectl delete pod test-trigger-jellyseerr`  
+   - Assuming real metrics are healthy (≥95%), alert resolves
+   - Notification shows "✅ RESOLVED:" prefix via template
+   - Tests the complete resolved notification flow
+
+### Benefits
+- ✅ **Real Data**: Uses actual current metrics for notification values
+- ✅ **Template Testing**: Goes through Grafana's actual template engine
+- ✅ **Single Source**: No duplicate alert logic to maintain
+- ✅ **Complete Cycle**: Tests both firing and resolved states
+- ✅ **RESOLVED Prefix**: Verifies `{{ if eq .Status "resolved" }}✅ RESOLVED:` works
+
+## Current Alert Inventory
+- **3 alert types** × **12 services** = **36 total alerts**
+- Services: jellyfin, jellyseerr, lidarr, overseerr, plex-external, plex-internal, prowlarr, radarr, readarr, sabnzbd, sonarr, tautulli
+- Alert types: SyntheticTestsFailing, SyntheticTestsNotRunning, SyntheticSlowResponse
+
+## Implementation Plan
+
+### Phase 1: Single Alert Test
+1. Modify `SyntheticTestsFailing-jellyseerr` alert to include trigger condition
+2. Test manually:
+   ```bash
+   # Fire alert with real current metrics
+   kubectl run test-trigger-jellyseerr --image=nginx --restart=Never
+   
+   # Wait for Slack notification, verify it shows real values
+   # Verify template processing works correctly
+   
+   # Resolve alert  
+   kubectl delete pod test-trigger-jellyseerr
+   
+   # Wait for resolved notification with "✅ RESOLVED:" prefix
+   ```
+
+### Phase 2: Task Automation
+Create `task alerting:test:trigger ALERT=SyntheticTestsFailing-jellyseerr` that:
+- Creates trigger pod
+- Waits for alert to fire  
+- Deletes trigger pod
+- Waits for alert to resolve
+- Provides status feedback
+
+### Phase 3: Rollout (if successful)
+- Extend trigger logic to all 36 alerts
+- Create comprehensive testing tasks
+- Document testing procedures
+
+## Key Template Changes Already Applied
+- Fixed `{{ $values.A.Value }}` → `{{ $value }}` for proper variable substitution
+- Added RESOLVED prefix logic: `{{ if eq .Status "resolved" }}✅ RESOLVED: {{ else }}🚨 {{ end }}`
+
+## Next Steps
+1. Implement Phase 1 with jellyseerr alert
+2. Test manually to verify approach works  
+3. Create automated task for testing
+4. Expand to other alerts if successful

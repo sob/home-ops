@@ -11,49 +11,33 @@ resource "grafana_rule_group" "synthetic_monitoring" {
   folder_uid       = data.grafana_folder.monitoring_alerts.uid
   interval_seconds = 60
 
-  # Create individual alert rules for each service
+  # Alert 1: Synthetic tests failing (success rate < 95%)
   dynamic "rule" {
     for_each = local.k6_test_configs
     content {
-      name = "SyntheticServiceDown-${rule.key}"
+      name = "SyntheticTestsFailing-${rule.key}"
       
       annotations = {
-        summary     = "Service ${rule.key} is failing synthetic tests"
-        description = "${rule.key} has ${contains(["plex-external", "overseerr", "jellyseerr"], rule.key) ? "critical" : "warning"} failures - success rate: {{ $values.A.Value | printf \"%.0f\" }}%"
-        runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticServiceDown"
+        summary     = "K6 synthetic tests failing for ${rule.key}"
+        description = "${rule.key} synthetic tests alert triggered"
+        runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticTestsFailing"
         service     = rule.key
       }
       
       labels = {
-        severity = contains(["plex-external", "overseerr", "jellyseerr"], rule.key) ? "critical" : "warning"
+        severity = "critical"
         type     = "synthetic"
         service  = rule.key
       }
       
-      for               = contains(["plex-external", "overseerr", "jellyseerr"], rule.key) ? "5m" : "6m"
-      condition         = "B"
-      no_data_state     = contains(["plex-external", "overseerr", "jellyseerr"], rule.key) ? "Alerting" : "OK"  # Only critical services alert on no data
+      for               = "5m"
+      condition         = "A"
+      no_data_state     = "OK"
       exec_err_state    = "Alerting"
       
-      # Query A: Get success rate or 0 if no metrics
+      # Query A: Success rate check
       data {
         ref_id = "A"
-        
-        relative_time_range {
-          from = 600  # 10 minutes to capture 2 test runs
-          to   = 0
-        }
-        
-        datasource_uid = local.prometheus_datasource_uid
-        model = jsonencode({
-          expr  = "(avg(avg_over_time(k6_checks_rate{service=\"${rule.key}\"}[10m])) * 100) or on() vector(0)"
-          refId = "A"
-        })
-      }
-      
-      # Query B: Alert condition - success rate < 95% or no data
-      data {
-        ref_id = "B"
         
         relative_time_range {
           from = 600
@@ -62,8 +46,50 @@ resource "grafana_rule_group" "synthetic_monitoring" {
         
         datasource_uid = local.prometheus_datasource_uid
         model = jsonencode({
-          expr  = "(absent_over_time(k6_checks_rate{service=\"${rule.key}\"}[10m]) == 1) or ((avg(avg_over_time(k6_checks_rate{service=\"${rule.key}\"}[10m])) * 100) < 95)"
-          refId = "B"
+          expr  = "(avg(avg_over_time(k6_checks_rate{service=\"${rule.key}\"}[10m])) * 100) < 95"
+          refId = "A"
+        })
+      }
+    }
+  }
+
+  # Alert 2: No synthetic test data (tests not running)
+  dynamic "rule" {
+    for_each = local.k6_test_configs
+    content {
+      name = "SyntheticTestsNotRunning-${rule.key}"
+      
+      annotations = {
+        summary     = "K6 synthetic tests not running for ${rule.key}"
+        description = "${rule.key} synthetic tests have not produced metrics in the last 10 minutes"
+        runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/SyntheticTestsNotRunning"
+        service     = rule.key
+      }
+      
+      labels = {
+        severity = "warning"
+        type     = "synthetic"
+        service  = rule.key
+      }
+      
+      for               = "10m"
+      condition         = "A"
+      no_data_state     = "OK"  # This is handled by the absent() query
+      exec_err_state    = "Alerting"
+      
+      # Query A: Alert when no metrics exist
+      data {
+        ref_id = "A"
+        
+        relative_time_range {
+          from = 600
+          to   = 0
+        }
+        
+        datasource_uid = local.prometheus_datasource_uid
+        model = jsonencode({
+          expr  = "absent(k6_checks_rate{service=\"${rule.key}\"})"
+          refId = "A"
         })
       }
     }
@@ -77,7 +103,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       
       annotations = {
         summary     = "Service ${rule.key} has slow response times"
-        description = "${rule.key} P95 response time is {{ $values.A.Value | printf \"%.0f\" }}ms (threshold > 3000ms)"
+        description = "${rule.key} P95 response time is {{ $value | printf \"%.0f\" }}ms (threshold > 3000ms)"
         runbook_url = "https://github.com/seobrien/home-ops/wiki/Alerts/ServiceSlowResponse"
         service     = rule.key
       }
@@ -89,7 +115,7 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       }
       
       for               = "10m"
-      condition         = "B"
+      condition         = "A"
       no_data_state     = "OK"  # Don't alert on missing response time metrics
       exec_err_state    = "OK"
       
