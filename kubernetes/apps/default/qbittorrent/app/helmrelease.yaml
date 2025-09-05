@@ -39,7 +39,6 @@ spec:
               TZ: America/Chicago
               QBT_WEBUI_PORT: &port 80
               QBT_TORRENTING_PORT: &torrentPort 50413
-              QBT_WEBUI_BYPASS_LOCAL_AUTH: "true"
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -48,10 +47,9 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /api/v2/app/version
+                  tcpSocket:
                     port: *port
-                  initialDelaySeconds: 30
+                  initialDelaySeconds: 60
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 3
