@@ -125,13 +125,8 @@ spec:
     persistence:
       config:
         existingClaim: romm
-        advancedMounts:
-          romm:
-            app:
-              - path: /romm/config
-                subPath: config
-              - path: /romm/resources  
-                subPath: resources
+        globalMounts:
+          - path: /romm
       database:
         existingClaim: romm-database
         globalMounts:
