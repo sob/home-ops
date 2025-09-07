@@ -33,6 +33,9 @@ spec:
             env:
               TZ: America/Chicago
               ROMM_BASE_URL: "https://romm.${SECRET_DOMAIN}"
+              REDIS_HOST: "127.0.0.1"
+              REDIS_PORT: "6379"
+              REDIS_DB: "0"
               # Metadata provider settings
               HASHEOUS_API_ENABLED: "true"
               PLAYMATCH_API_ENABLED: "true"
@@ -74,9 +77,28 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 256Mi
+                memory: 512Mi
               limits:
-                memory: 2Gi
+                memory: 4Gi
+          valkey:
+            image:
+              repository: valkey/valkey
+              tag: 8.0-alpine@sha256:80eca97cbc5b9b3e2e11affe66e95c05d13cd9ba1e1dbb5a75dfab8a84c58fb9
+            args:
+              - --dir
+              - /data
+              - --save
+              - "60 1000"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
           mariadb:
             image:
               repository: mariadb
@@ -192,5 +214,7 @@ spec:
           - path: /tmp
       redis-data:
         type: emptyDir
-        globalMounts:
-          - path: /redis-data
+        advancedMounts:
+          romm:
+            valkey:
+              - path: /data
