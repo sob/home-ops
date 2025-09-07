@@ -193,4 +193,4 @@ spec:
       redis-data:
         type: emptyDir
         globalMounts:
-          - path: /data
+          - path: /redis-data
