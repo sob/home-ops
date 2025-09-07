@@ -44,8 +44,6 @@ spec:
               ENABLE_SCHEDULED_UPDATE_LAUNCHBOX_METADATA: "true"
               SCHEDULED_UPDATE_LAUNCHBOX_METADATA_CRON: "0 5 * * *"
               SCHEDULED_RESCAN_CRON: "0 3 * * *"
-              REDIS_HOST: "dragonfly.database.svc.cluster.local"
-              REDIS_PORT: "6379"
             envFrom:
               - secretRef:
                   name: romm-secret
