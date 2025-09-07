@@ -32,6 +32,7 @@ spec:
               tag: 4.1.6@sha256:2e9cd221a9cefe093c327258e148b762b0e5491ff72f6f79fbe9fc336852654c
             env:
               TZ: America/Chicago
+              ROMM_BASE_URL: "https://romm.${SECRET_DOMAIN}"
               # Metadata provider settings
               HASHEOUS_API_ENABLED: "true"
               PLAYMATCH_API_ENABLED: "true"
