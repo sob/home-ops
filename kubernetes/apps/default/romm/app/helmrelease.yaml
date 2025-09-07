@@ -190,3 +190,7 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      redis-data:
+        type: emptyDir
+        globalMounts:
+          - path: /data
