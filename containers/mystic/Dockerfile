@@ -1,5 +1,12 @@
+# Version definitions
+ARG ALPINE_VERSION="3.20@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5"
+ARG UNRAR_VERSION="7.1.10"
+ARG CRYPTLIB_VERSION="345" 
+ARG CRYPTLIB_SO_VERSION="3.4.5"
+ARG MYSTIC_VERSION="112a48"
+
 # Build stage for cryptlib compilation
-FROM alpine:3.20@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5 AS builder
+FROM alpine:${ALPINE_VERSION} AS builder
 
 # Install build dependencies for Alpine
 RUN apk add --no-cache \
@@ -13,44 +20,49 @@ RUN apk add --no-cache \
     python3 \
     python3-dev
 
-# Build unrar from source
-WORKDIR /tmp
-RUN wget -q https://www.rarlab.com/rar/unrarsrc-7.1.10.tar.gz \
-    && tar -xzf unrarsrc-7.1.10.tar.gz \
-    && cd unrar \
-    && make \
-    && mkdir -p /build/bin \
-    && cp unrar /build/bin/ \
-    && cd / \
-    && rm -rf /tmp/unrar*
+# Build unrar from source (only needed for x86_64)
+WORKDIR /tmp  
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
+        wget -q https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz \
+        && tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz \
+        && cd unrar \
+        && make \
+        && mkdir -p /build/bin \
+        && cp unrar /build/bin/ \
+        && cd / \
+        && rm -rf /tmp/unrar*; \
+    else \
+        mkdir -p /build/bin; \
+    fi
 
 # Build cryptlib for Mystic BBS SSH support
 WORKDIR /tmp
-RUN wget -q http://www.mysticbbs.com/downloads/cl345.zip \
+RUN wget -q http://www.mysticbbs.com/downloads/cl${CRYPTLIB_VERSION}.zip \
     && mkdir cryptlib \
     && cd cryptlib \
-    && unzip -a ../cl345.zip \
+    && unzip -a ../cl${CRYPTLIB_VERSION}.zip \
     && sed -i 's/-mcpu=pentium/-march=x86-64/g' tools/ccopts.sh \
     && sed -i 's/mcpu=pentium/march=x86-64/g' tools/ccopts.sh \
     && CC=gcc-9 CXX=g++-9 make shared \
     && mkdir -p /build \
-    && cp libcl.so.3.4.5 /build/ \
+    && cp libcl.so.${CRYPTLIB_SO_VERSION} /build/ \
+    && echo ${CRYPTLIB_SO_VERSION} > /build/cryptlib_version \
     && cd / \
-    && rm -rf /tmp/cryptlib /tmp/cl345.zip
+    && rm -rf /tmp/cryptlib /tmp/cl${CRYPTLIB_VERSION}.zip
 
 # Download and install Mystic BBS (architecture-specific)
 WORKDIR /tmp
 RUN ARCH=$(uname -m) && \
     echo "Detected architecture: $ARCH" && \
     if [ "$ARCH" = "x86_64" ]; then \
-        MYSTIC_URL="https://www.mysticbbs.com/downloads/mys112a48_l64.rar"; \
-        MYSTIC_FILE="mys112a48_l64.rar"; \
+        MYSTIC_URL="https://www.mysticbbs.com/downloads/mys${MYSTIC_VERSION}_l64.rar"; \
+        MYSTIC_FILE="mys${MYSTIC_VERSION}_l64.rar"; \
     elif [ "$ARCH" = "aarch64" ]; then \
-        MYSTIC_URL="https://www.mysticbbs.com/downloads/mys112a48_p64.zip"; \
-        MYSTIC_FILE="mys112a48_p64.zip"; \
+        MYSTIC_URL="https://www.mysticbbs.com/downloads/mys${MYSTIC_VERSION}_p64.zip"; \
+        MYSTIC_FILE="mys${MYSTIC_VERSION}_p64.zip"; \
     elif [ "$ARCH" = "armv7l" ] || [ "$ARCH" = "arm" ]; then \
-        MYSTIC_URL="https://www.mysticbbs.com/downloads/mys112a48_p32.zip"; \
-        MYSTIC_FILE="mys112a48_p32.zip"; \
+        MYSTIC_URL="https://www.mysticbbs.com/downloads/mys${MYSTIC_VERSION}_p32.zip"; \
+        MYSTIC_FILE="mys${MYSTIC_VERSION}_p32.zip"; \
     else \
         echo "Unsupported architecture: $ARCH"; \
         exit 1; \
@@ -69,7 +81,7 @@ RUN ARCH=$(uname -m) && \
     rm -rf /tmp/"$MYSTIC_FILE" /tmp/install*
 
 # Runtime stage
-FROM alpine:3.20@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+FROM alpine:${ALPINE_VERSION}
 
 # Metadata
 LABEL org.opencontainers.image.title="Mystic BBS"
@@ -91,8 +103,12 @@ RUN apk add --no-cache \
 
 # Copy unrar and cryptlib from builder
 COPY --from=builder /build/bin/unrar /usr/local/bin/unrar
-COPY --from=builder /build/libcl.so.3.4.5 /usr/lib/libcl.so
-RUN ldconfig
+COPY --from=builder /build/libcl.so.* /usr/lib/
+COPY --from=builder /build/cryptlib_version /tmp/cryptlib_version
+RUN CRYPTLIB_VERSION=$(cat /tmp/cryptlib_version) && \
+    ln -s /usr/lib/libcl.so.${CRYPTLIB_VERSION} /usr/lib/libcl.so && \
+    rm /tmp/cryptlib_version && \
+    ldconfig
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
