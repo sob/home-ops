@@ -15,6 +15,7 @@ resources:
   - ./jellyseerr/ks.yaml
   - ./lidarr/ks.yaml
 # - ./lubelog/ks.yaml
+  - ./mystic-bbs/ks.yaml
 # - ./node-red/ks.yaml
   - ./overseerr/ks.yaml
   - ./plex/ks.yaml
