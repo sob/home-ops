@@ -29,10 +29,13 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install pyenv and Python 2.7.18
-RUN git clone --depth=1 --branch=v2.4.18 https://github.com/pyenv/pyenv.git /opt/pyenv
-ENV PATH="/opt/pyenv/bin:$PATH"
-RUN eval "$(pyenv init -)" && pyenv install 2.7.18 && pyenv global 2.7.18
+# Install Python 2.7 from Ubuntu packages (much faster than compiling)
+RUN apt-get update && apt-get install -y \
+    python2.7 \
+    python2.7-dev \
+    libpython2.7 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Build cryptlib for Mystic BBS SSH support
 WORKDIR /tmp
@@ -91,20 +94,17 @@ LABEL org.opencontainers.image.licenses="MIT"
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Chicago
-ENV PYTHONPATH="/opt/pyenv/versions/2.7.18/lib/python2.7:/opt/pyenv/versions/2.7.18/lib/python2.7/lib-dynload"
-ENV PATH="/opt/pyenv/versions/2.7.18/bin:$PATH"
 
-# Install runtime dependencies only
+# Install runtime dependencies including Python 2.7
 RUN apt-get update && apt-get install -y \
     cron \
     expect \
     logrotate \
+    python2.7 \
+    libpython2.7 \
     zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Copy Python from builder
-COPY --from=builder /opt/pyenv /opt/pyenv
 
 # Copy cryptlib from builder
 COPY --from=builder /build/libcl.so.3.4.5 /usr/lib/libcl.so
