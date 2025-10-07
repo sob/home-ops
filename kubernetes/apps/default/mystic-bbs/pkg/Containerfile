@@ -40,8 +40,9 @@ RUN wget -q http://www.mysticbbs.com/downloads/cl345.zip \
     && mkdir cryptlib \
     && cd cryptlib \
     && unzip -a ../cl345.zip \
-    && sed -i 's/-mcpu=pentium/-march=x86-64/g' makefile \
-    && sed -i 's/mcpu=pentium/march=x86-64/g' makefile \
+    && find . -name "*.mk" -o -name "makefile*" -o -name "Makefile*" | xargs sed -i 's/-mcpu=pentium/-march=x86-64/g' \
+    && find . -name "*.mk" -o -name "makefile*" -o -name "Makefile*" | xargs sed -i 's/mcpu=pentium/march=x86-64/g' \
+    && grep -r "mcpu.*pentium" . && echo "Found remaining mcpu references" || echo "No mcpu references found" \
     && CC=gcc-9 CXX=g++-9 make shared \
     && mkdir -p /build \
     && cp libcl.so.3.4.5 /build/ \
