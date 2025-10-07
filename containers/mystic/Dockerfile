@@ -11,8 +11,18 @@ RUN apk add --no-cache \
     wget \
     zlib-dev \
     python3 \
-    python3-dev \
-    unrar
+    python3-dev
+
+# Build unrar from source
+WORKDIR /tmp
+RUN wget -q https://www.rarlab.com/rar/unrarsrc-7.1.10.tar.gz \
+    && tar -xzf unrarsrc-7.1.10.tar.gz \
+    && cd unrar \
+    && make \
+    && mkdir -p /build/bin \
+    && cp unrar /build/bin/ \
+    && cd / \
+    && rm -rf /tmp/unrar*
 
 # Build cryptlib for Mystic BBS SSH support
 WORKDIR /tmp
@@ -35,7 +45,6 @@ RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
         MYSTIC_URL="https://www.mysticbbs.com/downloads/mys112a48_l64.rar"; \
         MYSTIC_FILE="mys112a48_l64.rar"; \
-        apt-get update && apt-get install -y unrar && apt-get clean && rm -rf /var/lib/apt/lists/*; \
     elif [ "$ARCH" = "aarch64" ]; then \
         MYSTIC_URL="https://www.mysticbbs.com/downloads/mys112a48_p64.zip"; \
         MYSTIC_FILE="mys112a48_p64.zip"; \
@@ -49,7 +58,7 @@ RUN ARCH=$(uname -m) && \
     echo "Downloading Mystic BBS for $ARCH from $MYSTIC_URL" && \
     wget -q "$MYSTIC_URL" -O "$MYSTIC_FILE" && \
     if [ "${MYSTIC_FILE##*.}" = "rar" ]; then \
-        unrar x "$MYSTIC_FILE"; \
+        /build/bin/unrar x "$MYSTIC_FILE"; \
     else \
         unzip -q "$MYSTIC_FILE"; \
     fi && \
@@ -80,7 +89,8 @@ RUN apk add --no-cache \
     zip \
     bash
 
-# Copy cryptlib from builder
+# Copy unrar and cryptlib from builder
+COPY --from=builder /build/bin/unrar /usr/local/bin/unrar
 COPY --from=builder /build/libcl.so.3.4.5 /usr/lib/libcl.so
 RUN ldconfig
 
