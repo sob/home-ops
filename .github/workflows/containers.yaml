@@ -24,29 +24,30 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      containers: ${{ steps.filter.outputs.containers }}
+      containers: ${{ steps.set-output.outputs.containers }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get changed containers
-        id: filter
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: containers/**
+          dir_names: true
+          dir_names_max_depth: 2
+          json: true
+          escape_json: false
+
+      - name: Set containers output
+        id: set-output
         run: |
           if [ -n "${{ github.event.inputs.container }}" ]; then
             echo "containers=[\"${{ github.event.inputs.container }}\"]" >> $GITHUB_OUTPUT
           else
-            # Get changed containers by looking at containers/ directory
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
-              changed_dirs=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^containers/' | cut -d'/' -f2 | sort | uniq | tr '\n' ' ')
-            else
-              changed_dirs=$(git diff --name-only ${{ github.event.before }}..${{ github.sha }} | grep '^containers/' | cut -d'/' -f2 | sort | uniq | tr '\n' ' ')
-            fi
-            if [ -z "$changed_dirs" ]; then
-              echo "containers=[]" >> $GITHUB_OUTPUT
-            else
-              containers=$(echo "$changed_dirs" | jq -R -s -c 'split(" ") | map(select(length > 0))')
-              echo "containers=$containers" >> $GITHUB_OUTPUT
-            fi
+            echo "containers=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
           fi
 
   build:
