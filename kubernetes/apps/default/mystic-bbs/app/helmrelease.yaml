@@ -24,7 +24,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/sob/mystic-bbs
+              repository: ghcr.io/sob/mystic
               tag: latest
             env:
               TZ: America/Chicago

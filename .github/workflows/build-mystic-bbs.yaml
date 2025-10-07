@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/mystic-bbs
+  IMAGE_NAME: ${{ github.repository_owner }}/mystic
 
 jobs:
   build:
