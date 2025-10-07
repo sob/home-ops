@@ -41,6 +41,7 @@ RUN wget -q http://www.mysticbbs.com/downloads/cl345.zip \
     && cd cryptlib \
     && unzip -a ../cl345.zip \
     && sed -i 's/-mcpu=pentium/-march=x86-64/g' makefile \
+    && sed -i 's/mcpu=pentium/march=x86-64/g' makefile \
     && CC=gcc-9 CXX=g++-9 make shared \
     && mkdir -p /build \
     && cp libcl.so.3.4.5 /build/ \
