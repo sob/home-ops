@@ -1,5 +1,5 @@
 # Build stage for cryptlib compilation
-FROM ubuntu:24.04@sha256:b359f1067efa76f37863778f7b6d0e8d911e3ee8efa807ad01fbf5dc1ef9006b AS builder
+FROM ubuntu:24.04@sha256:728785b59223d755e3e5c5af178fab1be7031f3522c5ccd7a0b32b80d8248123 AS builder
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -80,7 +80,7 @@ RUN ARCH=$(uname -m) && \
     rm -rf /tmp/"$MYSTIC_FILE" /tmp/install*
 
 # Runtime stage
-FROM ubuntu:24.04@sha256:b359f1067efa76f37863778f7b6d0e8d911e3ee8efa807ad01fbf5dc1ef9006b
+FROM ubuntu:24.04@sha256:728785b59223d755e3e5c5af178fab1be7031f3522c5ccd7a0b32b80d8248123
 
 # Metadata
 LABEL org.opencontainers.image.title="Mystic BBS"
