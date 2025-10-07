@@ -1,41 +1,18 @@
 # Build stage for cryptlib compilation
-FROM ubuntu:24.04@sha256:b359f1067efa76f37863778f7b6d0e8d911e3ee8efa807ad01fbf5dc1ef9006b AS builder
+FROM alpine:3.20@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5 AS builder
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    gcc-9 \
-    g++-9 \
-    git \
-    libbz2-dev \
-    libffi-dev \
-    liblzma-dev \
-    libncurses5-dev \
-    libncursesw5-dev \
-    libreadline-dev \
-    libsqlite3-dev \
-    libssl-dev \
-    llvm \
+# Install build dependencies for Alpine
+RUN apk add --no-cache \
+    build-base \
+    gcc \
+    g++ \
     make \
-    python3-openssl \
-    tk-dev \
     unzip \
     wget \
-    xz-utils \
-    zlib1g-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python 3 from Ubuntu packages (Python 2.7 not available in Ubuntu 24.04)
-RUN apt-get update && apt-get install -y \
+    zlib-dev \
     python3 \
     python3-dev \
-    libpython3-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    unrar
 
 # Build cryptlib for Mystic BBS SSH support
 WORKDIR /tmp
@@ -83,7 +60,7 @@ RUN ARCH=$(uname -m) && \
     rm -rf /tmp/"$MYSTIC_FILE" /tmp/install*
 
 # Runtime stage
-FROM ubuntu:24.04@sha256:b359f1067efa76f37863778f7b6d0e8d911e3ee8efa807ad01fbf5dc1ef9006b
+FROM alpine:3.20@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
 
 # Metadata
 LABEL org.opencontainers.image.title="Mystic BBS"
@@ -92,19 +69,16 @@ LABEL org.opencontainers.image.source="https://github.com/seobrien/home-ops"
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Chicago
 
-# Install runtime dependencies including Python 3
-RUN apt-get update && apt-get install -y \
-    cron \
+# Install runtime dependencies for Alpine
+RUN apk add --no-cache \
+    dcron \
     expect \
     logrotate \
     python3 \
-    libpython3-dev \
     zip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    bash
 
 # Copy cryptlib from builder
 COPY --from=builder /build/libcl.so.3.4.5 /usr/lib/libcl.so
@@ -116,18 +90,21 @@ COPY --from=builder /build/mystic /opt/mystic
 # Setup logrotate
 COPY logrotate.conf /etc/logrotate.d/mystic
 
-# Create mystic user and directories (no passwords)
-RUN useradd -m -s /bin/bash mystic \
-    && mkdir -p /mystic
+# Create mystic user with standard UID/GID following home-operations conventions
+RUN addgroup -g 65534 mystic \
+    && adduser -u 65534 -G mystic -h /config -s /bin/bash -D mystic \
+    && mkdir -p /config /tmp/mystic \
+    && chown -R mystic:mystic /config /tmp/mystic
 
 # Copy startup scripts
-COPY boot.sh /mystic/
-COPY tailit.sh /mystic/
-RUN chmod +x /mystic/boot.sh /mystic/tailit.sh
+COPY boot.sh /usr/local/bin/
+COPY tailit.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/boot.sh /usr/local/bin/tailit.sh
 
 # Expose ports (telnet, SSH, BinkP for FidoNet)
 EXPOSE 23/tcp 22/tcp 24554/tcp
 
-WORKDIR /mystic
+WORKDIR /config
+USER 65534:65534
 
-CMD ["/mystic/boot.sh"]
+CMD ["/usr/local/bin/boot.sh"]
