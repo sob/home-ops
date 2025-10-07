@@ -33,6 +33,7 @@ jobs:
 
       - name: Get changed containers
         id: changed-files
+        if: github.event_name != 'workflow_dispatch'
         uses: tj-actions/changed-files@v41
         with:
           files: containers/**
@@ -44,9 +45,17 @@ jobs:
       - name: Set containers output
         id: set-output
         run: |
-          if [ -n "${{ github.event.inputs.container }}" ]; then
-            echo "containers=[\"${{ github.event.inputs.container }}\"]" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.container }}" ]; then
+              # Build specific container
+              echo "containers=[\"${{ github.event.inputs.container }}\"]" >> $GITHUB_OUTPUT
+            else
+              # Build all containers
+              all_containers=$(find containers -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -R -s -c 'split("\n") | map(select(length > 0))')
+              echo "containers=$all_containers" >> $GITHUB_OUTPUT
+            fi
           else
+            # Automatic trigger - use changed files
             echo "containers=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
           fi
 
