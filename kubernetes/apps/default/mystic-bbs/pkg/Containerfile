@@ -40,7 +40,8 @@ RUN wget -q http://www.mysticbbs.com/downloads/cl345.zip \
     && mkdir cryptlib \
     && cd cryptlib \
     && unzip -a ../cl345.zip \
-    && CC=gcc-9 CXX=g++-9 CFLAGS="-c -D__UNIX__ -DNDEBUG -I. -DDATA_LITTLEENDIAN -DFIXED_SEED=0x9387c06a95e93f30 -DHAS_ZLIB -fPIC -DHAS_RECURSIVE_MUTEX -DHAS_ROBUST_MUTEX -march=x86-64 -DOSVERSION=6 -O3 -fomit-frame-pointer -D_REENTRANT" make shared \
+    && sed -i 's/-mcpu=pentium/-march=x86-64/g' makefile \
+    && CC=gcc-9 CXX=g++-9 make shared \
     && mkdir -p /build \
     && cp libcl.so.3.4.5 /build/ \
     && cd / \
