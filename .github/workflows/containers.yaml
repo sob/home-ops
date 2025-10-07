@@ -45,6 +45,9 @@ jobs:
       - name: Set containers output
         id: set-output
         run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Changed files output: '${{ steps.changed-files.outputs.all_changed_files }}'"
+          
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             if [ -n "${{ github.event.inputs.container }}" ]; then
               # Build specific container
@@ -55,8 +58,16 @@ jobs:
               echo "containers=$all_containers" >> $GITHUB_OUTPUT
             fi
           else
-            # Automatic trigger - use changed files
-            echo "containers=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
+            # Automatic trigger - use changed files  
+            changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+            echo "Processing changed files: $changed_files"
+            
+            if [ -z "$changed_files" ] || [ "$changed_files" = "[]" ] || [ "$changed_files" = "" ]; then
+              echo "No changes detected, setting empty array"
+              echo "containers=[]" >> $GITHUB_OUTPUT
+            else
+              echo "containers=$changed_files" >> $GITHUB_OUTPUT
+            fi
           fi
 
   build:
