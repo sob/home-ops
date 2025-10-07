@@ -1,0 +1,105 @@
+---
+name: Build Containers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "containers/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "containers/**"
+  workflow_dispatch:
+    inputs:
+      container:
+        description: "Container to build (optional - builds all changed if empty)"
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.filter.outputs.containers }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get changed containers
+        id: filter
+        run: |
+          if [ -n "${{ github.event.inputs.container }}" ]; then
+            echo "containers=[\"${{ github.event.inputs.container }}\"]" >> $GITHUB_OUTPUT
+          else
+            # Get changed containers by looking at containers/ directory
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              changed_dirs=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^containers/' | cut -d'/' -f2 | sort | uniq | tr '\n' ' ')
+            else
+              changed_dirs=$(git diff --name-only ${{ github.event.before }}..${{ github.sha }} | grep '^containers/' | cut -d'/' -f2 | sort | uniq | tr '\n' ' ')
+            fi
+            if [ -z "$changed_dirs" ]; then
+              echo "containers=[]" >> $GITHUB_OUTPUT
+            else
+              containers=$(echo "$changed_dirs" | jq -R -s -c 'split(" ") | map(select(length > 0))')
+              echo "containers=$containers" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  build:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.containers != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        container: ${{ fromJson(needs.changes.outputs.containers) }}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:v0.12.4
+            network=host
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          context: containers/${{ matrix.container }}
+          file: containers/${{ matrix.container }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          builder: ${{ steps.buildx.outputs.name }}
