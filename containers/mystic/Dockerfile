@@ -132,9 +132,21 @@ RUN apk add --no-cache \
     zip \
     bash
 
-# Copy unrar and cryptlib from builder
-COPY --from=builder /build/bin/* /usr/local/bin/
+# Copy cryptlib from builder
 COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so.${CRYPTLIB_SO_VERSION}
+
+# Copy unrar binary if it exists (x86_64 only)
+RUN mkdir -p /usr/local/bin
+COPY --from=builder /build/bin/ /tmp/unrar-staging/
+RUN if [ "$(uname -m)" = "x86_64" ] && [ -f /tmp/unrar-staging/unrar ]; then \
+        echo "Copying unrar for x86_64" && \
+        cp /tmp/unrar-staging/unrar /usr/local/bin/; \
+    else \
+        echo "Skipping unrar copy for non-x86_64 architecture"; \
+    fi && \
+    rm -rf /tmp/unrar-staging
+
+# Configure dynamic linker
 RUN ldconfig
 
 # Copy Mystic BBS from builder
