@@ -158,7 +158,7 @@ jobs:
 
   merge:
     runs-on: ubuntu-24.04
-    needs: build
+    needs: [changes, build]
     if: ${{ needs.changes.outputs.containers != '[]' && needs.changes.outputs.containers != '' }}
     strategy:
       fail-fast: false
