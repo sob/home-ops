@@ -161,8 +161,10 @@ COPY --from=builder /build/mystic /opt/mystic
 COPY logrotate.conf /etc/logrotate.d/mystic
 
 # Create mystic user with standard UID/GID following home-operations conventions
-RUN addgroup -g 65534 mystic \
-    && adduser -u 65534 -G mystic -h /config -s /bin/bash -D mystic \
+RUN echo "Checking existing groups:" && \
+    getent group 65534 || echo "No group with GID 65534" && \
+    (addgroup -g 65534 mystic 2>/dev/null || echo "Using existing group with GID 65534") \
+    && adduser -u 65534 -G $(getent group 65534 | cut -d: -f1) -h /config -s /bin/bash -D mystic \
     && mkdir -p /config /tmp/mystic \
     && chown -R mystic:mystic /config /tmp/mystic
 
