@@ -178,12 +178,11 @@ COPY --from=builder /build/mystic /opt/mystic
 COPY logrotate.conf /etc/logrotate.d/mystic
 
 # Create mystic user with standard UID/GID following home-operations conventions
-RUN echo "Checking existing groups:" && \
-    getent group 65534 || echo "No group with GID 65534" && \
-    (addgroup -g 65534 mystic 2>/dev/null || echo "Using existing group with GID 65534") \
-    && adduser -u 65534 -G $(getent group 65534 | cut -d: -f1) -h /config -s /bin/bash -D mystic \
-    && mkdir -p /config /tmp/mystic \
-    && chown -R mystic:mystic /config /tmp/mystic
+RUN echo "Checking existing user/group 65534:" && \
+    getent passwd 65534 && getent group 65534 && \
+    echo "Using existing nobody user (65534:65534) for mystic" && \
+    mkdir -p /config /tmp/mystic && \
+    chown -R 65534:65534 /config /tmp/mystic
 
 # Copy startup scripts
 COPY entrypoint.sh /usr/local/bin/
