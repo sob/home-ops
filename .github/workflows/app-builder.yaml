@@ -191,7 +191,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: [plan, merge]
-    if: ${{ !inputs.release }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

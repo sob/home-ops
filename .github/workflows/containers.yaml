@@ -16,11 +16,6 @@ on:
         description: "Container to build (optional - builds all changed if empty)"
         required: false
         type: string
-      release:
-        description: "Release build"
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   prepare:
@@ -88,5 +83,5 @@ jobs:
         app: ${{ fromJson(needs.changed.outputs.apps) }}
     with:
       app: ${{ matrix.app }}
-      release: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.inputs.release == 'true' }}
+      release: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets: inherit
