@@ -8,11 +8,11 @@ ARG MYSTIC_VERSION="112a48"
 # Build stage for cryptlib compilation
 FROM alpine:${ALPINE_VERSION} AS builder
 
-# Re-declare ARGs for builder stage
-ARG UNRAR_VERSION="7.1.10"
-ARG CRYPTLIB_VERSION="345" 
-ARG CRYPTLIB_SO_VERSION="3.4.5"
-ARG MYSTIC_VERSION="112a48"
+# Re-declare ARGs for builder stage (inherit from global)
+ARG UNRAR_VERSION
+ARG CRYPTLIB_VERSION
+ARG CRYPTLIB_SO_VERSION
+ARG MYSTIC_VERSION
 
 # Install build dependencies for Alpine
 RUN apk add --no-cache \
