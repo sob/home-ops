@@ -119,6 +119,7 @@ jobs:
             *.cache-to=type=gha,mode=max
           files: |
             ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
 
       - name: Export digest
         run: |
