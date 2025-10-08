@@ -198,3 +198,17 @@ jobs:
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}@sha256:%s ' *)
+
+      - name: Inspect image and extract digest
+        id: inspect
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}"
+          DIGEST=$(docker buildx imagetools inspect ${IMAGE_NAME}:${{ github.sha }} --format "{{ .Manifest.Digest }}" | cut -d':' -f2)
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+          
+      - name: Tag with SHA256 digest
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}"
+          docker buildx imagetools create \
+            -t ${IMAGE_NAME}:sha256-${{ steps.inspect.outputs.digest }} \
+            ${IMAGE_NAME}:${{ github.sha }}
