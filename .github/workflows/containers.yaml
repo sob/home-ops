@@ -133,12 +133,68 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push container image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: containers/${{ matrix.container }}
           file: containers/${{ matrix.container }}/Dockerfile
           platforms: ${{ matrix.platform }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          builder: ${{ steps.buildx.outputs.name }}
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }},push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.container }}-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-24.04
+    needs: build
+    if: ${{ needs.changes.outputs.containers != '[]' && needs.changes.outputs.containers != '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        container: ${{ fromJson(needs.changes.outputs.containers || '[]') }}
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-${{ matrix.container }}-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}@sha256:%s ' *)
