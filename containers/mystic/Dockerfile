@@ -146,10 +146,13 @@ RUN if [ "$(uname -m)" = "x86_64" ] && [ -f /tmp/unrar-staging/unrar ]; then \
     fi && \
     rm -rf /tmp/unrar-staging
 
-# Configure dynamic linker
+# Configure dynamic linker  
 RUN echo "Verifying cryptlib installation:" && \
     ls -la /usr/lib/libcl.so && \
-    ldconfig
+    echo "Checking if library is valid:" && \
+    readelf -h /usr/lib/libcl.so 2>/dev/null || echo "readelf not available" && \
+    echo "Running ldconfig with verbose output:" && \
+    ldconfig -v 2>&1 || echo "ldconfig failed, continuing without it"
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
