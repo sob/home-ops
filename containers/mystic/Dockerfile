@@ -49,18 +49,32 @@ RUN if [ "$(uname -m)" = "x86_64" ]; then \
         mkdir -p /build/bin; \
     fi
 
-# Build cryptlib for Mystic BBS SSH support
+# Build cryptlib for Mystic BBS SSH support (architecture-specific)
 WORKDIR /tmp
-RUN wget -q http://www.mysticbbs.com/downloads/cl${CRYPTLIB_VERSION}.zip \
+RUN ARCH=$(uname -m) && \
+    echo "Building cryptlib for architecture: $ARCH" && \
+    wget -q http://www.mysticbbs.com/downloads/cl${CRYPTLIB_VERSION}.zip \
     && mkdir cryptlib \
     && cd cryptlib \
     && unzip -a ../cl${CRYPTLIB_VERSION}.zip \
-    && sed -i 's/-mcpu=pentium/-march=x86-64/g' tools/ccopts.sh \
-    && sed -i 's/mcpu=pentium/march=x86-64/g' tools/ccopts.sh \
-    && CC=gcc-9 CXX=g++-9 make shared \
+    && if [ "$ARCH" = "x86_64" ]; then \
+        sed -i 's/-mcpu=pentium/-march=x86-64/g' tools/ccopts.sh && \
+        sed -i 's/mcpu=pentium/march=x86-64/g' tools/ccopts.sh; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        sed -i 's/-mcpu=pentium/-march=armv8-a/g' tools/ccopts.sh && \
+        sed -i 's/mcpu=pentium/march=armv8-a/g' tools/ccopts.sh && \
+        sed -i 's/-O3/-O1/g' tools/ccopts.sh; \
+    elif [ "$ARCH" = "armv7l" ] || [ "$ARCH" = "arm" ]; then \
+        sed -i 's/-mcpu=pentium/-march=armv7-a/g' tools/ccopts.sh && \
+        sed -i 's/mcpu=pentium/march=armv7-a/g' tools/ccopts.sh && \
+        sed -i 's/-O3/-O1/g' tools/ccopts.sh; \
+    else \
+        echo "Unsupported architecture for cryptlib: $ARCH"; \
+        exit 1; \
+    fi \
+    && CFLAGS="-fno-stack-protector -DNDEBUG" CC=gcc CXX=g++ make shared \
     && mkdir -p /build \
     && cp libcl.so.${CRYPTLIB_SO_VERSION} /build/ \
-    && echo ${CRYPTLIB_SO_VERSION} > /build/cryptlib_version \
     && cd / \
     && rm -rf /tmp/cryptlib /tmp/cl${CRYPTLIB_VERSION}.zip
 
