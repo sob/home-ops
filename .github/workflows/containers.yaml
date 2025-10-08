@@ -138,6 +138,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
+          cache-from: |
+            type=gha,scope=${{ matrix.container }}-${{ matrix.arch }}
+            type=gha,scope=${{ matrix.container }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.container }}-${{ matrix.arch }}
           builder: ${{ steps.buildx.outputs.name }}
