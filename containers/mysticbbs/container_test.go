@@ -13,7 +13,7 @@ func TestMysticContainer(t *testing.T) {
 	pool, err := dockertest.NewPool("")
 	require.NoError(t, err, "Could not connect to docker")
 
-	resource, err := pool.Run("ghcr.io/sob/mystic", "latest", []string{})
+	resource, err := pool.Run("ghcr.io/sob/mysticbbs", "rolling", []string{})
 	require.NoError(t, err, "Could not start resource")
 
 	defer func() {

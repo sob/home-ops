@@ -103,12 +103,18 @@ FROM ubuntu:${UBUNTU_VERSION}
 # Re-declare ARG for runtime stage
 ARG UBUNTU_VERSION
 ARG CRYPTLIB_SO_VERSION
+ARG MYSTIC_VERSION
 
 # Metadata
 LABEL org.opencontainers.image.title="Mystic BBS"
 LABEL org.opencontainers.image.description="Mystic BBS running in a container with SSH access and FidoNet BinkP support"
-LABEL org.opencontainers.image.source="https://github.com/seobrien/home-ops"
+LABEL org.opencontainers.image.source="https://github.com/sob/home-ops"
+LABEL org.opencontainers.image.url="https://github.com/sob/home-ops/tree/main/containers/mysticbbs"
+LABEL org.opencontainers.image.documentation="https://github.com/sob/home-ops/blob/main/containers/mysticbbs/README.md"
 LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.vendor="sob"
+LABEL org.opencontainers.image.authors="sob"
+LABEL org.opencontainers.image.version="${MYSTIC_VERSION}"
 
 # Set environment variables
 ENV TZ=America/Chicago

@@ -20,11 +20,19 @@ group "default" {
 }
 
 target "mysticbbs" {
-  dockerfile = "Containerfile"
+  dockerfile = "Dockerfile"
   platforms = PLATFORMS
   tags = [
     "ghcr.io/sob/mysticbbs:${VERSION}",
     "ghcr.io/sob/mysticbbs:${MAJOR_VERSION}",
     "ghcr.io/sob/mysticbbs:rolling"
   ]
+  labels = {
+    "org.opencontainers.image.source" = "https://github.com/seobrien/home-ops"
+    "org.opencontainers.image.created" = "${timestamp()}"
+    "org.opencontainers.image.title" = "Mystic BBS"
+    "org.opencontainers.image.description" = "Mystic BBS running in a container with SSH access and FidoNet BinkP support"
+    "org.opencontainers.image.licenses" = "MIT"
+    "org.opencontainers.image.version" = "${VERSION}"
+  }
 }

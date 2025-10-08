@@ -187,3 +187,26 @@ jobs:
           docker buildx imagetools create \
             -t ${IMAGE_NAME}:sha256-${{ steps.inspect.outputs.digest }} \
             ${IMAGE_NAME}:rolling
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [plan, merge]
+    if: ${{ !inputs.release }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Run container tests
+        working-directory: containers/${{ inputs.app }}
+        run: |
+          if [ -f "container_test.go" ]; then
+            echo "Running container tests for ${{ inputs.app }}"
+            go test -v .
+          else
+            echo "No container tests found for ${{ inputs.app }}"
+          fi
