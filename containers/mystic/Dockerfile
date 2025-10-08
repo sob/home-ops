@@ -8,6 +8,12 @@ ARG MYSTIC_VERSION="112a48"
 # Build stage for cryptlib compilation
 FROM alpine:${ALPINE_VERSION} AS builder
 
+# Re-declare ARGs for builder stage
+ARG UNRAR_VERSION="7.1.10"
+ARG CRYPTLIB_VERSION="345" 
+ARG CRYPTLIB_SO_VERSION="3.4.5"
+ARG MYSTIC_VERSION="112a48"
+
 # Install build dependencies for Alpine
 RUN apk add --no-cache \
     build-base \
@@ -25,19 +31,34 @@ RUN apk add --no-cache \
 WORKDIR /tmp  
 RUN if [ "$(uname -m)" = "x86_64" ]; then \
         echo "Building unrar for x86_64..." && \
-        wget -v https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz && \
-        echo "Download completed, extracting..." && \
-        tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz && \
-        echo "Extraction completed, entering directory..." && \
-        cd unrar && \
-        echo "Contents of unrar directory:" && \
-        ls -la && \
-        echo "Starting make with verbose output..." && \
-        make -j1 && \
-        echo "Make completed, copying binary..." && \
-        mkdir -p /build/bin && \
-        cp unrar /build/bin/ && \
-        echo "Unrar build successful" && \
+        echo "Attempting to download unrarsrc-${UNRAR_VERSION}.tar.gz" && \
+        if wget --timeout=30 -v https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz; then \
+            echo "Download successful, file info:" && \
+            ls -la unrarsrc-${UNRAR_VERSION}.tar.gz && \
+            echo "Extracting..." && \
+            tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz && \
+            cd unrar && \
+            echo "Directory contents:" && \
+            ls -la && \
+            echo "Checking makefile..." && \
+            head -20 makefile && \
+            echo "Starting compilation..." && \
+            make lib && \
+            make unrar && \
+            mkdir -p /build/bin && \
+            cp unrar /build/bin/ && \
+            echo "Unrar build successful"; \
+        else \
+            echo "Download failed, trying alternative source..." && \
+            apk add --no-cache curl && \
+            curl -L -o unrarsrc.tar.gz https://github.com/pmachapman/unrar/archive/refs/tags/v${UNRAR_VERSION}.tar.gz && \
+            tar -xzf unrarsrc.tar.gz && \
+            cd unrar-${UNRAR_VERSION} && \
+            make lib && \
+            make unrar && \
+            mkdir -p /build/bin && \
+            cp unrar /build/bin/; \
+        fi && \
         cd / && \
         rm -rf /tmp/unrar*; \
     else \
