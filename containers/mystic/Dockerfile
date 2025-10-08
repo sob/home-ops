@@ -30,35 +30,19 @@ RUN apk add --no-cache \
 # Build unrar from source (only needed for x86_64)
 WORKDIR /tmp  
 RUN if [ "$(uname -m)" = "x86_64" ]; then \
-        echo "Building unrar for x86_64..." && \
-        echo "Attempting to download unrarsrc-${UNRAR_VERSION}.tar.gz" && \
-        if wget --timeout=30 -v https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz; then \
-            echo "Download successful, file info:" && \
-            ls -la unrarsrc-${UNRAR_VERSION}.tar.gz && \
-            echo "Extracting..." && \
-            tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz && \
-            cd unrar && \
-            echo "Directory contents:" && \
-            ls -la && \
-            echo "Checking makefile..." && \
-            head -20 makefile && \
-            echo "Starting compilation..." && \
-            make lib && \
-            make unrar && \
-            mkdir -p /build/bin && \
-            cp unrar /build/bin/ && \
-            echo "Unrar build successful"; \
-        else \
-            echo "Download failed, trying alternative source..." && \
-            apk add --no-cache curl && \
-            curl -L -o unrarsrc.tar.gz https://github.com/pmachapman/unrar/archive/refs/tags/v${UNRAR_VERSION}.tar.gz && \
-            tar -xzf unrarsrc.tar.gz && \
-            cd unrar-${UNRAR_VERSION} && \
-            make lib && \
-            make unrar && \
-            mkdir -p /build/bin && \
-            cp unrar /build/bin/; \
-        fi && \
+        echo "Building unrar for x86_64 using LinuxServer approach..." && \
+        wget -q https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz && \
+        tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz && \
+        cd unrar && \
+        echo "Applying LinuxServer makefile fixes for Alpine..." && \
+        sed -i 's|LDFLAGS=-pthread|LDFLAGS=-pthread -static|' makefile && \
+        sed -i 's|CXXFLAGS=-march=native |CXXFLAGS=|' makefile && \
+        echo "Building with static linking..." && \
+        make lib && \
+        make unrar && \
+        mkdir -p /build/bin && \
+        cp unrar /build/bin/ && \
+        echo "Unrar build successful" && \
         cd / && \
         rm -rf /tmp/unrar*; \
     else \
