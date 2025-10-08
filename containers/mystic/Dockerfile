@@ -130,7 +130,8 @@ RUN apk add --no-cache \
     logrotate \
     python3 \
     zip \
-    bash
+    bash \
+    binutils
 
 # Copy cryptlib from builder and rename to generic name (per Mystic BBS docs)
 COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so
@@ -146,13 +147,15 @@ RUN if [ "$(uname -m)" = "x86_64" ] && [ -f /tmp/unrar-staging/unrar ]; then \
     fi && \
     rm -rf /tmp/unrar-staging
 
-# Configure dynamic linker  
+# Configure dynamic linker (required for Mystic BBS SSH support)
 RUN echo "Verifying cryptlib installation:" && \
     ls -la /usr/lib/libcl.so && \
-    echo "Checking if library is valid:" && \
-    readelf -h /usr/lib/libcl.so 2>/dev/null || echo "readelf not available" && \
-    echo "Running ldconfig with verbose output:" && \
-    ldconfig -v 2>&1 || echo "ldconfig failed, continuing without it"
+    echo "Checking library architecture and validity:" && \
+    readelf -h /usr/lib/libcl.so && \
+    echo "Checking library dependencies:" && \
+    ldd /usr/lib/libcl.so 2>/dev/null || echo "Library dependencies check failed" && \
+    echo "Running ldconfig (must succeed for SSH support):" && \
+    ldconfig -v
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
