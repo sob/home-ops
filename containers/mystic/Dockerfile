@@ -25,20 +25,24 @@ RUN apk add --no-cache \
 WORKDIR /tmp  
 RUN if [ "$(uname -m)" = "x86_64" ]; then \
         echo "Building unrar for x86_64..." && \
-        wget -q https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz \
-        && tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz \
-        && cd unrar \
-        && echo "Starting make..." \
-        && make -j$(nproc) \
-        && echo "Make completed, copying binary..." \
-        && mkdir -p /build/bin \
-        && cp unrar /build/bin/ \
-        && echo "Unrar build successful" \
-        && cd / \
-        && rm -rf /tmp/unrar*; \
+        wget -v https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz && \
+        echo "Download completed, extracting..." && \
+        tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz && \
+        echo "Extraction completed, entering directory..." && \
+        cd unrar && \
+        echo "Contents of unrar directory:" && \
+        ls -la && \
+        echo "Starting make with verbose output..." && \
+        make -j1 && \
+        echo "Make completed, copying binary..." && \
+        mkdir -p /build/bin && \
+        cp unrar /build/bin/ && \
+        echo "Unrar build successful" && \
+        cd / && \
+        rm -rf /tmp/unrar*; \
     else \
-        echo "Skipping unrar build for non-x86_64 architecture" \
-        && mkdir -p /build/bin; \
+        echo "Skipping unrar build for non-x86_64 architecture" && \
+        mkdir -p /build/bin; \
     fi
 
 # Build cryptlib for Mystic BBS SSH support
