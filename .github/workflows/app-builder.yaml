@@ -1,0 +1,189 @@
+---
+name: Build App
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: "Application to build"
+        required: true
+        type: string
+      release:
+        description: "Release build"
+        required: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      platforms: ${{ steps.platforms.outputs.platforms }}
+      version: ${{ steps.version.outputs.version }}
+      raw: ${{ steps.version.outputs.raw }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if app exists
+        run: |
+          if [ ! -d "containers/${{ inputs.app }}" ]; then
+            echo "App ${{ inputs.app }} does not exist"
+            exit 1
+          fi
+          if [ ! -f "containers/${{ inputs.app }}/docker-bake.hcl" ]; then
+            echo "App ${{ inputs.app }} does not have docker-bake.hcl"
+            exit 1
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Get platforms
+        id: platforms
+        working-directory: containers/${{ inputs.app }}
+        run: |
+          platforms=$(docker buildx bake --print | jq -r '.target[].platforms // [] | @json')
+          echo "platforms=$platforms" >> $GITHUB_OUTPUT
+
+      - name: Get version
+        id: version
+        working-directory: containers/${{ inputs.app }}
+        run: |
+          version=$(docker buildx bake --print | jq -r '.variable.VERSION.default // "rolling"')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "raw=$version" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ${{ matrix.runner }}
+    needs: plan
+    if: ${{ fromJson(needs.plan.outputs.platforms) != null }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJson(needs.plan.outputs.platforms) }}
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build App Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}
+          tags: |
+            type=raw,value=rolling,enable={{is_default_branch}}
+            type=raw,value=${{ needs.plan.outputs.raw }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+          labels: |
+            org.opencontainers.image.title=${{ inputs.app }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
+            org.opencontainers.image.version=${{ needs.plan.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+
+      - name: Build App
+        id: build
+        uses: docker/bake-action@v5
+        with:
+          workdir: containers/${{ inputs.app }}
+          targets: ${{ inputs.app }}
+          set: |
+            *.platform=${{ matrix.platform }}
+            *.output=type=image,push-by-digest=true,name-canonical=true,push=true
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ fromJSON(steps.build.outputs.metadata)[inputs.app]['containerimage.digest'] }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ inputs.app }}-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: [plan, build]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-${{ inputs.app }}-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build App Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}
+          tags: |
+            type=raw,value=rolling,enable={{is_default_branch}}
+            type=raw,value=${{ needs.plan.outputs.raw }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}@sha256:%s ' *)
+
+      - name: Inspect image and extract digest
+        id: inspect
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}"
+          DIGEST=$(docker buildx imagetools inspect ${IMAGE_NAME}:rolling --format "{{ .Manifest.Digest }}" | cut -d':' -f2)
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+
+      - name: Tag with SHA256 digest
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}"
+          docker buildx imagetools create \
+            -t ${IMAGE_NAME}:sha256-${{ steps.inspect.outputs.digest }} \
+            ${IMAGE_NAME}:rolling

@@ -12,26 +12,28 @@ on:
       - "containers/**"
   workflow_dispatch:
     inputs:
-      container:
+      app:
         description: "Container to build (optional - builds all changed if empty)"
         required: false
         type: string
-
-env:
-  REGISTRY: ghcr.io
+      release:
+        description: "Release build"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-  changes:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
-      containers: ${{ steps.set-output.outputs.containers }}
+      changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Get changed containers
+      - name: Get changed files
         id: changed-files
         if: github.event_name != 'workflow_dispatch'
         uses: tj-actions/changed-files@v41
@@ -42,173 +44,49 @@ jobs:
           json: true
           escape_json: false
 
-      - name: Set containers output
-        id: set-output
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Changed files output: '${{ steps.changed-files.outputs.all_changed_files }}'"
-          
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ -n "${{ github.event.inputs.container }}" ]; then
-              # Build specific container
-              echo "containers=[\"${{ github.event.inputs.container }}\"]" >> $GITHUB_OUTPUT
-            else
-              # Build all containers
-              all_containers=$(find containers -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -R -s -c 'split("\n") | map(select(length > 0))')
-              echo "containers=$all_containers" >> $GITHUB_OUTPUT
-            fi
-          else
-            # Automatic trigger - use changed files  
-            changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
-            echo "Processing changed files: $changed_files"
-            
-            # Ensure we always output valid JSON
-            if [ -z "$changed_files" ] || [ "$changed_files" = "[]" ] || [ "$changed_files" = "" ] || [ "$changed_files" = "null" ]; then
-              echo "No changes detected, setting empty array"
-              echo "containers=[]" >> $GITHUB_OUTPUT
-            else
-              # Validate JSON and extract container names
-              if echo "$changed_files" | jq empty 2>/dev/null; then
-                # Valid JSON - extract container directories
-                containers=$(echo "$changed_files" | jq -r '.[]' | cut -d'/' -f1 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-                echo "Extracted containers: $containers"
-                echo "containers=$containers" >> $GITHUB_OUTPUT
-              else
-                echo "Invalid JSON from changed-files, setting empty array"
-                echo "containers=[]" >> $GITHUB_OUTPUT
-              fi
-            fi
-          fi
-
-  build:
-    needs: changes
-    if: ${{ needs.changes.outputs.containers != '[]' && needs.changes.outputs.containers != '' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        container: ${{ fromJson(needs.changes.outputs.containers || '[]') }}
-        platform:
-          - linux/amd64
-          - linux/arm64
-        include:
-          - platform: linux/amd64
-            runner: ubuntu-24.04
-            arch: amd64
-          - platform: linux/arm64
-            runner: ubuntu-24.04-arm
-            arch: arm64
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      contents: read
-      packages: write
-
+  changed:
+    runs-on: ubuntu-latest
+    needs: prepare
+    outputs:
+      apps: ${{ steps.changed.outputs.apps }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver-opts: |
-            image=moby/buildkit:v0.12.4
-            network=host
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push container image
-        id: build
-        uses: docker/build-push-action@v5
-        with:
-          context: containers/${{ matrix.container }}
-          file: containers/${{ matrix.container }}/Dockerfile
-          platforms: ${{ matrix.platform }}
-          labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }},push-by-digest=true,name-canonical=true,push=true
-
-      - name: Export digest
+      - name: Determine changed apps
+        id: changed
         run: |
-          mkdir -p /tmp/digests
-          digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.app }}" ]; then
+              # Build specific app
+              echo "apps=[\"${{ github.event.inputs.app }}\"]" >> $GITHUB_OUTPUT
+            else
+              # Build all apps
+              apps=$(find containers -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -R -s -c 'split("\n") | map(select(length > 0))')
+              echo "apps=$apps" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Automatic trigger - use changed files
+            changed_files="${{ needs.prepare.outputs.changed-files }}"
+            if [ -z "$changed_files" ] || [ "$changed_files" = "[]" ] || [ "$changed_files" = "null" ]; then
+              echo "apps=[]" >> $GITHUB_OUTPUT
+            else
+              # Extract app directories from changed files
+              apps=$(echo "$changed_files" | jq -r '.[]' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+              echo "apps=$apps" >> $GITHUB_OUTPUT
+            fi
+          fi
 
-      - name: Upload digest
-        uses: actions/upload-artifact@v4
-        with:
-          name: digests-${{ matrix.container }}-${{ matrix.arch }}
-          path: /tmp/digests/*
-          if-no-files-found: error
-          retention-days: 1
-
-  merge:
-    runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: ${{ needs.changes.outputs.containers != '[]' && needs.changes.outputs.containers != '' }}
+  build:
+    uses: ./.github/workflows/app-builder.yaml
+    needs: changed
+    if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
     strategy:
       fail-fast: false
+      max-parallel: 4
       matrix:
-        container: ${{ fromJson(needs.changes.outputs.containers || '[]') }}
-    steps:
-      - name: Download digests
-        uses: actions/download-artifact@v4
-        with:
-          pattern: digests-${{ matrix.container }}-*
-          path: /tmp/digests
-          merge-multiple: true
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
-        run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}@sha256:%s ' *)
-
-      - name: Inspect image and extract digest
-        id: inspect
-        run: |
-          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}"
-          DIGEST=$(docker buildx imagetools inspect ${IMAGE_NAME}:${{ github.sha }} --format "{{ .Manifest.Digest }}" | cut -d':' -f2)
-          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
-          
-      - name: Tag with SHA256 digest
-        run: |
-          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}"
-          docker buildx imagetools create \
-            -t ${IMAGE_NAME}:sha256-${{ steps.inspect.outputs.digest }} \
-            ${IMAGE_NAME}:${{ github.sha }}
+        app: ${{ fromJson(needs.changed.outputs.apps) }}
+    with:
+      app: ${{ matrix.app }}
+      release: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.inputs.release == 'true' }}
+    secrets: inherit
