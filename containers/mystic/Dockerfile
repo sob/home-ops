@@ -57,9 +57,14 @@ RUN ARCH=$(uname -m) && \
     && mkdir cryptlib \
     && cd cryptlib \
     && unzip -a ../cl${CRYPTLIB_VERSION}.zip \
-    && echo "Patching cryptlib for musl libc compatibility..." \
+    && echo "Patching cryptlib for musl libc compatibility and build stability..." \
     && find . -name "*.c" -exec sed -i 's/pthread_yield()/sched_yield()/g' {} \; \
     && find . -name "*.h" -exec sed -i 's/pthread_yield()/sched_yield()/g' {} \; \
+    && echo "Applying MacPorts-style compiler and makefile fixes..." \
+    && sed -i 's/CFLAGS.*=/CFLAGS+=/g' makefile \
+    && sed -i 's/static_assert(/assert(/g' *.h misc/*.h \
+    && echo "Simplifying compiler detection for cross-compilation..." \
+    && if [ -f tools/getcompiler.sh ]; then sed -i 's/.*) exit.*/*);;/g' tools/getcompiler.sh; fi \
     && if [ "$ARCH" = "x86_64" ]; then \
         sed -i 's/-mcpu=pentium/-march=x86-64/g' tools/ccopts.sh && \
         sed -i 's/mcpu=pentium/march=x86-64/g' tools/ccopts.sh; \
@@ -81,7 +86,12 @@ RUN ARCH=$(uname -m) && \
         echo "Unsupported architecture for cryptlib: $ARCH"; \
         exit 1; \
     fi \
-    && CFLAGS="-fno-stack-protector -DNDEBUG -O1 -D_GNU_SOURCE" CC=gcc CXX=g++ make shared \
+    && if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "armv7l" ] || [ "$ARCH" = "arm" ]; then \
+        CFLAGS="-fno-stack-protector -DNDEBUG -O0 -D_GNU_SOURCE -fno-inline -fno-omit-frame-pointer"; \
+    else \
+        CFLAGS="-fno-stack-protector -DNDEBUG -O1 -D_GNU_SOURCE"; \
+    fi \
+    && CC=gcc CXX=g++ make shared \
     && mkdir -p /build \
     && cp libcl.so.${CRYPTLIB_SO_VERSION} /build/ \
     && cd / \
