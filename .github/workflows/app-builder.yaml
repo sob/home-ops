@@ -94,17 +94,14 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}
           tags: |
-            type=raw,value=rolling,enable={{is_default_branch}}
-            type=raw,value=${{ needs.plan.outputs.raw }}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha
+            type=raw,value=
           labels: |
             org.opencontainers.image.title=${{ inputs.app }}
             org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
             org.opencontainers.image.version=${{ needs.plan.outputs.version }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.vendor=${{ github.repository_owner }}
+          bake-target: ${{ inputs.app }}
 
       - name: Build App
         id: build
