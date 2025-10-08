@@ -97,6 +97,9 @@ RUN ARCH=$(uname -m) && \
 # Runtime stage
 FROM alpine:${ALPINE_VERSION}
 
+# Re-declare ARG for runtime stage
+ARG CRYPTLIB_SO_VERSION
+
 # Metadata
 LABEL org.opencontainers.image.title="Mystic BBS"
 LABEL org.opencontainers.image.description="Mystic BBS running in a container with SSH access and FidoNet BinkP support"
@@ -116,13 +119,9 @@ RUN apk add --no-cache \
     bash
 
 # Copy unrar and cryptlib from builder
-COPY --from=builder /build/bin/unrar /usr/local/bin/unrar
-COPY --from=builder /build/libcl.so.* /usr/lib/
-COPY --from=builder /build/cryptlib_version /tmp/cryptlib_version
-RUN CRYPTLIB_VERSION=$(cat /tmp/cryptlib_version) && \
-    ln -s /usr/lib/libcl.so.${CRYPTLIB_VERSION} /usr/lib/libcl.so && \
-    rm /tmp/cryptlib_version && \
-    ldconfig
+COPY --from=builder /build/bin/* /usr/local/bin/
+COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so.${CRYPTLIB_SO_VERSION}
+RUN ldconfig
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
