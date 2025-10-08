@@ -147,7 +147,10 @@ RUN if [ "$(uname -m)" = "x86_64" ] && [ -f /tmp/unrar-staging/unrar ]; then \
     rm -rf /tmp/unrar-staging
 
 # Configure dynamic linker
-RUN ldconfig
+RUN echo "Checking library before ldconfig:" && \
+    ls -la /usr/lib/libcl.so.* && \
+    file /usr/lib/libcl.so.* && \
+    ldconfig -v 2>&1 | grep -E "(libcl|error|warning)" || ldconfig
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
