@@ -81,13 +81,20 @@ jobs:
           fi
 
   build:
-    runs-on: ubuntu-latest
     needs: changes
     if: ${{ needs.changes.outputs.containers != '[]' && needs.changes.outputs.containers != '' }}
     strategy:
       fail-fast: false
       matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm64  
+            arch: arm64
         container: ${{ fromJson(needs.changes.outputs.containers || '[]') }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -127,10 +134,10 @@ jobs:
         with:
           context: containers/${{ matrix.container }}
           file: containers/${{ matrix.container }}/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
           builder: ${{ steps.buildx.outputs.name }}
