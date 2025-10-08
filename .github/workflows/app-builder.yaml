@@ -114,12 +114,11 @@ jobs:
           targets: ${{ inputs.app }}
           set: |
             *.platform=${{ matrix.platform }}
-            *.output=type=image,push-by-digest=true,name-canonical=true,push=true
+            *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }},push-by-digest=true,name-canonical=true,push=true
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
           files: |
             ./docker-bake.hcl
-            ${{ steps.meta.outputs.bake-file }}
 
       - name: Export digest
         run: |
