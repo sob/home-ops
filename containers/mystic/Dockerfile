@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     g++-9 \
     make \
     unzip \
+    unrar \
     wget \
     zlib1g-dev \
     python3 \
@@ -28,27 +29,6 @@ RUN apt-get update && apt-get install -y \
     linux-libc-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Build unrar from source (only needed for x86_64)
-WORKDIR /tmp  
-RUN if [ "$(uname -m)" = "x86_64" ]; then \
-        echo "Building unrar for x86_64 using LinuxServer approach..." && \
-        wget -q https://www.rarlab.com/rar/unrarsrc-${UNRAR_VERSION}.tar.gz && \
-        tar -xzf unrarsrc-${UNRAR_VERSION}.tar.gz && \
-        cd unrar && \
-        echo "Applying LinuxServer makefile fixes for Alpine..." && \
-        sed -i 's|LDFLAGS=-pthread|LDFLAGS=-pthread -static|' makefile && \
-        sed -i 's|CXXFLAGS=-march=native |CXXFLAGS=|' makefile && \
-        echo "Building unrar executable with static linking..." && \
-        make unrar && \
-        mkdir -p /build/bin && \
-        cp unrar /build/bin/ && \
-        echo "Unrar build successful" && \
-        cd / && \
-        rm -rf /tmp/unrar*; \
-    else \
-        echo "Skipping unrar build for non-x86_64 architecture" && \
-        mkdir -p /build/bin; \
-    fi
 
 # Build cryptlib for Mystic BBS SSH support (architecture-specific)
 WORKDIR /tmp
@@ -107,7 +87,7 @@ RUN ARCH=$(uname -m) && \
     echo "Downloading Mystic BBS for $ARCH from $MYSTIC_URL" && \
     wget -q "$MYSTIC_URL" -O "$MYSTIC_FILE" && \
     if [ "${MYSTIC_FILE##*.}" = "rar" ]; then \
-        /build/bin/unrar x "$MYSTIC_FILE"; \
+        unrar x "$MYSTIC_FILE"; \
     else \
         unzip -q "$MYSTIC_FILE"; \
     fi && \
@@ -147,16 +127,6 @@ RUN apt-get update && apt-get install -y \
 # Copy cryptlib from builder and rename to generic name (per Mystic BBS docs)
 COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so
 
-# Copy unrar binary if it exists (x86_64 only)
-RUN mkdir -p /usr/local/bin
-COPY --from=builder /build/bin/ /tmp/unrar-staging/
-RUN if [ "$(uname -m)" = "x86_64" ] && [ -f /tmp/unrar-staging/unrar ]; then \
-        echo "Copying unrar for x86_64" && \
-        cp /tmp/unrar-staging/unrar /usr/local/bin/; \
-    else \
-        echo "Skipping unrar copy for non-x86_64 architecture"; \
-    fi && \
-    rm -rf /tmp/unrar-staging
 
 # Configure dynamic linker (required for Mystic BBS SSH support)
 RUN echo "Verifying cryptlib installation:" && \
