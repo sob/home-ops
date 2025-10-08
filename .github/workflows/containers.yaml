@@ -86,6 +86,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        container: ${{ fromJson(needs.changes.outputs.containers || '[]') }}
+        platform:
+          - linux/amd64
+          - linux/arm64
         include:
           - platform: linux/amd64
             runner: ubuntu-24.04
@@ -93,7 +97,6 @@ jobs:
           - platform: linux/arm64
             runner: ubuntu-24.04-arm64  
             arch: arm64
-        container: ${{ fromJson(needs.changes.outputs.containers || '[]') }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
