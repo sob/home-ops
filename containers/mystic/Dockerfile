@@ -37,8 +37,7 @@ RUN if [ "$(uname -m)" = "x86_64" ]; then \
         echo "Applying LinuxServer makefile fixes for Alpine..." && \
         sed -i 's|LDFLAGS=-pthread|LDFLAGS=-pthread -static|' makefile && \
         sed -i 's|CXXFLAGS=-march=native |CXXFLAGS=|' makefile && \
-        echo "Building with static linking..." && \
-        make lib && \
+        echo "Building unrar executable with static linking..." && \
         make unrar && \
         mkdir -p /build/bin && \
         cp unrar /build/bin/ && \
