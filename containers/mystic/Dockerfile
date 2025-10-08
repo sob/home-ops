@@ -63,16 +63,22 @@ RUN ARCH=$(uname -m) && \
     elif [ "$ARCH" = "aarch64" ]; then \
         sed -i 's/-mcpu=pentium/-march=armv8-a/g' tools/ccopts.sh && \
         sed -i 's/mcpu=pentium/march=armv8-a/g' tools/ccopts.sh && \
-        sed -i 's/-O3/-O1/g' tools/ccopts.sh; \
+        sed -i 's/-O3/-O1/g' tools/ccopts.sh && \
+        find . -name "*.sh" -exec sed -i 's/-O3/-O1/g' {} \; && \
+        find . -name "makefile*" -exec sed -i 's/-O3/-O1/g' {} \; && \
+        find . -name "Makefile*" -exec sed -i 's/-O3/-O1/g' {} \;; \
     elif [ "$ARCH" = "armv7l" ] || [ "$ARCH" = "arm" ]; then \
         sed -i 's/-mcpu=pentium/-march=armv7-a/g' tools/ccopts.sh && \
         sed -i 's/mcpu=pentium/march=armv7-a/g' tools/ccopts.sh && \
-        sed -i 's/-O3/-O1/g' tools/ccopts.sh; \
+        sed -i 's/-O3/-O1/g' tools/ccopts.sh && \
+        find . -name "*.sh" -exec sed -i 's/-O3/-O1/g' {} \; && \
+        find . -name "makefile*" -exec sed -i 's/-O3/-O1/g' {} \; && \
+        find . -name "Makefile*" -exec sed -i 's/-O3/-O1/g' {} \;; \
     else \
         echo "Unsupported architecture for cryptlib: $ARCH"; \
         exit 1; \
     fi \
-    && CFLAGS="-fno-stack-protector -DNDEBUG" CC=gcc CXX=g++ make shared \
+    && CFLAGS="-fno-stack-protector -DNDEBUG -O1" CC=gcc CXX=g++ make shared \
     && mkdir -p /build \
     && cp libcl.so.${CRYPTLIB_SO_VERSION} /build/ \
     && cd / \
