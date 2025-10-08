@@ -132,8 +132,8 @@ RUN apk add --no-cache \
     zip \
     bash
 
-# Copy cryptlib from builder
-COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so.${CRYPTLIB_SO_VERSION}
+# Copy cryptlib from builder and rename to generic name (per Mystic BBS docs)
+COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so
 
 # Copy unrar binary if it exists (x86_64 only)
 RUN mkdir -p /usr/local/bin
@@ -147,10 +147,9 @@ RUN if [ "$(uname -m)" = "x86_64" ] && [ -f /tmp/unrar-staging/unrar ]; then \
     rm -rf /tmp/unrar-staging
 
 # Configure dynamic linker
-RUN echo "Checking library before ldconfig:" && \
-    ls -la /usr/lib/libcl.so.* && \
-    file /usr/lib/libcl.so.* && \
-    ldconfig -v 2>&1 | grep -E "(libcl|error|warning)" || ldconfig
+RUN echo "Verifying cryptlib installation:" && \
+    ls -la /usr/lib/libcl.so && \
+    ldconfig
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
