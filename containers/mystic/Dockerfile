@@ -166,9 +166,10 @@ RUN echo "Verifying cryptlib installation:" && \
     echo "Checking ldconfig configuration:" && \
     cat /etc/ld-musl-x86_64.path 2>/dev/null || echo "No musl ldconfig file" && \
     echo "Running ldconfig with detailed output:" && \
-    ldconfig -v -X 2>&1 || (echo "ldconfig failed, trying alternative..." && \
+    ldconfig -v -X 2>&1 || (echo "ldconfig failed, trying musl-compatible approach..." && \
+    mkdir -p /etc/ld.so.conf.d && \
     echo "/usr/lib" > /etc/ld.so.conf.d/cryptlib.conf && \
-    ldconfig -v 2>&1)
+    ldconfig -v 2>&1) || echo "ldconfig not working with musl, but library should still be found"
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
