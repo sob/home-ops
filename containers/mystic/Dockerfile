@@ -1,12 +1,12 @@
 # Version definitions
-ARG ALPINE_VERSION="3.20@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5"
+ARG UBUNTU_VERSION="24.04"
 ARG UNRAR_VERSION="7.1.10"
 ARG CRYPTLIB_VERSION="345" 
 ARG CRYPTLIB_SO_VERSION="3.4.5"
 ARG MYSTIC_VERSION="112a48"
 
 # Build stage for cryptlib compilation
-FROM alpine:${ALPINE_VERSION} AS builder
+FROM ubuntu:${UBUNTU_VERSION} AS builder
 
 # Re-declare ARGs for builder stage (inherit from global)
 ARG UNRAR_VERSION
@@ -14,19 +14,19 @@ ARG CRYPTLIB_VERSION
 ARG CRYPTLIB_SO_VERSION
 ARG MYSTIC_VERSION
 
-# Install build dependencies for Alpine
-RUN apk add --no-cache \
-    build-base \
-    gcc \
-    g++ \
-    gcc-gnat \
+# Install build dependencies for Ubuntu
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc-9 \
+    g++-9 \
     make \
     unzip \
     wget \
-    zlib-dev \
+    zlib1g-dev \
     python3 \
     python3-dev \
-    linux-headers
+    linux-libc-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Build unrar from source (only needed for x86_64)
 WORKDIR /tmp  
@@ -58,10 +58,7 @@ RUN ARCH=$(uname -m) && \
     && mkdir cryptlib \
     && cd cryptlib \
     && unzip -a ../cl${CRYPTLIB_VERSION}.zip \
-    && echo "Patching cryptlib for musl libc compatibility and build stability..." \
-    && find . -name "*.c" -exec sed -i 's/pthread_yield()/sched_yield()/g' {} \; \
-    && find . -name "*.h" -exec sed -i 's/pthread_yield()/sched_yield()/g' {} \; \
-    && echo "Applying static_assert compatibility fix..." \
+    && echo "Patching cryptlib for compatibility..." \
     && find . -name "*.h" -exec sed -i 's/static_assert(/assert(/g' {} \; 2>/dev/null || true \
     && if [ "$ARCH" = "x86_64" ]; then \
         sed -i 's/-mcpu=pentium/-march=x86-64/g' tools/ccopts.sh && \
@@ -84,7 +81,7 @@ RUN ARCH=$(uname -m) && \
         echo "Unsupported architecture for cryptlib: $ARCH"; \
         exit 1; \
     fi \
-    && CFLAGS="-fno-stack-protector -DNDEBUG -D_GNU_SOURCE" CC=gcc CXX=g++ make shared \
+    && CC=gcc-9 CXX=g++-9 make shared \
     && mkdir -p /build \
     && cp libcl.so.${CRYPTLIB_SO_VERSION} /build/ \
     && cd / \
@@ -121,9 +118,10 @@ RUN ARCH=$(uname -m) && \
     rm -rf /tmp/"$MYSTIC_FILE" /tmp/install*
 
 # Runtime stage
-FROM alpine:${ALPINE_VERSION}
+FROM ubuntu:${UBUNTU_VERSION}
 
 # Re-declare ARG for runtime stage
+ARG UBUNTU_VERSION
 ARG CRYPTLIB_SO_VERSION
 
 # Metadata
@@ -135,15 +133,16 @@ LABEL org.opencontainers.image.licenses="MIT"
 # Set environment variables
 ENV TZ=America/Chicago
 
-# Install runtime dependencies for Alpine
-RUN apk add --no-cache \
-    dcron \
+# Install runtime dependencies for Ubuntu
+RUN apt-get update && apt-get install -y \
+    cron \
     expect \
     logrotate \
     python3 \
     zip \
     bash \
-    binutils
+    binutils \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy cryptlib from builder and rename to generic name (per Mystic BBS docs)
 COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so
@@ -162,17 +161,10 @@ RUN if [ "$(uname -m)" = "x86_64" ] && [ -f /tmp/unrar-staging/unrar ]; then \
 # Configure dynamic linker (required for Mystic BBS SSH support)
 RUN echo "Verifying cryptlib installation:" && \
     ls -la /usr/lib/libcl.so && \
-    echo "Checking library architecture and validity:" && \
-    readelf -h /usr/lib/libcl.so && \
-    echo "Checking library dependencies:" && \
+    echo "Testing library load:" && \
     ldd /usr/lib/libcl.so && \
-    echo "Checking ldconfig configuration:" && \
-    cat /etc/ld-musl-x86_64.path 2>/dev/null || echo "No musl ldconfig file" && \
-    echo "Running ldconfig with detailed output:" && \
-    ldconfig -v -X 2>&1 || (echo "ldconfig failed, trying musl-compatible approach..." && \
-    mkdir -p /etc/ld.so.conf.d && \
-    echo "/usr/lib" > /etc/ld.so.conf.d/cryptlib.conf && \
-    ldconfig -v 2>&1) || echo "ldconfig not working with musl, but library should still be found"
+    echo "Running ldconfig:" && \
+    ldconfig
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
