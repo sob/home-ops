@@ -159,9 +159,13 @@ RUN echo "Verifying cryptlib installation:" && \
     echo "Checking library architecture and validity:" && \
     readelf -h /usr/lib/libcl.so && \
     echo "Checking library dependencies:" && \
-    ldd /usr/lib/libcl.so 2>/dev/null || echo "Library dependencies check failed" && \
-    echo "Running ldconfig (must succeed for SSH support):" && \
-    ldconfig -v
+    ldd /usr/lib/libcl.so && \
+    echo "Checking ldconfig configuration:" && \
+    cat /etc/ld-musl-x86_64.path 2>/dev/null || echo "No musl ldconfig file" && \
+    echo "Running ldconfig with detailed output:" && \
+    ldconfig -v -X 2>&1 || (echo "ldconfig failed, trying alternative..." && \
+    echo "/usr/lib" > /etc/ld.so.conf.d/cryptlib.conf && \
+    ldconfig -v 2>&1)
 
 # Copy Mystic BBS from builder
 COPY --from=builder /build/mystic /opt/mystic
