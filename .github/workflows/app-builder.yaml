@@ -171,10 +171,19 @@ jobs:
         id: inspect
         run: |
           IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}"
-          DIGEST=$(docker buildx imagetools inspect ${IMAGE_NAME}:rolling --format "{{ .Manifest.Digest }}" | cut -d':' -f2)
-          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+          # Wait a moment for the manifest to be available
+          sleep 5
+          # Try to get digest from the first available digest file
+          if [ -f /tmp/digests/* ]; then
+            DIGEST=$(ls /tmp/digests/ | head -1)
+            echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+          else
+            echo "No digest files found, skipping SHA256 tag creation"
+            echo "digest=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Tag with SHA256 digest
+        if: ${{ steps.inspect.outputs.digest != '' }}
         run: |
           IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}"
           docker buildx imagetools create \
