@@ -63,12 +63,21 @@ jobs:
           else
             # Automatic trigger - use changed files
             changed_files="${{ needs.prepare.outputs.changed-files }}"
-            if [ -z "$changed_files" ] || [ "$changed_files" = "[]" ] || [ "$changed_files" = "null" ]; then
+            echo "Changed files: $changed_files"
+            if [ -z "$changed_files" ] || [ "$changed_files" = "[]" ] || [ "$changed_files" = "null" ] || [ "$changed_files" = "" ]; then
+              echo "No changes detected, setting empty array"
               echo "apps=[]" >> $GITHUB_OUTPUT
             else
-              # Extract app directories from changed files
-              apps=$(echo "$changed_files" | jq -r '.[]' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-              echo "apps=$apps" >> $GITHUB_OUTPUT
+              # Validate JSON before processing
+              if echo "$changed_files" | jq empty 2>/dev/null; then
+                # Extract app directories from changed files
+                apps=$(echo "$changed_files" | jq -r '.[]' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+                echo "Extracted apps: $apps"
+                echo "apps=$apps" >> $GITHUB_OUTPUT
+              else
+                echo "Invalid JSON in changed_files, setting empty array"
+                echo "apps=[]" >> $GITHUB_OUTPUT
+              fi
             fi
           fi
 
