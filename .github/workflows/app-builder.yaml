@@ -161,14 +161,19 @@ jobs:
         run: |
           # Create tags from docker-bake.hcl configuration
           IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}"
+          echo "Available digest files:"
+          ls -la
           DIGESTS=""
           for digest in *; do
+            echo "Processing digest: $digest"
             DIGESTS="$DIGESTS $IMAGE_NAME@sha256:$digest"
           done
+          echo "Final digests: $DIGESTS"
           TAGS="-t ${IMAGE_NAME}:${{ needs.plan.outputs.version }} -t ${IMAGE_NAME}:rolling"
           if [ -n "${{ needs.plan.outputs.major_version }}" ]; then
             TAGS="$TAGS -t ${IMAGE_NAME}:${{ needs.plan.outputs.major_version }}"
           fi
+          echo "Final tags: $TAGS"
           docker buildx imagetools create $TAGS $DIGESTS
 
       - name: Inspect image and extract digest
