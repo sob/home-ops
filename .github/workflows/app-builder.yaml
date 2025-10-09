@@ -171,12 +171,12 @@ jobs:
         id: inspect
         run: |
           IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}"
-          # Wait a moment for the manifest to be available
-          sleep 5
-          # Try to get digest from the first available digest file
-          if [ -f /tmp/digests/* ]; then
-            DIGEST=$(ls /tmp/digests/ | head -1)
-            echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+          # Get digest from the digest files created during build
+          cd /tmp/digests
+          if ls *.* > /dev/null 2>&1; then
+            DIGEST=$(ls | head -1)
+            echo "Found digest: $DIGEST"
+            echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           else
             echo "No digest files found, skipping SHA256 tag creation"
             echo "digest=" >> $GITHUB_OUTPUT
