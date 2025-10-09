@@ -56,25 +56,17 @@ jobs:
           echo "=== Docker bake output ==="
           docker buildx bake --print
           echo "=== Extracting versions ==="
-          # Try different jq paths to find the variables
+          # Extract from the resolved JSON structure
           bake_output=$(docker buildx bake --print)
-          version=$(echo "$bake_output" | jq -r '.variable.VERSION.default // empty')
-          if [ -z "$version" ]; then
-            version=$(echo "$bake_output" | jq -r '.variables.VERSION.default // empty')
-          fi
-          if [ -z "$version" ]; then
-            version=$(echo "$bake_output" | jq -r '.target.mysticbbs.args.VERSION // empty')
-          fi
+          
+          # Get version from the image.version label
+          version=$(echo "$bake_output" | jq -r '.target.mysticbbs.labels."org.opencontainers.image.version" // empty')
+          
+          # Get major version by finding the shortest non-rolling tag
+          major_version=$(echo "$bake_output" | jq -r '.target.mysticbbs.tags[]' | sed 's/.*://' | grep -v rolling | sort -n | head -1)
+          
           if [ -z "$version" ]; then
             version="rolling"
-          fi
-          
-          major_version=$(echo "$bake_output" | jq -r '.variable.MAJOR_VERSION.default // empty')
-          if [ -z "$major_version" ]; then
-            major_version=$(echo "$bake_output" | jq -r '.variables.MAJOR_VERSION.default // empty')
-          fi
-          if [ -z "$major_version" ]; then
-            major_version=$(echo "$bake_output" | jq -r '.target.mysticbbs.args.MAJOR_VERSION // empty')
           fi
           echo "Extracted version: '$version'"
           echo "Extracted major_version: '$major_version'"
