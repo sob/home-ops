@@ -53,8 +53,13 @@ jobs:
         id: version
         working-directory: containers/${{ inputs.app }}
         run: |
+          echo "=== Docker bake output ==="
+          docker buildx bake --print
+          echo "=== Extracting versions ==="
           version=$(docker buildx bake --print | jq -r '.variable.VERSION.default // "rolling"')
           major_version=$(docker buildx bake --print | jq -r '.variable.MAJOR_VERSION.default // ""')
+          echo "Extracted version: '$version'"
+          echo "Extracted major_version: '$major_version'"
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "major_version=$major_version" >> $GITHUB_OUTPUT
           echo "raw=$version" >> $GITHUB_OUTPUT
@@ -169,18 +174,29 @@ jobs:
             DIGESTS="$DIGESTS $IMAGE_NAME@sha256:$digest"
           done
           echo "Final digests: $DIGESTS"
+          echo "=== Version Information ==="
+          echo "Version: '${{ needs.plan.outputs.version }}'"
+          echo "Major Version: '${{ needs.plan.outputs.major_version }}'"
+          echo "Raw: '${{ needs.plan.outputs.raw }}'"
+          
           # Create rolling tag first
           echo "Creating rolling tag..."
           docker buildx imagetools create -t ${IMAGE_NAME}:rolling $DIGESTS
           
           # Create version tag
-          echo "Creating version tag: ${{ needs.plan.outputs.version }}"
-          docker buildx imagetools create -t ${IMAGE_NAME}:${{ needs.plan.outputs.version }} ${IMAGE_NAME}:rolling
+          if [ -n "${{ needs.plan.outputs.version }}" ] && [ "${{ needs.plan.outputs.version }}" != "rolling" ]; then
+            echo "Creating version tag: ${{ needs.plan.outputs.version }}"
+            docker buildx imagetools create -t ${IMAGE_NAME}:${{ needs.plan.outputs.version }} ${IMAGE_NAME}:rolling
+          else
+            echo "Skipping version tag - empty or rolling"
+          fi
           
           # Create major version tag if defined
           if [ -n "${{ needs.plan.outputs.major_version }}" ]; then
             echo "Creating major version tag: ${{ needs.plan.outputs.major_version }}"
             docker buildx imagetools create -t ${IMAGE_NAME}:${{ needs.plan.outputs.major_version }} ${IMAGE_NAME}:rolling
+          else
+            echo "Skipping major version tag - not defined"
           fi
 
       - name: Inspect image and extract digest
