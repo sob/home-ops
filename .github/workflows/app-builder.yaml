@@ -169,12 +169,19 @@ jobs:
             DIGESTS="$DIGESTS $IMAGE_NAME@sha256:$digest"
           done
           echo "Final digests: $DIGESTS"
-          TAGS="-t ${IMAGE_NAME}:${{ needs.plan.outputs.version }} -t ${IMAGE_NAME}:rolling"
+          # Create rolling tag first
+          echo "Creating rolling tag..."
+          docker buildx imagetools create -t ${IMAGE_NAME}:rolling $DIGESTS
+          
+          # Create version tag
+          echo "Creating version tag: ${{ needs.plan.outputs.version }}"
+          docker buildx imagetools create -t ${IMAGE_NAME}:${{ needs.plan.outputs.version }} ${IMAGE_NAME}:rolling
+          
+          # Create major version tag if defined
           if [ -n "${{ needs.plan.outputs.major_version }}" ]; then
-            TAGS="$TAGS -t ${IMAGE_NAME}:${{ needs.plan.outputs.major_version }}"
+            echo "Creating major version tag: ${{ needs.plan.outputs.major_version }}"
+            docker buildx imagetools create -t ${IMAGE_NAME}:${{ needs.plan.outputs.major_version }} ${IMAGE_NAME}:rolling
           fi
-          echo "Final tags: $TAGS"
-          docker buildx imagetools create $TAGS $DIGESTS
 
       - name: Inspect image and extract digest
         id: inspect
