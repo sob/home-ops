@@ -22,6 +22,7 @@ jobs:
     outputs:
       platforms: ${{ steps.platforms.outputs.platforms }}
       version: ${{ steps.version.outputs.version }}
+      major_version: ${{ steps.version.outputs.major_version }}
       raw: ${{ steps.version.outputs.raw }}
     steps:
       - name: Checkout repository
@@ -53,7 +54,9 @@ jobs:
         working-directory: containers/${{ inputs.app }}
         run: |
           version=$(docker buildx bake --print | jq -r '.variable.VERSION.default // "rolling"')
+          major_version=$(docker buildx bake --print | jq -r '.variable.MAJOR_VERSION.default // ""')
           echo "version=$version" >> $GITHUB_OUTPUT
+          echo "major_version=$major_version" >> $GITHUB_OUTPUT
           echo "raw=$version" >> $GITHUB_OUTPUT
 
   build:
@@ -153,23 +156,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build App Metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}
-          tags: |
-            type=raw,value=rolling,enable={{is_default_branch}}
-            type=raw,value=${{ needs.plan.outputs.raw }}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha
-
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}@sha256:%s ' *)
+          # Create tags from docker-bake.hcl configuration
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.app }}"
+          docker buildx imagetools create \
+            -t ${IMAGE_NAME}:${{ needs.plan.outputs.version }} \
+            $([ -n "${{ needs.plan.outputs.major_version }}" ] && echo "-t ${IMAGE_NAME}:${{ needs.plan.outputs.major_version }}") \
+            -t ${IMAGE_NAME}:rolling \
+            $(printf '${IMAGE_NAME}@sha256:%s ' *)
 
       - name: Inspect image and extract digest
         id: inspect
