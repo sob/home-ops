@@ -29,6 +29,7 @@ spec:
             env:
               TZ: America/Chicago
               MYSTIC_NODE: "1"
+              MYSTIC_PATH: "/config"
             probes:
               liveness: &probes
                 enabled: true
@@ -89,3 +90,15 @@ spec:
             app:
               - path: /tmp
                 subPath: tmp
+      run:
+        type: emptyDir
+        advancedMounts:
+          mystic-bbs:
+            app:
+              - path: /var/run
+      log:
+        type: emptyDir
+        advancedMounts:
+          mystic-bbs:
+            app:
+              - path: /var/log

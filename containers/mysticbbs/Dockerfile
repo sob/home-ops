@@ -67,7 +67,7 @@ RUN ARCH=$(uname -m) && \
     && cd / \
     && rm -rf /tmp/cryptlib /tmp/cl${CRYPTLIB_VERSION}.zip
 
-# Download and install Mystic BBS (architecture-specific)
+# Download Mystic BBS installer (architecture-specific)
 WORKDIR /tmp
 RUN ARCH=$(uname -m) && \
     echo "Detected architecture: $ARCH" && \
@@ -92,9 +92,8 @@ RUN ARCH=$(uname -m) && \
         unzip -q "$MYSTIC_FILE"; \
     fi && \
     chmod +x install && \
-    ./install auto /build/mystic && \
-    chmod +x /build/mystic/mis && \
-    chmod +x /build/mystic/*.sh 2>/dev/null || true && \
+    mkdir -p /build && \
+    cp install /build/ && \
     rm -rf /tmp/"$MYSTIC_FILE" /tmp/install*
 
 # Runtime stage
@@ -142,8 +141,9 @@ RUN echo "Verifying cryptlib installation:" && \
     echo "Running ldconfig:" && \
     ldconfig
 
-# Copy Mystic BBS from builder
-COPY --from=builder /build/mystic /opt/mystic
+# Copy Mystic BBS installer from builder
+COPY --from=builder /build/install /usr/local/bin/mystic-install
+RUN chmod +x /usr/local/bin/mystic-install
 
 # Setup logrotate
 COPY logrotate.conf /etc/logrotate.d/mystic
