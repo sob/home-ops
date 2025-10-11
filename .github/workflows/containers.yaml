@@ -183,6 +183,7 @@ jobs:
         with:
           workdir: containers/${{ matrix.app }}
           targets: ${{ matrix.app }}
+          provenance: false
           set: |
             *.platform=${{ matrix.platform }}
             *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }},push-by-digest=true,name-canonical=true,push=true
