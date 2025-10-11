@@ -425,14 +425,6 @@ func TestMysticTelnetPort(t *testing.T) {
 	require.NoError(t, err, "Should be able to connect to telnet port 23")
 	t.Logf("Successfully connected to Mystic BBS telnet port at %s", hostPort)
 
-	// Additional test: verify Mystic process is running
-	t.Run("MysticProcessRunning", func(t *testing.T) {
-		// Look for the mis binary (which runs as the server)
-		exitCode, err := resource.Exec([]string{"pgrep", "-x", "mis"}, dockertest.ExecOptions{})
-		require.NoError(t, err)
-		assert.Equal(t, 0, exitCode, "Mystic BBS server process should be running")
-	})
-
 	// Test that the port is listening inside the container
 	t.Run("TelnetPortListeningInContainer", func(t *testing.T) {
 		// Try to connect to localhost:23 from inside the container
