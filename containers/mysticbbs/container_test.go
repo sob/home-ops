@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"net"
 	"testing"
 	"time"
 
@@ -182,7 +184,7 @@ func TestEnvironmentVariables(t *testing.T) {
 	pool, err := dockertest.NewPool("")
 	require.NoError(t, err, "Could not connect to docker")
 
-	customPath := "/custom/mystic/path"
+	customPath := "/tmp/custom-mystic"  // Use /tmp which is writable by nobody user
 	customTZ := "America/New_York"
 	customNode := "42"
 
@@ -369,5 +371,59 @@ func TestHookSystem(t *testing.T) {
 		exitCode, err := resource.Exec([]string{"sh", "-c", "[ -d \"$MYSTIC_PATH/hooks\" ]"}, dockertest.ExecOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, 0, exitCode, "Hooks should be in MYSTIC_PATH/hooks directory")
+	})
+}
+
+func TestMysticTelnetPort(t *testing.T) {
+	pool, err := dockertest.NewPool("")
+	require.NoError(t, err, "Could not connect to docker")
+
+	// Run container with exposed telnet port
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/mysticbbs",
+		Tag:        "rolling",
+		ExposedPorts: []string{"23/tcp"},
+		Env: []string{
+			"MYSTIC_PATH=/config",
+		},
+	})
+	require.NoError(t, err, "Could not start resource")
+
+	defer func() {
+		assert.NoError(t, pool.Purge(resource), "Could not purge resource")
+	}()
+
+	// Get the host and port for telnet
+	hostPort := resource.GetHostPort("23/tcp")
+	require.NotEmpty(t, hostPort, "Telnet port should be mapped")
+
+	// Retry connection to telnet port with timeout
+	// Mystic takes time to install and start, so we need to be patient
+	err = pool.Retry(func() error {
+		conn, err := net.DialTimeout("tcp", hostPort, 5*time.Second)
+		if err != nil {
+			return fmt.Errorf("telnet port not ready: %w", err)
+		}
+		defer conn.Close()
+		return nil
+	})
+
+	require.NoError(t, err, "Should be able to connect to telnet port 23")
+	t.Logf("Successfully connected to Mystic BBS telnet port at %s", hostPort)
+
+	// Additional test: verify Mystic process is running
+	t.Run("MysticProcessRunning", func(t *testing.T) {
+		exitCode, err := resource.Exec([]string{"pgrep", "-f", "mis server"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "Mystic BBS server process should be running")
+	})
+
+	// Test that the port is listening inside the container
+	t.Run("TelnetPortListeningInContainer", func(t *testing.T) {
+		// Try to connect to localhost:23 from inside the container
+		exitCode, err := resource.Exec([]string{"sh", "-c", "timeout 2 bash -c '</dev/tcp/localhost/23' 2>/dev/null && echo 'port open' || echo 'port closed'"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		// Exit code 0 means bash successfully connected to the port
+		assert.Equal(t, 0, exitCode, "Port 23 should be listening inside container")
 	})
 }
