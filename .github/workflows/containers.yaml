@@ -188,6 +188,7 @@ jobs:
             *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }},push-by-digest=true,name-canonical=true,push=true
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
+            *.tags=
             *.labels.org.opencontainers.image.title=${{ matrix.app }}
             *.labels.org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
