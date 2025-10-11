@@ -183,7 +183,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}
           tags: |
-            type=raw,value=
+            type=raw,value=build-${{ github.sha }}
           labels: |
             org.opencontainers.image.title=${{ matrix.app }}
             org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
