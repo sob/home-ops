@@ -276,14 +276,6 @@ jobs:
           echo "Creating rolling tag..."
           docker buildx imagetools create -t ${IMAGE_NAME}:rolling $DIGESTS
 
-          # Create version tag
-          if [ -n "${{ steps.version.outputs.version }}" ] && [ "${{ steps.version.outputs.version }}" != "rolling" ]; then
-            echo "Creating version tag: ${{ steps.version.outputs.version }}"
-            docker buildx imagetools create -t ${IMAGE_NAME}:${{ steps.version.outputs.version }} ${IMAGE_NAME}:rolling
-          else
-            echo "Skipping version tag - empty or rolling"
-          fi
-
           # Create major version tag if defined
           if [ -n "${{ steps.version.outputs.major_version }}" ]; then
             echo "Creating major version tag: ${{ steps.version.outputs.major_version }}"
@@ -311,6 +303,15 @@ jobs:
           IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}"
           docker buildx imagetools create \
             -t ${IMAGE_NAME}:sha256-${{ steps.inspect.outputs.digest }} \
+            ${IMAGE_NAME}:rolling
+
+      - name: Tag with version (becomes default)
+        if: ${{ steps.version.outputs.version != '' && steps.version.outputs.version != 'rolling' }}
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}"
+          echo "Creating version tag as default: ${{ steps.version.outputs.version }}"
+          docker buildx imagetools create \
+            -t ${IMAGE_NAME}:${{ steps.version.outputs.version }} \
             ${IMAGE_NAME}:rolling
 
       - name: Clean up untagged digest images
