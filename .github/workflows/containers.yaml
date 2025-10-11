@@ -98,9 +98,6 @@ jobs:
       max-parallel: 10
       matrix:
         app: ${{ fromJson(needs.changed.outputs.apps) }}
-    outputs:
-      version-${{ matrix.app }}: ${{ steps.version.outputs.version }}
-      major-version-${{ matrix.app }}: ${{ steps.version.outputs.major_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
