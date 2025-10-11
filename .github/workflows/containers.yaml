@@ -177,20 +177,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build App Metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}
-          tags: |
-            type=raw,value=build-${{ github.sha }}
-          labels: |
-            org.opencontainers.image.title=${{ matrix.app }}
-            org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.vendor=${{ github.repository_owner }}
-          bake-target: ${{ matrix.app }}
-
       - name: Build App
         id: build
         uses: docker/bake-action@v5
@@ -202,10 +188,13 @@ jobs:
             *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }},push-by-digest=true,name-canonical=true,push=true
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
-            *.tags=
+            *.labels.org.opencontainers.image.title=${{ matrix.app }}
+            *.labels.org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
+            *.labels.org.opencontainers.image.revision=${{ github.sha }}
+            *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
+            *.labels.org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/home-ops
           files: |
             ./docker-bake.hcl
-            ${{ steps.meta.outputs.bake-file }}
 
       - name: Export digest
         run: |
