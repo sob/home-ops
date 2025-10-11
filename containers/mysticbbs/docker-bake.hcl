@@ -1,10 +1,10 @@
 variable "VERSION" {
   // renovate: datasource=custom.mysticbbs depName=mystic-bbs versioning=loose
-  default = "112a48"
+  default = "1.12a48"
 }
 
 variable "MAJOR_VERSION" {
-  default = "112"
+  default = "1.12"
 }
 
 
