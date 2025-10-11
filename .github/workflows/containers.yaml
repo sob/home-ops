@@ -380,6 +380,28 @@ jobs:
           echo "Creating immutable sha256 tag as default: sha256-${DIGEST}"
           docker buildx imagetools create -t ${IMAGE_NAME}:sha256-${DIGEST} ${COMMIT_TAG}
 
+      - name: Update package README
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          PACKAGE_NAME="${{ matrix.app }}"
+
+          # Check if README exists for this container
+          if [ -f "containers/$PACKAGE_NAME/README.md" ]; then
+            echo "Updating package README from containers/$PACKAGE_NAME/README.md"
+
+            # GitHub API requires the README content to be base64 encoded
+            README_CONTENT=$(cat "containers/$PACKAGE_NAME/README.md" | base64 -w 0)
+
+            # Update the package README
+            curl -X PUT \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/user/packages/container/$PACKAGE_NAME" \
+              -d "{\"description\":\"$(head -1 containers/$PACKAGE_NAME/README.md | sed 's/^# //')\"}" || true
+          else
+            echo "No README found at containers/$PACKAGE_NAME/README.md"
+          fi
+
       - name: Clean up untagged digest images
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: |
