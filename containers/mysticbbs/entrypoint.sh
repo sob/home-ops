@@ -33,26 +33,58 @@ cleanup() {
 # trap SIGTERM for graceful shutdown
 trap 'cleanup' SIGTERM
 
-# Start cron for logrotate
+# Start cron for logrotate (may fail with read-only filesystem, non-critical)
 echo "Starting cron..."
-service cron start
+service cron start 2>/dev/null || echo "Cron failed to start (non-critical)"
 
-# Check if Mystic BBS exists in persistent storage, if not run installer
+# Check if Mystic BBS exists in persistent storage
 if [ ! -f "$MYSTIC_PATH/mis" ]; then
-    echo "Installing Mystic BBS to $MYSTIC_PATH..."
     mkdir -p "$MYSTIC_PATH"
-    
-    # Run pre-install hook
-    run_hook "pre-install.sh"
-    
-    # Run the installer
-    cd "$MYSTIC_PATH"
-    /usr/local/bin/mystic-install auto .
-    
-    # Run post-install hook
-    run_hook "post-install.sh"
-    
-    echo "Mystic BBS installation completed"
+
+    # Check if this is an upgrade (mystic.dat exists but mis doesn't)
+    if [ -f "$MYSTIC_PATH/mystic.dat" ]; then
+        echo "Existing Mystic BBS data detected - performing upgrade..."
+
+        # Run pre-upgrade hook
+        run_hook "pre-upgrade.sh"
+
+        # Use the upgrade utility to preserve data files
+        cd /usr/local/share/mystic
+        ./upgrade "$MYSTIC_PATH"
+
+        # Run post-upgrade hook
+        run_hook "post-upgrade.sh"
+
+        echo "Mystic BBS upgrade completed"
+    else
+        echo "Installing Mystic BBS to $MYSTIC_PATH..."
+
+        # Run pre-install hook
+        run_hook "pre-install.sh"
+
+        # Run the installer (needs install_data.mys in same directory as installer)
+        # Use 'overwrite' option to install into existing directory
+        cd /usr/local/share/mystic
+        ./install auto "$MYSTIC_PATH" overwrite
+
+        # Run post-install hook
+        run_hook "post-install.sh"
+
+        echo "Mystic BBS installation completed"
+    fi
+
+    # Copy documentation files to config directory if they don't exist or differ
+    for doc_file in whatsnew.txt upgrade.txt; do
+        if [ -f "/usr/local/share/mystic/$doc_file" ]; then
+            if [ ! -f "$MYSTIC_PATH/$doc_file" ] || ! cmp -s "/usr/local/share/mystic/$doc_file" "$MYSTIC_PATH/$doc_file"; then
+                cp "/usr/local/share/mystic/$doc_file" "$MYSTIC_PATH/$doc_file" 2>/dev/null && \
+                    echo "Updated $doc_file in $MYSTIC_PATH" || \
+                    echo "Warning: Could not copy $doc_file (non-critical)"
+            else
+                echo "$doc_file is up to date"
+            fi
+        fi
+    done
 fi
 
 # Verify cryptlib
@@ -70,7 +102,7 @@ echo "Note: Mystic BBS will handle SSH on port 22 with cryptlib support"
 echo "Configure SSH server in Mystic configuration: System > Configuration > Servers"
 
 # Start logger in background
-$MYSTIC_PATH/tailit.sh &
+/usr/local/bin/tailit.sh &
 
 # Start Mystic BBS server
 ./mis server &

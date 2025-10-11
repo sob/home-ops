@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # Simple log monitoring script
-if [ -f "/mystic/logs/server.log" ]; then
-    tail -f /mystic/logs/server.log
+MYSTIC_PATH=${MYSTIC_PATH:-/mystic}
+
+if [ -f "$MYSTIC_PATH/logs/server.log" ]; then
+    tail -f "$MYSTIC_PATH/logs/server.log"
 else
     echo "No server log found yet..."
     sleep 5

@@ -1,7 +1,14 @@
+# Mystic BBS Container
+# See README.md for complete documentation on:
+# - Hook system for lifecycle automation
+# - Install/upgrade process and detection
+# - Filesystem layout following FHS
+# - Environment variables and configuration
+
 # Version definitions
 ARG UBUNTU_VERSION="24.04"
 ARG UNRAR_VERSION="7.1.10"
-ARG CRYPTLIB_VERSION="345" 
+ARG CRYPTLIB_VERSION="345"
 ARG CRYPTLIB_SO_VERSION="3.4.5"
 ARG MYSTIC_VERSION="112a48"
 
@@ -92,9 +99,14 @@ RUN ARCH=$(uname -m) && \
         unzip -q "$MYSTIC_FILE"; \
     fi && \
     chmod +x install && \
+    chmod +x upgrade 2>/dev/null || true && \
     mkdir -p /build && \
     cp install /build/ && \
-    rm -rf /tmp/"$MYSTIC_FILE" /tmp/install*
+    cp install_data.mys /build/ 2>/dev/null || true && \
+    cp upgrade /build/ 2>/dev/null || true && \
+    cp whatsnew.txt /build/ 2>/dev/null || true && \
+    cp upgrade.txt /build/ 2>/dev/null || true && \
+    rm -rf /tmp/"$MYSTIC_FILE"
 
 # Runtime stage
 FROM ubuntu:${UBUNTU_VERSION}
@@ -141,9 +153,22 @@ RUN echo "Verifying cryptlib installation:" && \
     echo "Running ldconfig:" && \
     ldconfig
 
-# Copy Mystic BBS installer from builder
-COPY --from=builder /build/install /usr/local/bin/mystic-install
-RUN chmod +x /usr/local/bin/mystic-install
+# Copy Mystic BBS installer and upgrade utility from builder
+# Keep all mystic installer files together in /usr/local/share/mystic
+RUN mkdir -p /usr/local/share/mystic
+COPY --from=builder /build/install /usr/local/share/mystic/install
+COPY --from=builder /build/install_data.mys /usr/local/share/mystic/install_data.mys
+COPY --from=builder /build/upgrade /usr/local/share/mystic/upgrade
+COPY --from=builder /build/whatsnew.txt /usr/local/share/mystic/whatsnew.txt
+COPY --from=builder /build/upgrade.txt /usr/local/share/mystic/upgrade.txt
+RUN chmod +x /usr/local/share/mystic/install && \
+    chmod +x /usr/local/share/mystic/upgrade 2>/dev/null || true && \
+    chmod 644 /usr/local/share/mystic/install_data.mys && \
+    chmod 644 /usr/local/share/mystic/whatsnew.txt && \
+    chmod 644 /usr/local/share/mystic/upgrade.txt && \
+    chown -R 65534:65534 /usr/local/share/mystic && \
+    ln -s /usr/local/share/mystic/install /usr/local/bin/mystic-install && \
+    ln -s /usr/local/share/mystic/upgrade /usr/local/bin/mystic-upgrade
 
 # Setup logrotate
 COPY logrotate.conf /etc/logrotate.d/mystic

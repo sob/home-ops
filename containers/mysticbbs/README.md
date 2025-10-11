@@ -1,14 +1,112 @@
 # Mystic BBS Container
 
-A containerized Mystic BBS bulletin board system with SSH access and FidoNet support.
+A containerized Mystic BBS bulletin board system with SSH access, FidoNet support, and runtime installation for cloud-native deployments.
 
 ## Features
 
 - **Multi-architecture support**: x86_64, ARM64, ARM32
+- **Runtime Installation**: Mystic installs to persistent storage on first run
+- **Automatic Upgrades**: Detects and handles version upgrades automatically
+- **Hook System**: Customizable lifecycle hooks for automation
 - **SSH Server**: Built-in SSH server with cryptlib support
-- **Telnet Access**: Traditional BBS telnet interface  
+- **Telnet Access**: Traditional BBS telnet interface
 - **FidoNet/BinkP**: Mailer support for FidoNet networks
-- **Cloudflare Tunnel Ready**: Pre-configured for web-based access
+- **Security Hardened**: Runs as non-root with read-only filesystem support
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MYSTIC_PATH` | `/mystic` | Installation directory for Mystic BBS (should match persistent volume mount) |
+| `TZ` | `America/Chicago` | Timezone for the container |
+| `MYSTIC_NODE` | (none) | Optional node identifier for multi-node setups |
+
+## Installation Process
+
+### Fresh Installation
+
+On first run, if `$MYSTIC_PATH/mis` doesn't exist, the container performs a fresh installation:
+
+1. Executes `pre-install.sh` hook (if present)
+2. Runs Mystic installer from `/usr/local/share/mystic/install`
+3. Installs to `$MYSTIC_PATH` with overwrite support
+4. Executes `post-install.sh` hook (if present)
+5. Copies documentation files (`whatsnew.txt`, `upgrade.txt`) to installation directory
+
+### Automatic Upgrades
+
+The container automatically detects upgrade scenarios:
+
+**Upgrade Detection**: If `$MYSTIC_PATH/mystic.dat` exists but `$MYSTIC_PATH/mis` doesn't, an upgrade is performed.
+
+**Upgrade Process**:
+1. Executes `pre-upgrade.sh` hook (if present)
+2. Runs upgrade utility from `/usr/local/share/mystic/upgrade`
+3. Preserves existing data files (user accounts, message bases, file bases, etc.)
+4. Executes `post-upgrade.sh` hook (if present)
+5. Updates documentation files if they differ from container versions
+
+**Documentation Updates**: On each container start, the system compares `whatsnew.txt` and `upgrade.txt` files. If the container versions differ from installed versions, they are automatically updated.
+
+## Hook System
+
+The container supports lifecycle hooks for automation and customization. Hooks are executable scripts placed in `$MYSTIC_PATH/hooks/`.
+
+### Available Hooks
+
+| Hook | When Executed | Use Cases |
+|------|---------------|-----------|
+| `pre-install.sh` | Before fresh installation | Pre-configure directories, download assets |
+| `post-install.sh` | After fresh installation | Configure initial settings, import data |
+| `pre-upgrade.sh` | Before upgrade process | Backup configurations, prepare for changes |
+| `post-upgrade.sh` | After upgrade process | Migrate settings, run database updates |
+| `startup.sh` | Every container start (after install/upgrade) | Start background services, health checks |
+| `shutdown.sh` | On container shutdown | Cleanup tasks, graceful service shutdown |
+
+### Hook Example
+
+Create a hook to backup the configuration before upgrades:
+
+```bash
+# $MYSTIC_PATH/hooks/pre-upgrade.sh
+#!/bin/bash
+BACKUP_DIR="$MYSTIC_PATH/backups"
+mkdir -p "$BACKUP_DIR"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+tar -czf "$BACKUP_DIR/mystic-backup-$TIMESTAMP.tar.gz" \
+    "$MYSTIC_PATH/data" \
+    "$MYSTIC_PATH/*.dat" \
+    "$MYSTIC_PATH/*.ini"
+echo "Backup created: mystic-backup-$TIMESTAMP.tar.gz"
+```
+
+Remember to make hooks executable: `chmod +x $MYSTIC_PATH/hooks/*.sh`
+
+## Filesystem Layout
+
+The container follows the Filesystem Hierarchy Standard (FHS):
+
+```
+/usr/local/share/mystic/     # Mystic installer files (read-only)
+├── install                  # Fresh installation executable
+├── install_data.mys        # Installation data file
+├── upgrade                 # Upgrade utility executable
+├── whatsnew.txt           # Version changelog
+└── upgrade.txt            # Upgrade documentation
+
+/usr/local/bin/             # Symlinks for PATH access
+├── mystic-install -> /usr/local/share/mystic/install
+└── mystic-upgrade -> /usr/local/share/mystic/upgrade
+
+$MYSTIC_PATH/               # Runtime installation (persistent volume)
+├── mis                    # Mystic server executable
+├── mystic.dat            # Main configuration file
+├── data/                 # User data, message bases, file bases
+├── logs/                 # Server logs
+├── hooks/                # Lifecycle hook scripts
+├── whatsnew.txt         # Version changelog (auto-updated)
+└── upgrade.txt          # Upgrade documentation (auto-updated)
+```
 
 ## Usage
 
@@ -26,6 +124,7 @@ services:
     volumes:
       - mystic-config:/config
     environment:
+      - MYSTIC_PATH=/config  # Must match volume mount
       - TZ=America/Chicago
     restart: unless-stopped
 
