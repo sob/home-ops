@@ -1,15 +1,22 @@
 ---
 name: Build Containers
 
+env:
+  REGISTRY: ghcr.io
+
 on:
   push:
     branches: [main]
     paths:
       - "containers/**"
+      - "!containers/**/go.mod"
+      - "!containers/**/go.sum"
   pull_request:
     branches: [main]
     paths:
       - "containers/**"
+      - "!containers/**/go.mod"
+      - "!containers/**/go.sum"
   workflow_dispatch:
     inputs:
       app:
@@ -37,7 +44,6 @@ jobs:
           dir_names: true
           dir_names_max_depth: 2
           json: true
-          escape_json: false
 
   changed:
     runs-on: ubuntu-latest
@@ -63,7 +69,7 @@ jobs:
           else
             # Automatic trigger - use changed files
             changed_files="${{ needs.prepare.outputs.changed-files }}"
-            echo "Changed files: $changed_files"
+            echo "Changed files raw output: '$changed_files'"
             if [ -z "$changed_files" ] || [ "$changed_files" = "[]" ] || [ "$changed_files" = "null" ] || [ "$changed_files" = "" ]; then
               echo "No changes detected, setting empty array"
               echo "apps=[]" >> $GITHUB_OUTPUT
@@ -75,22 +81,297 @@ jobs:
                 echo "Extracted apps: $apps"
                 echo "apps=$apps" >> $GITHUB_OUTPUT
               else
-                echo "Invalid JSON in changed_files, setting empty array"
-                echo "apps=[]" >> $GITHUB_OUTPUT
+                echo "ERROR: Invalid JSON in changed_files output"
+                echo "Raw value: '$changed_files'"
+                echo "This is likely a bug in the changed-files action configuration"
+                exit 1
               fi
             fi
           fi
 
-  build:
-    uses: ./.github/workflows/app-builder.yaml
+  plan:
+    runs-on: ubuntu-latest
     needs: changed
     if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 10
       matrix:
         app: ${{ fromJson(needs.changed.outputs.apps) }}
-    with:
-      app: ${{ matrix.app }}
-      release: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    secrets: inherit
+    outputs:
+      version-${{ matrix.app }}: ${{ steps.version.outputs.version }}
+      major-version-${{ matrix.app }}: ${{ steps.version.outputs.major_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if app exists
+        run: |
+          if [ ! -d "containers/${{ matrix.app }}" ]; then
+            echo "App ${{ matrix.app }} does not exist"
+            exit 1
+          fi
+          if [ ! -f "containers/${{ matrix.app }}/docker-bake.hcl" ]; then
+            echo "App ${{ matrix.app }} does not have docker-bake.hcl"
+            exit 1
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Get version
+        id: version
+        working-directory: containers/${{ matrix.app }}
+        run: |
+          echo "=== Docker bake output ==="
+          docker buildx bake --print
+          echo "=== Extracting versions ==="
+          bake_output=$(docker buildx bake --print)
+
+          # Get the first target name dynamically
+          target=$(echo "$bake_output" | jq -r '.target | keys[0]')
+          echo "Found target: $target"
+
+          # Get version from the image.version label
+          version=$(echo "$bake_output" | jq -r ".target.${target}.labels.\"org.opencontainers.image.version\" // empty")
+
+          # Get major version by finding the shortest non-rolling tag
+          major_version=$(echo "$bake_output" | jq -r ".target.${target}.tags[]" | sed 's/.*://' | grep -v rolling | sort -n | head -1)
+
+          if [ -z "$version" ]; then
+            version="rolling"
+          fi
+          echo "Extracted version: '$version'"
+          echo "Extracted major_version: '$major_version'"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "major_version=$major_version" >> $GITHUB_OUTPUT
+
+  build-image:
+    runs-on: ${{ matrix.runner }}
+    needs: [changed, plan]
+    if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        app: ${{ fromJson(needs.changed.outputs.apps) }}
+        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build App Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}
+          tags: |
+            type=raw,value=
+          labels: |
+            org.opencontainers.image.title=${{ matrix.app }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+          bake-target: ${{ matrix.app }}
+
+      - name: Build App
+        id: build
+        uses: docker/bake-action@v5
+        with:
+          workdir: containers/${{ matrix.app }}
+          targets: ${{ matrix.app }}
+          set: |
+            *.platform=${{ matrix.platform }}
+            *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }},push-by-digest=true,name-canonical=true,push=true
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ fromJSON(steps.build.outputs.metadata)[matrix.app]['containerimage.digest'] }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.app }}-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: [changed, plan, build-image]
+    if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        app: ${{ fromJson(needs.changed.outputs.apps) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-${{ matrix.app }}-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version info
+        id: version
+        working-directory: containers/${{ matrix.app }}
+        run: |
+          bake_output=$(docker buildx bake --print)
+          target=$(echo "$bake_output" | jq -r '.target | keys[0]')
+          version=$(echo "$bake_output" | jq -r ".target.${target}.labels.\"org.opencontainers.image.version\" // empty")
+          major_version=$(echo "$bake_output" | jq -r ".target.${target}.tags[]" | sed 's/.*://' | grep -v rolling | sort -n | head -1)
+
+          if [ -z "$version" ]; then
+            version="rolling"
+          fi
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "major_version=$major_version" >> $GITHUB_OUTPUT
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}"
+          echo "Available digest files:"
+          ls -la
+          DIGESTS=""
+          for digest in *; do
+            echo "Processing digest: $digest"
+            DIGESTS="$DIGESTS $IMAGE_NAME@sha256:$digest"
+          done
+          echo "Final digests: $DIGESTS"
+          echo "=== Version Information ==="
+          echo "Version: '${{ steps.version.outputs.version }}'"
+          echo "Major Version: '${{ steps.version.outputs.major_version }}'"
+
+          # Create rolling tag first
+          echo "Creating rolling tag..."
+          docker buildx imagetools create -t ${IMAGE_NAME}:rolling $DIGESTS
+
+          # Create version tag
+          if [ -n "${{ steps.version.outputs.version }}" ] && [ "${{ steps.version.outputs.version }}" != "rolling" ]; then
+            echo "Creating version tag: ${{ steps.version.outputs.version }}"
+            docker buildx imagetools create -t ${IMAGE_NAME}:${{ steps.version.outputs.version }} ${IMAGE_NAME}:rolling
+          else
+            echo "Skipping version tag - empty or rolling"
+          fi
+
+          # Create major version tag if defined
+          if [ -n "${{ steps.version.outputs.major_version }}" ]; then
+            echo "Creating major version tag: ${{ steps.version.outputs.major_version }}"
+            docker buildx imagetools create -t ${IMAGE_NAME}:${{ steps.version.outputs.major_version }} ${IMAGE_NAME}:rolling
+          else
+            echo "Skipping major version tag - not defined"
+          fi
+
+      - name: Inspect image and extract digest
+        id: inspect
+        run: |
+          cd /tmp/digests
+          if ls *.* > /dev/null 2>&1; then
+            DIGEST=$(ls | head -1)
+            echo "Found digest: $DIGEST"
+            echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          else
+            echo "No digest files found, skipping SHA256 tag creation"
+            echo "digest=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Tag with SHA256 digest
+        if: ${{ steps.inspect.outputs.digest != '' }}
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}"
+          docker buildx imagetools create \
+            -t ${IMAGE_NAME}:sha256-${{ steps.inspect.outputs.digest }} \
+            ${IMAGE_NAME}:rolling
+
+      - name: Clean up untagged digest images
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          # Delete untagged images (digest-only images from multi-platform build)
+          PACKAGE_NAME="${{ matrix.app }}"
+
+          # Get all package versions
+          echo "Fetching package versions for $PACKAGE_NAME..."
+          VERSIONS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions" | \
+            jq -r '.[] | select(.metadata.container.tags | length == 0) | .id')
+
+          # Delete each untagged version
+          for VERSION_ID in $VERSIONS; do
+            echo "Deleting untagged version: $VERSION_ID"
+            curl -X DELETE -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions/$VERSION_ID" || true
+          done
+
+          echo "Cleanup complete"
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [changed, merge]
+    if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        app: ${{ fromJson(needs.changed.outputs.apps) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Run container tests
+        working-directory: containers/${{ matrix.app }}
+        run: |
+          if [ -f "container_test.go" ]; then
+            echo "Running container tests for ${{ matrix.app }}"
+            go test -v .
+          else
+            echo "No container tests found for ${{ matrix.app }}"
+          fi
