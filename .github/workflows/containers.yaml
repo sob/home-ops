@@ -190,11 +190,7 @@ jobs:
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
             *.tags=
-            *.labels.org.opencontainers.image.title=${{ matrix.app }}
-            *.labels.org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/home-ops
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
-            *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            *.labels.org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/home-ops
           files: |
             ./docker-bake.hcl
 
@@ -310,6 +306,10 @@ jobs:
           echo "Version: '${{ steps.version.outputs.version }}'"
           echo "Major Version: '${{ steps.version.outputs.major_version }}'"
 
+          # Get the image digest for sha256 tag
+          DIGEST=$(docker buildx imagetools inspect ${COMMIT_TAG} --format '{{json .}}' | jq -r '.manifest.digest' | sed 's/sha256://')
+          echo "Image digest: $DIGEST"
+
           # Create rolling tag
           echo "Creating rolling tag..."
           docker buildx imagetools create -t ${IMAGE_NAME}:rolling ${COMMIT_TAG}
@@ -322,13 +322,17 @@ jobs:
             echo "Skipping major version tag - not defined"
           fi
 
-          # Create version tag last so it becomes the default
+          # Create version tag
           if [ -n "${{ steps.version.outputs.version }}" ] && [ "${{ steps.version.outputs.version }}" != "rolling" ]; then
-            echo "Creating version tag as default: ${{ steps.version.outputs.version }}"
+            echo "Creating version tag: ${{ steps.version.outputs.version }}"
             docker buildx imagetools create -t ${IMAGE_NAME}:${{ steps.version.outputs.version }} ${COMMIT_TAG}
           else
             echo "Skipping version tag - empty or rolling"
           fi
+
+          # Create sha256 tag last so it becomes the default (immutable content-addressed tag)
+          echo "Creating immutable sha256 tag as default: sha256-${DIGEST}"
+          docker buildx imagetools create -t ${IMAGE_NAME}:sha256-${DIGEST} ${COMMIT_TAG}
 
       - name: Clean up untagged digest images
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
