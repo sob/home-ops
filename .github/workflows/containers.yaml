@@ -213,7 +213,7 @@ jobs:
 
   merge:
     runs-on: ubuntu-latest
-    needs: [changed, plan, build-image]
+    needs: [changed, plan, test]
     if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
     strategy:
       fail-fast: false
@@ -338,7 +338,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: [changed, merge]
+    needs: [changed, plan, build-image]
     if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
     strategy:
       fail-fast: false
