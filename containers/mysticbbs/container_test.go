@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"os"
 	"testing"
 	"time"
 
@@ -11,11 +12,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func getImageTag() string {
+	// Use TEST_IMAGE_TAG from environment, fallback to "rolling" for local testing
+	if tag := os.Getenv("TEST_IMAGE_TAG"); tag != "" {
+		return tag
+	}
+	return "rolling"
+}
+
 func TestMysticContainer(t *testing.T) {
 	pool, err := dockertest.NewPool("")
 	require.NoError(t, err, "Could not connect to docker")
 
-	resource, err := pool.Run("ghcr.io/sob/mysticbbs", "rolling", []string{})
+	imageTag := getImageTag()
+	t.Logf("Using image tag: %s", imageTag)
+
+	resource, err := pool.Run("ghcr.io/sob/mysticbbs", imageTag, []string{})
 	require.NoError(t, err, "Could not start resource")
 
 	defer func() {
@@ -37,7 +49,8 @@ func TestMysticFilesystemLayout(t *testing.T) {
 	pool, err := dockertest.NewPool("")
 	require.NoError(t, err, "Could not connect to docker")
 
-	resource, err := pool.Run("ghcr.io/sob/mysticbbs", "rolling", []string{
+	imageTag := getImageTag()
+	resource, err := pool.Run("ghcr.io/sob/mysticbbs", imageTag, []string{
 		"MYSTIC_PATH=/config",
 	})
 	require.NoError(t, err, "Could not start resource")
@@ -130,7 +143,7 @@ func TestMysticInstallation(t *testing.T) {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "ghcr.io/sob/mysticbbs",
-		Tag:        "rolling",
+		Tag:        getImageTag(),
 		Env: []string{
 			"MYSTIC_PATH=/config",
 		},
@@ -190,7 +203,7 @@ func TestEnvironmentVariables(t *testing.T) {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "ghcr.io/sob/mysticbbs",
-		Tag:        "rolling",
+		Tag:        getImageTag(),
 		Env: []string{
 			"MYSTIC_PATH=" + customPath,
 			"TZ=" + customTZ,
@@ -248,7 +261,8 @@ func TestDefaultEnvironmentVariables(t *testing.T) {
 	require.NoError(t, err, "Could not connect to docker")
 
 	// Run without explicit env vars to test defaults
-	resource, err := pool.Run("ghcr.io/sob/mysticbbs", "rolling", []string{})
+	imageTag := getImageTag()
+	resource, err := pool.Run("ghcr.io/sob/mysticbbs", imageTag, []string{})
 	require.NoError(t, err, "Could not start resource")
 
 	defer func() {
@@ -279,7 +293,7 @@ func TestHookSystem(t *testing.T) {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "ghcr.io/sob/mysticbbs",
-		Tag:        "rolling",
+		Tag:        getImageTag(),
 		Env: []string{
 			"MYSTIC_PATH=/config",
 		},
@@ -381,7 +395,7 @@ func TestMysticTelnetPort(t *testing.T) {
 	// Run container with exposed telnet port
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "ghcr.io/sob/mysticbbs",
-		Tag:        "rolling",
+		Tag:        getImageTag(),
 		ExposedPorts: []string{"23/tcp"},
 		Env: []string{
 			"MYSTIC_PATH=/config",
