@@ -68,12 +68,17 @@ tasks:
       NS: Namespace the PVC is in (default: default)
       APP: Application to unlock (required)
     cmds:
+      - echo "Cleaning up any stuck volsync jobs for {{.APP}}..."
+      - kubectl --namespace {{.NS}} delete job --field-selector status.successful==0 -l app.kubernetes.io/name={{.APP}} --ignore-not-found=true
+      - kubectl --namespace {{.NS}} delete job volsync-src-{{.APP}}-r2 --ignore-not-found=true
+      - kubectl --namespace {{.NS}} delete job {{.JOB}} --ignore-not-found=true
+      - echo "Creating unlock job..."
       - envsubst < {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml | kubectl apply -f -
       - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container minio
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=2m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container r2
       - kubectl --namespace {{.NS}} delete job {{.JOB}}
+      - echo "✓ Repository unlocked for {{.APP}}"
     vars:
       NS: '{{.NS | default "default"}}'
       JOB: volsync-unlock-{{.APP}}
