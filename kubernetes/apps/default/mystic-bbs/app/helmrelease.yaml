@@ -76,7 +76,7 @@ spec:
             port: 23
             protocol: TCP
           ssh:
-            port: *ssh-port
+            port: 22
             protocol: TCP
           binkp:
             port: 24554
