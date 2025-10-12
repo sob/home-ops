@@ -60,6 +60,8 @@ spec:
               limits:
                 memory: 512Mi
     defaultPodOptions:
+      annotations:
+        spegel.io/ignore: "true"
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
