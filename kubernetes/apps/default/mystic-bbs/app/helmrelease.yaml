@@ -26,6 +26,7 @@ spec:
             image:
               repository: ghcr.io/sob/mysticbbs
               tag: rolling
+              pullPolicy: Always
             env:
               TZ: America/Chicago
               MYSTIC_NODE: "1"
