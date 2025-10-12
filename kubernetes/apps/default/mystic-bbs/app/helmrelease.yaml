@@ -36,7 +36,7 @@ spec:
                 custom: true
                 spec:
                   tcpSocket:
-                    port: &ssh-port 22
+                    port: &telnet-port 23
                   initialDelaySeconds: 30
                   periodSeconds: 30
                   timeoutSeconds: 5
@@ -44,7 +44,10 @@ spec:
               readiness: *probes
               startup:
                 enabled: true
+                custom: true
                 spec:
+                  tcpSocket:
+                    port: *telnet-port
                   failureThreshold: 30
                   periodSeconds: 10
             securityContext:
