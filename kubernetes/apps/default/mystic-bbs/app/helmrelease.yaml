@@ -24,7 +24,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/sob/mysticbbs@sha256:b77665f08675ed33187a2ccdf5a1ed8e1bfa165bd6ee254198534db65cb453b5
+              repository: ghcr.io/sob/mysticbbs
+              tag: rolling@sha256:b77665f08675ed33187a2ccdf5a1ed8e1bfa165bd6ee254198534db65cb453b5
             env:
               TZ: America/Chicago
               MYSTIC_NODE: "1"
