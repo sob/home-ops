@@ -101,6 +101,23 @@ echo "Starting Mystic BBS server..."
 echo "Note: Mystic BBS will handle SSH on port 22 with cryptlib support"
 echo "Configure SSH server in Mystic configuration: System > Configuration > Servers"
 
+# Check for stale lock file
+LOCK_FILE="$MYSTIC_PATH/semaphore/mis.bsy"
+if [ -f "$LOCK_FILE" ]; then
+    echo "Found lock file: $LOCK_FILE"
+
+    # Check if any Mystic processes are actually running
+    if pgrep -x "mis" > /dev/null; then
+        echo "ERROR: Mystic servers are already running."
+        echo "If this is not true, then delete the following file and restart:"
+        echo "$LOCK_FILE"
+        exit 1
+    else
+        echo "No Mystic processes running - removing stale lock file"
+        rm -f "$LOCK_FILE"
+    fi
+fi
+
 # Start logger in background
 /usr/local/bin/tailit.sh &
 
