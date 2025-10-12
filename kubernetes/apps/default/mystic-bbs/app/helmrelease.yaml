@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/mysticbbs
-              tag: rolling
+              tag: sha256-4b328df26330669b3b29cf0a57dfcd7cabb67d54f3939bbe50081ea5b1f3c858
             env:
               TZ: America/Chicago
               MYSTIC_NODE: "1"
