@@ -4,6 +4,7 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
   name: authentik-postgresql
+  namespace: security
 spec:
   sourcePVC: data-authentik-postgresql-0
   trigger:
@@ -31,6 +32,7 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
   name: authentik-postgresql-dst
+  namespace: security
 spec:
   trigger:
     manual: restore-once

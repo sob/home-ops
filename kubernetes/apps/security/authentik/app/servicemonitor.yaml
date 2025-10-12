@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: authentik-metrics
+  namespace: security
   labels:
     app.kubernetes.io/component: server
     app.kubernetes.io/instance: authentik
@@ -23,6 +24,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: authentik
+  namespace: security
   labels:
     app.kubernetes.io/component: server
     app.kubernetes.io/instance: authentik
