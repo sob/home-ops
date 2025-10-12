@@ -83,6 +83,12 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /config
+      semaphore:
+        type: emptyDir
+        advancedMounts:
+          mystic-bbs:
+            app:
+              - path: /config/semaphore
       tmpfs:
         type: emptyDir
         advancedMounts:
