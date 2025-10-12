@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/mysticbbs
-              tag: sha256-4b328df26330669b3b29cf0a57dfcd7cabb67d54f3939bbe50081ea5b1f3c858
+              tag: sha256-b77665f08675ed33187a2ccdf5a1ed8e1bfa165bd6ee254198534db65cb453b5
             env:
               TZ: America/Chicago
               MYSTIC_NODE: "1"
