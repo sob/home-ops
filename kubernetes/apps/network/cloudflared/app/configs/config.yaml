@@ -48,11 +48,11 @@ ingress:
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "requests.${SECRET_DOMAIN}"
-  - hostname: "bbs.${SECRET_DOMAIN}"
+  - hostname: "bbs.${SECRET_EXTERNAL_DOMAIN}"
     service: tcp://mystic-bbs.default.svc.cluster.local:23
-  - hostname: "ssh.${SECRET_DOMAIN}"
+  - hostname: "ssh.${SECRET_EXTERNAL_DOMAIN}"
     service: ssh://mystic-bbs.default.svc.cluster.local:22
-  - hostname: "mailer.${SECRET_DOMAIN}"
+  - hostname: "mailer.${SECRET_EXTERNAL_DOMAIN}"
     service: tcp://mystic-bbs.default.svc.cluster.local:24554
   - hostname: "${SECRET_DOMAIN}"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
