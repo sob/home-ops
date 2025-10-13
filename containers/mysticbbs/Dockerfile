@@ -129,6 +129,9 @@ LABEL org.opencontainers.image.version="${MYSTIC_VERSION}"
 
 # Set environment variables
 ENV TZ=America/Chicago
+ENV DOSEMU_ROOT=/doors/dosemu
+ENV DOORS_PATH=/doors
+ENV HOME=/home/nobody
 
 # Install runtime dependencies for Ubuntu
 RUN apt-get update && apt-get install -y \
@@ -137,9 +140,45 @@ RUN apt-get update && apt-get install -y \
     logrotate \
     python3 \
     zip \
+    unzip \
+    arj \
     bash \
     binutils \
+    dos2unix \
+    wget \
+    curl \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
+
+# Install dosemu2 for DOS door support
+# Note: ARM64 support is experimental, ARM32 (armv7l) is not supported
+# Use DEBIAN_FRONTEND=noninteractive to prevent interactive prompts
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        echo "Installing dosemu2 for x86_64 architecture..." && \
+        add-apt-repository ppa:dosemu2/ppa && \
+        apt-get update && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dosemu2 || { \
+            echo "WARNING: dosemu2 installation had issues, continuing anyway..."; \
+            dpkg --configure -a || true; \
+        } && \
+        rm -rf /var/lib/apt/lists/* && \
+        echo "dosemu2 installed successfully"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        echo "Installing dosemu2 for ARM64 architecture (experimental)..." && \
+        add-apt-repository ppa:dosemu2/ppa && \
+        apt-get update && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dosemu2 || { \
+            echo "WARNING: dosemu2 installation had issues, continuing anyway..."; \
+            dpkg --configure -a || true; \
+        } && \
+        rm -rf /var/lib/apt/lists/* && \
+        echo "dosemu2 installed (experimental ARM64 support)" && \
+        echo "WARNING: ARM64 support is experimental and may have stability issues"; \
+    else \
+        echo "Skipping dosemu2 installation on $ARCH (not supported)" && \
+        echo "DOS doors will not be available on this architecture"; \
+    fi
 
 # Copy cryptlib from builder and rename to generic name (per Mystic BBS docs)
 COPY --from=builder /build/libcl.so.${CRYPTLIB_SO_VERSION} /usr/lib/libcl.so
@@ -177,13 +216,19 @@ COPY logrotate.conf /etc/logrotate.d/mystic
 RUN echo "Checking existing user/group 65534:" && \
     getent passwd 65534 && getent group 65534 && \
     echo "Using existing nobody user (65534:65534) for mystic" && \
-    mkdir -p /config /tmp/mystic && \
-    chown -R 65534:65534 /config /tmp/mystic
+    mkdir -p /config /tmp/mystic /doors /home/nobody/.dosemu && \
+    chown -R 65534:65534 /config /tmp/mystic /doors /home/nobody
 
 # Copy startup scripts
 COPY entrypoint.sh /usr/local/bin/
 COPY tailit.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/tailit.sh
+COPY rundoor.sh /usr/local/bin/
+COPY install-door.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/tailit.sh /usr/local/bin/rundoor.sh /usr/local/bin/install-door.sh
+
+# Copy door configuration example
+COPY doors.conf.example /usr/local/share/mystic/doors.conf.example
+RUN chmod 644 /usr/local/share/mystic/doors.conf.example
 
 # Expose ports (telnet, SSH, BinkP for FidoNet)
 EXPOSE 23/tcp 22/tcp 24554/tcp

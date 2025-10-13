@@ -93,6 +93,49 @@ ldconfig -p | grep libcl && echo "Cryptlib is available for SSH support" || echo
 
 cd "$MYSTIC_PATH"
 
+# Initialize dosemu structure for DOS doors
+if command -v dosemu &> /dev/null; then
+    echo "Initializing dosemu structure for DOS doors..."
+
+    DOSEMU_ROOT=${DOSEMU_ROOT:-/doors/dosemu}
+    DOORS_PATH=${DOORS_PATH:-/doors}
+
+    # Create base dosemu directory structure
+    # Node-specific directories will be created on-demand by rundoor.sh
+    mkdir -p "$DOSEMU_ROOT/drive_c/doors"
+    mkdir -p "$DOSEMU_ROOT/drive_c/nodes"
+
+    # Copy example door configuration if it doesn't exist
+    if [ ! -f "$DOORS_PATH/doors.conf" ] && [ -f "/usr/local/share/mystic/doors.conf.example" ]; then
+        echo "Creating default door configuration..."
+        cp /usr/local/share/mystic/doors.conf.example "$DOORS_PATH/doors.conf"
+        chmod 644 "$DOORS_PATH/doors.conf"
+    fi
+
+    # Initialize .dosemurc if it doesn't exist
+    if [ ! -f "$HOME/.dosemurc" ]; then
+        echo "Creating default .dosemurc configuration..."
+        cat > "$HOME/.dosemurc" << 'EOF'
+# dosemu2 configuration for Mystic BBS DOS doors
+$_cpu = "80486"
+$_cpu_emu = "vm86"
+$_hogthreshold = (10)
+$_external_char_set = "cp437"
+$_internal_char_set = "cp437"
+$_layout = "us"
+$_rawkeyboard = (0)
+$_speaker = ""
+$_sound = (off)
+$_com1 = "virtual"
+EOF
+    fi
+
+    echo "dosemu structure initialized"
+    echo "Door configuration: $DOORS_PATH/doors.conf"
+else
+    echo "dosemu2 not available - DOS doors disabled"
+fi
+
 # Run startup hook
 run_hook "startup.sh"
 

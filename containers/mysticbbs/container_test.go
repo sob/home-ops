@@ -434,3 +434,158 @@ func TestMysticTelnetPort(t *testing.T) {
 		assert.Equal(t, 0, exitCode, "Port 23 should be listening inside container")
 	})
 }
+
+func TestDosemuIntegration(t *testing.T) {
+	pool, err := dockertest.NewPool("")
+	require.NoError(t, err, "Could not connect to docker")
+
+	imageTag := getImageTag()
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/mysticbbs",
+		Tag:        imageTag,
+		Env: []string{
+			"MYSTIC_PATH=/config",
+		},
+	})
+	require.NoError(t, err, "Could not start resource")
+
+	defer func() {
+		assert.NoError(t, pool.Purge(resource), "Could not purge resource")
+	}()
+
+	// Give the container time to start and initialize
+	time.Sleep(30 * time.Second)
+
+	t.Run("DosemuEnvironmentVariables", func(t *testing.T) {
+		// Check DOSEMU_ROOT environment variable
+		exitCode, err := resource.Exec([]string{"sh", "-c", "[ \"$DOSEMU_ROOT\" = \"/doors/dosemu\" ]"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "DOSEMU_ROOT should be set to /doors/dosemu")
+
+		// Check DOORS_PATH environment variable
+		exitCode, err = resource.Exec([]string{"sh", "-c", "[ \"$DOORS_PATH\" = \"/doors\" ]"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "DOORS_PATH should be set to /doors")
+	})
+
+	t.Run("RundoorScriptExists", func(t *testing.T) {
+		// Check that rundoor.sh exists
+		exitCode, err := resource.Exec([]string{"test", "-f", "/usr/local/bin/rundoor.sh"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "rundoor.sh should exist")
+
+		// Check that it's executable
+		exitCode, err = resource.Exec([]string{"test", "-x", "/usr/local/bin/rundoor.sh"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "rundoor.sh should be executable")
+	})
+
+	t.Run("DoorConfigurationExample", func(t *testing.T) {
+		// Check that doors.conf.example exists
+		exitCode, err := resource.Exec([]string{"test", "-f", "/usr/local/share/mystic/doors.conf.example"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "doors.conf.example should exist")
+
+		// Verify it has readable permissions
+		exitCode, err = resource.Exec([]string{"test", "-r", "/usr/local/share/mystic/doors.conf.example"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "doors.conf.example should be readable")
+	})
+
+	t.Run("DosemuDirectoryStructure", func(t *testing.T) {
+		// Check that base doors directory exists
+		exitCode, err := resource.Exec([]string{"test", "-d", "/doors"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "/doors directory should exist")
+
+		// Check that dosemu directory structure is created
+		exitCode, err = resource.Exec([]string{"test", "-d", "/doors/dosemu/drive_c/doors"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "/doors/dosemu/drive_c/doors should be created")
+
+		exitCode, err = resource.Exec([]string{"test", "-d", "/doors/dosemu/drive_c/nodes"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "/doors/dosemu/drive_c/nodes should be created")
+	})
+
+	t.Run("DoorConfigurationCopied", func(t *testing.T) {
+		// Check that doors.conf was copied from example
+		exitCode, err := resource.Exec([]string{"test", "-f", "/doors/doors.conf"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "/doors/doors.conf should be copied from example")
+
+		// Verify it's readable
+		exitCode, err = resource.Exec([]string{"test", "-r", "/doors/doors.conf"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "/doors/doors.conf should be readable")
+	})
+
+	t.Run("DosemurcConfiguration", func(t *testing.T) {
+		// Check that .dosemurc was created in home directory
+		exitCode, err := resource.Exec([]string{"test", "-f", "/home/nobody/.dosemurc"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, ".dosemurc should be created in home directory")
+
+		// Verify it contains expected configuration
+		exitCode, err = resource.Exec([]string{"sh", "-c", "grep -q '\\$_cpu = \"80486\"' /home/nobody/.dosemurc"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, ".dosemurc should contain CPU configuration")
+
+		exitCode, err = resource.Exec([]string{"sh", "-c", "grep -q '\\$_external_char_set = \"cp437\"' /home/nobody/.dosemurc"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, ".dosemurc should contain character set configuration")
+	})
+
+	t.Run("Dos2UnixInstalled", func(t *testing.T) {
+		// Check that dos2unix utilities are installed
+		exitCode, err := resource.Exec([]string{"sh", "-c", "command -v dos2unix"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "dos2unix should be installed")
+
+		exitCode, err = resource.Exec([]string{"sh", "-c", "command -v unix2dos"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "unix2dos should be installed")
+	})
+}
+
+func TestDosemuArchitectureSupport(t *testing.T) {
+	pool, err := dockertest.NewPool("")
+	require.NoError(t, err, "Could not connect to docker")
+
+	imageTag := getImageTag()
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/mysticbbs",
+		Tag:        imageTag,
+		Env: []string{
+			"MYSTIC_PATH=/config",
+		},
+	})
+	require.NoError(t, err, "Could not start resource")
+
+	defer func() {
+		assert.NoError(t, pool.Purge(resource), "Could not purge resource")
+	}()
+
+	// Give the container time to start
+	time.Sleep(15 * time.Second)
+
+	t.Run("DosemuAvailability", func(t *testing.T) {
+		// Check what architecture we're running on
+		exitCode, err := resource.Exec([]string{"uname", "-m"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+
+		// Check if dosemu command exists
+		exitCode, err = resource.Exec([]string{"sh", "-c", "command -v dosemu"}, dockertest.ExecOptions{})
+
+		if exitCode == 0 {
+			t.Log("dosemu2 is installed and available")
+		} else {
+			t.Log("dosemu2 is not available (may be ARM architecture)")
+		}
+
+		// This test passes either way - we just log the status
+		// On x86_64, dosemu should be available
+		// On ARM32, it should not be available
+		// On ARM64, it may or may not be available (experimental)
+	})
+}

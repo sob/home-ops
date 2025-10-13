@@ -1,0 +1,86 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mystic-doors-config
+data:
+  doors.conf: |
+    #!/bin/bash
+    # Mystic BBS Door Configuration
+    #
+    # This file defines the available DOS doors for Mystic BBS.
+    # Edit this ConfigMap to add or modify door configurations.
+    #
+    # For each door, define three variables:
+    #   DOOR_CMD[name]   - The DOS command to execute
+    #   DOOR_PATH[name]  - The DOS path to the door directory
+    #   DOOR_DESC[name]  - Human-readable description
+    #
+    # Important notes:
+    # - Door names should be lowercase
+    # - Use DOS-style paths with backslashes (C:\\DOORS\\...)
+    # - Paths are relative to the dosemu C: drive (/doors/dosemu/drive_c)
+    # - DOOR.SYS will be automatically placed in C:\NODES\TEMP{N}\
+
+    # Example: Legend of the Red Dragon (LORD)
+    DOOR_CMD[lord]="START.BAT"
+    DOOR_PATH[lord]="C:\\DOORS\\LORD"
+    DOOR_DESC[lord]="Legend of the Red Dragon"
+
+    # Example: Trade Wars 2002
+    DOOR_CMD[tw2002]="TW2002.EXE TWNODE.CFG"
+    DOOR_PATH[tw2002]="C:\\DOORS\\TW2002"
+    DOOR_DESC[tw2002]="Trade Wars 2002"
+
+    # Example: Darkness
+    DOOR_CMD[dark]="DARK.EXE DARK.CFG"
+    DOOR_PATH[dark]="C:\\DOORS\\DARKNESS"
+    DOOR_DESC[dark]="Darkness"
+
+    # Example: Barren Realms Elite (BRE)
+    DOOR_CMD[bre]="BRE.EXE BRE.CFG"
+    DOOR_PATH[bre]="C:\\DOORS\\BRE"
+    DOOR_DESC[bre]="Barren Realms Elite"
+
+    # Example: Galactic Dynasty
+    DOOR_CMD[dynasty]="DYNASTY.EXE"
+    DOOR_PATH[dynasty]="C:\\DOORS\\DYNASTY"
+    DOOR_DESC[dynasty]="Galactic Dynasty"
+
+    # Example: LORD II: New World
+    DOOR_CMD[lord2]="LORD2.EXE"
+    DOOR_PATH[lord2]="C:\\DOORS\\LORD2"
+    DOOR_DESC[lord2]="LORD II: New World"
+
+    # Example: Planets: The Exploration of Space (TEOS)
+    DOOR_CMD[teos]="TEOS.EXE"
+    DOOR_PATH[teos]="C:\\DOORS\\TEOS"
+    DOOR_DESC[teos]="Planets: TEOS"
+
+    # Example: Usurper
+    DOOR_CMD[usurper]="USURPER.EXE"
+    DOOR_PATH[usurper]="C:\\DOORS\\USURPER"
+    DOOR_DESC[usurper]="Usurper"
+
+    # Example: Solar Realms Elite (SRE)
+    DOOR_CMD[sre]="SRE.EXE"
+    DOOR_PATH[sre]="C:\\DOORS\\SRE"
+    DOOR_DESC[sre]="Solar Realms Elite"
+
+    # Example: Operation Overkill
+    DOOR_CMD[oo]="OVERKILL.EXE"
+    DOOR_PATH[oo]="C:\\DOORS\\OO"
+    DOOR_DESC[oo]="Operation Overkill"
+
+    # ---
+    # Use 'kubectl exec' to install doors easily:
+    # kubectl exec -it deployment/mystic-bbs -- install-door.sh list
+    # kubectl exec -it deployment/mystic-bbs -- install-door.sh lord
+    #
+    # Available doors: lord, tw2002, bre, teos, usurper, sre, darkness, oo
+    # ---
+
+    # Add your custom doors below this line
+    # DOOR_CMD[mydoor]="MYDOOR.EXE /PARAMS"
+    # DOOR_PATH[mydoor]="C:\\DOORS\\MYDOOR"
+    # DOOR_DESC[mydoor]="My Custom Door"
