@@ -40,7 +40,7 @@ spec:
                   tcpSocket:
                     port: &telnet-port 23
                   initialDelaySeconds: 30
-                  periodSeconds: 30
+                  periodSeconds: 120
                   timeoutSeconds: 5
                   failureThreshold: 3
               readiness: *probes
