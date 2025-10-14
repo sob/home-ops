@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/mysticbbs
-              tag: 1.12a48-2c92ffb
+              tag: 1.12a48-69708d1
             env:
               TZ: America/Chicago
               MYSTIC_NODE: "1"
