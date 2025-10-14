@@ -30,6 +30,18 @@ DOSEMU_ROOT=${DOSEMU_ROOT:-/doors/dosemu}
 DOORS_PATH=${DOORS_PATH:-/doors}
 DOOR_CONFIG=${DOOR_CONFIG:-/doors/doors.conf}
 
+# Log file for door executions
+LOG_DIR="$MYSTIC_PATH/logs"
+DOOR_LOG="$LOG_DIR/doors.log"
+
+mkdir -p "$LOG_DIR"
+
+# Logging function
+log() {
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] [Node $NODE] $1" | tee -a "$DOOR_LOG"
+}
+
 # Ensure door name is lowercase
 DOOR=$(echo "$DOOR" | tr '[:upper:]' '[:lower:]')
 
@@ -42,20 +54,20 @@ DOSEMU_NODE_DIR="$DOSEMU_ROOT/drive_c/nodes/temp$NODE"
 
 # Check if dosemu is available
 if ! command -v dosemu &> /dev/null; then
-    echo "ERROR: dosemu2 is not installed or not in PATH"
-    echo "DOS doors are not available on this architecture"
+    log "ERROR: dosemu2 is not installed or not in PATH"
+    log "DOS doors are not available on this architecture"
     exit 1
 fi
 
 # Check if node directory exists
 if [ ! -d "$NODE_DIR" ]; then
-    echo "ERROR: Node directory does not exist: $NODE_DIR"
+    log "ERROR: Node directory does not exist: $NODE_DIR"
     exit 1
 fi
 
 # Check if DOOR.SYS exists
 if [ ! -f "$DOORFILE" ]; then
-    echo "ERROR: DOOR.SYS not found: $DOORFILE"
+    log "ERROR: DOOR.SYS not found: $DOORFILE"
     exit 1
 fi
 
@@ -65,7 +77,7 @@ stty cols 80 rows 25 2>/dev/null || true
 # Get username from DOOR.SYS (line 36 for DOOR.SYS format)
 USERNAME=$(sed -n '36p' "$DOORFILE" 2>/dev/null || echo "Unknown")
 
-echo "Door Launch: User=$USERNAME, Node=$NODE, Door=$DOOR"
+log "Door Launch: User=$USERNAME, Door=$DOOR"
 
 # Create dosemu node directory if it doesn't exist
 mkdir -p "$DOSEMU_NODE_DIR"
@@ -104,10 +116,19 @@ run_dosemu_batch() {
     local dosemu_dir=$3
 
     # Run dosemu with the batch file
-    # Redirect stderr to avoid noise, stdout is visible to user
-    dosemu -E "C:\\NODES\\TEMP$node\\$batch" 2>/dev/null || {
-        echo "WARNING: dosemu exited with non-zero status"
-    }
+    # Show output to user AND capture to log file using tee
+    log "--- Door execution started ---"
+
+    set +e  # Don't exit on error for dosemu
+    dosemu -E "C:\\NODES\\TEMP$node\\$batch" 2>&1 | tee -a "$DOOR_LOG"
+    local dosemu_exit=$?
+    set -e
+
+    log "--- Door execution ended (exit code: $dosemu_exit) ---"
+
+    if [ $dosemu_exit -ne 0 ]; then
+        log "WARNING: dosemu exited with non-zero status: $dosemu_exit"
+    fi
 
     # Cleanup
     cleanup_door "$node" "$batch" "$dosemu_dir"
@@ -129,8 +150,8 @@ fi
 
 # Check if door is configured
 if [ -z "${DOOR_CMD[$DOOR]}" ]; then
-    echo "ERROR: Door '$DOOR' is not configured"
-    echo "Please add door configuration to: $DOOR_CONFIG"
+    log "ERROR: Door '$DOOR' is not configured"
+    log "Please add door configuration to: $DOOR_CONFIG"
     exit 1
 fi
 
@@ -139,9 +160,9 @@ CMD="${DOOR_CMD[$DOOR]}"
 PATH_DIR="${DOOR_PATH[$DOOR]}"
 DESC="${DOOR_DESC[$DOOR]:-$DOOR}"
 
-echo "Launching: $DESC"
-echo "Path: $PATH_DIR"
-echo "Command: $CMD"
+log "Launching: $DESC"
+log "Path: $PATH_DIR"
+log "Command: $CMD"
 
 # Create the batch file
 cat > "$BATCH_PATH" << EOF
@@ -157,8 +178,9 @@ EOF
 unix2dos "$BATCH_PATH" 2>/dev/null
 
 # Run the door
-echo "Starting door execution..."
+log "Starting door execution..."
 run_dosemu_batch "$NODE" "$BATCH_FILE" "$DOSEMU_NODE_DIR"
 
-echo "Door execution completed"
+log "Door execution completed"
+log "Full log available at: $DOOR_LOG"
 exit 0

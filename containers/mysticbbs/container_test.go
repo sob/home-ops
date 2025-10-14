@@ -589,3 +589,102 @@ func TestDosemuArchitectureSupport(t *testing.T) {
 		// On ARM64, it may or may not be available (experimental)
 	})
 }
+
+func TestLORDDoorInstallation(t *testing.T) {
+	pool, err := dockertest.NewPool("")
+	require.NoError(t, err, "Could not connect to docker")
+
+	imageTag := getImageTag()
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/mysticbbs",
+		Tag:        imageTag,
+		Env: []string{
+			"MYSTIC_PATH=/config",
+			"DOSEMU_ROOT=/doors/dosemu",
+			"DOORS_PATH=/doors",
+		},
+	})
+	require.NoError(t, err, "Could not start resource")
+
+	defer func() {
+		assert.NoError(t, pool.Purge(resource), "Could not purge resource")
+	}()
+
+	// Give the container time to start and initialize dosemu structure
+	time.Sleep(20 * time.Second)
+
+	t.Run("InstallDoorScriptExists", func(t *testing.T) {
+		exitCode, err := resource.Exec([]string{"test", "-f", "/usr/local/bin/install-door.sh"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "install-door.sh should be installed")
+	})
+
+	t.Run("InstallDoorScriptExecutable", func(t *testing.T) {
+		exitCode, err := resource.Exec([]string{"test", "-x", "/usr/local/bin/install-door.sh"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "install-door.sh should be executable")
+	})
+
+	t.Run("ListDoorsCommand", func(t *testing.T) {
+		exitCode, err := resource.Exec([]string{"install-door.sh", "list"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "install-door.sh list should succeed")
+	})
+
+	t.Run("InstallLORDDoor", func(t *testing.T) {
+		// Install LORD door (this downloads ~300KB and may take 30-60 seconds)
+		t.Log("Installing LORD door (this may take up to 60 seconds)...")
+
+		exitCode, err := resource.Exec(
+			[]string{"sh", "-c", "echo 'y' | install-door.sh lord"},
+			dockertest.ExecOptions{},
+		)
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "LORD installation should succeed")
+	})
+
+	t.Run("VerifyLORDDirectoryCreated", func(t *testing.T) {
+		exitCode, err := resource.Exec([]string{"test", "-d", "/doors/dosemu/drive_c/doors/lord"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "LORD directory should be created at /doors/dosemu/drive_c/doors/lord")
+	})
+
+	t.Run("VerifyNestedArchiveExtracted", func(t *testing.T) {
+		// Verify that the nested LORD.ZIP was extracted and removed
+		exitCode, err := resource.Exec([]string{"test", "-f", "/doors/dosemu/drive_c/doors/lord/LORD.ZIP"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.NotEqual(t, 0, exitCode, "Nested LORD.ZIP should be extracted and removed")
+	})
+
+	t.Run("VerifyLORDGameFiles", func(t *testing.T) {
+		// Check for expected LORD game files that should exist after nested extraction
+		expectedFiles := []string{
+			"/doors/dosemu/drive_c/doors/lord/LORD.EXE",
+			"/doors/dosemu/drive_c/doors/lord/START.BAT",
+		}
+
+		for _, file := range expectedFiles {
+			exitCode, err := resource.Exec([]string{"test", "-f", file}, dockertest.ExecOptions{})
+			require.NoError(t, err)
+			assert.Equal(t, 0, exitCode, "Expected LORD game file should exist: %s", file)
+		}
+	})
+
+	t.Run("VerifyExecutablePermissions", func(t *testing.T) {
+		// Verify that executable files have proper permissions
+		exitCode, err := resource.Exec([]string{"test", "-x", "/doors/dosemu/drive_c/doors/lord/LORD.EXE"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "LORD.EXE should be executable")
+
+		exitCode, err = resource.Exec([]string{"test", "-x", "/doors/dosemu/drive_c/doors/lord/START.BAT"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "START.BAT should be executable")
+	})
+
+	t.Run("VerifyDoorsConfigExists", func(t *testing.T) {
+		// Verify that doors.conf was created
+		exitCode, err := resource.Exec([]string{"test", "-f", "/doors/doors.conf"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "doors.conf should exist")
+	})
+}

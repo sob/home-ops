@@ -32,16 +32,16 @@ log_error() {
 }
 
 # Door catalog - Add more doors here
-# Format: name|description|url|archive_type|extract_dir
+# Format: name|description|url|archive_type|extract_dir|nested_archives (optional, comma-separated)
 declare -A DOOR_CATALOG=(
-    ["lord"]="Legend of the Red Dragon|http://breakintochat.com/files/doors/Robinson/LORD/distributions/lord407.zip|zip|lord"
+    ["lord"]="Legend of the Red Dragon|http://breakintochat.com/files/doors/Robinson/LORD/distributions/lord407.zip|zip|lord|LORD.ZIP"
     ["tw2002"]="Trade Wars 2002|http://breakintochat.com/files/doors/Martech/TW2002/distributions/2002V309-DPMI.ZIP|zip|tw2002"
     ["bre"]="Barren Realms Elite|http://breakintochat.com/files/doors/SRGames/BRE/distributions/bre0987.arj|arj|bre"
     ["teos"]="Planets: The Exploration of Space|http://breakintochat.com/files/doors/Robinson/planets-teos/distributions/teos201b.zip|zip|teos"
     ["usurper"]="Usurper|http://breakintochat.com/files/doors/Dangarden/Usurper/distributions/USURP019B6.ZIP|zip|usurper"
     ["sre"]="Solar Realms Elite|http://breakintochat.com/files/doors/SRGames/SRE/distributions/sre0994b.arj|arj|sre"
     ["darkness"]="Darkness|https://jackphla.sh/files/darkness/DRK200.ZIP|zip|darkness"
-    ["oo"]="OperationL Overkill|https://operationoverkill.com/files/oo120.zip|zip|oo"
+    ["oo"]="Operation Overkill|https://operationoverkill.com/files/oo120.zip|zip|oo"
 )
 
 list_doors() {
@@ -144,6 +144,69 @@ extract_archive() {
     esac
 }
 
+extract_nested_archives() {
+    local dir=$1
+    local specific_archives=$2  # Optional: comma-separated list of specific archives to extract
+
+    if [ -z "$specific_archives" ]; then
+        log_info "No nested archives specified for this door"
+        return 0
+    fi
+
+    log_info "Extracting nested archives: $specific_archives"
+
+    # Split comma-separated list and process each archive
+    IFS=',' read -ra ARCHIVES <<< "$specific_archives"
+    for archive_pattern in "${ARCHIVES[@]}"; do
+        # Trim whitespace
+        archive_pattern=$(echo "$archive_pattern" | xargs)
+
+        # Find matching archive (case-insensitive)
+        local found_archive=$(find "$dir" -maxdepth 1 -type f -iname "$archive_pattern" 2>/dev/null | head -1)
+
+        if [ -z "$found_archive" ]; then
+            log_warn "Nested archive not found: $archive_pattern"
+            continue
+        fi
+
+        local archive_name=$(basename "$found_archive")
+        local archive_ext="${archive_name##*.}"
+        archive_ext=$(echo "$archive_ext" | tr '[:upper:]' '[:lower:]')
+
+        log_info "Extracting nested archive: $archive_name"
+
+        # Extract in place
+        case "$archive_ext" in
+            zip)
+                if command -v unzip &> /dev/null; then
+                    unzip -q -o "$found_archive" -d "$dir" && rm "$found_archive"
+                else
+                    log_error "unzip not available, skipping $archive_name"
+                fi
+                ;;
+            arj)
+                if command -v arj &> /dev/null; then
+                    (cd "$dir" && arj x -y "$found_archive" && rm "$found_archive")
+                elif command -v unarj &> /dev/null; then
+                    (cd "$dir" && unarj x "$found_archive" && rm "$found_archive")
+                else
+                    log_error "arj/unarj not available, skipping $archive_name"
+                fi
+                ;;
+            rar)
+                if command -v unrar &> /dev/null; then
+                    unrar x -o+ "$found_archive" "$dir/" && rm "$found_archive"
+                else
+                    log_error "unrar not available, skipping $archive_name"
+                fi
+                ;;
+            *)
+                log_warn "Unknown nested archive type: $archive_ext"
+                ;;
+        esac
+    done
+}
+
 install_door() {
     local door_name=$1
 
@@ -156,7 +219,7 @@ install_door() {
     fi
 
     # Parse door info
-    IFS='|' read -r desc url type extract_dir <<< "${DOOR_CATALOG[$door_name]}"
+    IFS='|' read -r desc url type extract_dir nested_archives <<< "${DOOR_CATALOG[$door_name]}"
 
     log_info "Installing: $desc"
 
@@ -179,6 +242,11 @@ install_door() {
 
     # Extract
     extract_archive "$archive" "$type" "$install_path" || exit 1
+
+    # Extract any nested archives (e.g., LORD.ZIP inside lord407.zip)
+    if [ -n "$nested_archives" ]; then
+        extract_nested_archives "$install_path" "$nested_archives"
+    fi
 
     # Convert text files to Unix format if dos2unix is available
     if command -v dos2unix &> /dev/null; then

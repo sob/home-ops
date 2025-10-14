@@ -73,11 +73,81 @@ data:
     DOOR_DESC[oo]="Operation Overkill"
 
     # ---
+    # Installing Doors with install-door.sh
+    # ---
+    #
     # Use 'kubectl exec' to install doors easily:
-    # kubectl exec -it deployment/mystic-bbs -- install-door.sh list
-    # kubectl exec -it deployment/mystic-bbs -- install-door.sh lord
+    #   kubectl exec -it deployment/mystic-bbs -- install-door.sh list
+    #   kubectl exec -it deployment/mystic-bbs -- install-door.sh lord
     #
     # Available doors: lord, tw2002, bre, teos, usurper, sre, darkness, oo
+    #
+    # The installer automatically:
+    #   - Downloads the door archive from a known source
+    #   - Extracts the archive to C:\DOORS\{NAME}
+    #   - Extracts nested archives if specified (e.g., LORD.ZIP inside lord407.zip)
+    #   - Converts text files to Unix format
+    #   - Sets executable permissions on .exe and .bat files
+    #
+    # Nested archives are explicitly configured in install-door.sh catalog:
+    #   Format: name|desc|url|type|dir|nested_archives
+    #   Example: ["lord"]="...|...|...|lord|LORD.ZIP"
+    #   Supports multiple: "GAME.ZIP,DATA.ARJ" (comma-separated)
+    #
+    # Example installation workflow:
+    #   1. kubectl exec -it deployment/mystic-bbs -- install-door.sh lord
+    #   2. Wait for extraction (nested archives are handled automatically)
+    #   3. Configure in Mystic BBS Menu Editor:
+    #      - Open Menu Editor: System > Menu Editor
+    #      - Select your main menu or door menu
+    #      - Add new menu command (Insert key)
+    #      - Command: DD (Execute Door)
+    #      - Data: /usr/local/bin/rundoor.sh %N lord /DOS
+    #      - Optional settings:
+    #        * Hot Key: L (for LORD)
+    #        * Display Text: (L) Play Legend of the Red Dragon
+    #        * Security Level: Set as needed
+    #
+    # Mystic BBS Menu Command Reference (DD - Execute Door):
+    #   Format: <command line> /DOS
+    #
+    #   Available MCI Codes:
+    #     %N = Current node number
+    #     %# = User's unique ID
+    #     %U = User's handle (underscores for spaces)
+    #     %A = User's real name (underscores for spaces)
+    #     %B = User's real name (with spaces)
+    #     %T = User's time left in minutes
+    #     %P = Node's temp directory
+    #
+    #   Example: /usr/local/bin/rundoor.sh %N lord /DOS
+    #
+    #   The /DOS flag ensures DOOR.SYS is created in DOS text format.
+    #   rundoor.sh handles the door execution and drop file placement.
+    #
+    # More info: https://wiki.mysticbbs.com/doku.php?id=menu_commands
+    #
+    # Troubleshooting Door Execution:
+    #   Door execution logs are written to: /config/logs/doors.log
+    #
+    #   View logs:
+    #     kubectl exec -it deployment/mystic-bbs -- tail -f /config/logs/doors.log
+    #     kubectl exec -it deployment/mystic-bbs -- cat /config/logs/doors.log
+    #
+    #   Log rotation (via logrotate):
+    #     - Rotates daily or when log exceeds 10MB (whichever comes first)
+    #     - Keeps 7 days of compressed backups
+    #     - Managed by system logrotate (runs via cron)
+    #     - View backups: ls -lh /config/logs/
+    #
+    #   Each log entry includes:
+    #     - Timestamp
+    #     - Node number
+    #     - Username
+    #     - Door name
+    #     - Door path and command
+    #     - dosemu stdout/stderr output (real-time and logged)
+    #     - Exit code
     # ---
 
     # Add your custom doors below this line
