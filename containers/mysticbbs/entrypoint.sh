@@ -164,8 +164,8 @@ fi
 # Start logger in background
 /usr/local/bin/tailit.sh &
 
-# Start Mystic BBS server
-./mis server &
+# Start Mystic BBS in daemon mode (headless - prevents CPU polling loop)
+./mis daemon &
 
 # Keep container alive
 tail -f /dev/null
