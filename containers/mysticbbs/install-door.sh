@@ -258,8 +258,8 @@ install_door() {
 
     # Set permissions
     log_info "Setting permissions..."
-    find "$install_path" -type f -name "*.exe" -exec chmod +x {} \; 2>/dev/null || true
-    find "$install_path" -type f -name "*.bat" -exec chmod +x {} \; 2>/dev/null || true
+    find "$install_path" -type f -iname "*.exe" -exec chmod +x {} \; 2>/dev/null || true
+    find "$install_path" -type f -iname "*.bat" -exec chmod +x {} \; 2>/dev/null || true
 
     log_info "Installation complete!"
     log_info "Door installed to: $install_path"
