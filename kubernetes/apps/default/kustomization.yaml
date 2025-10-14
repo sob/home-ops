@@ -6,6 +6,7 @@ namespace: default
 components:
   - ../../components/common
 resources:
+  - ./namespace.yaml
   - ./bazarr/ks.yaml
 # - ./bsky-pds/ks.yaml
 # - ./cert-exporter/ks.yaml

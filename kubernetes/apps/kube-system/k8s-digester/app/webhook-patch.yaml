@@ -1,0 +1,19 @@
+---
+# Patch webhook to only target pods as recommended by Spegel docs
+# https://spegel.dev/docs/guides/updating-latest-tag/
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: digester-webhook
+webhooks:
+  - name: digester-webhook.k8s-digester.svc
+    rules:
+      - resources:
+          - pods
+        apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
