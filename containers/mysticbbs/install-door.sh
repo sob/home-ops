@@ -7,7 +7,8 @@
 set -e
 
 # Configuration
-DOORS_ROOT=${DOORS_ROOT:-/doors/dosemu/drive_c/doors}
+DOSEMU_ROOT=${DOSEMU_ROOT:-/doors/dosemu}
+DOORS_ROOT=${DOORS_ROOT:-${DOSEMU_ROOT}/drive_c/doors}
 TEMP_DIR=$(mktemp -d)
 
 # Color output
