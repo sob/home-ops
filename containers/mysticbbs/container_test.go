@@ -688,3 +688,62 @@ func TestLORDDoorInstallation(t *testing.T) {
 		assert.Equal(t, 0, exitCode, "doors.conf should exist")
 	})
 }
+
+func TestLORDDoorInstallationWithConfigurablePath(t *testing.T) {
+	pool, err := dockertest.NewPool("")
+	require.NoError(t, err, "Could not connect to docker")
+
+	imageTag := getImageTag()
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/mysticbbs",
+		Tag:        imageTag,
+		Env: []string{
+			"MYSTIC_PATH=/config",
+			"DOSEMU_ROOT=/config/doors/dosemu",
+			"DOORS_PATH=/config/doors",
+		},
+	})
+	require.NoError(t, err, "Could not start resource")
+
+	defer func() {
+		assert.NoError(t, pool.Purge(resource), "Could not purge resource")
+	}()
+
+	time.Sleep(20 * time.Second)
+
+	t.Run("InstallLORDWithConfigurablePath", func(t *testing.T) {
+		t.Log("Installing LORD door to /config/doors (this may take up to 60 seconds)...")
+
+		exitCode, err := resource.Exec(
+			[]string{"sh", "-c", "echo 'y' | install-door.sh lord"},
+			dockertest.ExecOptions{},
+		)
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "LORD installation should succeed with configurable path")
+	})
+
+	t.Run("VerifyLORDInstalledToConfigPath", func(t *testing.T) {
+		exitCode, err := resource.Exec([]string{"test", "-d", "/config/doors/dosemu/drive_c/doors/lord"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "LORD directory should be created at /config/doors/dosemu/drive_c/doors/lord")
+	})
+
+	t.Run("VerifyLORDGameFilesInConfigPath", func(t *testing.T) {
+		expectedFiles := []string{
+			"/config/doors/dosemu/drive_c/doors/lord/LORD.EXE",
+			"/config/doors/dosemu/drive_c/doors/lord/START.BAT",
+		}
+
+		for _, file := range expectedFiles {
+			exitCode, err := resource.Exec([]string{"test", "-f", file}, dockertest.ExecOptions{})
+			require.NoError(t, err)
+			assert.Equal(t, 0, exitCode, "Expected LORD game file should exist: %s", file)
+		}
+	})
+
+	t.Run("VerifyDoorsConfigInConfigPath", func(t *testing.T) {
+		exitCode, err := resource.Exec([]string{"test", "-f", "/config/doors/doors.conf"}, dockertest.ExecOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, exitCode, "doors.conf should exist at /config/doors/doors.conf")
+	})
+}
