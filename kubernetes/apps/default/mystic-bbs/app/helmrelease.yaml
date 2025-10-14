@@ -30,8 +30,8 @@ spec:
               TZ: America/Chicago
               MYSTIC_NODE: "1"
               MYSTIC_PATH: "/config"
-              DOSEMU_ROOT: "/doors/dosemu"
-              DOORS_PATH: "/doors"
+              DOSEMU_ROOT: "/config/doors/dosemu"
+              DOORS_PATH: "/config/doors"
             probes:
               liveness: &probes
                 enabled: true
@@ -88,10 +88,6 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /config
-      doors:
-        existingClaim: mystic-bbs-doors
-        globalMounts:
-          - path: /doors
       doors-config:
         type: configMap
         name: mystic-doors-config
@@ -99,7 +95,7 @@ spec:
         advancedMounts:
           mystic-bbs:
             app:
-              - path: /doors/doors.conf
+              - path: /config/doors/doors.conf
                 subPath: doors.conf
                 readOnly: true
       dosemu-home:
