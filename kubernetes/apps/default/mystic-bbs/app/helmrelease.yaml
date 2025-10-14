@@ -89,10 +89,7 @@ spec:
         globalMounts:
           - path: /config
       doors:
-        size: 5Gi
-        accessMode: ReadWriteOnce
-        storageClass: ceph-block
-        retain: true
+        existingClaim: mystic-bbs-doors
         globalMounts:
           - path: /doors
       doors-config:
