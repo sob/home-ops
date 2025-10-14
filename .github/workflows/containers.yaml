@@ -247,6 +247,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Checkout repository for version info
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Create manifest and tag with commit hash
         working-directory: /tmp/digests
         run: |
@@ -254,6 +260,23 @@ jobs:
           SHORT_SHA="${{ github.sha }}"
           SHORT_SHA="${SHORT_SHA:0:7}"
 
+          # Get version from docker-bake.hcl
+          cd ${{ github.workspace }}/containers/${{ matrix.app }}
+          bake_output=$(docker buildx bake --print)
+          target=$(echo "$bake_output" | jq -r '.target | keys[0]')
+          VERSION=$(echo "$bake_output" | jq -r ".target.${target}.labels.\"org.opencontainers.image.version\" // empty")
+
+          if [ -z "$VERSION" ] || [ "$VERSION" = "rolling" ]; then
+            VERSION="rolling"
+            VERSION_TAG="${SHORT_SHA}"
+          else
+            VERSION_TAG="${VERSION}-${SHORT_SHA}"
+          fi
+
+          echo "Version: $VERSION"
+          echo "Version Tag: $VERSION_TAG"
+
+          cd /tmp/digests
           echo "Available digest files:"
           ls -la
           DIGESTS=""
@@ -266,6 +289,10 @@ jobs:
           # Create commit hash tag for testing
           echo "Creating ${SHORT_SHA} tag for testing..."
           docker buildx imagetools create -t ${IMAGE_NAME}:${SHORT_SHA} $DIGESTS
+
+          # Create version-sha tag for semantic versioning
+          echo "Creating version-sha tag: ${VERSION_TAG}"
+          docker buildx imagetools create -t ${IMAGE_NAME}:${VERSION_TAG} $DIGESTS
 
   cleanup-failed:
     runs-on: ubuntu-latest
