@@ -7,3 +7,5 @@ spec:
   dependsOn:
     - name: volsync
       namespace: storage
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
