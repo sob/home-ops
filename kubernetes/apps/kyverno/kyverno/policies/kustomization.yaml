@@ -5,4 +5,5 @@ kind: Kustomization
 resources:
   - ./add-authentik-ingress-annotations.yaml
   - ./add-reflector-cert-annotations.yaml
+  - ./cleanup-controller-rbac.yaml
   - ./cleanup-k6-resources.yaml

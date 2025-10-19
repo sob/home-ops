@@ -1,0 +1,37 @@
+---
+# Add RBAC permissions for Kyverno cleanup controller to delete resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyverno:cleanup-controller:delete-permissions
+  labels:
+    # This label causes the role to be aggregated into kyverno:cleanup-controller
+    rbac.kyverno.io/aggregate-to-cleanup-controller: "true"
+    app.kubernetes.io/component: cleanup-controller
+    app.kubernetes.io/instance: kyverno
+    app.kubernetes.io/part-of: kyverno
+rules:
+  # Permission to delete Pods
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - delete
+      - deletecollection
+  # Permission to delete Jobs
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - delete
+      - deletecollection
+  # Permission to delete k6 TestRuns
+  - apiGroups:
+      - k6.io
+    resources:
+      - testruns
+    verbs:
+      - delete
+      - deletecollection
