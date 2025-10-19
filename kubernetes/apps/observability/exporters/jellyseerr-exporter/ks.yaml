@@ -10,6 +10,11 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: jellyseerr
+      namespace: default
+    - name: external-secrets-stores
+      namespace: external-secrets
   interval: 10m
   path: ./kubernetes/apps/observability/exporters/jellyseerr-exporter/app
   prune: true

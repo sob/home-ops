@@ -10,6 +10,13 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: emqx
+      namespace: database
+    - name: emqx-cluster
+      namespace: database
+    - name: external-secrets-stores
+      namespace: external-secrets
   interval: 10m
   path: ./kubernetes/apps/observability/exporters/emqx-exporter/app
   prune: true
