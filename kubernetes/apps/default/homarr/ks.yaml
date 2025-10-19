@@ -13,6 +13,9 @@ spec:
   components:
     - ../../../../components/gatus/external
     - ../../../../components/volsync
+  dependsOn:
+    - name: external-secrets-stores
+      namespace: external-secrets
   path: ./kubernetes/apps/default/homarr/app
   prune: true
   sourceRef:
