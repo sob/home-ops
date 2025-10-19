@@ -22,6 +22,12 @@ spec:
     remediation:
       retries: 3
   values:
+    preUpgradeHook:
+      image:
+        registry: registry.k8s.io
+        repository: kubectl
+        # renovate: datasource=docker depName=registry.k8s.io/kubectl
+        tag: v1.34.1
     loki:
       enabled: false
     minio:
