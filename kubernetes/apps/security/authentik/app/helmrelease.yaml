@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: authentik
-      version: 2025.6.4
+      version: 2025.8.4
       sourceRef:
         kind: HelmRepository
         name: authentik
@@ -41,9 +41,7 @@ spec:
     postgresql:
       enabled: true
       image:
-        registry: docker.io
-        repository: library/postgres
-        tag: 17-alpine
+        tag: 17-debian-12
       auth:
         existingSecret: authentik
         secretKeys:
