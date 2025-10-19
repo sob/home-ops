@@ -1,0 +1,31 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ job_name }}
+  namespace: rook-ceph
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      nodeName: {{ node }}
+      containers:
+        - name: disk-wipe
+          image: docker.io/library/alpine:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -ex
+              apk add --no-cache sgdisk util-linux util-linux-misc parted device-mapper
+              sgdisk --zap-all {{ device }}
+              dd if=/dev/zero of={{ device }} bs=1M count=100 oflag=direct
+              blkdiscard {{ device }} || true
+              partprobe {{ device }}
+              echo "Disk {{ device }} wiped successfully"
+          securityContext:
+            privileged: true
+          resources: {}
+      tolerations:
+        - operator: Exists
