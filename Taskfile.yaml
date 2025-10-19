@@ -5,21 +5,25 @@ version: "3"
 set: [pipefail]
 shopt: [globstar]
 
+dotenv:
+  - '.talos.env'
+
 vars:
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
   TALOS_DIR: '{{.ROOT_DIR}}/talos'
 
 env:
   KUBERNETES_DIR: '{{.KUBERNETES_DIR}}'
+  KUBERNETES_VERSION: '{{.KUBERNETES_VERSION}}'
   KUBECONFIG: '{{.ROOT_DIR}}/.kubeconfig'
   MINIJINJA_CONFIG_FILE: '{{.ROOT_DIR}}/.minijinja.toml'
   SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.key'
   TALOSCONFIG: '{{.ROOT_DIR}}/.talosconfig'
+  TALOS_VERSION: '{{.TALOS_VERSION}}'
 
 includes:
   alerting: .taskfiles/alerting
   authentik: .taskfiles/authentik
-  bootstrap: .taskfiles/bootstrap
   bucket: .taskfiles/bucket
   kube: .taskfiles/kube
   flux: .taskfiles/flux
@@ -29,7 +33,6 @@ includes:
   rook: .taskfiles/rook
   secrets: .taskfiles/externalsecrets
   sops: .taskfiles/sops
-  talos: .taskfiles/talos
   volsync: .taskfiles/volsync
   workstation: .taskfiles/workstation
   validate: .taskfiles/validation

@@ -1,0 +1,19 @@
+---
+machine:
+  nodeLabels:
+    topology.kubernetes.io/zone: b
+  type: worker
+  network:
+    hostname: metal-05
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: 94:c6:91:a5:7b:b4
+        addresses:
+          - 10.1.100.105/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.1.100.1
+        dhcp: false
+  install:
+    diskSelector:
+      serial: 21313G804237

@@ -22,6 +22,11 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
+  values:
+    prometheus:
+      enabled: true
+      servicemonitor:
+        enabled: true
   valuesFrom:
     - kind: ConfigMap
       name: cert-manager-helm-values

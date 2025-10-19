@@ -1,0 +1,21 @@
+---
+machine:
+  nodeLabels:
+    topology.kubernetes.io/zone: b
+  type: controlplane
+  network:
+    hostname: metal-02
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: 94:c6:91:a4:05:c8
+        addresses:
+          - 10.1.100.102/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.1.100.1
+        dhcp: false
+        vip:
+          ip: 10.1.100.100
+  install:
+    diskSelector:
+      model: 'Micron_1100_MTFD*'

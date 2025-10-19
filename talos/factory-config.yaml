@@ -1,8 +1,0 @@
----
-# Talos Factory configuration for custom boot assets
-# This creates an installer image with Intel GPU support
-customization:
-  systemExtensions:
-    officialExtensions:
-      - siderolabs/i915-ucode
-      - siderolabs/intel-ucode

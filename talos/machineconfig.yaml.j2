@@ -1,0 +1,160 @@
+---
+version: v1alpha1
+machine:
+  ca:
+    crt: op://STONEHEDGES/talos/MACHINE_CA_CRT
+    {% if ENV.IS_CONTROLLER %}
+    key: op://STONEHEDGES/talos/MACHINE_CA_KEY
+    {% endif %}
+  features:
+    apidCheckExtKeyUsage: true
+    diskQuotaSupport: true
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: false
+      resolveMemberNames: true
+    kubePrism:
+      enabled: true
+      port: 7445
+    {% if ENV.IS_CONTROLLER %}
+    kubernetesTalosAPIAccess:
+      allowedKubernetesNamespaces:
+        - actions-runner-system
+        - system-upgrade
+      allowedRoles:
+        - os:admin
+      enabled: true
+    {% endif %}
+    rbac: true
+    stableHostname: true
+  install:
+    image: factory.talos.dev/metal-installer/{{ ENV.TALOS_SCHEMATIC_ID }}:{{ ENV.TALOS_VERSION }}
+    wipe: true
+  kernel:
+    modules:
+      - name: nbd
+  kubelet:
+    defaultRuntimeSeccompProfileEnabled: true
+    disableManifestsDirectory: true
+    extraConfig:
+      featureGates:
+        ImageVolume: true
+        ResourceHealthStatus: true
+      serializeImagePulls: false
+    image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    nodeIP:
+      validSubnets:
+        - 10.1.100.0/24
+  network:
+    nameservers:
+      - 1.1.1.1
+      - 1.0.0.1
+  nodeLabels:
+    node.kubernetes.io/gpu: "true"
+    topology.kubernetes.io/region: main
+  token: op://STONEHEDGES/talos/MACHINE_TOKEN
+cluster:
+  ca:
+    crt: op://STONEHEDGES/talos/CLUSTER_CA_CRT
+    {% if ENV.IS_CONTROLLER %}
+    key: op://STONEHEDGES/talos/CLUSTER_CA_KEY
+    {% endif %}
+  clusterName: main
+  controlPlane:
+    endpoint: https://10.1.100.100:6443
+  discovery:
+    enabled: true
+    registries:
+      kubernetes:
+        disabled: true
+      service:
+        disabled: false
+  id: op://STONEHEDGES/talos/CLUSTER_ID
+  network:
+    cni:
+      name: none
+    dnsDomain: cluster.local
+    podSubnets:
+      - 10.42.0.0/16
+    serviceSubnets:
+      - 10.43.0.0/16
+  secret: op://STONEHEDGES/talos/CLUSTER_SECRET
+  token: op://STONEHEDGES/talos/CLUSTER_TOKEN
+  {% if ENV.IS_CONTROLLER %}
+  aggregatorCA:
+    crt: op://STONEHEDGES/talos/CLUSTER_AGGREGATORCA_CRT
+    key: op://STONEHEDGES/talos/CLUSTER_AGGREGATORCA_KEY
+  allowSchedulingOnControlPlanes: true
+  apiServer:
+    auditPolicy:
+      apiVersion: audit.k8s.io/v1
+      kind: Policy
+      rules:
+        - level: Metadata
+    certSANs:
+      - k8s.internal
+    disablePodSecurityPolicy: true
+    extraArgs:
+      enable-aggregator-routing: "true"
+      feature-gates: ImageVolume=true,MutatingAdmissionPolicy=true,ResourceHealthStatus=true
+      runtime-config: admissionregistration.k8s.io/v1beta1=true
+    image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
+  controllerManager:
+    extraArgs:
+      bind-address: 0.0.0.0
+    image: registry.k8s.io/kube-controller-manager:{{ ENV.KUBERNETES_VERSION }}
+  coreDNS:
+    disabled: true
+  etcd:
+    advertisedSubnets:
+      - 10.1.100.0/24
+    ca:
+      crt: op://STONEHEDGES/talos/CLUSTER_ETCD_CA_CRT
+      key: op://STONEHEDGES/talos/CLUSTER_ETCD_CA_KEY
+    extraArgs:
+      listen-metrics-urls: http://0.0.0.0:2381
+  proxy:
+    disabled: true
+    image: registry.k8s.io/kube-proxy:{{ ENV.KUBERNETES_VERSION }}
+  scheduler:
+    config:
+      apiVersion: kubescheduler.config.k8s.io/v1
+      kind: KubeSchedulerConfiguration
+      profiles:
+        - schedulerName: default-scheduler
+          plugins:
+            score:
+              disabled:
+                - name: ImageLocality
+          pluginConfig:
+            - name: PodTopologySpread
+              args:
+                defaultingType: List
+                defaultConstraints:
+                  - maxSkew: 1
+                    topologyKey: kubernetes.io/hostname
+                    whenUnsatisfiable: ScheduleAnyway
+    extraArgs:
+      bind-address: 0.0.0.0
+    image: registry.k8s.io/kube-scheduler:{{ ENV.KUBERNETES_VERSION }}
+  secretboxEncryptionSecret: op://STONEHEDGES/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
+  serviceAccount:
+    key: op://STONEHEDGES/talos/CLUSTER_SERVICEACCOUNT_KEY
+  {% endif %}
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: lldpd
+configFiles:
+  - content: |
+      configure lldp portidsubtype ifname
+    mountPath: /usr/local/etc/lldpd/lldpd.conf
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: nut-client
+configFiles:
+  - content: |
+      MONITOR ups@rack-ups.stonehedges.net 1 remote monuser pass
+      SHUTDOWNCMD "/sbin/poweroff"
+    mountPath: /usr/local/etc/nut/upsmon.conf

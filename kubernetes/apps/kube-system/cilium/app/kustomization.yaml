@@ -5,10 +5,5 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./networks.yaml
+  - ./ocirepository.yaml
   - ./bgp-config.yaml
-configMapGenerator:
-  - name: cilium-values
-    files:
-      - values.yaml=./helm/cilium-values.yaml
-configurations:
-  - ./helm/kustomize-config.yaml

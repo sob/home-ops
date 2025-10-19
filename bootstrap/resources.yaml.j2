@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: onepassword-connect-secret
+  namespace: external-secrets
+stringData:
+  1password-credentials.json: "op://STONEHEDGES/STONEHEDGES Credentials File/1password-credentials-base64"
+  token: "op://STONEHEDGES/gg7deoh3wga3jqlt6sqyfifzou/credential"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-tunnel-id-secret
+  namespace: network
+stringData:
+  CLOUDFLARE_TUNNEL_ID: op://STONEHEDGES/cloudflare/TUNNEL_ID
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sops-age-secret
+  namespace: flux-system
+stringData:
+  age.agekey: op://STONEHEDGES/sops/SOPS_PRIVATE_KEY

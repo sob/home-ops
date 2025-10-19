@@ -10,3 +10,6 @@ patches:
   - target:
       kind: HelmRelease
     path: patches/helm-dependencies.yaml
+  - target:
+      kind: Kustomization
+    path: patches/ks-dependencies.yaml

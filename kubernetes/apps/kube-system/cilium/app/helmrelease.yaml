@@ -21,10 +21,142 @@ spec:
     cleanupOnFail: true
     remediation:
       retries: 3
-  valuesFrom:
-    - kind: ConfigMap
-      name: cilium-values
   values:
+    kubeProxyReplacement: true
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+
+    # Use local KubePrism endpoint for API server access
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+
+    # Security context required for Talos
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - PERFMON
+          - BPF
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+
+    # Cgroup configuration for Talos
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+
+    # Network routing optimizations
+    autoDirectNodeRoutes: true
+    routingMode: native
+    ipv4NativeRoutingCIDR: 10.42.0.0/16
+    endpointRoutes:
+      enabled: true
+    localRedirectPolicy: true
+
+    # BPF configuration with performance optimizations
+    bpf:
+      datapathMode: netkit
+      masquerade: true
+      preallocateMaps: true
+    bpfClockProbe: true
+
+    # Bandwidth Manager with BBR congestion control
+    bandwidthManager:
+      enabled: true
+      bbr: true
+
+    # Enable BIG TCP for better performance
+    enableIPv4BIGTCP: true
+
+    # L2 Announcements
+    l2announcements:
+      enabled: true
+
+    # Gateway API Support
+    gatewayAPI:
+      enabled: true
+      enableAlpn: true
+      xffNumTrustedHops: 1
+      gatewayClass:
+        name: cilium
+        default: false
+
+    # LoadBalancer configuration
+    loadBalancer:
+      algorithm: maglev
+      mode: dsr
+      serviceTopology: true
+
+    # IPAM
+    ipam:
+      mode: kubernetes
+      operator:
+        clusterPoolIPv4PodCIDRList:
+          - 10.42.0.0/16
+
+    # CNI configuration
+    cni:
+      exclusive: false
+
+    # Rollout configuration
+    rollOutCiliumPods: true
+
+    # Operator configuration
+    operator:
+      replicas: 2
+      rollOutPods: true
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+      dashboards:
+        enabled: true
+        annotations:
+          grafana_folder: Cilium
+
+    # Prometheus and monitoring
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        trustCRDsExist: true
+
+    dashboards:
+      enabled: true
+      annotations:
+        grafana_folder: Cilium
+
+    # External workload support
+    externalWorkloads:
+      enabled: false
+
+    # Security policies
+    policyEnforcementMode: default
+
+    # BGP
+    bgpControlPlane:
+      enabled: true
+
+    # Envoy
+    envoy:
+      rollOutPods: true
+      prometheus:
+        serviceMonitor:
+          enabled: true
+
+    # Hubble
     hubble:
       enabled: true
       metrics:
