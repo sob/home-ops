@@ -19,9 +19,17 @@ spec:
             - |
               set -ex
               apk add --no-cache sgdisk util-linux util-linux-misc parted device-mapper
+              # Wipe partition table and beginning of disk
               sgdisk --zap-all {{ device }}
-              dd if=/dev/zero of={{ device }} bs=1M count=100 oflag=direct
+              # Wipe first 1GB to remove any filesystem signatures and Ceph metadata
+              dd if=/dev/zero of={{ device }} bs=1M count=1024 oflag=direct
+              # Wipe end of disk (last 1GB) where Ceph stores metadata
+              dd if=/dev/zero of={{ device }} bs=1M seek=$(( $(blockdev --getsz {{ device }}) / 2048 - 1024 )) count=1024 oflag=direct || true
+              # Discard all blocks
               blkdiscard {{ device }} || true
+              # Wipe any remaining filesystem signatures
+              wipefs -af {{ device }}
+              # Update kernel partition table
               partprobe {{ device }}
               echo "Disk {{ device }} wiped successfully"
           securityContext:
