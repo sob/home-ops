@@ -31,6 +31,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: external-secrets-stores
+      namespace: external-secrets
   path: ./kubernetes/apps/network/ingress-nginx/external
   prune: true
   sourceRef:
