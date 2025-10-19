@@ -10,7 +10,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-
+  dependsOn:
+    - name: openebs
+      namespace: storage
   path: ./kubernetes/apps/observability/loki/app
   prune: false # never should be deleted
   sourceRef:
