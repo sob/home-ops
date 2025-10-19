@@ -173,39 +173,39 @@ spec:
         crashcollector: system-node-critical
         exporter: system-node-critical
 
-    placement:
-      mds:
-        nodeAffinity: *controlPlanePreferredAffinity
-      mon:
-        nodeAffinity: *controlPlanePreferredAffinity
-      mgr:
-        nodeAffinity: *controlPlanePreferredAffinity
-      osd:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: storage.rook.io/ceph
-                    operator: In
-                    values:
-                      - "true"
+      placement:
+        mds:
+          nodeAffinity: *controlPlanePreferredAffinity
+        mon:
+          nodeAffinity: *controlPlanePreferredAffinity
+        mgr:
+          nodeAffinity: *controlPlanePreferredAffinity
+        osd:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: storage.rook.io/ceph
+                      operator: In
+                      values:
+                        - "true"
 
-    storage:
-      useAllNodes: false
-      useAllDevices: false
-      deviceFilter: nvme0n1
-      config:
-        osdsPerDevice: "1"
-      nodes:
-        - name: "metal-04"
-          devices:
-            - name: "/dev/sda"
-        - name: "metal-05"
-          devices:
-            - name: "/dev/sda"
-        - name: "metal-06"
-          devices:
-            - name: "/dev/sda"
+      storage:
+        useAllNodes: false
+        useAllDevices: false
+        deviceFilter: nvme0n1
+        config:
+          osdsPerDevice: "1"
+        nodes:
+          - name: "metal-04"
+            devices:
+              - name: "/dev/sda"
+          - name: "metal-05"
+            devices:
+              - name: "/dev/sda"
+          - name: "metal-06"
+            devices:
+              - name: "/dev/sda"
 
     cephBlockPools:
       - name: ceph-blockpool
