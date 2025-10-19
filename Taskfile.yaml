@@ -29,7 +29,6 @@ includes:
   flux: .taskfiles/flux
   media: .taskfiles/media
   pds: .taskfiles/pds
-  cnpg: .taskfiles/cnpg
   rook: .taskfiles/rook
   secrets: .taskfiles/externalsecrets
   sops: .taskfiles/sops
