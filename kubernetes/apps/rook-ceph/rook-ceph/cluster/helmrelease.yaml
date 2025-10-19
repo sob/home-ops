@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: rook-ceph-cluster
-      version: v1.17.7
+      version: v1.18.4
       sourceRef:
         kind: HelmRepository
         name: rook-ceph
@@ -21,7 +21,7 @@ spec:
       retries: 5
   upgrade:
     cleanupOnFail: true
-    remediation: &remediation
+    remediation:
       strategy: rollback
       retries: 5
   uninstall:
@@ -37,38 +37,43 @@ spec:
       createPrometheusRules: true
     ingress:
       dashboard:
-        ingressClassName: &ingressClass internal
-        annotations: &dashboardAnnotations
+        ingressClassName: internal
+        annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         host:
           name: rook.${SECRET_DOMAIN}
           path: &rootPath /
     toolbox:
       enabled: false
-      priorityClassName: &criticalPriority infrastructure-critical
+      priorityClassName: infrastructure-critical
 
     # Resource definitions
     resources: &defaultResources
-      requests: &defaultRequests
+      requests:
         cpu: "50m"
         memory: "64Mi"
-      limits: &defaultLimits
+      limits:
         cpu: "100m"
         memory: "128Mi"
+
+    csiPluginResources: &csiPluginResources
+      requests:
+        cpu: "5m"
+        memory: "64Mi"
+      limits:
+        cpu: "100m"
+        memory: "256Mi"
+
+    storageClassDefaults: &storageClassDefaults
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: Immediate
 
     # Control plane toleration and affinity
     controlPlaneToleration: &controlPlaneToleration
       - key: "node-role.kubernetes.io/control-plane"
         operator: "Exists"
         effect: "NoSchedule"
-
-    controlPlaneAffinity: &controlPlaneAffinity
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: node-role.kubernetes.io/control-plane
-                  operator: Exists
 
     controlPlanePreferredAffinity: &controlPlanePreferredAffinity
       nodeAffinity:
@@ -125,27 +130,15 @@ spec:
             cpu: "50m"
             memory: "64Mi"
         provisioner: *defaultResources
+        csi-rbd-plugin: *csiPluginResources
+        csi-cephfs-plugin: *csiPluginResources
+        csi-rbd-provisioner: *defaultResources
+        csi-cephfs-provisioner: *defaultResources
 
       crashCollector:
         disable: false
 
       csi:
-        csiRBDPluginResource:
-          requests:
-            cpu: "5m"
-            memory: "64Mi"
-          limits:
-            cpu: "100m"
-            memory: "256Mi"
-        csiCephFSPluginResource:
-          requests:
-            cpu: "5m"
-            memory: "64i"
-          limits:
-            cpu: "100m"
-            memory: "256Mi"
-        csiRBDProvisionerResource: *defaultResources
-        csiCephFSProvisionerResource: *defaultResources
         readAffinity:
           enabled: true
 
@@ -218,12 +211,10 @@ spec:
           replicated:
             size: 3
         storageClass:
+          <<: *storageClassDefaults
           enabled: true
           name: ceph-block
           isDefault: true
-          reclaimPolicy: Delete
-          allowVolumeExpansion: true
-          volumeBindingMode: Immediate
           mountOptions: ["discard"]
           parameters:
             imageFormat: "2"
@@ -260,7 +251,6 @@ spec:
             resources: *defaultResources
             placement:
               tolerations: *controlPlaneToleration
-              nodeAffinity: *controlPlanePreferredAffinity
               topologySpreadConstraints:
                 - maxSkew: 1
                   topologyKey: kubernetes.io/hostname
@@ -271,13 +261,11 @@ spec:
                       app.kubernetes.io/part-of: *cephFileSystemName
 
         storageClass:
+          <<: *storageClassDefaults
           enabled: true
           isDefault: false
           name: ceph-filesystem
           pool: data0
-          reclaimPolicy: Delete
-          allowVolumeExpansion: true
-          volumeBindingMode: Immediate
           parameters:
             csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
             csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
