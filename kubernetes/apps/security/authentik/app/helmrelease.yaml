@@ -40,6 +40,10 @@ spec:
       log_level: trace
     postgresql:
       enabled: true
+      image:
+        registry: docker.io
+        repository: library/postgres
+        tag: 17-alpine
       auth:
         existingSecret: authentik
         secretKeys:
