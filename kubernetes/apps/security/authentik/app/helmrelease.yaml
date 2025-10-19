@@ -73,7 +73,45 @@ spec:
               prometheus.io/forward: "true"
       ingress:
         enabled: false
+      initContainers:
+        - name: wait-for-postgresql
+          image: docker.io/bitnami/postgresql:17.4.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until pg_isready -h authentik-postgresql -p 5432 -U authentik; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authentik
+                  key: AUTHENTIK_POSTGRESQL__PASSWORD
     worker:
       autoscaling:
         enabled: true
         minReplicas: 2
+      initContainers:
+        - name: wait-for-postgresql
+          image: docker.io/bitnami/postgresql:17.4.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until pg_isready -h authentik-postgresql -p 5432 -U authentik; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authentik
+                  key: AUTHENTIK_POSTGRESQL__PASSWORD
