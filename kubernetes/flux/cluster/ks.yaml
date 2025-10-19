@@ -33,6 +33,9 @@ spec:
     provider: sops
     secretRef:
       name: sops-age-secret
+  dependsOn:
+    - name: external-secrets-stores
+      namespace: external-secrets
   interval: 30m
   path: ./kubernetes/apps
   prune: true
