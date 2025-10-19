@@ -44,7 +44,7 @@ spec:
           name: rook.${SECRET_DOMAIN}
           path: &rootPath /
     toolbox:
-      enabled: false
+      enabled: true
       priorityClassName: infrastructure-critical
 
     # Resource definitions
