@@ -10,6 +10,11 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: snapshot-controller
+      namespace: storage
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   path: ./kubernetes/apps/storage/volsync/app
   prune: true
   sourceRef:
