@@ -54,7 +54,7 @@ stringData:
     # Default fallback
     - name: 'default'
       slack_configs:
-      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+      - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url'
         channel: '#alerts'
         title: '🏠 Home-Ops Alert'
         text: |
@@ -66,8 +66,8 @@ stringData:
     # Critical alerts - Both Pushover AND Slack
     - name: 'critical-alerts'
       pushover_configs:
-      - user_key_file: '/etc/alertmanager/secrets/pushover-user'
-        token_file: '/etc/alertmanager/secrets/pushover-token'
+      - user_key_file: '/etc/alertmanager/secrets/alertmanager-secret/pushover-user'
+        token_file: '/etc/alertmanager/secrets/alertmanager-secret/pushover-token'
         title: '🚨 CRITICAL: Home-Ops'
         message: |
           {{ range .Alerts }}
@@ -78,7 +78,7 @@ stringData:
         retry: '30s'
         expire: '1h'
       slack_configs:
-      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+      - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url'
         channel: '#alerts'
         title: '🚨 CRITICAL Infrastructure Alert'
         text: |
@@ -92,9 +92,9 @@ stringData:
         color: 'danger'
 
     # Infrastructure alerts - Slack only
-    - name: 'infrastructure-alerts' 
+    - name: 'infrastructure-alerts'
       slack_configs:
-      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+      - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url'
         channel: '#alerts'
         title: '⚙️ Infrastructure Alert'
         text: |
@@ -110,7 +110,7 @@ stringData:
     # Resource constraint alerts
     - name: 'resource-alerts'
       slack_configs:
-      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url' 
+      - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url' 
         channel: '#alerts'
         title: '📊 Resource Alert'
         text: |
@@ -126,7 +126,7 @@ stringData:
     # Workload alerts
     - name: 'workload-alerts'
       slack_configs:
-      - api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+      - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url'
         channel: '#alerts'  
         title: '🔧 Workload Alert'
         text: |
