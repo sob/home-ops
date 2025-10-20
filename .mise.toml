@@ -1,11 +1,16 @@
 [env]
-_.file = '{{config_root}}/.talos.env'
-BOOTSTRAP_DIR = '{{config_root}}/bootstrap'
-KUBERNETES_DIR = '{{config_root}}/kubernetes'
-TALOS_DIR = '{{config_root}}/talos'
 KUBECONFIG = '{{config_root}}/.kubeconfig'
+_.file = '{{config_root}}/.talos.env'
+KUBERNETES_DIR = '{{config_root}}/kubernetes'
 MINIJINJA_CONFIG_FILE = '{{config_root}}/.minijinja.toml'
+TALOS_DIR = '{{config_root}}/talos'
 SOPS_AGE_KEY_FILE = '{{config_root}}/age.key'
 TALOSCONFIG = '{{config_root}}/.talosconfig'
-AWS_ACCESS_KEY_ID = { value = "op://STONEHEDGES/cloudflare/AWS_ACCESS_KEY_ID" }
-AWS_SECRET_ACCESS_KEY = { value = "op://STONEHEDGES/cloudflare/AWS_SECRET_ACCESS_KEY" }
+TF_VAR_onepassword_account = "$(op account list --format json | jq -r '.[0].user_uuid')"
+TF_CLI_CONFIG_FILE = "$(pwd)/terraform/media/terraform.tfrc.dev"
+TFE_PARALLELISM = 5
+
+[tools]
+"python" = "3.12"
+"pipx:flux-local" = "latest"
+pipx = "latest"
