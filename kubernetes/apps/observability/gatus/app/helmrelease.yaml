@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: gatus
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: gatus
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.7.3
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
   install:
     remediation:
       retries: 3

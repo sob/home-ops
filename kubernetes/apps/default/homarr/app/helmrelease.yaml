@@ -6,15 +6,10 @@ metadata:
   name: &app homarr
   namespace: default
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: homarr
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.7.3
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
   maxHistory: 2
   install:
     createNamespace: true
