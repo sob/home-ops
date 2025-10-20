@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - ./authentik.yaml
   - ./backube.yaml
-  - ./descheduler.yaml
   - ./emberstack.yaml
   - ./emqx.yaml
   - ./intel.yaml
