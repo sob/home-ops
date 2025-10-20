@@ -11,6 +11,6 @@ TF_CLI_CONFIG_FILE = "$(pwd)/terraform/media/terraform.tfrc.dev"
 TFE_PARALLELISM = 5
 
 [tools]
-"python" = "3.12"
+"python" = "3.14.0"
 "pipx:flux-local" = "latest"
 pipx = "latest"
