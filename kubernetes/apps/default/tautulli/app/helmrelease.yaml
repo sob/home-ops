@@ -118,11 +118,7 @@ spec:
       config:
         existingClaim: tautulli
       cache:
-        type: persistentVolumeClaim
-        storageClass: openebs-hostpath
-        retain: false
-        accessMode: ReadWriteOnce
-        size: 10Gi
+        type: emptyDir
         globalMounts:
           - path: /config/cache
       logs:

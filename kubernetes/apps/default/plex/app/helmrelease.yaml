@@ -141,12 +141,7 @@ spec:
           - path: /config/Library/Application Support/Plex Media Server
       # Separate PVC for cache to avoid backing up cache files
       cache:
-        type: persistentVolumeClaim
-        storageClass: openebs-hostpath
-        retain: false
-        accessMode: ReadWriteOnce
-        size: 20Gi
-        suffix: cache  # Force PVC to be named plex-cache due to app-template bug
+        type: emptyDir
         globalMounts:
           - path: /config/Library/Application Support/Plex Media Server/Cache
       logs:

@@ -28,8 +28,6 @@ spec:
   dependsOn:
     - name: prometheus-operator-crds
       namespace: observability
-    - name: openebs
-      namespace: storage
   values:
     crds:
       enabled: false
