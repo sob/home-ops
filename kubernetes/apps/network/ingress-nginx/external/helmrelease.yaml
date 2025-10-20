@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app ingress-nginx-external
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: ingress-nginx
   interval: 30m
-  chart:
-    spec:
-      chart: ingress-nginx
-      version: 4.13.0
-      sourceRef:
-        kind: HelmRepository
-        name: ingress-nginx
-        namespace: flux-system
   install:
     remediation:
       retries: 3

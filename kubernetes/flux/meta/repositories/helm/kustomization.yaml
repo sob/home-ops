@@ -29,4 +29,3 @@ resources:
   - ./rook-ceph.yaml
   - ./stakater.yaml
   - ./external-dns.yaml
-  - ./ingress-nginx.yaml
