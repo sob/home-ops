@@ -25,6 +25,8 @@ spec:
       retries: 3
   values:
     global:
+      security:
+        allowInsecureImages: true
       podAnnotations:
         secret.reloader.stakater.com/reload: authentik
       deploymentStrategy:
@@ -41,7 +43,9 @@ spec:
     postgresql:
       enabled: true
       image:
-        tag: 17-debian-12
+        registry: docker.io
+        repository: library/postgres
+        tag: 17.6-alpine
       auth:
         existingSecret: authentik
         secretKeys:
