@@ -14,7 +14,7 @@ upstreams:
 conditional:
   mapping:
     # Forward cluster.local to CoreDNS
-    cluster.local: tcp+udp:10.96.0.10
+    cluster.local: tcp+udp:10.43.0.10
 
 # Adblocking configuration
 blocking:
@@ -103,7 +103,7 @@ clientLookup:
 
 # Bootstrap DNS servers (for resolving upstream hostnames)
 bootstrapDns:
-  - upstream: tcp+udp:10.96.0.10
+  - upstream: tcp+udp:10.43.0.10
 
 # Filtering configuration
 filtering:

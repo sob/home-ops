@@ -37,7 +37,7 @@ spec:
             env:
               TZ: America/Chicago
               PLEX_ADVERTISE_URL: https://plex.${SECRET_DOMAIN}:443,http://${SECRET_VIP_PLEX}:32400
-              PLEX_NO_AUTH_NETWORKS: ${SECRET_CIDR},10.244.0.0/16,10.96.0.0/12
+              PLEX_NO_AUTH_NETWORKS: ${SECRET_CIDR},10.244.0.0/16,10.43.0.0/12
             probes:
               liveness: &probes
                 enabled: true
