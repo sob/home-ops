@@ -14,7 +14,6 @@ resources:
   - ./descheduler.yaml
   - ./emberstack.yaml
   - ./emqx.yaml
-  - ./external-secrets.yaml
   - ./fairwinds.yaml
   - ./grafana.yaml
   - ./hajimari.yaml
