@@ -11,4 +11,4 @@ spec:
     operation: copy
   ref:
     tag: 4.13.0
-  url: oci://ghcr.io/nginx/charts/nginx-ingress
+  url: oci://ghcr.io/nginxinc/charts/nginx-ingress
