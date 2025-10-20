@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app snmp-exporter-cyberpower-pdu
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: prometheus-snmp-exporter
   interval: 30m
-  chart:
-    spec:
-      chart: prometheus-snmp-exporter
-      version: 9.6.1
-      sourceRef:
-        kind: HelmRepository
-        name: prometheus-community
-        namespace: flux-system
   install:
     remediation:
       retries: 3

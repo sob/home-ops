@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app blackbox-exporter
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: prometheus-blackbox-exporter
   interval: 30m
-  chart:
-    spec:
-      chart: prometheus-blackbox-exporter
-      version: 11.2.0
-      sourceRef:
-        kind: HelmRepository
-        name: prometheus-community
-        namespace: flux-system
   install:
     remediation:
       retries: 3
