@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: reloader
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: reloader
   interval: 30m
-  chart:
-    spec:
-      chart: reloader
-      version: 2.2.0
-      sourceRef:
-        kind: HelmRepository
-        name: stakater
-        namespace: flux-system
   install:
     remediation:
       retries: 3
