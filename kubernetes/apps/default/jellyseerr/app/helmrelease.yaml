@@ -31,6 +31,11 @@ spec:
               TZ: America/Chicago
               LOG_LEVEL: "info"
               PORT: &port 80
+              API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: jellyseerr-secret
+                    key: API_KEY
             probes:
               liveness: &probes
                 enabled: true
