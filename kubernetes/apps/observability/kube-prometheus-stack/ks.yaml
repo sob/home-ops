@@ -15,8 +15,6 @@ spec:
       namespace: external-secrets
     - name: prometheus-operator-crds
       namespace: observability
-    - name: openebs
-      namespace: storage
   path: ./kubernetes/apps/observability/kube-prometheus-stack/app
   prune: true
   sourceRef:
