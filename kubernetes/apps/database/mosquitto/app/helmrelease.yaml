@@ -100,6 +100,6 @@ spec:
         globalMounts:
           - path: /mosquitto-init
       data:
-        existingClaim: *app
+        type: emptyDir
         globalMounts:
           - path: /mosquitto/data
