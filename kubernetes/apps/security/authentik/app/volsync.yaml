@@ -11,7 +11,7 @@ spec:
     schedule: "0 3 * * *"  # Daily at 3 AM
   restic:
     copyMethod: Snapshot
-    cacheStorageClassName: openebs-hostpath
+    cacheStorageClassName: ceph-block
     cacheCapacity: 2Gi
     moverSecurityContext:
       runAsUser: 1001
@@ -39,7 +39,7 @@ spec:
   restic:
     copyMethod: Snapshot
     repository: authentik-postgresql-restic-secret
-    cacheStorageClassName: openebs-hostpath
+    cacheStorageClassName: ceph-block
     cacheCapacity: 2Gi
     moverSecurityContext:
       runAsUser: 1001

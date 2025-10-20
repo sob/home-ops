@@ -8,4 +8,4 @@ spec:
     - name: volsync
       namespace: storage
     - name: rook-ceph-cluster
-      namespace: flux-system
+      namespace: rook-ceph
