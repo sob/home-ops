@@ -25,6 +25,13 @@ stringData:
       receiver: 'default'
       
       routes:
+      # Send all alerts to Robusta for analysis and continue to other routes
+      - receiver: 'robusta'
+        group_wait: 1s
+        group_interval: 1s
+        repeat_interval: 4h
+        continue: true
+
       # Critical infrastructure alerts - immediate Pushover + Slack
       - match:
           severity: critical
@@ -51,6 +58,12 @@ stringData:
         receiver: 'workload-alerts'
 
     receivers:
+    # Robusta platform integration
+    - name: 'robusta'
+      webhook_configs:
+      - url: 'http://robusta-runner.observability.svc.cluster.local/api/alerts'
+        send_resolved: true
+
     # Default fallback
     - name: 'default'
       slack_configs:
