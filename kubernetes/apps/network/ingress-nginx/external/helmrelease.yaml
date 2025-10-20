@@ -20,8 +20,6 @@ spec:
     fullnameOverride: *app
     controller:
       service:
-        annotations:
-          io.cilium/lb-ipam-ips: "${SECRET_NGINX_EXTERNAL_VIP}"
         externalTrafficPolicy: Cluster
       ingressClass: external
       ingressClassResource:

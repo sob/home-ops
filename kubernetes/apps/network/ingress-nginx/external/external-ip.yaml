@@ -1,0 +1,13 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: ingress-nginx-external-pool
+spec:
+  blocks:
+    - start: 10.1.100.202
+      stop: 10.1.100.202
+  serviceSelector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/instance: ingress-nginx-external

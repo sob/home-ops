@@ -5,8 +5,8 @@ metadata:
   name: mosquitto-pool
 spec:
   blocks:
-    - start: 10.1.100.223
-      stop: 10.1.100.223
+    - start: 10.1.100.206
+      stop: 10.1.100.206
   serviceSelector:
     matchLabels:
       app.kubernetes.io/name: mosquitto
