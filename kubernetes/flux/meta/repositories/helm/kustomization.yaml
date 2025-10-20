@@ -15,7 +15,6 @@ resources:
   - ./emberstack.yaml
   - ./emqx.yaml
   - ./fairwinds.yaml
-  - ./grafana.yaml
   - ./hajimari.yaml
   - ./intel.yaml
   - ./kyverno.yaml

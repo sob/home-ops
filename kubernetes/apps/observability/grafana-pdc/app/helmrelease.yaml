@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: grafana-pdc
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: pdc-agent
   interval: 30m
-  chart:
-    spec:
-      chart: pdc-agent
-      version: 0.0.1
-      sourceRef:
-        kind: HelmRepository
-        name: grafana
-        namespace: flux-system
   install:
     remediation:
       retries: 3

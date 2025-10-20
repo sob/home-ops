@@ -6,4 +6,5 @@ namespace: observability
 resources:
   - ./configmap.yaml
   - ./externalsecret.yaml
+  - ./ocirepository.yaml
   - ./helmrelease.yaml

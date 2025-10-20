@@ -5,16 +5,10 @@ metadata:
   name: k6-operator
   namespace: observability
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: k6-operator
   interval: 30m
-  chart:
-    spec:
-      chart: k6-operator
-      version: "3.15.0"
-      sourceRef:
-        kind: HelmRepository
-        name: grafana
-        namespace: flux-system
-      interval: 30m
   install:
     crds: CreateReplace
     remediation:

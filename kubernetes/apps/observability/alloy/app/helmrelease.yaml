@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: alloy
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: alloy
   interval: 30m
-  chart:
-    spec:
-      chart: alloy
-      version: 0.10.0
-      sourceRef:
-        kind: HelmRepository
-        name: grafana
-        namespace: flux-system
   install:
     remediation:
       retries: 3
