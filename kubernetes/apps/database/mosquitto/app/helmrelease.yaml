@@ -79,7 +79,8 @@ spec:
         controller: *app
         type: LoadBalancer
         annotations:
-          coredns.io/hostname: "mqtt.${SECRET_DOMAIN}"
+          external-dns.alpha.kubernetes.io/hostname: "mqtt.${SECRET_DOMAIN}"
+          io.cilium/lb-ipam-ips: "10.1.100.224"
         ports:
           mqtt:
             port: 1883
