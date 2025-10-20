@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: cert-manager
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: cert-manager
   interval: 30m
-  chart:
-    spec:
-      chart: cert-manager
-      version: v1.18.2
-      sourceRef:
-        kind: HelmRepository
-        name: jetstack
-        namespace: flux-system
   install:
     remediation:
       retries: 3
