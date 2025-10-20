@@ -58,20 +58,6 @@ spec:
     matchLabels:
       io.cilium.gateway/owning-gateway: external-gateway
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumloadbalancerippool_v2alpha1.json
-apiVersion: cilium.io/v2alpha1
-kind: CiliumLoadBalancerIPPool
-metadata:
-  name: emqx-pool
-spec:
-  blocks:
-    - start: "${SECRET_VIP_EMQX}"
-      stop: "${SECRET_VIP_EMQX}"
-  disabled: false
-  serviceSelector:
-    matchLabels:
-      apps.emqx.io/instance: emqx
----
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliuml2announcementpolicy_v2alpha1.json
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
