@@ -1,0 +1,98 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/refs/heads/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mosquitto
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: mosquitto
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      mosquitto:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-passwords:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.20
+            envFrom:
+              - secretRef:
+                  name: mosquitto-secret
+            command:
+              - /bin/sh
+              - -c
+              - |
+                # Create password file with hashes
+                rm -f /mosquitto-init/mosquitto.passwd
+                mosquitto_passwd -b -c /mosquitto-init/mosquitto.passwd "$HASS_USER" "$HASS_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$RATGDO_USER" "$RATGDO_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$ZIGBEE_USER" "$ZIGBEE_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$EXPORTER_USER" "$EXPORTER_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$RTLAMR_USER" "$RTLAMR_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$N8N_USER" "$N8N_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$NODERED_USER" "$NODERED_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$BATOCERA_USER" "$BATOCERA_PASS"
+                chmod 0600 /mosquitto-init/mosquitto.passwd
+                echo "Password file created successfully"
+        containers:
+          app:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.20
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    service:
+      app:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          coredns.io/hostname: "mqtt.${SECRET_DOMAIN}"
+        ports:
+          mqtt:
+            port: 1883
+            protocol: TCP
+    persistence:
+      config:
+        type: secret
+        name: mosquitto-secret
+        globalMounts:
+          - path: /mosquitto/config/mosquitto.conf
+            subPath: mosquitto.conf
+            readOnly: true
+          - path: /mosquitto/config/mosquitto.acl
+            subPath: mosquitto.acl
+            readOnly: true
+      passwd:
+        type: emptyDir
+        globalMounts:
+          - path: /mosquitto-init
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /mosquitto/data
