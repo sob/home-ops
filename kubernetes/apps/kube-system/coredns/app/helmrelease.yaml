@@ -5,15 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app coredns
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: coredns
   interval: 30m
-  chart:
-    spec:
-      chart: coredns
-      version: 1.43.0
-      sourceRef:
-        kind: HelmRepository
-        name: coredns
-        namespace: flux-system
   install:
     remediation:
       retries: 3
