@@ -11,9 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: emqx
-      namespace: database
-    - name: emqx-cluster
+    - name: mosquitto
       namespace: database
     - name: external-secrets-stores
       namespace: external-secrets

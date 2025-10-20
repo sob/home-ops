@@ -28,8 +28,8 @@ spec:
               repository: ghcr.io/kpetremann/mqtt-exporter
               tag: 1.7.2@sha256:7e2a27e3dce10427ae46490ede2f74fb7799e9e909baae6f8642fb4d5794f1e0
             env:
-              MQTT_ADDRESS: emqx-listeners.database.svc.cluster.local
-              MQTT_V5_PROTOCOL: true
+              MQTT_ADDRESS: mosquitto.database.svc.cluster.local
+              MQTT_V5_PROTOCOL: false
               PROMETHEUS_PORT: &port 3321
               TZ: ${TIMEZONE}
               ZIGBEE2MQTT_AVAILABILITY: true
