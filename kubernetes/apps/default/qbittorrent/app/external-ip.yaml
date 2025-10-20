@@ -1,0 +1,12 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: qbittorrent-pool
+spec:
+  blocks:
+    - start: 10.1.100.205
+      stop: 10.1.100.205
+  serviceSelector:
+    matchLabels:
+      app.kubernetes.io/name: qbittorrent

@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+  - ./external-ip.yaml
 configMapGenerator:
   - name: plex-loki-rules
     files:

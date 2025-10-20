@@ -1,0 +1,12 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: plex-pool
+spec:
+  blocks:
+    - start: 10.1.100.204
+      stop: 10.1.100.204
+  serviceSelector:
+    matchLabels:
+      app.kubernetes.io/name: plex

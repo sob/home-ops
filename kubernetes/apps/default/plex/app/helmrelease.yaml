@@ -100,8 +100,6 @@ spec:
       lb:
         controller: plex
         type: LoadBalancer
-        annotations:
-          io.cilium/lb-ipam-ips: ${SECRET_VIP_PLEX}
         ports:
           http:
             port: 32400
