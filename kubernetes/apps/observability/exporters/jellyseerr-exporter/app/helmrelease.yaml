@@ -37,11 +37,11 @@ spec:
                   name: jellyseerr-exporter-secret
             probes:
               liveness:
-                enabled: false
+                enabled: true
                 spec:
                   initialDelaySeconds: 30
               readiness:
-                enabled: false
+                enabled: true
                 spec:
                   initialDelaySeconds: 30
             resources:
