@@ -1,0 +1,157 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: enigma-bbs
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: enigma-bbs
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      enigma-bbs:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: enigmabbs/enigma-bbs
+              tag: latest
+            env:
+              TZ: America/Chicago
+              NODE_ENV: production
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &telnet-port 23
+                  initialDelaySeconds: 30
+                  periodSeconds: 120
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *telnet-port
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+                add: ["NET_BIND_SERVICE"]
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+    service:
+      app:
+        controller: enigma-bbs
+        ports:
+          telnet:
+            port: 23
+            protocol: TCP
+          ssh:
+            port: 22
+            protocol: TCP
+          wss:
+            port: 8811
+            protocol: TCP
+          binkp:
+            port: 24554
+            protocol: TCP
+    persistence:
+      config:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/config
+      db:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/db
+                subPath: db
+      logs:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/logs
+      filebase:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/filebase
+                subPath: filebase
+      art:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/art
+                subPath: art
+      mods:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/mods
+                subPath: mods
+      mail:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /mail
+                subPath: mail
+      dosemu-home:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /home/nobody/.dosemu
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /tmp
+      run:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /var/run
+      var-log:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /var/log

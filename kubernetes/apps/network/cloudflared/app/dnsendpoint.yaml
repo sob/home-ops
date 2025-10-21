@@ -11,12 +11,15 @@ spec:
     - dnsName: "external.${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "bbs.${SECRET_EXTERNAL_DOMAIN}"
+    - dnsName: "enigma.halfduplex.io"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "ssh.${SECRET_EXTERNAL_DOMAIN}"
+    - dnsName: "ssh.halfduplex.io"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "mailer.${SECRET_EXTERNAL_DOMAIN}"
+    - dnsName: "wss.halfduplex.io"
+      recordType: CNAME
+      targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
+    - dnsName: "mailer.halfduplex.io"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
