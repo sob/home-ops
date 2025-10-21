@@ -23,7 +23,6 @@ env:
 
 includes:
   alerting: .taskfiles/alerting
-  authentik: .taskfiles/authentik
   bucket: .taskfiles/bucket
   kube: .taskfiles/kube
   flux: .taskfiles/flux

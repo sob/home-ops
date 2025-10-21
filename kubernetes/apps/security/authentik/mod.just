@@ -21,3 +21,7 @@ plan:
 apply:
   just authentik init
   cd "{{ terraform_dir }}" && terraform apply -auto-approve
+
+[doc('terraform destroy')]
+apply:
+  cd "{{ terraform_dir }}" && terraform destroy
