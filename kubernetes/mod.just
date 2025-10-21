@@ -19,6 +19,12 @@ sync-git:
     kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite gitrepo "$name" reconcile.fluxcd.io/requestedAt="$(date +%s)"; \
   done
 
+[doc('sync helmreleases')]
+sync-hr:
+  kubectl get hr --no-headers -A | while read -r ns name _; do \
+    kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite hr "$name" reconcile.fluxcd.io/requestedAt="$(date +%s)"; \
+  done
+
 [doc('toggle helmrelease')]
 toggle-hr namespace hr:
   kubectl patch hr "{{ hr }}" --namespace "{{ namespace }}" --type=merge -p '{"spec":{"suspend":true}}' && \

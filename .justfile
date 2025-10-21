@@ -7,6 +7,7 @@ mod bootstrap "bootstrap"
 mod kube "kubernetes"
 mod rook "kubernetes/apps/rook-ceph"
 mod talos "talos"
+mod authentik "kubernetes/apps/security/authentik"
 
 [private]
 default:
