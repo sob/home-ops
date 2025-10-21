@@ -32,6 +32,8 @@ spec:
               - http://jellyseerr.default.svc.cluster.local
               - --jellyseerr.apiKey
               - $(JELLYSEERR_APIKEY)
+              - --log
+              - debug
             envFrom:
               - secretRef:
                   name: jellyseerr-exporter-secret
