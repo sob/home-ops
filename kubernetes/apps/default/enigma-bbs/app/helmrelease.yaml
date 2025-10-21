@@ -84,53 +84,14 @@ spec:
             port: 24554
             protocol: TCP
     persistence:
-      config:
+      data:
         existingClaim: "{{ .Release.Name }}"
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /enigma-bbs/config
-      db:
-        existingClaim: "{{ .Release.Name }}"
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /enigma-bbs/db
-                subPath: db
+        globalMounts:
+          - path: /enigma-bbs
       logs:
         type: emptyDir
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /enigma-bbs/logs
-      filebase:
-        existingClaim: "{{ .Release.Name }}"
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /enigma-bbs/filebase
-                subPath: filebase
-      art:
-        existingClaim: "{{ .Release.Name }}"
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /enigma-bbs/art
-                subPath: art
-      mods:
-        existingClaim: "{{ .Release.Name }}"
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /enigma-bbs/mods
-                subPath: mods
-      mail:
-        existingClaim: "{{ .Release.Name }}"
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /mail
-                subPath: mail
+        globalMounts:
+          - path: /enigma-bbs/logs
       dosemu-home:
         type: emptyDir
         advancedMounts:
