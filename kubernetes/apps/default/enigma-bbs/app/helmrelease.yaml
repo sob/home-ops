@@ -84,36 +84,23 @@ spec:
             port: 24554
             protocol: TCP
     persistence:
-      config:
+      data:
         existingClaim: "{{ .Release.Name }}"
-        suffix: config
-        globalMounts:
-          - path: /enigma-bbs/config
-      db:
-        existingClaim: "{{ .Release.Name }}"
-        suffix: db
-        globalMounts:
-          - path: /enigma-bbs/db
-      filebase:
-        existingClaim: "{{ .Release.Name }}"
-        suffix: filebase
-        globalMounts:
-          - path: /enigma-bbs/filebase
-      art:
-        existingClaim: "{{ .Release.Name }}"
-        suffix: art
-        globalMounts:
-          - path: /enigma-bbs/art
-      mods:
-        existingClaim: "{{ .Release.Name }}"
-        suffix: mods
-        globalMounts:
-          - path: /enigma-bbs/mods
-      mail:
-        existingClaim: "{{ .Release.Name }}"
-        suffix: mail
-        globalMounts:
-          - path: /mail
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/config
+                subPath: config
+              - path: /enigma-bbs/db
+                subPath: db
+              - path: /enigma-bbs/filebase
+                subPath: filebase
+              - path: /enigma-bbs/art
+                subPath: art
+              - path: /enigma-bbs/mods
+                subPath: mods
+              - path: /mail
+                subPath: mail
       logs:
         type: emptyDir
         globalMounts:
