@@ -31,7 +31,7 @@ spec:
               - --jellyseerr.address
               - http://jellyseerr.default.svc.cluster.local
               - --jellyseerr.apiKey
-              - $(JELLYSEERR_API_KEY)
+              - $(JELLYSEERR_APIKEY)
             envFrom:
               - secretRef:
                   name: jellyseerr-exporter-secret
