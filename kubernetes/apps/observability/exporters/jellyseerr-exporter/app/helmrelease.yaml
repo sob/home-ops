@@ -37,20 +37,17 @@ spec:
                   name: jellyseerr-exporter-secret
             probes:
               liveness:
-                enabled: true
+                enabled: false
                 spec:
                   initialDelaySeconds: 30
               readiness:
-                enabled: true
+                enabled: false
                 spec:
                   initialDelaySeconds: 30
             resources:
               requests:
                 cpu: 10m
                 memory: 32Mi
-              limits:
-                cpu: 20m
-                memory: 100Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
