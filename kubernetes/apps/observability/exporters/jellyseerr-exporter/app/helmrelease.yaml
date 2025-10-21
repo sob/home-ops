@@ -27,6 +27,11 @@ spec:
             image:
               repository: ghcr.io/opspotes/jellyseerr-exporter
               tag: 1.4@sha256:2667a7bed7aabfc2b08dac71cd14e352644c9e1ca7b4f9dd6f6687997c5fc825
+            args:
+              - --jellyseerr.address
+              - http://jellyseerr.default.svc.cluster.local
+              - --jellyseerr.apiKey
+              - $(JELLYSEERR_API_KEY)
             envFrom:
               - secretRef:
                   name: jellyseerr-exporter-secret
