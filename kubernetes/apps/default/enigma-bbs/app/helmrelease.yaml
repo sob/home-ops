@@ -51,6 +51,8 @@ spec:
             env:
               TZ: America/Chicago
               NODE_ENV: production
+              HOME: /home/nobody
+              PM2_HOME: /home/nobody/.pm2
             probes:
               liveness: &probes
                 enabled: true
@@ -130,12 +132,10 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /enigma-bbs/logs
-      dosemu-home:
+      home:
         type: emptyDir
-        advancedMounts:
-          enigma-bbs:
-            app:
-              - path: /home/nobody/.dosemu
+        globalMounts:
+          - path: /home/nobody
       tmpfs:
         type: emptyDir
         advancedMounts:
