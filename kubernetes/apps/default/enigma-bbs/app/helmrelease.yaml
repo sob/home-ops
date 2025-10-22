@@ -21,6 +21,28 @@ spec:
       enigma-bbs:
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          init-config:
+            image:
+              repository: docker.io/curlimages/curl
+              tag: latest
+            command:
+              - /bin/sh
+              - -c
+              - |
+                if [ ! -f /enigma-bbs/config/config.hjson ]; then
+                  echo "Downloading default config template..."
+                  curl -fsSL https://raw.githubusercontent.com/NuSkooler/enigma-bbs/master/misc/config_template.in.hjson \
+                    -o /enigma-bbs/config/config.hjson
+                  echo "Config template downloaded"
+                else
+                  echo "Config already exists, skipping"
+                fi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
         containers:
           app:
             image:
@@ -88,6 +110,9 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         advancedMounts:
           enigma-bbs:
+            init-config:
+              - path: /enigma-bbs/config
+                subPath: config
             app:
               - path: /enigma-bbs/config
                 subPath: config
