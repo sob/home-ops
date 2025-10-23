@@ -51,8 +51,8 @@ spec:
             env:
               TZ: America/Chicago
               NODE_ENV: production
-              HOME: /home/nobody
-              PM2_HOME: /home/nobody/.pm2
+              HOME: /root
+              PM2_HOME: /root/.pm2
             probes:
               liveness:
                 enabled: false
@@ -72,12 +72,12 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 2Gi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
-        fsGroup: 65534
+    # defaultPodOptions:
+    #   securityContext:
+    #     runAsNonRoot: true
+    #     runAsUser: 65534
+    #     runAsGroup: 65534
+    #     fsGroup: 65534
     service:
       app:
         controller: enigma-bbs
@@ -122,7 +122,7 @@ spec:
       home:
         type: emptyDir
         globalMounts:
-          - path: /home/nobody
+          - path: /root
       tmpfs:
         type: emptyDir
         advancedMounts:
