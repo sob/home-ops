@@ -54,28 +54,15 @@ spec:
               HOME: /home/nobody
               PM2_HOME: /home/nobody/.pm2
             probes:
-              liveness: &probes
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: &telnet-port 23
-                  initialDelaySeconds: 30
-                  periodSeconds: 120
-                  timeoutSeconds: 5
-                  failureThreshold: 3
-              readiness: *probes
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
               startup:
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: *telnet-port
-                  failureThreshold: 30
-                  periodSeconds: 10
+                enabled: false
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              readOnlyRootFilesystem: false
               capabilities:
                 drop: ["ALL"]
                 add: ["NET_BIND_SERVICE"]
