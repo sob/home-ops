@@ -112,6 +112,21 @@ spec:
                 memory: 32Mi
               limits:
                 memory: 128Mi
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8080
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8080
     # defaultPodOptions:
     #   securityContext:
     #     runAsNonRoot: true
@@ -131,6 +146,7 @@ spec:
           wss:
             port: 8811
             protocol: TCP
+            targetPort: 8812  # Route to nginx proxy which cleans XFF
           binkp:
             port: 24554
             protocol: TCP
@@ -193,3 +209,30 @@ spec:
               - path: /vtx
             nginx:
               - path: /usr/share/nginx/html
+      nginx-config:
+        type: configMap
+        name: enigma-bbs-nginx-config
+        advancedMounts:
+          enigma-bbs:
+            nginx:
+              - path: /etc/nginx/nginx.conf
+                subPath: nginx.conf
+                readOnly: true
+      nginx-tmp:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            nginx:
+              - path: /tmp
+      nginx-cache:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            nginx:
+              - path: /var/cache/nginx
+      nginx-log:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            nginx:
+              - path: /var/log/nginx

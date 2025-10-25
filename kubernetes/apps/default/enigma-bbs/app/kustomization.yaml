@@ -7,3 +7,4 @@ resources:
   - ./helmrelease.yaml
   - ./httproute.yaml
   - ./httproute-web.yaml
+  - ./nginx-config.yaml
