@@ -129,8 +129,8 @@ spec:
                     port: 8080
           code-server:
             image:
-              repository: ghcr.io/codercom/code-server
-              tag: 4.96.2
+              repository: ghcr.io/coder/code-server
+              tag: 4.105.1
             args:
               - --auth
               - none
