@@ -43,6 +43,26 @@ spec:
               readOnlyRootFilesystem: true
               capabilities:
                 drop: ["ALL"]
+          init-vtx:
+            image:
+              repository: ghcr.io/tarampampam/curl
+              tag: 8.11.0
+            command:
+              - /bin/sh
+              - -c
+              - |
+                echo "Downloading VTX client files..."
+                cd /vtx
+                curl -fsSL https://github.com/codewar65/VTX_ClientServer/archive/refs/heads/master.tar.gz | tar xz --strip-components=2 VTX_ClientServer-master/www
+                # Update WebSocket URL in index.html
+                sed -i 's|wsConnect:.*|wsConnect: "wss://socket.56kbps.io",|' index.html
+                sed -i 's|sysName:.*|sysName: "56kbps BBS",|' index.html
+                echo "VTX client ready"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
         containers:
           app:
             image:
@@ -72,6 +92,21 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 2Gi
+          nginx:
+            image:
+              repository: docker.io/nginx
+              tag: 1.27-alpine
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
     # defaultPodOptions:
     #   securityContext:
     #     runAsNonRoot: true
@@ -94,6 +129,10 @@ spec:
           binkp:
             port: 24554
             protocol: TCP
+          http:
+            port: 80
+            protocol: TCP
+            targetPort: 80
     persistence:
       data:
         existingClaim: "{{ .Release.Name }}"
@@ -141,3 +180,23 @@ spec:
           enigma-bbs:
             app:
               - path: /var/log
+      vtx:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            init-vtx:
+              - path: /vtx
+            nginx:
+              - path: /usr/share/nginx/html
+      nginx-cache:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            nginx:
+              - path: /var/cache/nginx
+      nginx-run:
+        type: emptyDir
+        advancedMounts:
+          enigma-bbs:
+            nginx:
+              - path: /var/run
