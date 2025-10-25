@@ -69,8 +69,6 @@ tasks:
       - task: .delete
         vars: {TYPE: "configmap", LABEL: "app.kubernetes.io/name={{.KS}}", NS: "{{.NS}}"}
       - task: .delete
-        vars: {TYPE: "persistentvolumeclaim", APP: "{{.APP}}", NS: "{{.NS}}"}
-      - task: .delete
         vars: {TYPE: "deployment", APP: "{{.APP}}", NS: "{{.NS}}"}
       - task: .delete
         vars: {TYPE: "helmrelease", APP: "{{.APP}}", NS: "{{.NS}}"}
