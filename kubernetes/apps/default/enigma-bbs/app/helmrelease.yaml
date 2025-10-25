@@ -58,6 +58,8 @@ spec:
                 # Update WebSocket URL in index.html
                 sed -i 's|wsConnect:.*|wsConnect: "wss://socket.56kbps.io",|' index.html
                 sed -i 's|sysName:.*|sysName: "56kbps BBS",|' index.html
+                # Fix vtxclient.js filename reference
+                sed -i 's|vtxclient_94.js|vtxclient.js|' index.html
                 echo "VTX client ready"
             securityContext:
               allowPrivilegeEscalation: false
