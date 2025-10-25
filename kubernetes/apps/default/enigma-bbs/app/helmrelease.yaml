@@ -189,15 +189,3 @@ spec:
               - path: /vtx
             nginx:
               - path: /usr/share/nginx/html
-      nginx-cache:
-        type: emptyDir
-        advancedMounts:
-          enigma-bbs:
-            nginx:
-              - path: /var/cache/nginx
-      nginx-run:
-        type: emptyDir
-        advancedMounts:
-          enigma-bbs:
-            nginx:
-              - path: /var/run
