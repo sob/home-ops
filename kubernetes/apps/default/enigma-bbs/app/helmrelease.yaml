@@ -95,11 +95,9 @@ spec:
                 memory: 2Gi
           nginx:
             image:
-              repository: docker.io/nginx
+              repository: docker.io/nginxinc/nginx-unprivileged
               tag: 1.27-alpine
             securityContext:
-              runAsUser: 0
-              runAsGroup: 0
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
               capabilities:
@@ -135,7 +133,7 @@ spec:
           http:
             port: 80
             protocol: TCP
-            targetPort: 80
+            targetPort: 8080
     persistence:
       data:
         existingClaim: "{{ .Release.Name }}"
