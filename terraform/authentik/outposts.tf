@@ -1,6 +1,7 @@
 locals {
   internal_proxy_provider_ids = [
     authentik_provider_proxy.main["bazarr"].id,
+    authentik_provider_proxy.main["enigma_code"].id,
     authentik_provider_proxy.main["lidarr"].id,
     authentik_provider_proxy.main["prowlarr"].id,
     authentik_provider_proxy.main["radarr"].id,
@@ -42,7 +43,7 @@ resource "authentik_outpost" "internal" {
       "nginx.ingress.kubernetes.io/proxy-buffers" : "8 16k"
       "nginx.ingress.kubernetes.io/proxy-busy-buffers-size" : "32k"
     }
-    "kubernetes_ingress_secret_name" = "56kbps-io-production-tls"
+    "kubernetes_ingress_secret_name" = "halfduplex-io-production-tls"
   })
 }
 

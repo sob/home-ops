@@ -46,6 +46,11 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
       group         = resource.authentik_group.network
     },
+    enigma_code = {
+      external_host = "https://edit.halfduplex.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png"
+      group         = resource.authentik_group.network
+    },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
