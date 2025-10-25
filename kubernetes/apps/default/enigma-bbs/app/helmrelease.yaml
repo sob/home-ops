@@ -99,7 +99,7 @@ spec:
               tag: 1.27-alpine
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              readOnlyRootFilesystem: false
               capabilities:
                 drop: ["ALL"]
             resources:
