@@ -5,6 +5,4 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
-  - ./httproute.yaml
-  - ./httproute-web.yaml
   - ./nginx-config.yaml

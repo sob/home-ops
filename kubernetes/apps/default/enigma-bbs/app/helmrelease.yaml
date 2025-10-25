@@ -22,29 +22,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          init-config:
-            image:
-              repository: docker.io/alpine
-              tag: 3.21
-            command:
-              - /bin/sh
-              - -c
-              - |
-                apk add --no-cache curl
-                if [ ! -f /enigma-bbs/config/config.hjson ]; then
-                  echo "Downloading default config template..."
-                  curl -fsSL https://raw.githubusercontent.com/NuSkooler/enigma-bbs/master/misc/config_template.in.hjson \
-                    -o /enigma-bbs/config/config.hjson
-                  echo "Config template downloaded"
-                fi
-                # Enable proxied mode for WebSocket to support X-Forwarded-For
-                sed -i 's/proxied: false/proxied: true/' /enigma-bbs/config/config.hjson
-                echo "Proxied mode enabled for WebSocket"
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
-              capabilities:
-                drop: ["ALL"]
           init-vtx:
             image:
               repository: docker.io/alpine
@@ -58,8 +35,8 @@ spec:
                 cd /vtx
                 curl -fsSL https://github.com/codewar65/VTX_ClientServer/archive/refs/heads/master.tar.gz | tar xz --strip-components=2 VTX_ClientServer-master/www
                 # Update WebSocket URL in index.html
-                sed -i 's|wsConnect:.*|wsConnect: "wss://socket.56kbps.io",|' index.html
-                sed -i 's|sysName:.*|sysName: "56kbps BBS",|' index.html
+                sed -i 's|wsConnect:.*|wsConnect: "wss://wss.halfduplex.io",|' index.html
+                sed -i 's|sysName:.*|sysName: "halfduplex BBS",|' index.html
                 # Fix vtxclient.js filename reference
                 sed -i 's|vtxclient_94.js|vtxclient.js|' index.html
                 echo "VTX client ready"
@@ -211,14 +188,60 @@ spec:
                 service:
                   name: enigma-bbs
                   port: 8443
+    route:
+      websocket:
+        annotations:
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        parentRefs:
+          - group: gateway.networking.k8s.io
+            kind: Gateway
+            name: external-gateway
+            namespace: network
+            sectionName: https
+          - group: gateway.networking.k8s.io
+            kind: Gateway
+            name: internal-gateway
+            namespace: network
+            sectionName: https
+        hostnames:
+          - wss.halfduplex.io
+        rules:
+          - backendRefs:
+              - name: enigma-bbs
+                port: 8811
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+      web:
+        annotations:
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        parentRefs:
+          - group: gateway.networking.k8s.io
+            kind: Gateway
+            name: external-gateway
+            namespace: network
+            sectionName: https
+          - group: gateway.networking.k8s.io
+            kind: Gateway
+            name: internal-gateway
+            namespace: network
+            sectionName: https
+        hostnames:
+          - halfduplex.io
+        rules:
+          - backendRefs:
+              - name: enigma-bbs
+                port: 80
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /
     persistence:
       data:
         existingClaim: "{{ .Release.Name }}"
         advancedMounts:
           enigma-bbs:
-            init-config:
-              - path: /enigma-bbs/config
-                subPath: config
             app:
               - path: /enigma-bbs/config
                 subPath: config
