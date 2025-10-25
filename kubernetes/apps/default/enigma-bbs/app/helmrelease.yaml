@@ -45,12 +45,13 @@ spec:
                 drop: ["ALL"]
           init-vtx:
             image:
-              repository: ghcr.io/tarampampam/curl
-              tag: 8.11.0
+              repository: docker.io/alpine
+              tag: 3.21
             command:
               - /bin/sh
               - -c
               - |
+                apk add --no-cache curl tar
                 echo "Downloading VTX client files..."
                 cd /vtx
                 curl -fsSL https://github.com/codewar65/VTX_ClientServer/archive/refs/heads/master.tar.gz | tar xz --strip-components=2 VTX_ClientServer-master/www
