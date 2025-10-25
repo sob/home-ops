@@ -50,6 +50,7 @@ locals {
       external_host = "https://edit.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png"
       group         = resource.authentik_group.network
+      cookie_domain = "halfduplex.io"
     },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"

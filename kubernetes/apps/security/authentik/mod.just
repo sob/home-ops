@@ -15,7 +15,7 @@ init:
 [doc('terraform plan')]
 plan:
   just authentik init
-  cd "{{ terraform }}" && terraform plan
+  cd "{{ terraform_dir }}" && terraform plan
 
 [doc('terraform apply')]
 apply:
@@ -23,5 +23,5 @@ apply:
   cd "{{ terraform_dir }}" && terraform apply -auto-approve
 
 [doc('terraform destroy')]
-apply:
+destroy:
   cd "{{ terraform_dir }}" && terraform destroy
