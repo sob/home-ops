@@ -24,23 +24,25 @@ spec:
         initContainers:
           init-config:
             image:
-              repository: docker.io/curlimages/curl
-              tag: latest
+              repository: docker.io/alpine
+              tag: 3.21
             command:
               - /bin/sh
               - -c
               - |
+                apk add --no-cache curl
                 if [ ! -f /enigma-bbs/config/config.hjson ]; then
                   echo "Downloading default config template..."
                   curl -fsSL https://raw.githubusercontent.com/NuSkooler/enigma-bbs/master/misc/config_template.in.hjson \
                     -o /enigma-bbs/config/config.hjson
                   echo "Config template downloaded"
-                else
-                  echo "Config already exists, skipping"
                 fi
+                # Enable proxied mode for WebSocket to support X-Forwarded-For
+                sed -i 's/proxied: false/proxied: true/' /enigma-bbs/config/config.hjson
+                echo "Proxied mode enabled for WebSocket"
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              readOnlyRootFilesystem: false
               capabilities:
                 drop: ["ALL"]
           init-vtx:
