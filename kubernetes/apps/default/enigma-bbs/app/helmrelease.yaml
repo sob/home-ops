@@ -179,7 +179,7 @@ spec:
             protocol: TCP
     ingress:
       code:
-        className: external
+        className: internal
         annotations:
           authentik.home.arpa/internal: "true"
           nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"

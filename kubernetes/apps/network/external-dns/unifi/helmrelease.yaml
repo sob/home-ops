@@ -62,7 +62,7 @@ spec:
     sources: ["service", "ingress", "gateway-httproute", "crd"]
     txtOwnerId: stone
     txtPrefix: k8s.
-    domainFilters: ["${SECRET_DOMAIN}"]
+    domainFilters: ["${SECRET_DOMAIN}", "halfduplex.io"]
     serviceMonitor:
       enabled: true
     podAnnotations:
