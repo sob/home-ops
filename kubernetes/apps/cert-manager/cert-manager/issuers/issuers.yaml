@@ -19,6 +19,7 @@ spec:
           dnsZones:
             - "${SECRET_DOMAIN}"
             - "${SECRET_INTERNAL_DOMAIN}"
+            - "halfduplex.io"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -40,3 +41,4 @@ spec:
           dnsZones:
             - "${SECRET_DOMAIN}"
             - "${SECRET_INTERNAL_DOMAIN}"
+            - "halfduplex.io"
