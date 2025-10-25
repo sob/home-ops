@@ -56,7 +56,11 @@ ingress:
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "bbs.${SECRET_DOMAIN}"
-  - hostname: "enigma.halfduplex.io"
+  - hostname: "halfduplex.io"
+    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "halfduplex.io"
+  - hostname: "telnet.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:23
   - hostname: "ssh.halfduplex.io"
     service: ssh://enigma-bbs.default.svc.cluster.local:22

@@ -46,7 +46,7 @@ spec:
     sources: ["ingress", "gateway-httproute", "crd"]
     txtPrefix: k8s.
     txtOwnerId: default
-    domainFilters: ["${SECRET_DOMAIN}", "${SECRET_EXTERNAL_DOMAIN}"]
+    domainFilters: ["${SECRET_DOMAIN}", "${SECRET_EXTERNAL_DOMAIN}", "halfduplex.io"]
     serviceMonitor:
       enabled: true
       labels:

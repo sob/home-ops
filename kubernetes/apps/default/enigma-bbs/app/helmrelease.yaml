@@ -129,17 +129,20 @@ spec:
                     port: 8080
           code-server:
             image:
-              repository: ghcr.io/linuxserver/code-server
+              repository: ghcr.io/codercom/code-server
               tag: 4.96.2
+            args:
+              - --auth
+              - none
+              - --port
+              - "8443"
             env:
               TZ: America/Chicago
-              PUID: "1000"
-              PGID: "1000"
-              SUDO_PASSWORD_HASH: ""  # No sudo needed
-              DEFAULT_WORKSPACE: /config
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
+              runAsUser: 1000
+              runAsGroup: 1000
               capabilities:
                 drop: ["ALL"]
             resources:
@@ -201,7 +204,7 @@ spec:
           nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
           nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
         hosts:
-          - host: edit.56kbps.io
+          - host: edit.halfduplex.io
             paths:
               - path: /
                 pathType: Prefix
