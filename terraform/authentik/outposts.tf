@@ -57,13 +57,13 @@ resource "authentik_outpost" "halfduplex" {
   config = jsonencode({
     "log_level"                      = "info"
     "docker_labels"                  = null
-    "authentik_host"                 = "https://sso.halfduplex.io/"
+    "authentik_host"                 = "http://authentik-server.security.svc.cluster.local"
     "docker_network"                 = null
     "container_image"                = null
     "docker_map_ports"               = true
     "kubernetes_replicas"            = 1
     "kubernetes_namespace"           = "security"
-    "authentik_host_browser"         = ""
+    "authentik_host_browser"         = "https://sso.halfduplex.io/"
     "object_naming_template"         = "ak-outpost-%(name)s"
     "authentik_host_insecure"        = false
     "kubernetes_json_patches"        = null
