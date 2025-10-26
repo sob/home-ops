@@ -21,6 +21,8 @@ spec:
         certificateRefs:
           - kind: Secret
             name: "${SECRET_DOMAIN/./-}-production-tls"
+          - kind: Secret
+            name: halfduplex-io-production-tls
       allowedRoutes:
         namespaces:
           from: All
