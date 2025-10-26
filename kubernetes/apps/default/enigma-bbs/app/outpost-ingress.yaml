@@ -1,0 +1,36 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: enigma-bbs-outpost
+  namespace: default
+spec:
+  ingressClassName: internal
+  rules:
+    - host: edit.halfduplex.io
+      http:
+        paths:
+          - path: /outpost.goauthentik.io
+            pathType: Prefix
+            backend:
+              service:
+                name: ak-outpost-halfduplex
+                port:
+                  number: 9000
+  tls:
+    - hosts:
+        - edit.halfduplex.io
+      secretName: halfduplex-io-production-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ak-outpost-halfduplex
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: ak-outpost-halfduplex.security.svc.cluster.local
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
