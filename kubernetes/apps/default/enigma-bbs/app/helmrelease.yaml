@@ -177,13 +177,6 @@ spec:
           code:
             port: 8443
             protocol: TCP
-      ak-outpost-halfduplex-proxy:
-        controller: enigma-bbs
-        type: ExternalName
-        externalName: ak-outpost-halfduplex.security.svc.cluster.local
-        ports:
-          http:
-            port: 9000
     ingress:
       code:
         enabled: true
@@ -198,11 +191,6 @@ spec:
         hosts:
           - host: edit.halfduplex.io
             paths:
-              - path: /outpost.goauthentik.io
-                pathType: Prefix
-                service:
-                  name: ak-outpost-halfduplex-proxy
-                  port: 9000
               - path: /
                 pathType: Prefix
                 service:
