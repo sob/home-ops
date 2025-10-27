@@ -10,6 +10,7 @@ metadata:
     app.kubernetes.io/component: server-lb
   annotations:
     io.cilium/lb-ipam-ips: "10.1.100.207"
+    io.cilium/lb-ipam-sharing-key: "authentik-server-lb"
 spec:
   type: LoadBalancer
   ports:

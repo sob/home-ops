@@ -8,6 +8,7 @@ resources:
   - ./helmrelease.yaml
   - ./httproute-56kbps.yaml
   - ./httproute-halfduplex.yaml
+  - ./ippool.yaml
   - ./service-lb.yaml
   - ./servicemonitor.yaml
   - ./volsync.yaml
