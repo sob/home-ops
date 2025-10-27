@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/service.json
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentik-server-lb
+  namespace: security
+  labels:
+    app.kubernetes.io/name: authentik
+    app.kubernetes.io/component: server-lb
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.1.100.207
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: https
+  selector:
+    app.kubernetes.io/name: authentik
+    app.kubernetes.io/component: server
