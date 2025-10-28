@@ -17,7 +17,6 @@ resource "authentik_stage_identification" "authentication-identification-halfdup
   show_source_labels        = false
   show_matched_user         = false
   password_stage            = authentik_stage_password.authentication-password.id
-  recovery_flow             = authentik_flow.recovery.uuid
   sources                   = []
 }
 

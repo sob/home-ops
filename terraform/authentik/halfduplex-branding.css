@@ -1,34 +1,26 @@
-/* Black background theme for halfduplex.io */
-:root {
-  --ak-dark-background: #000000 !important;
-  --ak-dark-background-light: #0a0a0a !important;
-  --ak-dark-background-lighter: #141414 !important;
-}
-
-body,
-.pf-c-page,
+/* Black background theme for halfduplex.io login screen only */
 .pf-c-login,
-.pf-c-background-image {
+.pf-c-login .pf-c-background-image {
   background-color: #000000 !important;
   background-image: none !important;
 }
 
-.pf-c-login__main {
+.pf-c-login .pf-c-login__main {
   background-color: transparent !important;
 }
 
-.pf-c-card {
+.pf-c-login .pf-c-card {
   background-color: rgba(20, 20, 20, 0.8) !important;
   border: 1px solid #333 !important;
 }
 
-/* Hide default Authentik logo */
-.pf-c-brand {
+/* Hide default Authentik logo on login page */
+.pf-c-login .pf-c-brand {
   display: none !important;
 }
 
-/* ASCII art logo */
-.pf-c-login__header::before {
+/* ASCII art logo on login page */
+.pf-c-login .pf-c-login__header::before {
   content: "";
   display: block;
   white-space: pre;
@@ -41,44 +33,51 @@ body,
   content: " _           _  __     _             _             _      \A| |__   __ _| |/ _| __| |_   _ _ __ | | _____  __ (_) ___  \A| '_ \\ / _` | | |_ / _` | | | | '_ \\| |/ _ \\ \\/ / | |/ _ \\ \A| | | | (_| | |  _| (_| | |_| | |_) | |  __/>  < _| | (_) |\A|_| |_|\\__,_|_|_|  \\__,_|\\__,_| .__/|_|\\___/_/\\_(_)_|\\___/ \A                                |_|                          ";
 }
 
-/* Make form elements visible on black */
-.pf-c-form-control,
-.pf-c-button {
+/* Make form elements visible on black background (login page only) */
+.pf-c-login .pf-c-form-control,
+.pf-c-login .pf-c-button {
   border-color: #444 !important;
 }
 
-input.pf-c-form-control {
+.pf-c-login input.pf-c-form-control {
   background-color: #1a1a1a !important;
   color: #00ff00 !important;
   border: 1px solid #333 !important;
 }
 
-input.pf-c-form-control:focus {
+.pf-c-login input.pf-c-form-control:focus {
   border-color: #00ff00 !important;
   box-shadow: 0 0 5px rgba(0, 255, 0, 0.3) !important;
 }
 
-.pf-c-button.pf-m-primary {
+.pf-c-login .pf-c-button.pf-m-primary {
   background-color: #00aa00 !important;
   border-color: #00ff00 !important;
   color: #000000 !important;
 }
 
-.pf-c-button.pf-m-primary:hover {
+.pf-c-login .pf-c-button.pf-m-primary:hover {
   background-color: #00ff00 !important;
 }
 
-/* Text colors */
-.pf-c-login__main-body,
-.pf-c-login__main-footer,
-.pf-c-form__label,
-.pf-c-title,
-h1, h2, h3, h4, h5, h6,
-p, span, a {
+/* Text colors (login page only) */
+.pf-c-login .pf-c-login__main-body,
+.pf-c-login .pf-c-login__main-footer,
+.pf-c-login .pf-c-form__label,
+.pf-c-login .pf-c-title,
+.pf-c-login h1,
+.pf-c-login h2,
+.pf-c-login h3,
+.pf-c-login h4,
+.pf-c-login h5,
+.pf-c-login h6,
+.pf-c-login p,
+.pf-c-login span,
+.pf-c-login a {
   color: #00ff00 !important;
 }
 
-a:hover {
+.pf-c-login a:hover {
   color: #00ff00 !important;
   text-decoration: underline !important;
 }
