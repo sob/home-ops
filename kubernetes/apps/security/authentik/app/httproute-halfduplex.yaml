@@ -11,10 +11,10 @@ spec:
   parentRefs:
     - name: external-gateway
       namespace: network
-      sectionName: https
+      sectionName: https-halfduplex
     - name: internal-gateway
       namespace: network
-      sectionName: https
+      sectionName: https-halfduplex
   hostnames:
     - "sso.halfduplex.io"
   rules:

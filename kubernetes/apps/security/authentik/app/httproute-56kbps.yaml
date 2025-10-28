@@ -11,10 +11,10 @@ spec:
   parentRefs:
     - name: external-gateway
       namespace: network
-      sectionName: https
+      sectionName: https-56kbps
     - name: internal-gateway
       namespace: network
-      sectionName: https
+      sectionName: https-56kbps
   hostnames:
     - "sso.56kbps.io"
   rules:
