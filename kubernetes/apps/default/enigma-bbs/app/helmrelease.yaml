@@ -152,12 +152,10 @@ spec:
                   httpGet:
                     path: /healthz
                     port: 8443
-    # defaultPodOptions:
-    #   securityContext:
-    #     runAsNonRoot: true
-    #     runAsUser: 65534
-    #     runAsGroup: 65534
-    #     fsGroup: 65534
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: enigma-bbs
