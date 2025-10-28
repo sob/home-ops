@@ -30,6 +30,33 @@ resource "authentik_flow_stage_binding" "authentication-flow-binding-100" {
   order  = 100
 }
 
+## Authentication flow for halfduplex.io (no 3rd party sources)
+resource "authentik_flow" "authentication-halfduplex" {
+  name               = "authentication-flow-halfduplex"
+  title              = "Welcome to halfduplex!"
+  slug               = "authentication-flow-halfduplex"
+  designation        = "authentication"
+  policy_engine_mode = "all"
+}
+
+resource "authentik_flow_stage_binding" "authentication-halfduplex-flow-binding-00" {
+  target = authentik_flow.authentication-halfduplex.uuid
+  stage  = authentik_stage_identification.authentication-identification-halfduplex.id
+  order  = 0
+}
+
+resource "authentik_flow_stage_binding" "authentication-halfduplex-flow-binding-10" {
+  target = authentik_flow.authentication-halfduplex.uuid
+  stage  = authentik_stage_authenticator_validate.authentication-mfa-validation.id
+  order  = 10
+}
+
+resource "authentik_flow_stage_binding" "authentication-halfduplex-flow-binding-100" {
+  target = authentik_flow.authentication-halfduplex.uuid
+  stage  = authentik_stage_user_login.authentication-login.id
+  order  = 100
+}
+
 ## Invalidation flow
 data "authentik_flow" "default-provider-invalidation-flow" {
   slug = "default-provider-invalidation-flow"

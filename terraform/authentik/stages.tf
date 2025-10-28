@@ -10,6 +10,17 @@ resource "authentik_stage_identification" "authentication-identification" {
   sources                   = [authentik_source_plex.plex.uuid]
 }
 
+resource "authentik_stage_identification" "authentication-identification-halfduplex" {
+  name                      = "authentication-identification-halfduplex"
+  user_fields               = ["username", "email"]
+  case_insensitive_matching = false
+  show_source_labels        = false
+  show_matched_user         = false
+  password_stage            = authentik_stage_password.authentication-password.id
+  recovery_flow             = authentik_flow.recovery.uuid
+  sources                   = []
+}
+
 resource "authentik_stage_password" "authentication-password" {
   name                          = "authentication-password"
   backends                      = ["authentik.core.auth.InbuiltBackend"]
