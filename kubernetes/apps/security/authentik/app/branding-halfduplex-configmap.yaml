@@ -1,0 +1,92 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-branding-halfduplex
+  namespace: security
+data:
+  custom.css: |
+    /* Black background theme for halfduplex.io */
+    :root {
+      --ak-dark-background: #000000 !important;
+      --ak-dark-background-light: #0a0a0a !important;
+      --ak-dark-background-lighter: #141414 !important;
+    }
+
+    body,
+    .pf-c-page,
+    .pf-c-login,
+    .pf-c-background-image {
+      background-color: #000000 !important;
+      background-image: none !important;
+    }
+
+    .pf-c-login__main {
+      background-color: transparent !important;
+    }
+
+    .pf-c-card {
+      background-color: rgba(20, 20, 20, 0.8) !important;
+      border: 1px solid #333 !important;
+    }
+
+    /* Hide default Authentik logo */
+    .pf-c-brand {
+      display: none !important;
+    }
+
+    /* ASCII art logo */
+    .pf-c-login__header::before {
+      content: "";
+      display: block;
+      white-space: pre;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 10px;
+      line-height: 1.2;
+      color: #00ff00;
+      text-align: center;
+      margin-bottom: 2rem;
+      content: " _           _  __     _             _             _      \A| |__   __ _| |/ _| __| |_   _ _ __ | | _____  __ (_) ___  \A| '_ \\ / _` | | |_ / _` | | | | '_ \\| |/ _ \\ \\/ / | |/ _ \\ \A| | | | (_| | |  _| (_| | |_| | |_) | |  __/>  < _| | (_) |\A|_| |_|\\__,_|_|_|  \\__,_|\\__,_| .__/|_|\\___/_/\\_(_)_|\\___/ \A                                |_|                          ";
+    }
+
+    /* Make form elements visible on black */
+    .pf-c-form-control,
+    .pf-c-button {
+      border-color: #444 !important;
+    }
+
+    input.pf-c-form-control {
+      background-color: #1a1a1a !important;
+      color: #00ff00 !important;
+      border: 1px solid #333 !important;
+    }
+
+    input.pf-c-form-control:focus {
+      border-color: #00ff00 !important;
+      box-shadow: 0 0 5px rgba(0, 255, 0, 0.3) !important;
+    }
+
+    .pf-c-button.pf-m-primary {
+      background-color: #00aa00 !important;
+      border-color: #00ff00 !important;
+      color: #000000 !important;
+    }
+
+    .pf-c-button.pf-m-primary:hover {
+      background-color: #00ff00 !important;
+    }
+
+    /* Text colors */
+    .pf-c-login__main-body,
+    .pf-c-login__main-footer,
+    .pf-c-form__label,
+    .pf-c-title,
+    h1, h2, h3, h4, h5, h6,
+    p, span, a {
+      color: #00ff00 !important;
+    }
+
+    a:hover {
+      color: #00ff00 !important;
+      text-decoration: underline !important;
+    }
