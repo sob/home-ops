@@ -74,18 +74,6 @@ spec:
               prometheus.io/forward: "true"
       ingress:
         enabled: false
-      volumes:
-        - name: branding-halfduplex
-          configMap:
-            name: authentik-branding-halfduplex
-      volumeMounts:
-        - name: branding-halfduplex
-          mountPath: /web/dist/custom.css
-          subPath: custom.css
-          readOnly: true
-      env:
-        - name: AUTHENTIK_WEB__CUSTOM_CSS
-          value: "/web/dist/custom.css"
       initContainers:
         - name: wait-for-postgresql
           image: docker.io/library/postgres:17-alpine
