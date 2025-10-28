@@ -15,14 +15,25 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https
+    - name: https-56kbps
       protocol: HTTPS
       port: 443
+      hostname: "*.${SECRET_DOMAIN}"
       tls:
         mode: Terminate
         certificateRefs:
           - kind: Secret
             name: "${SECRET_DOMAIN/./-}-production-tls"
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-halfduplex
+      protocol: HTTPS
+      port: 443
+      hostname: "*.halfduplex.io"
+      tls:
+        mode: Terminate
+        certificateRefs:
           - kind: Secret
             name: halfduplex-io-production-tls
       allowedRoutes:
