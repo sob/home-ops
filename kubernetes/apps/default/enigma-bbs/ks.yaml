@@ -32,8 +32,8 @@ spec:
       VOLSYNC_CACHE_CAPACITY: 10Gi
       VOLSYNC_STORAGECLASS: ceph-block
       VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
-      VOLSYNC_UID: "65534"
-      VOLSYNC_GID: "65534"
-      VOLSYNC_FSGROUP: "65534"
+      VOLSYNC_UID: "1000"
+      VOLSYNC_GID: "1000"
+      VOLSYNC_FSGROUP: "1000"
       GATUS_SUBDOMAIN: enigma
       GATUS_PATH: /
