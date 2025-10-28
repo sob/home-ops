@@ -229,8 +229,6 @@ spec:
                   type: PathPrefix
                   value: /
       web:
-        annotations:
-          external-dns.alpha.kubernetes.io/is-public: "true"
         parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway
