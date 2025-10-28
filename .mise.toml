@@ -6,8 +6,8 @@ MINIJINJA_CONFIG_FILE = '{{config_root}}/.minijinja.toml'
 TALOS_DIR = '{{config_root}}/talos'
 SOPS_AGE_KEY_FILE = '{{config_root}}/age.key'
 TALOSCONFIG = '{{config_root}}/.talosconfig'
-TF_VAR_onepassword_account = "$(op account list --format json | jq -r '.[0].user_uuid')"
-TF_CLI_CONFIG_FILE = "$(pwd)/terraform/media/terraform.tfrc.dev"
+TF_VAR_onepassword_account = "{{ exec(command='bash -c \"op account list --format json | jq -r .[0].user_uuid\"') }}"
+TF_VAR_authentik_url = "https://10.1.100.207"
 TFE_PARALLELISM = 5
 
 [tools]
