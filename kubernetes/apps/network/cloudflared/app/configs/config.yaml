@@ -56,6 +56,10 @@ ingress:
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "bbs.${SECRET_DOMAIN}"
+  - hostname: "sso.halfduplex.io"
+    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "sso.halfduplex.io"
   - hostname: "halfduplex.io"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
