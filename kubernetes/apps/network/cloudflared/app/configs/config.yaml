@@ -69,7 +69,7 @@ ingress:
   - hostname: "ssh.halfduplex.io"
     service: ssh://enigma-bbs.default.svc.cluster.local:22
   - hostname: "wss.halfduplex.io"
-    service: https://enigma-bbs.default.svc.cluster.local:8811
+    service: http://enigma-bbs.default.svc.cluster.local:8811
   - hostname: "mailer.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:24554
   - hostname: "${SECRET_DOMAIN}"
