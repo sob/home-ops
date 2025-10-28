@@ -112,11 +112,13 @@ spec:
             image:
               repository: ghcr.io/coder/code-server
               tag: 4.105.1
+            command:
+              - /usr/bin/code-server
             args:
+              - --bind-addr
+              - 0.0.0.0:8443
               - --auth
               - none
-              - --port
-              - "8443"
               - /config
             env:
               TZ: America/Chicago
