@@ -117,6 +117,7 @@ spec:
               - none
               - --port
               - "8443"
+              - /config
             env:
               TZ: America/Chicago
             securityContext:
