@@ -12,19 +12,19 @@ spec:
     - name: http
       protocol: HTTP
       port: 80
-      hostname: "*.${SECRET_DOMAIN}"
       allowedRoutes:
         namespaces:
           from: All
     - name: https
       protocol: HTTPS
       port: 443
-      hostname: "*.${SECRET_DOMAIN}"
       tls:
         mode: Terminate
         certificateRefs:
           - kind: Secret
             name: "${SECRET_DOMAIN/./-}-production-tls"
+          - kind: Secret
+            name: halfduplex-io-production-tls
       allowedRoutes:
         namespaces:
           from: All

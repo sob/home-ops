@@ -16,8 +16,9 @@ provider "onepassword" {
 }
 
 provider "authentik" {
-  url   = module.onepassword_authentik.fields.AUTHENTIK_URL
-  token = module.onepassword_authentik.fields.AUTHENTIK_BOOTSTRAP_TOKEN
+  url      = var.authentik_url
+  token    = module.onepassword_authentik.fields.AUTHENTIK_BOOTSTRAP_TOKEN
+  insecure = true
 }
 
 module "onepassword_authentik" {
