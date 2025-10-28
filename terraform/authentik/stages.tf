@@ -16,12 +16,19 @@ resource "authentik_stage_identification" "authentication-identification-halfdup
   case_insensitive_matching = false
   show_source_labels        = false
   show_matched_user         = false
-  password_stage            = authentik_stage_password.authentication-password.id
+  password_stage            = authentik_stage_password.authentication-password-halfduplex.id
+  recovery_flow             = ""
   sources                   = []
 }
 
 resource "authentik_stage_password" "authentication-password" {
   name                          = "authentication-password"
+  backends                      = ["authentik.core.auth.InbuiltBackend"]
+  failed_attempts_before_cancel = 3
+}
+
+resource "authentik_stage_password" "authentication-password-halfduplex" {
+  name                          = "authentication-password-halfduplex"
   backends                      = ["authentik.core.auth.InbuiltBackend"]
   failed_attempts_before_cancel = 3
 }
