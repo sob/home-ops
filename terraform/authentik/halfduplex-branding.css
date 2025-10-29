@@ -50,20 +50,21 @@
   display: none !important;
 }
 
-/* Hide "Welcome to halfduplex.io" banner/title */
-.pf-c-login .pf-c-login__main-header,
-.pf-c-login__main-header-desc,
-.pf-c-login__header {
+/* Hide "Welcome to halfduplex.io" text only (keep logo) */
+.pf-c-login .pf-c-login__main-header-desc,
+.pf-c-login__main-header .pf-c-title {
   display: none !important;
 }
 
 /* Green terminal color scheme with dark gray buttons */
 .pf-c-login input,
-.pf-c-login button,
 .pf-c-login .pf-c-form-control {
   color: #00ff00 !important;
-  border-color: #00ff00 !important;
   border-radius: 0 !important; /* Remove rounded corners from inputs */
+}
+
+.pf-c-login button {
+  border-radius: 0 !important; /* Remove rounded corners from buttons */
 }
 
 .pf-c-login input::placeholder {
