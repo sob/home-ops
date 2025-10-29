@@ -5,6 +5,14 @@
   background-image: none !important;
 }
 
+/* Center the login box vertically */
+.pf-c-login {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+}
+
 /* Transparent login window with blur effect */
 .pf-c-login .pf-c-login__main {
   background-color: transparent !important;
@@ -39,6 +47,13 @@
 .pf-c-login .pf-c-login__footer,
 .pf-c-login .pf-c-login__main-footer-band,
 .pf-c-login .pf-c-list.pf-m-inline {
+  display: none !important;
+}
+
+/* Hide "Welcome to halfduplex.io" banner/title */
+.pf-c-login .pf-c-login__main-header,
+.pf-c-login__main-header-desc,
+.pf-c-login__header {
   display: none !important;
 }
 
