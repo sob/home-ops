@@ -10,10 +10,10 @@ variable "PLATFORMS" {
 }
 
 group "default" {
-  targets = ["enigma-bbs"]
+  targets = ["enigmabbs"]
 }
 
-target "enigma-bbs" {
+target "enigmabbs" {
   dockerfile = "Containerfile"
   platforms = PLATFORMS
   args = {
