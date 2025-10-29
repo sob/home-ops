@@ -67,11 +67,12 @@ spec:
               startup:
                 enabled: false
             securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
               capabilities:
                 drop: ["ALL"]
-                add: ["NET_BIND_SERVICE"]
             resources:
               requests:
                 cpu: 50m
@@ -264,18 +265,26 @@ spec:
                 subPath: art
               - path: /enigma-bbs/mods
                 subPath: mods
-              - path: /mail
+              - path: /enigma-bbs/menus
+                subPath: menus
+              - path: /enigma-bbs/mail
                 subPath: mail
             code-server:
-              - path: /config/enigma
+              - path: /enigma-bbs/config
                 subPath: config
-              - path: /config/art
-                subPath: art
-              - path: /config/mods
-                subPath: mods
-              - path: /config/filebase
+              - path: /enigma-bbs/db
+                subPath: db
+              - path: /enigma-bbs/filebase
                 subPath: filebase
-              - path: /config/vtx
+              - path: /enigma-bbs/art
+                subPath: art
+              - path: /enigma-bbs/mods
+                subPath: mods
+              - path: /enigma-bbs/menus
+                subPath: menus
+              - path: /enigma-bbs/mail
+                subPath: mail
+              - path: /vtx
                 subPath: vtx
             init-vtx:
               - path: /vtx
