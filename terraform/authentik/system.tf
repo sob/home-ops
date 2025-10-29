@@ -11,7 +11,7 @@ resource "authentik_brand" "homelab" {
 resource "authentik_brand" "halfduplex" {
   domain              = "halfduplex.io"
   branding_title      = "halfduplex"
-  branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
+  branding_logo       = "/media/public/halfduplex.png"
   branding_favicon    = "/static/dist/assets/icons/icon.png"
   branding_custom_css = file("${path.module}/halfduplex-branding.css")
   flow_authentication = authentik_flow.authentication-halfduplex.uuid
