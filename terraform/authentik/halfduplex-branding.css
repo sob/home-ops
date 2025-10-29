@@ -61,15 +61,18 @@
 .pf-c-login .pf-c-form-control {
   color: #00ff00 !important;
   border-radius: 0 !important; /* Remove rounded corners from inputs */
+  border: 1px solid #2d2d2d !important; /* Dark gray border around fields */
 }
 
-/* Override browser's blue focus outline with dark gray */
+/* Override browser's blue focus outline and bottom border with dark gray */
 .pf-c-login input:focus,
 .pf-c-login .pf-c-form-control:focus,
 .pf-c-login button:focus {
   outline: 2px solid #2d2d2d !important;
   outline-offset: 2px !important;
   box-shadow: none !important;
+  border-color: #2d2d2d !important; /* Override blue bottom border */
+  border-bottom: 1px solid #2d2d2d !important; /* Force dark gray bottom border */
 }
 
 .pf-c-login button {
