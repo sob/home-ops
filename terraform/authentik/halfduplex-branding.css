@@ -42,29 +42,50 @@
   display: none !important;
 }
 
-/* Green terminal color scheme */
+/* Green terminal color scheme with dark gray buttons */
 .pf-c-login input,
 .pf-c-login button,
 .pf-c-login .pf-c-form-control {
   color: #00ff00 !important;
   border-color: #00ff00 !important;
+  border-radius: 0 !important; /* Remove rounded corners from inputs */
 }
 
 .pf-c-login input::placeholder {
   color: #008800 !important;
 }
 
-.pf-c-login .pf-c-button--m-primary {
-  background-color: #00ff00 !important;
-  color: #000000 !important;
-  border-color: #00ff00 !important;
+/* Dark gray submit button */
+.pf-c-login .pf-c-button--m-primary,
+.pf-c-login button[type="submit"] {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border-color: #2d2d2d !important;
+  border-radius: 0 !important; /* Remove rounded corners */
 }
 
-.pf-c-login .pf-c-button--m-primary:hover {
-  background-color: #00cc00 !important;
+.pf-c-login .pf-c-button--m-primary:hover,
+.pf-c-login button[type="submit"]:hover {
+  background-color: #3d3d3d !important;
+}
+
+.pf-c-login .pf-c-button--m-primary:active,
+.pf-c-login button[type="submit"]:active {
+  background-color: #1d1d1d !important;
 }
 
 .pf-c-login label,
 .pf-c-login .pf-c-title {
   color: #00ff00 !important;
+}
+
+/* Dark gray text selection */
+::selection {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+::-moz-selection {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
 }
