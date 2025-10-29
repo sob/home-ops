@@ -63,6 +63,15 @@
   border-radius: 0 !important; /* Remove rounded corners from inputs */
 }
 
+/* Override browser's blue focus outline with dark gray */
+.pf-c-login input:focus,
+.pf-c-login .pf-c-form-control:focus,
+.pf-c-login button:focus {
+  outline: 2px solid #2d2d2d !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
 .pf-c-login button {
   border-radius: 0 !important; /* Remove rounded corners from buttons */
 }
