@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -9,6 +10,32 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+const minimalConfig = `{
+    general: {
+        boardName: "Test BBS"
+        maxConnections: 0
+    }
+    paths: {
+        logs: /enigma-bbs/logs
+    }
+    logging: {
+        rotatingFile: {
+            level: "info"
+        }
+    }
+    theme: {
+        default: luciano_blocktronics
+    }
+    loginServers: {
+        telnet: {
+            port: 8023
+        }
+    }
+    users: {
+        requireActivation: false
+    }
+}`
 
 func getImageTag() string {
 	// Use TEST_IMAGE_TAG from environment, fallback to "rolling" for local testing
@@ -18,6 +45,15 @@ func getImageTag() string {
 	return "rolling"
 }
 
+// createTempConfigFile creates a temporary config file and returns the path
+func createTempConfigFile(t *testing.T) string {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "config.hjson")
+	err := os.WriteFile(configPath, []byte(minimalConfig), 0644)
+	require.NoError(t, err, "Could not create temp config file")
+	return configPath
+}
+
 func TestEnigmaContainer(t *testing.T) {
 	pool, err := dockertest.NewPool("")
 	require.NoError(t, err, "Could not connect to docker")
@@ -25,7 +61,16 @@ func TestEnigmaContainer(t *testing.T) {
 	imageTag := getImageTag()
 	t.Logf("Using image tag: %s", imageTag)
 
-	resource, err := pool.Run("ghcr.io/sob/enigma-bbs", imageTag, []string{})
+	// Create temp config file and mount it
+	configPath := createTempConfigFile(t)
+
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/enigma-bbs",
+		Tag:        imageTag,
+		Mounts: []string{
+			configPath + ":/enigma-bbs/config/config.hjson:ro",
+		},
+	})
 	require.NoError(t, err, "Could not start resource")
 
 	defer func() {
@@ -46,7 +91,17 @@ func TestUserAndPermissions(t *testing.T) {
 	require.NoError(t, err, "Could not connect to docker")
 
 	imageTag := getImageTag()
-	resource, err := pool.Run("ghcr.io/sob/enigma-bbs", imageTag, []string{})
+
+	// Create temp config file and mount it
+	configPath := createTempConfigFile(t)
+
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/enigma-bbs",
+		Tag:        imageTag,
+		Mounts: []string{
+			configPath + ":/enigma-bbs/config/config.hjson:ro",
+		},
+	})
 	require.NoError(t, err, "Could not start resource")
 
 	defer func() {
@@ -121,7 +176,17 @@ func TestEnigmaDirectoryStructure(t *testing.T) {
 	require.NoError(t, err, "Could not connect to docker")
 
 	imageTag := getImageTag()
-	resource, err := pool.Run("ghcr.io/sob/enigma-bbs", imageTag, []string{})
+
+	// Create temp config file and mount it
+	configPath := createTempConfigFile(t)
+
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/enigma-bbs",
+		Tag:        imageTag,
+		Mounts: []string{
+			configPath + ":/enigma-bbs/config/config.hjson:ro",
+		},
+	})
 	require.NoError(t, err, "Could not start resource")
 
 	defer func() {
@@ -182,13 +247,8 @@ func TestEnigmaStartupWithConfig(t *testing.T) {
 
 	imageTag := getImageTag()
 
-	// Create a minimal config for testing
-	minimalConfig := `{
-  general: {
-    boardName: "Test BBS"
-  }
-}
-`
+	// Create temp config file and mount it
+	configPath := createTempConfigFile(t)
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "ghcr.io/sob/enigma-bbs",
@@ -196,6 +256,9 @@ func TestEnigmaStartupWithConfig(t *testing.T) {
 		Env: []string{
 			"TZ=America/Chicago",
 			"NODE_ENV=production",
+		},
+		Mounts: []string{
+			configPath + ":/enigma-bbs/config/config.hjson:ro",
 		},
 	})
 	require.NoError(t, err, "Could not start resource")
@@ -247,7 +310,17 @@ func TestPM2RuntimeAvailable(t *testing.T) {
 	require.NoError(t, err, "Could not connect to docker")
 
 	imageTag := getImageTag()
-	resource, err := pool.Run("ghcr.io/sob/enigma-bbs", imageTag, []string{})
+
+	// Create temp config file and mount it
+	configPath := createTempConfigFile(t)
+
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/enigma-bbs",
+		Tag:        imageTag,
+		Mounts: []string{
+			configPath + ":/enigma-bbs/config/config.hjson:ro",
+		},
+	})
 	require.NoError(t, err, "Could not start resource")
 
 	defer func() {
@@ -275,12 +348,19 @@ func TestEnvironmentVariables(t *testing.T) {
 	require.NoError(t, err, "Could not connect to docker")
 
 	imageTag := getImageTag()
+
+	// Create temp config file and mount it
+	configPath := createTempConfigFile(t)
+
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "ghcr.io/sob/enigma-bbs",
 		Tag:        imageTag,
 		Env: []string{
 			"TZ=America/New_York",
 			"NODE_ENV=development",
+		},
+		Mounts: []string{
+			configPath + ":/enigma-bbs/config/config.hjson:ro",
 		},
 	})
 	require.NoError(t, err, "Could not start resource")
@@ -311,12 +391,19 @@ func TestPM2StartsWithoutPermissionIssues(t *testing.T) {
 	require.NoError(t, err, "Could not connect to docker")
 
 	imageTag := getImageTag()
+
+	// Create temp config file and mount it
+	configPath := createTempConfigFile(t)
+
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "ghcr.io/sob/enigma-bbs",
 		Tag:        imageTag,
 		Env: []string{
 			"TZ=America/Chicago",
 			"NODE_ENV=production",
+		},
+		Mounts: []string{
+			configPath + ":/enigma-bbs/config/config.hjson:ro",
 		},
 	})
 	require.NoError(t, err, "Could not start resource")
