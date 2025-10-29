@@ -1,36 +1,92 @@
-/* Black background theme for halfduplex.io login screen only */
-.pf-c-login,
-.pf-c-login .pf-c-background-image {
-  background-color: #000000 !important;
-  background-image: none !important;
+/* Import Orbitron font from Google Fonts */
+@import url('https://fonts.googleapis.com/css?family=Orbitron:400,500,600,700&display=swap');
+
+/* Apply Orbitron font globally to everything */
+* {
+  font-family: 'Orbitron', sans-serif !important;
 }
 
-/* Center the login box vertically */
-.pf-c-login {
+/* Override Authentik CSS variables for black background */
+:root {
+  --ak-flow-background: none !important;
+}
+
+/* Black background theme for halfduplex.io login screen only */
+body,
+.pf-c-login,
+.pf-c-page,
+.pf-c-page::before,
+.pf-c-page::after {
+  background-color: #000000 !important;
+  background-image: none !important;
+  background: #000000 !important;
+}
+
+/* Override inline background image style with highest specificity */
+.pf-c-background-image[style] {
+  background-image: none !important;
+  background-color: #000000 !important;
+  background: #000000 !important;
+  opacity: 0 !important;
+  display: none !important;
+}
+
+/* Ensure html and body take full height */
+html {
+  height: 100% !important;
+}
+
+/* Center the login box vertically and horizontally */
+body {
   display: flex !important;
-  align-items: center !important;
   justify-content: center !important;
+  align-items: center !important;
   min-height: 100vh !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure all wrapper elements stretch to allow centering */
+ak-flow-executor,
+ak-locale-context,
+.pf-c-page,
+.pf-c-page__drawer {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Center the login container itself */
+.ak-login-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-height: 100vh !important;
+}
+
+/* Remove background from login container to see through to body */
+.pf-c-login {
+  background: none !important;
 }
 
 /* Transparent login window with blur effect */
 .pf-c-login .pf-c-login__main {
   background-color: transparent !important;
   backdrop-filter: blur(8px);
-  border: 2px solid #00ff00;
+  border: 2px solid #2d2d2d;
   border-radius: 25px;
 }
 
 /* Glowing border animation */
 @keyframes pulse-border {
   0% {
-    box-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
+    box-shadow: 0 0 20px #2d2d2d, 0 0 40px #2d2d2d, 0 0 60px #2d2d2d;
   }
   50% {
-    box-shadow: 0 0 15px #00ff00, 0 0 25px #00ff00;
+    box-shadow: 0 0 30px #2d2d2d, 0 0 60px #2d2d2d, 0 0 90px #2d2d2d;
   }
   100% {
-    box-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
+    box-shadow: 0 0 20px #2d2d2d, 0 0 40px #2d2d2d, 0 0 60px #2d2d2d;
   }
 }
 
@@ -80,7 +136,7 @@
 }
 
 .pf-c-login input::placeholder {
-  color: #008800 !important;
+  color: #666666 !important;
 }
 
 /* Dark gray submit button */
@@ -104,7 +160,23 @@
 
 .pf-c-login label,
 .pf-c-login .pf-c-title {
-  color: #00ff00 !important;
+  color: #999999 !important;
+}
+
+/* Required field asterisk in dark gray */
+.pf-c-login .pf-c-form__label-required,
+.pf-c-login .pf-m-required::after {
+  color: #2d2d2d !important;
+}
+
+/* Dark gray loading spinner */
+.pf-c-login .pf-c-spinner,
+.pf-c-login .pf-c-spinner svg circle {
+  stroke: #2d2d2d !important;
+}
+
+.pf-c-login .pf-c-spinner__path {
+  stroke: #2d2d2d !important;
 }
 
 /* Dark gray text selection */
