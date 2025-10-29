@@ -74,15 +74,16 @@ spec:
               prometheus.io/forward: "true"
       ingress:
         enabled: false
-      volumes:
-        - name: halfduplex-logo
-          configMap:
-            name: authentik-halfduplex-logo
-      volumeMounts:
-        - name: halfduplex-logo
-          mountPath: /media/public/halfduplex.png
-          subPath: halfduplex.png
-          readOnly: true
+      deployment:
+        additionalVolumes:
+          - name: halfduplex-logo
+            configMap:
+              name: authentik-halfduplex-logo
+        additionalVolumeMounts:
+          - name: halfduplex-logo
+            mountPath: /media/public/halfduplex.png
+            subPath: halfduplex.png
+            readOnly: true
       initContainers:
         - name: wait-for-postgresql
           image: docker.io/library/postgres:17-alpine
