@@ -210,7 +210,7 @@ func TestEnigmaStartupWithConfig(t *testing.T) {
 	t.Run("EntrypointExecutes", func(t *testing.T) {
 		// The entrypoint should run without errors
 		// If the container is still running, the entrypoint succeeded
-		exitCode, err := resource.Exec([]string{"sh", "-c", "ps aux | grep -v grep | grep -q 'docker-entrypoint'"}, dockertest.ExecOptions{})
+		_, err := resource.Exec([]string{"sh", "-c", "ps aux | grep -v grep | grep -q 'docker-entrypoint'"}, dockertest.ExecOptions{})
 		// We don't require exact match since entrypoint may have handed off to pm2
 		// Just verify container didn't crash
 		require.NoError(t, err)
@@ -343,7 +343,7 @@ func TestPM2StartsWithoutPermissionIssues(t *testing.T) {
 	t.Run("NoPermissionErrorsInLogs", func(t *testing.T) {
 		// Check for common permission errors
 		// EACCES is the error code for permission denied
-		exitCode, err := resource.Exec([]string{"sh", "-c", "dmesg 2>/dev/null | grep -i 'EACCES' || true"}, dockertest.ExecOptions{})
+		_, err := resource.Exec([]string{"sh", "-c", "dmesg 2>/dev/null | grep -i 'EACCES' || true"}, dockertest.ExecOptions{})
 		require.NoError(t, err)
 		// We just want this to run without error - permission errors would be visible
 		t.Log("Checked for permission errors in system logs")
