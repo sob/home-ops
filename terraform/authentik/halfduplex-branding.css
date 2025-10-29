@@ -112,6 +112,11 @@ ak-locale-context,
   display: none !important;
 }
 
+/* Hide identification stage paragraph */
+p.style-scope.ak-stage-identification {
+  display: none !important;
+}
+
 /* Green terminal color scheme with dark gray buttons */
 .pf-c-login input,
 .pf-c-login .pf-c-form-control {
