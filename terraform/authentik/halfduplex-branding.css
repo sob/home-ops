@@ -117,10 +117,10 @@ p.style-scope.ak-stage-identification {
   display: none !important;
 }
 
-/* Green terminal color scheme with dark gray buttons */
+/* Black text with dark gray buttons */
 .pf-c-login input,
 .pf-c-login .pf-c-form-control {
-  color: #00ff00 !important;
+  color: #000000 !important;
   border-radius: 0 !important; /* Remove rounded corners from inputs */
   border: 1px solid #2d2d2d !important; /* Dark gray border around fields */
 }
