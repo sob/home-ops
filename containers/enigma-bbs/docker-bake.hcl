@@ -14,7 +14,7 @@ group "default" {
 }
 
 target "enigmabbs" {
-  dockerfile = "Containerfile"
+  dockerfile = "Dockerfile"
   platforms = PLATFORMS
   args = {
     ENIGMA_VERSION = VERSION
