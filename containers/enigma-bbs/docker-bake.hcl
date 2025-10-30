@@ -1,10 +1,11 @@
 variable "VERSION" {
-  default = "latest"
+  default = "master"
 }
 
 variable "PLATFORMS" {
   default = [
-    "linux/amd64"
+    "linux/amd64",
+    "linux/arm64"
   ]
 }
 
@@ -17,6 +18,7 @@ target "enigmabbs" {
   platforms = PLATFORMS
   args = {
     ENIGMA_VERSION = VERSION
+    NODE_VERSION = "22"
   }
   tags = [
     "ghcr.io/sob/enigma-bbs:${VERSION}",
@@ -25,8 +27,8 @@ target "enigmabbs" {
   labels = {
     "org.opencontainers.image.source" = "https://github.com/sob/home-ops"
     "org.opencontainers.image.created" = "${timestamp()}"
-    "org.opencontainers.image.title" = "ENiGMA½ BBS (Non-Root)"
-    "org.opencontainers.image.description" = "ENiGMA½ BBS running as non-root user 1000:1000"
+    "org.opencontainers.image.title" = "ENiGMA½ BBS (Multi-Arch)"
+    "org.opencontainers.image.description" = "ENiGMA½ BBS built from source for amd64 and arm64"
     "org.opencontainers.image.licenses" = "MIT"
     "org.opencontainers.image.version" = "${VERSION}"
   }
