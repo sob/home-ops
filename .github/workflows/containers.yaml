@@ -333,7 +333,7 @@ jobs:
   tag-release:
     runs-on: ubuntu-latest
     needs: [changed, plan, tag-commit, test]
-    if: ${{ success() && fromJson(needs.changed.outputs.apps)[0] != null }}
+    if: ${{ !cancelled() && fromJson(needs.changed.outputs.apps)[0] != null }}
     strategy:
       fail-fast: false
       max-parallel: 10
