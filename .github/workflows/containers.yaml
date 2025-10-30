@@ -296,40 +296,6 @@ jobs:
           echo "Creating version-sha tag: ${VERSION_TAG}"
           docker buildx imagetools create -t ${IMAGE_NAME}:${VERSION_TAG} $IMAGES
 
-  cleanup-failed:
-    runs-on: ubuntu-latest
-    needs: [changed, test]
-    if: ${{ failure() && fromJson(needs.changed.outputs.apps)[0] != null }}
-    strategy:
-      fail-fast: false
-      max-parallel: 10
-      matrix:
-        app: ${{ fromJson(needs.changed.outputs.apps) }}
-    steps:
-      - name: Delete commit hash tag on test failure
-        run: |
-          SHORT_SHA="${{ github.sha }}"
-          SHORT_SHA="${SHORT_SHA:0:7}"
-          PACKAGE_NAME="${{ matrix.app }}"
-
-          echo "Tests failed - cleaning up commit hash tag: ${SHORT_SHA}"
-
-          # Get the version ID for the commit hash tag
-          VERSION_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions" | \
-            jq -r ".[] | select(.metadata.container.tags[]? == \"${SHORT_SHA}\") | .id")
-
-          if [ -n "$VERSION_ID" ]; then
-            echo "Deleting failed build tag ${SHORT_SHA} (version ID: $VERSION_ID)"
-            curl -X DELETE -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions/$VERSION_ID" || true
-            echo "Cleanup complete - failed image cannot be pulled"
-          else
-            echo "No tag found for ${SHORT_SHA}"
-          fi
-
   tag-release:
     runs-on: ubuntu-latest
     needs: [changed, plan, tag-commit, test]
@@ -458,6 +424,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changed, plan, tag-commit]
     if: ${{ fromJson(needs.changed.outputs.apps)[0] != null }}
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -473,6 +442,7 @@ jobs:
           go-version: '1.25'
 
       - name: Run container tests
+        id: test
         working-directory: containers/${{ matrix.app }}
         env:
           TEST_IMAGE_TAG: ${{ github.sha }}
@@ -485,4 +455,29 @@ jobs:
             go test -v .
           else
             echo "No container tests found for ${{ matrix.app }}"
+          fi
+
+      - name: Delete commit hash tag on test failure
+        if: failure() && steps.test.outcome == 'failure'
+        run: |
+          SHORT_SHA="${{ github.sha }}"
+          SHORT_SHA="${SHORT_SHA:0:7}"
+          PACKAGE_NAME="${{ matrix.app }}"
+
+          echo "Tests failed - cleaning up commit hash tag: ${SHORT_SHA}"
+
+          # Get the version ID for the commit hash tag
+          VERSION_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions" | \
+            jq -r ".[] | select(.metadata.container.tags[]? == \"${SHORT_SHA}\") | .id")
+
+          if [ -n "$VERSION_ID" ]; then
+            echo "Deleting failed build tag ${SHORT_SHA} (version ID: $VERSION_ID)"
+            curl -X DELETE -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions/$VERSION_ID" || true
+            echo "Cleanup complete - failed image cannot be pulled"
+          else
+            echo "No tag found for ${SHORT_SHA}"
           fi
