@@ -197,10 +197,9 @@ jobs:
           provenance: false
           set: |
             *.platform=${{ matrix.platform }}
-            *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }},push-by-digest=true,name-canonical=true,push=true
+            *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:build-${{ github.sha }}-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }},push=true
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
-            *.tags=
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
           files: |
             ./docker-bake.hcl
@@ -210,7 +209,8 @@ jobs:
         run: |
           mkdir -p /tmp/digests
           digest="${{ fromJSON(steps.build.outputs.metadata)[matrix.app]['containerimage.digest'] }}"
-          touch "/tmp/digests/${digest#sha256:}"
+          platform_tag="${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}"
+          echo "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:build-${{ github.sha }}-${platform_tag}" > "/tmp/digests/${platform_tag}"
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
@@ -277,22 +277,24 @@ jobs:
           echo "Version Tag: $VERSION_TAG"
 
           cd /tmp/digests
-          echo "Available digest files:"
+          echo "Available platform tag files:"
           ls -la
-          DIGESTS=""
-          for digest in *; do
-            echo "Processing digest: $digest"
-            DIGESTS="$DIGESTS $IMAGE_NAME@sha256:$digest"
+
+          IMAGES=""
+          for platform in *; do
+            platform_tag=$(cat "$platform")
+            echo "Platform $platform: $platform_tag"
+            IMAGES="$IMAGES $platform_tag"
           done
-          echo "Final digests: $DIGESTS"
+          echo "Platform images: $IMAGES"
 
           # Create commit hash tag for testing
           echo "Creating ${SHORT_SHA} tag for testing..."
-          docker buildx imagetools create -t ${IMAGE_NAME}:${SHORT_SHA} $DIGESTS
+          docker buildx imagetools create -t ${IMAGE_NAME}:${SHORT_SHA} $IMAGES
 
           # Create version-sha tag for semantic versioning
           echo "Creating version-sha tag: ${VERSION_TAG}"
-          docker buildx imagetools create -t ${IMAGE_NAME}:${VERSION_TAG} $DIGESTS
+          docker buildx imagetools create -t ${IMAGE_NAME}:${VERSION_TAG} $IMAGES
 
   cleanup-failed:
     runs-on: ubuntu-latest
