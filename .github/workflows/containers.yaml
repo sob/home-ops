@@ -283,10 +283,23 @@ jobs:
           IMAGES=""
           for platform in *; do
             platform_tag=$(cat "$platform")
-            echo "Platform $platform: $platform_tag"
-            IMAGES="$IMAGES $platform_tag"
+            echo "Checking if platform image exists: $platform_tag"
+
+            # Check if the image actually exists in the registry
+            if docker buildx imagetools inspect "$platform_tag" > /dev/null 2>&1; then
+              echo "✓ Platform $platform image found: $platform_tag"
+              IMAGES="$IMAGES $platform_tag"
+            else
+              echo "✗ Platform $platform image not found (build may have failed): $platform_tag"
+            fi
           done
-          echo "Platform images: $IMAGES"
+
+          if [ -z "$IMAGES" ]; then
+            echo "ERROR: No platform images found - all builds failed"
+            exit 1
+          fi
+
+          echo "Valid platform images:$IMAGES"
 
           # Create commit hash tag for testing
           echo "Creating ${SHORT_SHA} tag for testing..."
