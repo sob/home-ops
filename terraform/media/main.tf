@@ -23,7 +23,7 @@ terraform {
     }
     onepassword = {
       source = "1password/onepassword"
-      version = "2.1.2"
+      version = "2.2.0"
     }
     restapi = {
       source  = "Mastercard/restapi"
