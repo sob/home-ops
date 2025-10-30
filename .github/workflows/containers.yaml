@@ -130,10 +130,10 @@ jobs:
           echo "Found target: $target"
 
           # Get version from the image.version label
-          version=$(echo "$bake_output" | jq -r ".target.${target}.labels.\"org.opencontainers.image.version\" // empty")
+          version=$(echo "$bake_output" | jq -r ".target[\"${target}\"].labels.\"org.opencontainers.image.version\" // empty")
 
           # Get major version by finding the shortest non-rolling tag
-          major_version=$(echo "$bake_output" | jq -r ".target.${target}.tags[]" | sed 's/.*://' | grep -v rolling | sort -n | head -1)
+          major_version=$(echo "$bake_output" | jq -r ".target[\"${target}\"].tags[]" | sed 's/.*://' | grep -v rolling | sort -n | head -1)
 
           if [ -z "$version" ]; then
             version="rolling"
@@ -264,7 +264,7 @@ jobs:
           cd ${{ github.workspace }}/containers/${{ matrix.app }}
           bake_output=$(docker buildx bake --print)
           target=$(echo "$bake_output" | jq -r '.target | keys[0]')
-          VERSION=$(echo "$bake_output" | jq -r ".target.${target}.labels.\"org.opencontainers.image.version\" // empty")
+          VERSION=$(echo "$bake_output" | jq -r ".target[\"${target}\"].labels.\"org.opencontainers.image.version\" // empty")
 
           if [ -z "$VERSION" ] || [ "$VERSION" = "rolling" ]; then
             VERSION="rolling"
@@ -338,8 +338,8 @@ jobs:
         run: |
           bake_output=$(docker buildx bake --print)
           target=$(echo "$bake_output" | jq -r '.target | keys[0]')
-          version=$(echo "$bake_output" | jq -r ".target.${target}.labels.\"org.opencontainers.image.version\" // empty")
-          major_version=$(echo "$bake_output" | jq -r ".target.${target}.tags[]" | sed 's/.*://' | grep -v rolling | sort -n | head -1)
+          version=$(echo "$bake_output" | jq -r ".target[\"${target}\"].labels.\"org.opencontainers.image.version\" // empty")
+          major_version=$(echo "$bake_output" | jq -r ".target[\"${target}\"].tags[]" | sed 's/.*://' | grep -v rolling | sort -n | head -1)
 
           if [ -z "$version" ]; then
             version="rolling"
