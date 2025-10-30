@@ -197,6 +197,7 @@ jobs:
           provenance: false
           set: |
             *.platform=${{ matrix.platform }}
+            *.tags=
             *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:build-${{ github.sha }}-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }},push=true
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
