@@ -199,8 +199,10 @@ jobs:
             *.platform=${{ matrix.platform }}
             *.tags=
             *.output=type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:build-${{ github.sha }}-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }},push=true
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+            *.cache-from=type=gha,scope=${{ matrix.app }}
+            *.cache-from=type=registry,ref=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:buildcache
+            *.cache-to=type=gha,mode=max,scope=${{ matrix.app }}
+            *.cache-to=type=inline
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
           files: |
             ./docker-bake.hcl

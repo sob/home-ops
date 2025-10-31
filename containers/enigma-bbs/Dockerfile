@@ -24,15 +24,17 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /build
 
-# Clone ENiGMA½ BBS repository
-RUN git clone --depth 1 --branch ${ENIGMA_VERSION} https://github.com/NuSkooler/enigma-bbs.git /build
-
-# Install Node.js dependencies
+# Install global npm tools (rarely changes - good cache layer)
 RUN npm set progress=false && \
     npm config set depth 0 && \
     npm install -g npm@latest && \
-    npm install -g pm2 && \
-    npm install --production --ignore-scripts
+    npm install -g pm2
+
+# Clone ENiGMA½ BBS repository
+RUN git clone --depth 1 --branch ${ENIGMA_VERSION} https://github.com/NuSkooler/enigma-bbs.git /build
+
+# Install project dependencies (will be cached unless package.json changes)
+RUN npm install --production --ignore-scripts
 
 # Prepare entrypoint script
 RUN dos2unix /build/docker/bin/docker-entrypoint.sh && \
