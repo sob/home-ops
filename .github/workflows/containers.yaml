@@ -244,6 +244,24 @@ jobs:
           ELAPSED=0
 
           while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Check if any build jobs for this app failed
+            BUILD_FAILED=false
+            for platform in "${PLATFORMS[@]}"; do
+              BUILD_STATUS=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+                --jq ".jobs[] | select(.name == \"build-image (${{ matrix.app }}, linux/${platform}\")) | .conclusion")
+
+              if [ "$BUILD_STATUS" = "failure" ] || [ "$BUILD_STATUS" = "cancelled" ]; then
+                echo "✗ Build failed for ${{ matrix.app }} on ${platform}: ${BUILD_STATUS}"
+                BUILD_FAILED=true
+              fi
+            done
+
+            if [ "$BUILD_FAILED" = true ]; then
+              echo "Skipping tag creation due to build failure"
+              exit 1
+            fi
+
+            # Check for artifacts
             ALL_FOUND=true
             for platform in "${PLATFORMS[@]}"; do
               artifact_name="digests-${{ matrix.app }}-${platform}"
@@ -518,6 +536,8 @@ jobs:
         app: ${{ fromJson(needs.changed.outputs.apps) }}
     steps:
       - name: Wait for image tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           SHORT_SHA="${{ github.sha }}"
           SHORT_SHA="${SHORT_SHA:0:7}"
@@ -527,8 +547,19 @@ jobs:
           MAX_WAIT=600  # 10 minutes
           INTERVAL=10
           ELAPSED=0
+          PLATFORMS=("amd64" "arm64")
 
           while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Check if tag-commit job failed for this app
+            TAG_COMMIT_STATUS=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+              --jq ".jobs[] | select(.name == \"tag-commit (${{ matrix.app }})\") | .conclusion")
+
+            if [ "$TAG_COMMIT_STATUS" = "failure" ] || [ "$TAG_COMMIT_STATUS" = "cancelled" ]; then
+              echo "✗ tag-commit failed for ${{ matrix.app }}: ${TAG_COMMIT_STATUS}"
+              echo "Skipping tests due to tagging failure"
+              exit 1
+            fi
+
             if docker manifest inspect "${IMAGE_TAG}" > /dev/null 2>&1; then
               echo "✓ Image tag ready: ${IMAGE_TAG}"
               exit 0
