@@ -247,8 +247,9 @@ jobs:
             # Check if any build jobs for this app failed
             BUILD_FAILED=false
             for platform in "${PLATFORMS[@]}"; do
+              JOB_NAME="build-image (${{ matrix.app }}, linux/${platform})"
               BUILD_STATUS=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
-                --jq ".jobs[] | select(.name == \"build-image (${{ matrix.app }}, linux/${platform}\")) | .conclusion")
+                --jq ".jobs[] | select(.name == \"${JOB_NAME}\") | .conclusion")
 
               if [ "$BUILD_STATUS" = "failure" ] || [ "$BUILD_STATUS" = "cancelled" ]; then
                 echo "✗ Build failed for ${{ matrix.app }} on ${platform}: ${BUILD_STATUS}"
@@ -385,8 +386,9 @@ jobs:
 
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             # Get all jobs for this workflow run
+            JOB_NAME="test (${{ matrix.app }})"
             TEST_STATUS=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
-              --jq ".jobs[] | select(.name == \"test (${{ matrix.app }})\") | .conclusion")
+              --jq ".jobs[] | select(.name == \"${JOB_NAME}\") | .conclusion")
 
             if [ "$TEST_STATUS" = "success" ]; then
               echo "✓ Test passed for ${{ matrix.app }}"
@@ -551,8 +553,9 @@ jobs:
 
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             # Check if tag-commit job failed for this app
+            JOB_NAME="tag-commit (${{ matrix.app }})"
             TAG_COMMIT_STATUS=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
-              --jq ".jobs[] | select(.name == \"tag-commit (${{ matrix.app }})\") | .conclusion")
+              --jq ".jobs[] | select(.name == \"${JOB_NAME}\") | .conclusion")
 
             if [ "$TAG_COMMIT_STATUS" = "failure" ] || [ "$TAG_COMMIT_STATUS" = "cancelled" ]; then
               echo "✗ tag-commit failed for ${{ matrix.app }}: ${TAG_COMMIT_STATUS}"
