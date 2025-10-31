@@ -34,9 +34,9 @@ RUN npm set progress=false && \
 RUN git clone --depth 1 --branch ${ENIGMA_VERSION} https://github.com/NuSkooler/enigma-bbs.git /build
 
 # Install project dependencies (will be cached unless package.json changes)
-# Skip prepare scripts (husky) but allow native module builds (sqlite3)
+# Skip prepare scripts (husky) but rebuild all native modules
 RUN npm install --production --ignore-scripts && \
-    npm rebuild sqlite3
+    npm rebuild
 
 # Prepare entrypoint script
 RUN dos2unix /build/docker/bin/docker-entrypoint.sh && \
