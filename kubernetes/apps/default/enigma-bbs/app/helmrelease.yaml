@@ -53,7 +53,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/enigma-bbs
-              tag: e922615@sha256:a7c02f7d6936d657c7d25ac9f58be71567426f163e0cdc7448724df45d90b70c
+              tag: 644076b@sha256:bd610795affdb93d3839159443e4124043f6c60ade113e73a491253d39aa8499
             env:
               TZ: America/Chicago
               NODE_ENV: production
