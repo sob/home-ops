@@ -157,7 +157,7 @@ spec:
               tag: latest
             env:
               TZ: America/Chicago
-              NODE_ENV: production
+              NODE_ENV: development
               DOMAIN: draw.halfduplex.io
             securityContext:
               allowPrivilegeEscalation: false
