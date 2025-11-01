@@ -158,7 +158,7 @@ spec:
         parentRefs:
           - name: internal-gateway
             namespace: network
-            sectionName: https
+            sectionName: https-56kbps
     persistence:
       config:
         type: configMap
