@@ -57,8 +57,6 @@ spec:
             env:
               TZ: America/Chicago
               NODE_ENV: production
-              HOME: /root
-              PM2_HOME: /root/.pm2
             probes:
               liveness:
                 enabled: false
@@ -296,10 +294,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /enigma-bbs/logs
-      home:
-        type: emptyDir
-        globalMounts:
-          - path: /root
       tmpfs:
         type: emptyDir
         advancedMounts:
