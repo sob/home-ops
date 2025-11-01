@@ -177,14 +177,14 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: 80
+                    port: 1337
               readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /
-                    port: 80
+                    port: 1337
     defaultPodOptions:
       securityContext:
         fsGroup: 1000
@@ -216,7 +216,7 @@ spec:
           draw:
             port: 8888
             protocol: TCP
-            targetPort: 80
+            targetPort: 1337
     ingress:
       code:
         enabled: true
