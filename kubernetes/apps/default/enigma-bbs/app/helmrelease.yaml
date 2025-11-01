@@ -115,12 +115,12 @@ spec:
               - --auth
               - none
               - --user-data-dir
-              - /config/.vscode
+              - /enigma-bbs/config/.vscode
               - --extensions-dir
-              - /config/.vscode
+              - /enigma-bbs/config/.vscode
               - --port
               - "8443"
-              - /config
+              - /enigma-bbs
             env:
               TZ: America/Chicago
             securityContext:
@@ -267,6 +267,8 @@ spec:
                 subPath: menus
               - path: /enigma-bbs/mail
                 subPath: mail
+              - path: /enigma-bbs/doors
+                subPath: doors
             code-server:
               - path: /enigma-bbs/config
                 subPath: config
@@ -282,8 +284,10 @@ spec:
                 subPath: menus
               - path: /enigma-bbs/mail
                 subPath: mail
-              - path: /vtx
+              - path: /enigma-bbs/vtx
                 subPath: vtx
+              - path: /enigma-bbs/doors
+                subPath: doors
             init-vtx:
               - path: /vtx
                 subPath: vtx
