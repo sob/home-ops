@@ -1,0 +1,74 @@
+{
+    general: {
+        boardName: "Test BBS"
+        prettyBoardName: "|08Test BBS"
+        maxConnections: 0
+    }
+
+    term: {
+        checkUtf8Encoding: true
+        checkAnsiHomePosition: true
+    }
+
+    paths: {
+        logs: /enigma-bbs/logs
+    }
+
+    logging: {
+        rotatingFile: {
+            level: "info"
+        }
+    }
+
+    theme: {
+        default: luciano_blocktronics
+        preLogin: luciano_blocktronics
+    }
+
+    loginServers: {
+        telnet: {
+            port: 8023
+        }
+
+        ssh: {
+            port: 8022
+            enabled: false
+        }
+
+        webSocket: {
+            proxied: true
+            ws: {
+                enabled: true
+                port: 8811
+            }
+            wss: {
+                port: 8811
+                enabled: false
+            }
+        }
+    }
+
+    contentServers: {
+        web: {
+            domain: "localhost"
+            staticRoot: /enigma-bbs/www
+            http: {
+                port: 8080
+            }
+            https: {
+                port: 8443
+                enabled: false
+            }
+        }
+    }
+
+    fileBase: {
+        areaStoragePrefix: /enigma-bbs/filebase
+    }
+
+    users: {
+        requireActivation: false
+        preAuthIdleLogoutSeconds: 600
+        idleLogoutSeconds: 3600
+    }
+}

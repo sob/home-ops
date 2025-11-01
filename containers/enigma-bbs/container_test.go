@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -53,6 +55,53 @@ func createTempConfigFile(t *testing.T) string {
 	err := os.WriteFile(configPath, []byte(minimalConfig), 0644)
 	require.NoError(t, err, "Could not create temp config file")
 	return configPath
+}
+
+const minimalMenuConfig = `{
+    menus: {
+        mainMenu: {
+            desc: Main Menu
+            art: MMENU
+            prompt: menuCommand
+        }
+        fullLogoffSequence: {
+            desc: Logging Off
+            prompt: logoffConfirmation
+        }
+        logoff: {
+            desc: Logging Off
+            art: LOGOFF
+            next: @systemMethod:logoff
+        }
+    }
+    prompts: {
+        menuCommand: {
+            art: MNUPRMT
+        }
+        logoffConfirmation: {
+            art: LOGPMPT
+        }
+    }
+}`
+
+// createTempConfigDir creates a temporary config directory with all required files
+func createTempConfigDir(t *testing.T) string {
+	tmpDir := t.TempDir()
+	configDir := filepath.Join(tmpDir, "config")
+	err := os.Mkdir(configDir, 0777) // Make it writable by all so UID 1000 in container can write
+	require.NoError(t, err, "Could not create temp config directory")
+
+	// Create config.hjson
+	configPath := filepath.Join(configDir, "config.hjson")
+	err = os.WriteFile(configPath, []byte(minimalConfig), 0666)
+	require.NoError(t, err, "Could not create config.hjson")
+
+	// Create menu.hjson
+	menuPath := filepath.Join(configDir, "menu.hjson")
+	err = os.WriteFile(menuPath, []byte(minimalMenuConfig), 0666)
+	require.NoError(t, err, "Could not create menu.hjson")
+
+	return configDir
 }
 
 func TestEnigmaContainer(t *testing.T) {
@@ -486,5 +535,144 @@ func TestPM2StartsWithoutPermissionIssues(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, 0, exitCode, "Container should be healthy and responsive")
 		t.Log("Container is running successfully without permission issues")
+	})
+}
+
+func TestEnigmaApplicationLaunches(t *testing.T) {
+	pool, err := dockertest.NewPool("")
+	require.NoError(t, err, "Could not connect to docker")
+
+	imageTag := getImageTag()
+	t.Logf("Using image tag: %s", imageTag)
+
+	// Read the test config file from the repo
+	testConfigPath := filepath.Join("test-config.hjson")
+	testConfigBytes, err := os.ReadFile(testConfigPath)
+	require.NoError(t, err, "Could not read test-config.hjson from repo")
+
+	// Create a temp directory for config
+	tmpDir := t.TempDir()
+	configDir := filepath.Join(tmpDir, "config")
+	err = os.Mkdir(configDir, 0777)
+	require.NoError(t, err, "Could not create temp config directory")
+
+	// Pre-create subdirectories that ENiGMA½ will need to create
+	// This works around macOS bind mount permission issues
+	subdirs := []string{"security", "menus"}
+	for _, subdir := range subdirs {
+		err = os.Mkdir(filepath.Join(configDir, subdir), 0777)
+		require.NoError(t, err, "Could not create "+subdir+" directory")
+	}
+
+	// Copy test-config.hjson to config directory
+	err = os.WriteFile(filepath.Join(configDir, "config.hjson"), testConfigBytes, 0666)
+	require.NoError(t, err, "Could not write config.hjson")
+
+	// Write minimal menu.hjson
+	err = os.WriteFile(filepath.Join(configDir, "menu.hjson"), []byte(minimalMenuConfig), 0666)
+	require.NoError(t, err, "Could not write menu.hjson")
+
+	// Start container with config mounted and default entrypoint
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "ghcr.io/sob/enigma-bbs",
+		Tag:        imageTag,
+		Env: []string{
+			"TZ=America/Chicago",
+			"NODE_ENV=production",
+		},
+		Mounts: []string{
+			configDir + ":/enigma-bbs/config",
+		},
+	})
+	require.NoError(t, err, "Could not start resource")
+
+	defer func() {
+		assert.NoError(t, pool.Purge(resource), "Could not purge resource")
+	}()
+
+	// Give the application time to fully start (PM2 + ENiGMA½ initialization)
+	t.Log("Waiting for application to start...")
+	time.Sleep(30 * time.Second)
+
+	// First, verify the container is still running
+	container, err := pool.Client.InspectContainer(resource.Container.ID)
+	require.NoError(t, err, "Could not inspect container")
+
+	if !container.State.Running {
+		// Container crashed - get logs for debugging
+		var logBuffer bytes.Buffer
+		_ = pool.Client.Logs(docker.LogsOptions{
+			Container:    resource.Container.ID,
+			OutputStream: &logBuffer,
+			ErrorStream:  &logBuffer,
+			Stdout:       true,
+			Stderr:       true,
+			Tail:         "100",
+		})
+		t.Fatalf("Container exited unexpectedly. Exit code: %d\nLogs:\n%s",
+			container.State.ExitCode, logBuffer.String())
+	}
+
+	// Capture container logs
+	var stdoutBuf, stderrBuf bytes.Buffer
+	err = pool.Client.Logs(docker.LogsOptions{
+		Container:    resource.Container.ID,
+		OutputStream: &stdoutBuf,
+		ErrorStream:  &stderrBuf,
+		Stdout:       true,
+		Stderr:       true,
+		Tail:         "200", // Get last 200 lines
+	})
+	require.NoError(t, err, "Could not retrieve container logs")
+
+	// Combine stdout and stderr for checking
+	combinedLogs := stdoutBuf.String() + stderrBuf.String()
+
+	// Log the output for debugging
+	t.Logf("Container logs:\n%s", combinedLogs)
+
+	// Verify expected startup messages are present
+	t.Run("PM2LaunchesInNoDaemonMode", func(t *testing.T) {
+		assert.Contains(t, combinedLogs, "PM2 log: Launching in no daemon mode",
+			"PM2 should launch in no daemon mode")
+	})
+
+	t.Run("PM2StartsMainApp", func(t *testing.T) {
+		assert.Contains(t, combinedLogs, "PM2 log: App [main:0] starting in -fork mode-",
+			"PM2 should start the main app in fork mode")
+	})
+
+	t.Run("PM2AppOnline", func(t *testing.T) {
+		assert.Contains(t, combinedLogs, "PM2 log: App [main:0] online",
+			"PM2 should report the app is online")
+	})
+
+	t.Run("EnigmaBannerDisplayed", func(t *testing.T) {
+		// Check for the ENiGMA½ copyright notice which is part of the banner
+		assert.Contains(t, combinedLogs, "ENiGMA½ Copyright (c)",
+			"ENiGMA½ banner should be displayed")
+	})
+
+	t.Run("SystemStartedMessage", func(t *testing.T) {
+		assert.Contains(t, combinedLogs, "System started!",
+			"ENiGMA½ should display 'System started!' message")
+	})
+
+	t.Run("NoFatalErrors", func(t *testing.T) {
+		// Check that there are no fatal errors or crashes in the logs
+		assert.NotContains(t, strings.ToLower(combinedLogs), "fatal error",
+			"Logs should not contain fatal errors")
+		assert.NotContains(t, strings.ToLower(combinedLogs), "uncaught exception",
+			"Logs should not contain uncaught exceptions")
+		assert.NotContains(t, strings.ToLower(combinedLogs), "eacces",
+			"Logs should not contain permission errors (EACCES)")
+	})
+
+	t.Run("ContainerStillHealthy", func(t *testing.T) {
+		// Final verification that container is still running
+		container, err := pool.Client.InspectContainer(resource.Container.ID)
+		require.NoError(t, err)
+		assert.True(t, container.State.Running, "Container should still be running after startup checks")
+		t.Log("ENiGMA½ BBS application launched successfully!")
 	})
 }
