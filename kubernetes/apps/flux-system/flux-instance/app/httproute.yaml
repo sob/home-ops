@@ -12,7 +12,7 @@ spec:
   parentRefs:
     - name: external-gateway
       namespace: network
-      sectionName: https-56kbps
+      sectionName: https-flux
   rules:
     - backendRefs:
         - name: webhook-receiver

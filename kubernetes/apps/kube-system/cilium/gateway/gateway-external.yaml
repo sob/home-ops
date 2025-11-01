@@ -51,6 +51,18 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-flux
+      protocol: HTTPS
+      port: 443
+      hostname: "flux-webhook.${SECRET_DOMAIN}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: "${SECRET_DOMAIN/./-}-production-tls"
+      allowedRoutes:
+        namespaces:
+          from: All
   # Removing static IP to let Cilium allocate dynamically
   # addresses:
   #   - type: IPAddress
