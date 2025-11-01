@@ -157,13 +157,14 @@ spec:
               tag: latest
             env:
               TZ: America/Chicago
-              NODE_ENV: development
+              NODE_ENV: production
               DOMAIN: draw.halfduplex.io
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
               capabilities:
                 drop: ["ALL"]
+                add: ["NET_BIND_SERVICE"]
             resources:
               requests:
                 cpu: 50m
@@ -177,14 +178,14 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: 1337
+                    port: 80
               readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /
-                    port: 1337
+                    port: 80
     defaultPodOptions:
       securityContext:
         fsGroup: 1000
@@ -216,7 +217,7 @@ spec:
           draw:
             port: 8888
             protocol: TCP
-            targetPort: 1337
+            targetPort: 80
     ingress:
       code:
         enabled: true
