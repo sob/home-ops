@@ -62,8 +62,8 @@ spec:
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 10m
-                memory: 2.93Gi
+                cpu: 100m
+                memory: 512Mi
                 gpu.intel.com/i915: "1"
               limits:
                 memory: 16Gi

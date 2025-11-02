@@ -76,10 +76,10 @@ spec:
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 10m
-                memory: 512Mi
-              limits:
+                cpu: 750m
                 memory: 4Gi
+              limits:
+                memory: 6Gi
           valkey:
             image:
               repository: valkey/valkey
