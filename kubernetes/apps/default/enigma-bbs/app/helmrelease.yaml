@@ -153,18 +153,17 @@ spec:
                     port: 8443
           text0wnz:
             image:
-              repository: ghcr.io/xero/text0wnz
+              repository: ghcr.io/sob/text0wnz
               tag: latest
             env:
               TZ: America/Chicago
               NODE_ENV: production
-              DOMAIN: draw.halfduplex.io
+              DEBUG: "false"
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
               capabilities:
                 drop: ["ALL"]
-                add: ["NET_BIND_SERVICE"]
             resources:
               requests:
                 cpu: 50m
@@ -178,14 +177,14 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: 80
+                    port: 3000
               readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /
-                    port: 80
+                    port: 3000
     defaultPodOptions:
       securityContext:
         fsGroup: 1000
@@ -217,7 +216,7 @@ spec:
           draw:
             port: 8888
             protocol: TCP
-            targetPort: 80
+            targetPort: 3000
     ingress:
       code:
         enabled: true
