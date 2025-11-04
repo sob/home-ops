@@ -154,7 +154,7 @@ spec:
           text0wnz:
             image:
               repository: ghcr.io/sob/text0wnz
-              tag: latest
+              tag: rolling
             env:
               TZ: America/Chicago
               NODE_ENV: production
