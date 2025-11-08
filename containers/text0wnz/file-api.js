@@ -88,24 +88,28 @@ export function setupFileAPI(app, debug = false) {
   });
 
   // Load a file
-  app.get('/api/files/:filename(*)', async (req, res) => {
+  app.get('/api/files/*', async (req, res) => {
     try {
-      const filename = sanitizeFilename(req.params.filename);
-      const filepath = path.join(FILES_DIR, filename);
+      // Extract filename from path (everything after /api/files/)
+      const filename = req.path.replace('/api/files/', '');
+      const sanitized = sanitizeFilename(filename);
+      const filepath = path.join(FILES_DIR, sanitized);
       const content = await fs.readFile(filepath, 'utf8');
-      log(`Loaded file: ${filename}`);
-      res.json({ name: filename, content });
+      log(`Loaded file: ${sanitized}`);
+      res.json({ name: sanitized, content });
     } catch (err) {
-      log(`Error loading file ${req.params.filename}:`, err);
+      log(`Error loading file ${req.path}:`, err);
       res.status(404).json({ error: 'File not found' });
     }
   });
 
   // Save a file
-  app.post('/api/files/:filename(*)', async (req, res) => {
+  app.post('/api/files/*', async (req, res) => {
     try {
-      const filename = sanitizeFilename(req.params.filename);
-      const filepath = path.join(FILES_DIR, filename);
+      // Extract filename from path (everything after /api/files/)
+      const filename = req.path.replace('/api/files/', '');
+      const sanitized = sanitizeFilename(filename);
+      const filepath = path.join(FILES_DIR, sanitized);
       const content = req.body.content || '';
 
       // Ensure parent directory exists
@@ -113,24 +117,26 @@ export function setupFileAPI(app, debug = false) {
       await fs.mkdir(dir, { recursive: true });
 
       await fs.writeFile(filepath, content, 'utf8');
-      log(`Saved file: ${filename} (${content.length} bytes)`);
-      res.json({ success: true, name: filename });
+      log(`Saved file: ${sanitized} (${content.length} bytes)`);
+      res.json({ success: true, name: sanitized });
     } catch (err) {
-      log(`Error saving file ${req.params.filename}:`, err);
+      log(`Error saving file ${req.path}:`, err);
       res.status(500).json({ error: 'Failed to save file' });
     }
   });
 
   // Delete a file
-  app.delete('/api/files/:filename(*)', async (req, res) => {
+  app.delete('/api/files/*', async (req, res) => {
     try {
-      const filename = sanitizeFilename(req.params.filename);
-      const filepath = path.join(FILES_DIR, filename);
+      // Extract filename from path (everything after /api/files/)
+      const filename = req.path.replace('/api/files/', '');
+      const sanitized = sanitizeFilename(filename);
+      const filepath = path.join(FILES_DIR, sanitized);
       await fs.unlink(filepath);
-      log(`Deleted file: ${filename}`);
+      log(`Deleted file: ${sanitized}`);
       res.json({ success: true });
     } catch (err) {
-      log(`Error deleting file ${req.params.filename}:`, err);
+      log(`Error deleting file ${req.path}:`, err);
       res.status(404).json({ error: 'File not found' });
     }
   });
