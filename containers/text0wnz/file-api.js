@@ -88,10 +88,10 @@ export function setupFileAPI(app, debug = false) {
   });
 
   // Load a file
-  app.get('/api/files/*', async (req, res) => {
+  app.get(/^\/api\/files\/(.+)/, async (req, res) => {
     try {
-      // Extract filename from path (everything after /api/files/)
-      const filename = req.path.replace('/api/files/', '');
+      // Extract filename from regex capture group
+      const filename = req.params[0];
       const sanitized = sanitizeFilename(filename);
       const filepath = path.join(FILES_DIR, sanitized);
       const content = await fs.readFile(filepath, 'utf8');
@@ -99,6 +99,44 @@ export function setupFileAPI(app, debug = false) {
       res.json({ name: sanitized, content });
     } catch (err) {
       log(`Error loading file ${req.path}:`, err);
+      res.status(404).json({ error: 'File not found' });
+    }
+  });
+
+  // Save a file
+  app.post(/^\/api\/files\/(.+)/, async (req, res) => {
+    try {
+      // Extract filename from regex capture group
+      const filename = req.params[0];
+      const sanitized = sanitizeFilename(filename);
+      const filepath = path.join(FILES_DIR, sanitized);
+      const content = req.body.content || '';
+
+      // Ensure parent directory exists
+      const dir = path.dirname(filepath);
+      await fs.mkdir(dir, { recursive: true });
+
+      await fs.writeFile(filepath, content, 'utf8');
+      log(`Saved file: ${sanitized} (${content.length} bytes)`);
+      res.json({ success: true, name: sanitized });
+    } catch (err) {
+      log(`Error saving file ${req.path}:`, err);
+      res.status(500).json({ error: 'Failed to save file' });
+    }
+  });
+
+  // Delete a file
+  app.delete(/^\/api\/files\/(.+)/, async (req, res) => {
+    try {
+      // Extract filename from regex capture group
+      const filename = req.params[0];
+      const sanitized = sanitizeFilename(filename);
+      const filepath = path.join(FILES_DIR, sanitized);
+      await fs.unlink(filepath);
+      log(`Deleted file: ${sanitized}`);
+      res.json({ success: true });
+    } catch (err) {
+      log(`Error deleting file ${req.path}:`, err);
       res.status(404).json({ error: 'File not found' });
     }
   });
