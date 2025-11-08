@@ -15,9 +15,51 @@ async function ensureFilesDir() {
   }
 }
 
-// Sanitize filename to prevent directory traversal
+// Sanitize filename to prevent directory traversal while allowing subdirectories
 function sanitizeFilename(filename) {
-  return path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, '_');
+  // Normalize path and prevent ".." traversal
+  const normalized = path.normalize(filename).replace(/^(\.\.[\/\\])+/, '');
+  // Ensure path doesn't escape FILES_DIR
+  const fullPath = path.join(FILES_DIR, normalized);
+  if (!fullPath.startsWith(FILES_DIR)) {
+    throw new Error('Invalid file path');
+  }
+  return normalized;
+}
+
+// Recursively find all art files in subdirectories
+async function findArtFiles(dir, baseDir = dir) {
+  const fileList = [];
+  
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      
+      if (entry.isDirectory()) {
+        // Recursively scan subdirectories
+        const subFiles = await findArtFiles(fullPath, baseDir);
+        fileList.push(...subFiles);
+      } else if (entry.isFile()) {
+        // Check if file has a valid extension
+        if (entry.name.endsWith('.txt') || entry.name.endsWith('.ans') || entry.name.endsWith('.asc')) {
+          const stats = await fs.stat(fullPath);
+          // Store relative path from base directory
+          const relativePath = path.relative(baseDir, fullPath);
+          fileList.push({
+            name: relativePath,
+            size: stats.size,
+            modified: stats.mtime.toISOString()
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error(`Error scanning directory ${dir}:`, err);
+  }
+  
+  return fileList;
 }
 
 // Setup file API routes
@@ -33,23 +75,10 @@ export function setupFileAPI(app, debug = false) {
   console.log(`  DEBUG: ${debug}`);
   console.log(`  TZ: ${process.env.TZ || 'UTC'}`);
 
-  // List all files
+  // List all files (recursively)
   app.get('/api/files', async (req, res) => {
     try {
-      const files = await fs.readdir(FILES_DIR);
-      const fileList = await Promise.all(
-        files
-          .filter(f => f.endsWith('.txt') || f.endsWith('.ans') || f.endsWith('.asc'))
-          .map(async (filename) => {
-            const filepath = path.join(FILES_DIR, filename);
-            const stats = await fs.stat(filepath);
-            return {
-              name: filename,
-              size: stats.size,
-              modified: stats.mtime.toISOString()
-            };
-          })
-      );
+      const fileList = await findArtFiles(FILES_DIR);
       log(`Listed ${fileList.length} files`);
       res.json({ files: fileList });
     } catch (err) {
@@ -59,7 +88,7 @@ export function setupFileAPI(app, debug = false) {
   });
 
   // Load a file
-  app.get('/api/files/:filename', async (req, res) => {
+  app.get('/api/files/:filename(*)', async (req, res) => {
     try {
       const filename = sanitizeFilename(req.params.filename);
       const filepath = path.join(FILES_DIR, filename);
@@ -73,11 +102,15 @@ export function setupFileAPI(app, debug = false) {
   });
 
   // Save a file
-  app.post('/api/files/:filename', async (req, res) => {
+  app.post('/api/files/:filename(*)', async (req, res) => {
     try {
       const filename = sanitizeFilename(req.params.filename);
       const filepath = path.join(FILES_DIR, filename);
       const content = req.body.content || '';
+
+      // Ensure parent directory exists
+      const dir = path.dirname(filepath);
+      await fs.mkdir(dir, { recursive: true });
 
       await fs.writeFile(filepath, content, 'utf8');
       log(`Saved file: ${filename} (${content.length} bytes)`);
@@ -89,7 +122,7 @@ export function setupFileAPI(app, debug = false) {
   });
 
   // Delete a file
-  app.delete('/api/files/:filename', async (req, res) => {
+  app.delete('/api/files/:filename(*)', async (req, res) => {
     try {
       const filename = sanitizeFilename(req.params.filename);
       const filepath = path.join(FILES_DIR, filename);
