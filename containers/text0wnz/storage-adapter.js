@@ -363,9 +363,9 @@
 
   // Intercept file operations
   function setupFileDialog() {
-    const openButton = document.querySelector('#open');
+    const openButton = document.querySelector('article#open, #open');
     const fileInput = document.querySelector('#openFile');
-    const saveButtons = document.querySelectorAll('#saveAnsi, #saveBin, #saveXbin');
+    const saveButtons = document.querySelectorAll('article#saveAnsi, article#saveBin, article#saveXbin, #saveAnsi, #saveBin, #saveXbin');
 
     if (!openButton || !fileInput) {
       console.log('[storage-adapter] File dialog elements not ready, retrying...');
@@ -373,20 +373,27 @@
       return;
     }
 
+    console.log('[storage-adapter] Found elements:', {open: openButton.tagName, input: fileInput.tagName, saves: saveButtons.length});
+
     // Intercept Open
     openButton.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
 
+      console.log('[storage-adapter] Open button clicked, showing dialog...');
+
       const filename = await showOpenDialog();
-      if (!filename) return;
+      if (!filename) {
+        console.log('[storage-adapter] No file selected');
+        return;
+      }
 
       try {
         const response = await fetch(`${API_BASE}/${filename}`);
         if (!response.ok) throw new Error('Failed to load file');
 
         const data = await response.json();
-        console.log('[storage-adapter] Loaded file:', filename);
+        console.log('[storage-adapter] Loaded file:', filename, 'size:', data.content.length);
 
         // Trigger the app's file load
         const blob = new Blob([data.content], { type: 'text/plain' });
