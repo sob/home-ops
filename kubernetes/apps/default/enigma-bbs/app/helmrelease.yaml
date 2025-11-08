@@ -154,7 +154,7 @@ spec:
           text0wnz:
             image:
               repository: ghcr.io/sob/text0wnz
-              tag: 118dcb5
+              tag: rolling
               pullPolicy: Always
             env:
               TZ: America/Chicago
