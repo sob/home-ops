@@ -52,12 +52,6 @@ locals {
       group         = resource.authentik_group.network
       cookie_domain = "halfduplex.io"
     },
-    enigma_draw = {
-      external_host = "https://draw.halfduplex.io"
-      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/draw.png"
-      group         = resource.authentik_group.network
-      cookie_domain = "halfduplex.io"
-    },
     homeassistant = {
       external_host = "https://hass.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"

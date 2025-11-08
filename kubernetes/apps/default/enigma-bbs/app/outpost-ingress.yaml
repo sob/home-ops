@@ -22,29 +22,6 @@ spec:
         - edit.halfduplex.io
       secretName: halfduplex-io-production-tls
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: enigma-bbs-outpost-draw
-  namespace: default
-spec:
-  ingressClassName: internal
-  rules:
-    - host: draw.halfduplex.io
-      http:
-        paths:
-          - backend:
-              service:
-                name: ak-outpost-halfduplex
-                port:
-                  number: 9000
-            path: /outpost.goauthentik.io
-            pathType: Prefix
-  tls:
-    - hosts:
-        - draw.halfduplex.io
-      secretName: halfduplex-io-production-tls
----
 apiVersion: v1
 kind: Service
 metadata:
