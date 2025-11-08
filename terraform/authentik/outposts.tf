@@ -13,6 +13,7 @@ locals {
 
   halfduplex_proxy_provider_ids = [
     authentik_provider_proxy.main["enigma_code"].id,
+    authentik_provider_proxy.main["enigma_draw"].id,
   ]
 }
 
