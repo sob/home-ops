@@ -479,6 +479,31 @@ jobs:
           echo "Creating immutable sha256 tag as default: sha256-${DIGEST}"
           docker buildx imagetools create -t ${IMAGE_NAME}:sha256-${DIGEST} ${COMMIT_TAG}
 
+      - name: Trigger Flux webhook for rolling tag updates
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        working-directory: containers/${{ matrix.app }}
+        env:
+          FLUX_WEBHOOK_URL: ${{ secrets.FLUX_WEBHOOK_URL }}
+        run: |
+          # Check if this app uses a rolling tag in its bake config
+          bake_output=$(docker buildx bake --print)
+          target=$(echo "$bake_output" | jq -r '.target | keys[0]')
+          has_rolling=$(echo "$bake_output" | jq -r ".target[\"${target}\"].tags[]" | grep -c "rolling" || echo "0")
+          
+          if [ "$has_rolling" -gt "0" ]; then
+            echo "App ${{ matrix.app }} uses rolling tag - triggering Flux reconciliation..."
+            if [ -n "$FLUX_WEBHOOK_URL" ]; then
+              curl -X POST "${FLUX_WEBHOOK_URL}" \
+                -H "Content-Type: application/json" \
+                -d '{"action": "reconcile"}' || echo "Webhook trigger failed, continuing anyway"
+              echo "Flux webhook triggered successfully"
+            else
+              echo "FLUX_WEBHOOK_URL secret not set - skipping webhook trigger"
+            fi
+          else
+            echo "App ${{ matrix.app }} does not use rolling tag - skipping webhook trigger"
+          fi
+
       - name: Update package README
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: |
