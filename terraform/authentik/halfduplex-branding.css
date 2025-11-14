@@ -117,10 +117,10 @@ p.style-scope.ak-stage-identification {
   display: none !important;
 }
 
-/* Black text with dark gray buttons */
+/* Dark gray text with dark gray buttons */
 .pf-c-login input,
 .pf-c-login .pf-c-form-control {
-  color: #000000 !important;
+  color: #4a4a4a !important; /* Dark gray text instead of black */
   border-radius: 0 !important; /* Remove rounded corners from inputs */
   border: 1px solid #2d2d2d !important; /* Dark gray border around fields */
 }
@@ -141,7 +141,7 @@ p.style-scope.ak-stage-identification {
 }
 
 .pf-c-login input::placeholder {
-  color: #666666 !important;
+  color: #999999 !important; /* Lighter gray for placeholder hints */
 }
 
 /* Dark gray submit button */
