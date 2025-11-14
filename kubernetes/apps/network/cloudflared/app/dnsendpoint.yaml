@@ -26,3 +26,9 @@ spec:
     - dnsName: "halfduplex.io"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
+    - dnsName: "edit.halfduplex.io"
+      recordType: CNAME
+      targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
+    - dnsName: "draw.halfduplex.io"
+      recordType: CNAME
+      targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]

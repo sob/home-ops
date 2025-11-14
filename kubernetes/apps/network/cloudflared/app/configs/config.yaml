@@ -64,6 +64,14 @@ ingress:
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "halfduplex.io"
+  - hostname: "edit.halfduplex.io"
+    service: https://ingress-nginx-internal-controller.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "edit.halfduplex.io"
+  - hostname: "draw.halfduplex.io"
+    service: https://ingress-nginx-internal-controller.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "draw.halfduplex.io"
   - hostname: "telnet.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:23
   - hostname: "ssh.halfduplex.io"
