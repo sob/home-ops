@@ -40,6 +40,10 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
       originServerName: "status.${SECRET_DOMAIN}"
+  - hostname: "logs.${SECRET_DOMAIN}"
+    service: https://ingress-nginx-internal-controller.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "logs.${SECRET_DOMAIN}"
   - hostname: "overseerr.${SECRET_DOMAIN}"
     service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
     originRequest:
