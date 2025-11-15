@@ -6,5 +6,4 @@ namespace: observability
 resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
-  - ./outpost-ingress.yaml
   - ./rbac.yaml
