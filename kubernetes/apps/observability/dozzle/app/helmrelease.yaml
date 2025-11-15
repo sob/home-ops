@@ -30,7 +30,6 @@ spec:
               DOZZLE_LEVEL: info
               DOZZLE_MODE: k8s
               DOZZLE_ENABLE_ACTIONS: "false"
-              DOZZLE_FILTER: status=running
             probes:
               liveness: &probes
                 enabled: true
