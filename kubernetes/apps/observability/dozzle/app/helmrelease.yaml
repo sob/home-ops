@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: amir20/dozzle
-              tag: v8.7.5
+              tag: v8.14.7
             env:
               DOZZLE_LEVEL: info
               DOZZLE_TAILSIZE: "300"
