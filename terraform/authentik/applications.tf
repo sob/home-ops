@@ -41,6 +41,12 @@ locals {
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
+    dozzle = {
+      external_host = "https://logs.${local.cluster_domain}"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/dozzle.png"
+      group         = resource.authentik_group.observability
+      namespace     = "observability"
+    },
     echo_server = {
       external_host = "https://echo-server.${local.cluster_domain}"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
@@ -49,6 +55,12 @@ locals {
     enigma_code = {
       external_host = "https://edit.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png"
+      group         = resource.authentik_group.network
+      cookie_domain = "halfduplex.io"
+    },
+    enigma_draw = {
+      external_host = "https://draw.halfduplex.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/draw.png"
       group         = resource.authentik_group.network
       cookie_domain = "halfduplex.io"
     },
