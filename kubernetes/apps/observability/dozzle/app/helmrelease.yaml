@@ -28,7 +28,7 @@ spec:
               tag: v8.14.7
             env:
               DOZZLE_LEVEL: info
-              DOZZLE_TAILSIZE: "300"
+              DOZZLE_MODE: k8s
               DOZZLE_ENABLE_ACTIONS: "false"
               DOZZLE_FILTER: status=running
             probes:
