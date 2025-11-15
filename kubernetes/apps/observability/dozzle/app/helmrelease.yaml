@@ -86,7 +86,3 @@ spec:
                 service:
                   identifier: app
                   port: http
-        tls:
-          - hosts:
-              - logs.${SECRET_DOMAIN}
-            secretName: 56kbps-io-production-tls

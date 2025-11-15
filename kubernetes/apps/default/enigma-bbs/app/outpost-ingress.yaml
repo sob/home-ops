@@ -17,10 +17,6 @@ spec:
                   number: 9000
             path: /outpost.goauthentik.io
             pathType: Prefix
-  tls:
-    - hosts:
-        - edit.halfduplex.io
-      secretName: halfduplex-io-production-tls
 ---
 apiVersion: v1
 kind: Service

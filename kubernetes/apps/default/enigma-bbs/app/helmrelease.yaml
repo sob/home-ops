@@ -237,10 +237,6 @@ spec:
                 service:
                   name: enigma-bbs
                   port: 8443
-        tls:
-          - hosts:
-              - edit.halfduplex.io
-            secretName: halfduplex-io-production-tls
       draw:
         enabled: true
         className: internal
@@ -252,10 +248,6 @@ spec:
                 service:
                   name: enigma-bbs
                   port: 8888
-        tls:
-          - hosts:
-              - draw.halfduplex.io
-            secretName: halfduplex-io-production-tls
     route:
       websocket:
         parentRefs:
