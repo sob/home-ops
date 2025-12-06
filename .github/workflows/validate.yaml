@@ -309,7 +309,7 @@ jobs:
           python-version: '3.14'
 
       - name: Setup Flux
-        uses: fluxcd/flux2/action@v2.7.0
+        uses: fluxcd/flux2/action@v2.7.5
 
       - name: Install flux-local
         run: pip install flux-local[helm]
@@ -395,7 +395,7 @@ jobs:
           python-version: '3.14'
 
       - name: Setup Flux
-        uses: fluxcd/flux2/action@v2.7.0
+        uses: fluxcd/flux2/action@v2.7.5
 
       - name: Install flux-local
         run: pip install flux-local[helm]
