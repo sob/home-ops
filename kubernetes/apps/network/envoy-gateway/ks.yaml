@@ -15,7 +15,8 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops
+    name: flux-system
+    namespace: flux-system
   wait: true
   timeout: 5m
 ---
@@ -37,7 +38,8 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops
+    name: flux-system
+    namespace: flux-system
   wait: true
   timeout: 5m
 ---
@@ -59,6 +61,7 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops
+    name: flux-system
+    namespace: flux-system
   wait: true
   timeout: 5m
