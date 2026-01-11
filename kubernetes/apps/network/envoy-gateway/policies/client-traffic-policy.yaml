@@ -25,10 +25,11 @@ spec:
   # Connection settings
   connection:
     bufferLimit: 32Ki
+  # Client IP detection
+  clientIPDetection:
+    xForwardedFor:
+      numTrustedHops: 1
   # Headers configuration
   headers:
     enableEnvoyHeaders: false
-    xForwardedFor:
-      numTrustedHops: 1
-    # Hide server headers for security
     withUnderscoresAction: RejectRequest
