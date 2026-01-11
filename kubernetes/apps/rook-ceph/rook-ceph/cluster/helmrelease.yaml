@@ -32,12 +32,7 @@ spec:
       createPrometheusRules: true
     ingress:
       dashboard:
-        ingressClassName: internal
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-        host:
-          name: rook.${SECRET_DOMAIN}
-          path: &rootPath /
+        enabled: false
     toolbox:
       enabled: true
       priorityClassName: infrastructure-critical
@@ -143,7 +138,7 @@ spec:
 
       dashboard:
         enabled: true
-        urlPrefix: *rootPath
+        urlPrefix: /
         ssl: false
         prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
 
