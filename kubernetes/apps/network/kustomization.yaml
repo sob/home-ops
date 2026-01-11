@@ -7,7 +7,8 @@ components:
   - ../../components/common
 resources:
   - ./cloudflared/ks.yaml
-  - ./echo-server/ks.yaml
   - ./dns-resolver/ks.yaml
+  - ./echo-server/ks.yaml
+  - ./envoy-gateway/ks.yaml
   - ./external-dns/ks.yaml
   - ./ingress-nginx/ks.yaml
