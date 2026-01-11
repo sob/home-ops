@@ -306,3 +306,5 @@ spec:
                 memory: 1Gi
               limits:
                 memory: 2Gi
+        storageClass:
+          enabled: false
