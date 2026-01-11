@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: envoy-gateway
+  namespace: network
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: envoy-gateway
+  targetNamespace: envoy-gateway-system
+  interval: 30m
+  install:
+    crds: CreateReplace
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    config:
+      envoyGateway:
+        gateway:
+          controllerName: gateway.envoyproxy.io/gatewayclass-controller
+        provider:
+          type: Kubernetes
+          kubernetes:
+            deploy:
+              # Deploy in GatewayNamespace for better isolation
+              type: GatewayNamespace
+        logging:
+          level:
+            default: info
+        # Rate limiting backend using Dragonfly (Redis-compatible)
+        rateLimit:
+          backend:
+            type: Redis
+            redis:
+              url: dragonfly.database.svc.cluster.local:6379
+        extensionManager:
+          hooks:
+            xdsTranslator:
+              post:
+                - BasicAuth
+    deployment:
+      replicas: 2
+      pod:
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                control-plane: envoy-gateway
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+    service:
+      type: ClusterIP

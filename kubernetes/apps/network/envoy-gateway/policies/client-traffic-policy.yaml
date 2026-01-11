@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/clienttrafficpolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: gateway-client-policy
+  namespace: network
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: internal-gateway-envoy
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external-gateway-envoy
+  # HTTP/2 support
+  http2:
+    initialConnectionWindowSize: 1048576  # 1MB
+    initialStreamWindowSize: 65536        # 64KB
+    maxConcurrentStreams: 100
+  # Client timeout settings
+  timeout:
+    http:
+      requestReceivedTimeout: 120s
+  # Connection settings
+  connection:
+    bufferLimit: 32Ki
+  # Headers configuration
+  headers:
+    enableEnvoyHeaders: false
+    xForwardedFor:
+      numTrustedHops: 1
+    # Hide server headers for security
+    withUnderscoresAction: RejectRequest

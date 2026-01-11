@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/backendtrafficpolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: default-backend-policy
+  namespace: network
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: internal-gateway-envoy
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external-gateway-envoy
+  # Timeouts
+  timeout:
+    tcp:
+      connectTimeout: 10s
+    http:
+      requestTimeout: 30s
+  # Retry policy
+  retry:
+    numRetries: 3
+    retryOn:
+      httpStatusCodes:
+        - 502
+        - 503
+        - 504
+  # Load balancer
+  loadBalancer:
+    type: RoundRobin
+  # Circuit breaker
+  circuitBreaker:
+    maxConnections: 1024
+    maxPendingRequests: 1024
+    maxRequests: 1024
+    maxRetries: 3

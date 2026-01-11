@@ -1,0 +1,70 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/gateway_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: external-gateway-envoy
+  namespace: network
+  annotations:
+    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+    external-dns.alpha.kubernetes.io/is-public: "true"
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-56kbps
+      protocol: HTTPS
+      port: 443
+      hostname: "*.${SECRET_DOMAIN}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: "${SECRET_DOMAIN/./-}-production-tls"
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-halfduplex
+      protocol: HTTPS
+      port: 443
+      hostname: "*.halfduplex.io"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: halfduplex-io-production-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-halfduplex-apex
+      protocol: HTTPS
+      port: 443
+      hostname: "halfduplex.io"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: halfduplex-io-production-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-flux
+      protocol: HTTPS
+      port: 443
+      hostname: "flux-webhook.${SECRET_DOMAIN}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: "${SECRET_DOMAIN/./-}-production-tls"
+      allowedRoutes:
+        namespaces:
+          from: All
+  addresses:
+    - type: IPAddress
+      value: 10.1.100.221
