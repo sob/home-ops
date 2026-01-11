@@ -31,22 +31,10 @@ spec:
           type: Kubernetes
           kubernetes:
             deploy:
-              # Deploy in GatewayNamespace for better isolation
               type: GatewayNamespace
         logging:
           level:
             default: info
-        # Rate limiting backend using Dragonfly (Redis-compatible)
-        rateLimit:
-          backend:
-            type: Redis
-            redis:
-              url: dragonfly.database.svc.cluster.local:6379
-        extensionManager:
-          hooks:
-            xdsTranslator:
-              post:
-                - BasicAuth
     deployment:
       replicas: 2
       pod:
@@ -64,5 +52,3 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
-    service:
-      type: ClusterIP
