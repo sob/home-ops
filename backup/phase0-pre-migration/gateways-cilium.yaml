@@ -1,0 +1,388 @@
+apiVersion: v1
+items:
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: Gateway
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+    creationTimestamp: "2025-10-19T15:33:32Z"
+    generation: 5
+    labels:
+      app.kubernetes.io/name: cilium-gateway
+      kustomize.toolkit.fluxcd.io/name: cilium-gateway
+      kustomize.toolkit.fluxcd.io/namespace: kube-system
+    name: external-gateway
+    namespace: network
+    resourceVersion: "111180541"
+    uid: 682ce12c-e97f-493a-877d-f74d480eddbf
+  spec:
+    gatewayClassName: cilium
+    listeners:
+    - allowedRoutes:
+        namespaces:
+          from: All
+      name: http
+      port: 80
+      protocol: HTTP
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: '*.56kbps.io'
+      name: https-56kbps
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+        - group: ""
+          kind: Secret
+          name: 56kbps-io-production-tls
+        mode: Terminate
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: '*.halfduplex.io'
+      name: https-halfduplex
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+        - group: ""
+          kind: Secret
+          name: halfduplex-io-production-tls
+        mode: Terminate
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: halfduplex.io
+      name: https-halfduplex-apex
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+        - group: ""
+          kind: Secret
+          name: halfduplex-io-production-tls
+        mode: Terminate
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: flux-webhook.56kbps.io
+      name: https-flux
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+        - group: ""
+          kind: Secret
+          name: 56kbps-io-production-tls
+        mode: Terminate
+  status:
+    addresses:
+    - type: IPAddress
+      value: 10.1.100.201
+    conditions:
+    - lastTransitionTime: "2025-11-01T22:17:07Z"
+      message: Gateway successfully scheduled
+      observedGeneration: 5
+      reason: Accepted
+      status: "True"
+      type: Accepted
+    - lastTransitionTime: "2025-11-01T22:17:07Z"
+      message: Gateway successfully reconciled
+      observedGeneration: 5
+      reason: Programmed
+      status: "True"
+      type: Programmed
+    listeners:
+    - attachedRoutes: 1
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: http
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+    - attachedRoutes: 5
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: https-56kbps
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+    - attachedRoutes: 2
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: https-halfduplex
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+    - attachedRoutes: 1
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: https-halfduplex-apex
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+    - attachedRoutes: 1
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:20:57Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: https-flux
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: Gateway
+  metadata:
+    creationTimestamp: "2025-10-19T15:33:32Z"
+    generation: 5
+    labels:
+      app.kubernetes.io/name: cilium-gateway
+      kustomize.toolkit.fluxcd.io/name: cilium-gateway
+      kustomize.toolkit.fluxcd.io/namespace: kube-system
+    name: internal-gateway
+    namespace: network
+    resourceVersion: "111187367"
+    uid: 8496c3a9-52c4-489a-805b-4ed5bd34e844
+  spec:
+    addresses:
+    - type: IPAddress
+      value: 10.1.100.200
+    gatewayClassName: cilium
+    listeners:
+    - allowedRoutes:
+        namespaces:
+          from: All
+      name: http
+      port: 80
+      protocol: HTTP
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: '*.56kbps.io'
+      name: https-56kbps
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+        - group: ""
+          kind: Secret
+          name: 56kbps-io-production-tls
+        mode: Terminate
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: '*.halfduplex.io'
+      name: https-halfduplex
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+        - group: ""
+          kind: Secret
+          name: halfduplex-io-production-tls
+        mode: Terminate
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: halfduplex.io
+      name: https-halfduplex-apex
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+        - group: ""
+          kind: Secret
+          name: halfduplex-io-production-tls
+        mode: Terminate
+  status:
+    addresses:
+    - type: IPAddress
+      value: 10.1.100.200
+    conditions:
+    - lastTransitionTime: "2025-10-28T07:52:25Z"
+      message: Gateway successfully scheduled
+      observedGeneration: 5
+      reason: Accepted
+      status: "True"
+      type: Accepted
+    - lastTransitionTime: "2025-10-28T07:52:25Z"
+      message: Gateway successfully reconciled
+      observedGeneration: 5
+      reason: Programmed
+      status: "True"
+      type: Programmed
+    listeners:
+    - attachedRoutes: 1
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: http
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+    - attachedRoutes: 7
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: https-56kbps
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+    - attachedRoutes: 2
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: https-halfduplex
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+    - attachedRoutes: 1
+      conditions:
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Programmed
+        observedGeneration: 5
+        reason: Programmed
+        status: "True"
+        type: Programmed
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Listener Accepted
+        observedGeneration: 5
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2026-01-11T20:27:21Z"
+        message: Resolved Refs
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      name: https-halfduplex-apex
+      supportedKinds:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+kind: List
+metadata:
+  resourceVersion: ""

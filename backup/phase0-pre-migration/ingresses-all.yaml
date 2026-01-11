@@ -1,0 +1,1306 @@
+apiVersion: v1
+items:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      authentik.home.arpa/internal: "true"
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: bazarr
+      meta.helm.sh/release-namespace: default
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+      nginx.ingress.kubernetes.io/auth-signin: https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/large-client-header-buffers: 4 100k
+      nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 32k
+      nginx.ingress.kubernetes.io/proxy-buffers: 8 16k
+    creationTimestamp: "2025-10-19T16:37:35Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: bazarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: bazarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: bazarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: bazarr
+    namespace: default
+    resourceVersion: "109604858"
+    uid: 8c470768-2b90-4466-8b2a-47f11b62a7e3
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: bazarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: bazarr
+              port:
+                number: 6767
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: enigma-bbs
+      meta.helm.sh/release-namespace: default
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+      nginx.ingress.kubernetes.io/auth-signin: https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-halfduplex.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    creationTimestamp: "2025-11-04T03:42:09Z"
+    generation: 3
+    labels:
+      app.kubernetes.io/instance: enigma-bbs
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: enigma-bbs
+      helm.sh/chart: app-template-4.4.0_fb3321cce7e3
+      helm.toolkit.fluxcd.io/name: enigma-bbs
+      helm.toolkit.fluxcd.io/namespace: default
+    name: enigma-bbs-code
+    namespace: default
+    resourceVersion: "109604926"
+    uid: aefd120b-9df1-448f-b522-7710b0e76bf6
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: edit.halfduplex.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: enigma-bbs
+              port:
+                number: 8443
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - edit.halfduplex.io
+      secretName: halfduplex-io-production-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: enigma-bbs
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-11-08T15:52:43Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/instance: enigma-bbs
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: enigma-bbs
+      helm.sh/chart: app-template-4.4.0_fb3321cce7e3
+      helm.toolkit.fluxcd.io/name: enigma-bbs
+      helm.toolkit.fluxcd.io/namespace: default
+    name: enigma-bbs-draw
+    namespace: default
+    resourceVersion: "109604930"
+    uid: 0cc1c761-d321-4902-9e21-29ca0c7c48eb
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: draw.halfduplex.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: enigma-bbs
+              port:
+                number: 8888
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - draw.halfduplex.io
+      secretName: halfduplex-io-production-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+      meta.helm.sh/release-name: homarr
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-19T16:47:50Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: homarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: homarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: homarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: homarr
+    namespace: default
+    resourceVersion: "109675069"
+    uid: 9a73fe36-8d50-4992-abe0-c9a8446cf6cf
+  spec:
+    ingressClassName: external
+    rules:
+    - host: homarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: homarr
+              port:
+                number: 3000
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.202
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/is-public: "true"
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+      meta.helm.sh/release-name: jellyseerr
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-19T16:47:23Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: jellyseerr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: jellyseerr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: jellyseerr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: jellyseerr
+    namespace: default
+    resourceVersion: "109675077"
+    uid: 88ef6c3d-60f4-46cb-b9ca-91f6bbbad0cb
+  spec:
+    ingressClassName: external
+    rules:
+    - host: jellyseerr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: jellyseerr
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.202
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      authentik.home.arpa/internal: "true"
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: lidarr
+      meta.helm.sh/release-namespace: default
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+      nginx.ingress.kubernetes.io/auth-signin: https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/large-client-header-buffers: 4 100k
+      nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 32k
+      nginx.ingress.kubernetes.io/proxy-buffers: 8 16k
+    creationTimestamp: "2025-10-19T16:39:50Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: lidarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: lidarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: lidarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: lidarr
+    namespace: default
+    resourceVersion: "109604848"
+    uid: 9a006c2a-1e55-4e12-921e-df689b72bf39
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: lidarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: lidarr
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      authentik.home.arpa/internal: "true"
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: prowlarr
+      meta.helm.sh/release-namespace: default
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+      nginx.ingress.kubernetes.io/auth-signin: https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/large-client-header-buffers: 4 100k
+      nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 32k
+      nginx.ingress.kubernetes.io/proxy-buffers: 8 16k
+    creationTimestamp: "2025-10-19T16:32:24Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: prowlarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: prowlarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: prowlarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: prowlarr
+    namespace: default
+    resourceVersion: "109604864"
+    uid: ab4e48d9-428d-4566-ab7f-3f689897c617
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: prowlarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: prowlarr
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: qbittorrent
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-20T18:04:05Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: qbittorrent
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: qbittorrent
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: qbittorrent
+      helm.toolkit.fluxcd.io/namespace: default
+    name: qbittorrent
+    namespace: default
+    resourceVersion: "109604917"
+    uid: 62018c70-9805-4767-8e52-cf036d311a87
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: qbittorrent.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: qbittorrent-app
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: qui
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-19T16:34:49Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: qui
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: qui
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: qui
+      helm.toolkit.fluxcd.io/namespace: default
+    name: qui
+    namespace: default
+    resourceVersion: "109604856"
+    uid: db2f74c0-87cb-42b8-831a-79375b97ca9d
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: qui.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: qui
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      authentik.home.arpa/internal: "true"
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: radarr
+      meta.helm.sh/release-namespace: default
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+      nginx.ingress.kubernetes.io/auth-signin: https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/large-client-header-buffers: 4 100k
+      nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 32k
+      nginx.ingress.kubernetes.io/proxy-buffers: 8 16k
+    creationTimestamp: "2025-10-19T16:41:17Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: radarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: radarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: radarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: radarr
+    namespace: default
+    resourceVersion: "109604899"
+    uid: f0226f65-1955-409e-b55d-a86732c0cb1f
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: radarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: radarr
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      authentik.home.arpa/internal: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: readarr
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-19T16:32:28Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: readarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: readarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: readarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: readarr
+    namespace: default
+    resourceVersion: "109604830"
+    uid: f0c91c49-921b-427d-bf6c-971cbd9f080e
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: readarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: readarr
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: sabnzbd
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-19T16:36:37Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: sabnzbd
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: sabnzbd
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: sabnzbd
+      helm.toolkit.fluxcd.io/namespace: default
+    name: sabnzbd
+    namespace: default
+    resourceVersion: "109604867"
+    uid: 23a035d2-1e3c-4756-817f-62d811f8e47f
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: sab.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: sabnzbd
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      authentik.home.arpa/internal: "true"
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: sonarr
+      meta.helm.sh/release-namespace: default
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+      nginx.ingress.kubernetes.io/auth-signin: https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/large-client-header-buffers: 4 100k
+      nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 32k
+      nginx.ingress.kubernetes.io/proxy-buffers: 8 16k
+    creationTimestamp: "2025-10-19T16:42:21Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: sonarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: sonarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: sonarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: sonarr
+    namespace: default
+    resourceVersion: "109604905"
+    uid: df0b4f77-1758-448f-ac4a-f877ed4842c4
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: sonarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: sonarr
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: tautulli
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-19T16:47:20Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: tautulli
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: tautulli
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: tautulli
+      helm.toolkit.fluxcd.io/namespace: default
+    name: tautulli
+    namespace: default
+    resourceVersion: "109604908"
+    uid: 0d5df501-1b54-42a8-ae0f-27e156266709
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: tautulli.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: tautulli
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+      meta.helm.sh/release-name: wizarr
+      meta.helm.sh/release-namespace: default
+    creationTimestamp: "2025-10-19T16:47:57Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: wizarr
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: wizarr
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: wizarr
+      helm.toolkit.fluxcd.io/namespace: default
+    name: wizarr
+    namespace: default
+    resourceVersion: "109675070"
+    uid: ba50cfca-0e48-4357-8c2f-6d0828a24b70
+  spec:
+    ingressClassName: external
+    rules:
+    - host: wizarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: wizarr
+              port:
+                number: 5690
+          path: /
+          pathType: Prefix
+    - host: join.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: wizarr
+              port:
+                number: 5690
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.202
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+      meta.helm.sh/release-name: echo-server
+      meta.helm.sh/release-namespace: network
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid
+      nginx.ingress.kubernetes.io/auth-signin: /outpost.goauthentik.io/start?rd=$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-external.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+    creationTimestamp: "2025-10-19T16:01:18Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: echo-server
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: echo-server
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: echo-server
+      helm.toolkit.fluxcd.io/namespace: network
+    name: echo-server
+    namespace: network
+    resourceVersion: "109675068"
+    uid: 81ebf8a9-8ac7-49dc-99a7-af8280179dc1
+  spec:
+    ingressClassName: external
+    rules:
+    - host: echo-server.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: echo-server
+              port:
+                number: 8080
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.202
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: blackbox-exporter
+      meta.helm.sh/release-namespace: observability
+    creationTimestamp: "2025-10-19T16:02:29Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: blackbox-exporter
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: prometheus-blackbox-exporter
+      app.kubernetes.io/version: v0.27.0
+      helm.sh/chart: prometheus-blackbox-exporter-11.2.0_e5098f4d2d55
+      helm.toolkit.fluxcd.io/name: blackbox-exporter
+      helm.toolkit.fluxcd.io/namespace: observability
+    name: blackbox-exporter
+    namespace: observability
+    resourceVersion: "109604842"
+    uid: 14454e09-caa1-4aae-b26c-43c7bd0bef4d
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: blackbox.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: blackbox-exporter
+              port:
+                number: 9115
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      meta.helm.sh/release-name: dozzle
+      meta.helm.sh/release-namespace: observability
+      nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+      nginx.ingress.kubernetes.io/auth-signin: https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+        $http_host;
+      nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-56kbps.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+      nginx.ingress.kubernetes.io/proxy-buffering: "off"
+      nginx.ingress.kubernetes.io/proxy-cache: "off"
+    creationTimestamp: "2025-11-15T00:39:49Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/instance: dozzle
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: dozzle
+      helm.sh/chart: app-template-4.4.0_fb3321cce7e3
+      helm.toolkit.fluxcd.io/name: dozzle
+      helm.toolkit.fluxcd.io/namespace: observability
+    name: dozzle
+    namespace: observability
+    resourceVersion: "109604938"
+    uid: 723506d5-cba4-4bcf-bf5d-1d7666dedb02
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: logs.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: dozzle
+              port:
+                number: 8080
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+      meta.helm.sh/release-name: gatus
+      meta.helm.sh/release-namespace: observability
+    creationTimestamp: "2025-10-19T15:34:06Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: gatus
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: gatus
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: gatus
+      helm.toolkit.fluxcd.io/namespace: observability
+    name: gatus
+    namespace: observability
+    resourceVersion: "109675094"
+    uid: 7f1d6abe-2bf5-476e-be1a-2f355c067a61
+  spec:
+    ingressClassName: external
+    rules:
+    - host: status.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: gatus
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.202
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+      meta.helm.sh/release-name: kromgo
+      meta.helm.sh/release-namespace: observability
+    creationTimestamp: "2025-10-19T16:01:09Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: kromgo
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: kromgo
+      helm.sh/chart: app-template-3.7.3_68059caef936
+      helm.toolkit.fluxcd.io/name: kromgo
+      helm.toolkit.fluxcd.io/namespace: observability
+    name: kromgo
+    namespace: observability
+    resourceVersion: "109675091"
+    uid: eadc80f1-b35a-47eb-9a3d-9273e2d3f3f5
+  spec:
+    ingressClassName: external
+    rules:
+    - host: kromgo.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: kromgo
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.202
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: kube-prometheus-stack
+      meta.helm.sh/release-namespace: observability
+    creationTimestamp: "2025-10-19T15:34:10Z"
+    generation: 1
+    labels:
+      app: kube-prometheus-stack-alertmanager
+      app.kubernetes.io/instance: kube-prometheus-stack
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/part-of: kube-prometheus-stack
+      app.kubernetes.io/version: 75.15.1_7ef48bde0c3b
+      chart: kube-prometheus-stack-75.15.1_7ef48bde0c3b
+      helm.toolkit.fluxcd.io/name: kube-prometheus-stack
+      helm.toolkit.fluxcd.io/namespace: observability
+      heritage: Helm
+      release: kube-prometheus-stack
+    name: kube-prometheus-stack-alertmanager
+    namespace: observability
+    resourceVersion: "109604825"
+    uid: 95288038-49d9-4f00-8cfc-23c1592f86d3
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: alertmanager.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: kube-prometheus-stack-alertmanager
+              port:
+                number: 9093
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: kube-prometheus-stack
+      meta.helm.sh/release-namespace: observability
+    creationTimestamp: "2025-10-19T15:34:10Z"
+    generation: 1
+    labels:
+      app: kube-prometheus-stack-prometheus
+      app.kubernetes.io/instance: kube-prometheus-stack
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/part-of: kube-prometheus-stack
+      app.kubernetes.io/version: 75.15.1_7ef48bde0c3b
+      chart: kube-prometheus-stack-75.15.1_7ef48bde0c3b
+      helm.toolkit.fluxcd.io/name: kube-prometheus-stack
+      helm.toolkit.fluxcd.io/namespace: observability
+      heritage: Helm
+      release: kube-prometheus-stack
+    name: kube-prometheus-stack-prometheus
+    namespace: observability
+    resourceVersion: "109604833"
+    uid: d6f73c88-b15f-4b22-bc81-4d37059d21cf
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: prometheus.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: kube-prometheus-stack-prometheus
+              port:
+                number: 9090
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      nginx.ingress.kubernetes.io/proxy-busy-buffers-size: 32k
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    creationTimestamp: "2025-11-15T02:01:53Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: 56kbps
+      app.kubernetes.io/managed-by: goauthentik.io
+      app.kubernetes.io/name: authentik-proxy
+      app.kubernetes.io/version: 2025.8.4
+      goauthentik.io/outpost-name: 56kbps
+      goauthentik.io/outpost-type: proxy
+      goauthentik.io/outpost-uuid: 2aa9d5aa340d4c3fa4efe368ef26af16
+    name: ak-outpost-56kbps
+    namespace: security
+    resourceVersion: "109604943"
+    uid: 79c4446a-90f8-4849-83a9-46efd62f5e79
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: prowlarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: readarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: hass.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: sonarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: join.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: echo-server.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: radarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: bazarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: lidarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: logs.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    tls:
+    - hosts:
+      - prowlarr.56kbps.io
+      - readarr.56kbps.io
+      - hass.56kbps.io
+      - sonarr.56kbps.io
+      - join.56kbps.io
+      - echo-server.56kbps.io
+      - radarr.56kbps.io
+      - bazarr.56kbps.io
+      - lidarr.56kbps.io
+      - logs.56kbps.io
+      secretName: authentik-outpost-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/is-public: "true"
+      external-dns.alpha.kubernetes.io/target: external.56kbps.io
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+      nginx.ingress.kubernetes.io/proxy-buffers: 8 16k
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      nginx.ingress.kubernetes.io/proxy-busy-buffers-size: 32k
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    creationTimestamp: "2025-10-21T02:49:30Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: external
+      app.kubernetes.io/managed-by: goauthentik.io
+      app.kubernetes.io/name: authentik-proxy
+      app.kubernetes.io/version: 2025.8.4
+      goauthentik.io/outpost-name: external
+      goauthentik.io/outpost-type: proxy
+      goauthentik.io/outpost-uuid: 50f288d018fe400c896260f7b559ca18
+    name: ak-outpost-external
+    namespace: security
+    resourceVersion: "109675087"
+    uid: 153a5fcc-aad8-4496-bb3f-ebbd91cb5907
+  spec:
+    ingressClassName: external
+    rules:
+    - host: echo-server.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-external
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: join.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-external
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: hass.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-external
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    tls:
+    - hosts:
+      - echo-server.56kbps.io
+      - join.56kbps.io
+      - hass.56kbps.io
+      secretName: 56kbps-io-production-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.202
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.halfduplex.io
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      nginx.ingress.kubernetes.io/proxy-busy-buffers-size: 32k
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    creationTimestamp: "2025-11-15T02:00:24Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/instance: halfduplex
+      app.kubernetes.io/managed-by: goauthentik.io
+      app.kubernetes.io/name: authentik-proxy
+      app.kubernetes.io/version: 2025.8.4
+      goauthentik.io/outpost-name: halfduplex
+      goauthentik.io/outpost-type: proxy
+      goauthentik.io/outpost-uuid: b4c6c1d4bbfd4849a07e0f414eb7458f
+    name: ak-outpost-halfduplex
+    namespace: security
+    resourceVersion: "109604933"
+    uid: f54b47b0-317d-438b-8890-2b2b1777f838
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: edit.halfduplex.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-halfduplex
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: draw.halfduplex.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-halfduplex
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    tls:
+    - hosts:
+      - edit.halfduplex.io
+      - draw.halfduplex.io
+      secretName: authentik-outpost-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/is-public: "false"
+      external-dns.alpha.kubernetes.io/target: internal.56kbps.io
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+      nginx.ingress.kubernetes.io/proxy-buffers: 8 16k
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      nginx.ingress.kubernetes.io/proxy-busy-buffers-size: 32k
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    creationTimestamp: "2025-10-21T02:49:31Z"
+    generation: 6
+    labels:
+      app.kubernetes.io/instance: internal
+      app.kubernetes.io/managed-by: goauthentik.io
+      app.kubernetes.io/name: authentik-proxy
+      app.kubernetes.io/version: 2025.8.4
+      goauthentik.io/outpost-name: internal
+      goauthentik.io/outpost-type: proxy
+      goauthentik.io/outpost-uuid: 7d587f43f1cd4842bdefbe52599c6079
+    name: ak-outpost-internal
+    namespace: security
+    resourceVersion: "109604924"
+    uid: d609c8b1-0639-4bb1-9cea-f352d5c1c396
+  spec:
+    ingressClassName: internal
+    rules:
+    - host: prowlarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-internal
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: readarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-internal
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: sonarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-internal
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: radarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-internal
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: bazarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-internal
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: lidarr.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-internal
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    - host: logs.56kbps.io
+      http:
+        paths:
+        - backend:
+            service:
+              name: ak-outpost-56kbps
+              port:
+                name: http
+          path: /outpost.goauthentik.io
+          pathType: Prefix
+    tls:
+    - hosts:
+      - prowlarr.56kbps.io
+      - readarr.56kbps.io
+      - sonarr.56kbps.io
+      - radarr.56kbps.io
+      - bazarr.56kbps.io
+      - lidarr.56kbps.io
+      secretName: 56kbps-io-production-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 10.1.100.203
+kind: List
+metadata:
+  resourceVersion: ""

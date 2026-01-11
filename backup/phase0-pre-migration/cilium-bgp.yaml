@@ -1,0 +1,30 @@
+apiVersion: v1
+items:
+- apiVersion: cilium.io/v2
+  kind: CiliumBGPAdvertisement
+  metadata:
+    creationTimestamp: "2025-10-19T08:03:56Z"
+    generation: 1
+    labels:
+      advertise: bgp
+      app.kubernetes.io/name: cilium
+      kustomize.toolkit.fluxcd.io/name: cilium
+      kustomize.toolkit.fluxcd.io/namespace: kube-system
+    name: bgp-advertisements
+    resourceVersion: "119889"
+    uid: 8f08fe28-4004-4363-8aec-a7608310c6c8
+  spec:
+    advertisements:
+    - advertisementType: Service
+      selector:
+        matchExpressions:
+        - key: io.cilium/bgp-announce
+          operator: NotIn
+          values:
+          - "false"
+      service:
+        addresses:
+        - LoadBalancerIP
+kind: List
+metadata:
+  resourceVersion: ""

@@ -1,0 +1,36 @@
+---
+# CiliumLoadBalancerIPPool for Envoy Gateway Internal
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: envoy-gateway-internal-pool
+  labels:
+    app.kubernetes.io/name: envoy-gateway
+spec:
+  blocks:
+    - start: 10.1.100.220
+      stop: 10.1.100.220
+  serviceSelector:
+    matchExpressions:
+      - key: gateway.envoyproxy.io/owning-gateway-name
+        operator: In
+        values:
+          - internal-gateway-envoy
+---
+# CiliumLoadBalancerIPPool for Envoy Gateway External
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: envoy-gateway-external-pool
+  labels:
+    app.kubernetes.io/name: envoy-gateway
+spec:
+  blocks:
+    - start: 10.1.100.221
+      stop: 10.1.100.221
+  serviceSelector:
+    matchExpressions:
+      - key: gateway.envoyproxy.io/owning-gateway-name
+        operator: In
+        values:
+          - external-gateway-envoy

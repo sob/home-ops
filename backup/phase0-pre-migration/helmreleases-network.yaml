@@ -1,0 +1,1252 @@
+apiVersion: v1
+items:
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704817"
+    creationTimestamp: "2025-10-19T15:34:03Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 2
+    labels:
+      app.kubernetes.io/name: cloudflared
+      kustomize.toolkit.fluxcd.io/name: cloudflared
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: cloudflared
+    namespace: network
+    resourceVersion: "111202830"
+    uid: 7a767e7f-64ab-41c7-92cc-77f4b01680a2
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: cloudflared
+    install:
+      remediation:
+        retries: 3
+    interval: 30m
+    upgrade:
+      cleanupOnFail: true
+      remediation:
+        retries: 3
+    values:
+      controllers:
+        cloudflared:
+          annotations:
+            reloader.stakater.com/auto: "true"
+          containers:
+            app:
+              args:
+              - tunnel
+              - --config
+              - /etc/cloudflared/config.yaml
+              - --loglevel
+              - debug
+              - run
+              - $(TUNNEL_ID)
+              env:
+                NO_AUTOUPDATE: true
+                TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
+                TUNNEL_ID:
+                  valueFrom:
+                    secretKeyRef:
+                      key: TUNNEL_ID
+                      name: cloudflared-secret
+                TUNNEL_METRICS: 0.0.0.0:8080
+                TUNNEL_ORIGIN_ENABLE_HTTP2: true
+                TUNNEL_POST_QUANTUM: true
+                TUNNEL_TRANSPORT_PROTOCOL: quic
+              image:
+                repository: docker.io/cloudflare/cloudflared
+                tag: 2025.7.0
+              probes:
+                liveness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    failureThreshold: 3
+                    httpGet:
+                      path: /ready
+                      port: 8080
+                    initialDelaySeconds: 0
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+                readiness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    failureThreshold: 3
+                    httpGet:
+                      path: /ready
+                      port: 8080
+                    initialDelaySeconds: 0
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+              resources:
+                limits:
+                  memory: 256Mi
+                requests:
+                  cpu: 10m
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                readOnlyRootFilesystem: true
+          strategy: RollingUpdate
+      defaultPodOptions:
+        securityContext:
+          runAsGroup: 65534
+          runAsNonRoot: true
+          runAsUser: 65534
+          seccompProfile:
+            type: RuntimeDefault
+      persistence:
+        config:
+          globalMounts:
+          - path: /etc/cloudflared/config.yaml
+            readOnly: true
+            subPath: config.yaml
+          name: cloudflared-configmap
+          type: configMap
+        creds:
+          globalMounts:
+          - path: /etc/cloudflared/creds/credentials.json
+            readOnly: true
+            subPath: credentials.json
+          name: cloudflared-secret
+          type: secret
+      service:
+        app:
+          controller: cloudflared
+          ports:
+            http:
+              port: 8080
+      serviceMonitor:
+        app:
+          endpoints:
+          - interval: 1m
+            path: /metrics
+            port: http
+            scheme: http
+            scrapeTimeout: 10s
+          labels:
+            prometheus.io/forward: "true"
+          serviceName: cloudflared
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T20:44:14Z"
+      message: Helm upgrade succeeded for release network/cloudflared.v2 with chart
+        app-template@3.7.3+68059caef936
+      observedGeneration: 2
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-20T14:47:14Z"
+      message: Helm upgrade succeeded for release network/cloudflared.v2 with chart
+        app-template@3.7.3+68059caef936
+      observedGeneration: 2
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Released
+    history:
+    - chartName: app-template
+      chartVersion: 3.7.3+68059caef936
+      configDigest: sha256:a949be826c22cd4635b23f67f8fef9dbc0b0348e1ee79f29be4e3fddd9ee2f1b
+      digest: sha256:3f8b04ad07b6d93f14f8013f6088995934a1a8be8ccb7fc3d513ca8cdf9540e0
+      firstDeployed: "2025-10-19T15:34:32Z"
+      lastDeployed: "2025-10-20T14:47:07Z"
+      name: cloudflared
+      namespace: network
+      ociDigest: sha256:68059caef936b73167caef4749a9a3e33719af684d612dd4e661fbcd4cddc597
+      status: deployed
+      version: 2
+    - chartName: app-template
+      chartVersion: 3.7.3
+      configDigest: sha256:a949be826c22cd4635b23f67f8fef9dbc0b0348e1ee79f29be4e3fddd9ee2f1b
+      digest: sha256:67ecd467b43e1f25736931a7fe7f987983c141de3cf0387ddf3ed0e8d58640c9
+      firstDeployed: "2025-10-19T15:34:32Z"
+      lastDeployed: "2025-10-19T15:34:32Z"
+      name: cloudflared
+      namespace: network
+      status: superseded
+      version: 1
+    lastAttemptedConfigDigest: sha256:a949be826c22cd4635b23f67f8fef9dbc0b0348e1ee79f29be4e3fddd9ee2f1b
+    lastAttemptedGeneration: 2
+    lastAttemptedReleaseAction: upgrade
+    lastAttemptedReleaseActionDuration: 8.926448732s
+    lastAttemptedRevision: 3.7.3+68059caef936
+    lastAttemptedRevisionDigest: sha256:68059caef936b73167caef4749a9a3e33719af684d612dd4e661fbcd4cddc597
+    lastHandledReconcileAt: "1761704817"
+    observedGeneration: 2
+    storageNamespace: network
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704817"
+    creationTimestamp: "2025-10-19T15:31:35Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 3
+    labels:
+      app.kubernetes.io/name: echo-server
+      kustomize.toolkit.fluxcd.io/name: echo-server
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: echo-server
+    namespace: network
+    resourceVersion: "111201703"
+    uid: 363f1158-96d5-40a0-97fd-a26a412c9bed
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: echo-server
+    install:
+      remediation:
+        retries: 3
+    interval: 30m
+    upgrade:
+      cleanupOnFail: true
+      remediation:
+        retries: 3
+    values:
+      controllers:
+        echo-server:
+          containers:
+            app:
+              env:
+                HTTP_PORT: 8080
+                LOG_IGNORE_PATH: /healthz
+                LOG_WITHOUT_NEWLINE: true
+                PROMETHEUS_ENABLED: true
+              image:
+                repository: ghcr.io/mendhak/http-https-echo
+                tag: 37
+              probes:
+                liveness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    failureThreshold: 3
+                    httpGet:
+                      path: /healthz
+                      port: 8080
+                    initialDelaySeconds: 0
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+                readiness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    failureThreshold: 3
+                    httpGet:
+                      path: /healthz
+                      port: 8080
+                    initialDelaySeconds: 0
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+              resources:
+                limits:
+                  memory: 64Mi
+                requests:
+                  cpu: 10m
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                readOnlyRootFilesystem: true
+          strategy: RollingUpdate
+      defaultPodOptions:
+        securityContext:
+          runAsGroup: 65534
+          runAsNonRoot: true
+          runAsUser: 65534
+          seccompProfile:
+            type: RuntimeDefault
+      ingress:
+        app:
+          annotations:
+            external-dns.alpha.kubernetes.io/target: external.56kbps.io
+            nginx.ingress.kubernetes.io/auth-response-headers: Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid
+            nginx.ingress.kubernetes.io/auth-signin: /outpost.goauthentik.io/start?rd=$escaped_request_uri
+            nginx.ingress.kubernetes.io/auth-snippet: proxy_set_header X-Forwarded-Host
+              $http_host;
+            nginx.ingress.kubernetes.io/auth-url: http://ak-outpost-external.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+            nginx.ingress.kubernetes.io/proxy-body-size: 1000M
+          className: external
+          hosts:
+          - host: '{{ .Release.Name }}.56kbps.io'
+            paths:
+            - path: /
+              service:
+                identifier: app
+                port: http
+      service:
+        app:
+          controller: echo-server
+          ports:
+            http:
+              port: 8080
+      serviceMonitor:
+        app:
+          endpoints:
+          - interval: 1m
+            path: /metrics
+            port: http
+            scheme: http
+            scrapeTimeout: 10s
+          serviceName: echo-server
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T20:43:01Z"
+      message: Helm upgrade succeeded for release network/echo-server.v3 with chart
+        app-template@3.7.3+68059caef936
+      observedGeneration: 3
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-20T14:46:41Z"
+      message: Helm upgrade succeeded for release network/echo-server.v3 with chart
+        app-template@3.7.3+68059caef936
+      observedGeneration: 3
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Released
+    history:
+    - chartName: app-template
+      chartVersion: 3.7.3+68059caef936
+      configDigest: sha256:6e37e8d5e6bc6954c8e302215b72eee48d676fbf900d357583a04f0f2b77db87
+      digest: sha256:dbd167abbe6a08d175f4cc4b28b84e13116d5c8d103bd59dc10d986f34ba0ef5
+      firstDeployed: "2025-10-19T15:34:29Z"
+      lastDeployed: "2025-10-20T14:46:29Z"
+      name: echo-server
+      namespace: network
+      ociDigest: sha256:68059caef936b73167caef4749a9a3e33719af684d612dd4e661fbcd4cddc597
+      status: deployed
+      version: 3
+    - chartName: app-template
+      chartVersion: 3.7.3
+      configDigest: sha256:6e37e8d5e6bc6954c8e302215b72eee48d676fbf900d357583a04f0f2b77db87
+      digest: sha256:a8c8a3019bcc2823e34a93104c67bfc6da6e98e5ec77e1118463b692a474de52
+      firstDeployed: "2025-10-19T15:34:29Z"
+      lastDeployed: "2025-10-19T16:01:17Z"
+      name: echo-server
+      namespace: network
+      status: superseded
+      version: 2
+    lastAttemptedConfigDigest: sha256:6e37e8d5e6bc6954c8e302215b72eee48d676fbf900d357583a04f0f2b77db87
+    lastAttemptedGeneration: 3
+    lastAttemptedReleaseAction: upgrade
+    lastAttemptedReleaseActionDuration: 14.292787037s
+    lastAttemptedRevision: 3.7.3+68059caef936
+    lastAttemptedRevisionDigest: sha256:68059caef936b73167caef4749a9a3e33719af684d612dd4e661fbcd4cddc597
+    lastHandledReconcileAt: "1761704817"
+    observedGeneration: 3
+    storageNamespace: network
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704817"
+    creationTimestamp: "2025-10-19T15:32:48Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 4
+    labels:
+      app.kubernetes.io/name: external-dns-cloudflare
+      kustomize.toolkit.fluxcd.io/name: external-dns-cloudflare
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: external-dns-cloudflare
+    namespace: network
+    resourceVersion: "111199586"
+    uid: c63fe289-0402-43a8-8355-505152f7144a
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: external-dns-cloudflare
+    install:
+      crds: CreateReplace
+      remediation:
+        retries: 3
+    interval: 30m
+    upgrade:
+      cleanupOnFail: true
+      crds: CreateReplace
+      remediation:
+        retries: 3
+        strategy: rollback
+    values:
+      domainFilters:
+      - 56kbps.io
+      - null
+      - halfduplex.io
+      env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: CF_API_TOKEN
+            name: external-dns-cloudflare-secret
+      extraArgs:
+      - --cloudflare-dns-records-per-page=1000
+      - --cloudflare-proxied
+      - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
+      - --crd-source-kind=DNSEndpoint
+      - --events
+      - --ignore-ingress-tls-spec
+      - --ingress-class=external
+      - --gateway-namespace=network
+      - --gateway-name=external-gateway
+      - --annotation-filter=external-dns.alpha.kubernetes.io/is-public in (true)
+      - --managed-record-types=A
+      - --managed-record-types=CNAME
+      fullnameOverride: external-dns-cloudflare
+      podAnnotations:
+        secret.reloader.stakater.com/reload: external-dns-cloudflare-secret
+      policy: sync
+      provider:
+        name: cloudflare
+      serviceMonitor:
+        enabled: true
+        labels:
+          prometheus.io/forward: "false"
+      sources:
+      - ingress
+      - gateway-httproute
+      - crd
+      txtOwnerId: default
+      txtPrefix: k8s.
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T20:40:38Z"
+      message: Helm upgrade succeeded for release network/external-dns-cloudflare.v3
+        with chart external-dns@1.18.0+2ccc2d43e7a1
+      observedGeneration: 4
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-25T16:53:20Z"
+      message: Helm upgrade succeeded for release network/external-dns-cloudflare.v3
+        with chart external-dns@1.18.0+2ccc2d43e7a1
+      observedGeneration: 4
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Released
+    history:
+    - appVersion: 0.18.0
+      chartName: external-dns
+      chartVersion: 1.18.0+2ccc2d43e7a1
+      configDigest: sha256:4646fd4d7b390ddb324275b0ffd94123eaefdb789d051d593a244e3725eaa327
+      digest: sha256:459d66343b5e78c1763c6064cbac4bbf6d8a2bf0d8a4017a98cec9e11766e57a
+      firstDeployed: "2025-10-19T15:33:40Z"
+      lastDeployed: "2025-10-25T16:53:04Z"
+      name: external-dns-cloudflare
+      namespace: network
+      ociDigest: sha256:2ccc2d43e7a11e415b336529557117ab37a4a402447395cb6e32195b8fa159b0
+      status: deployed
+      version: 3
+    - appVersion: 0.18.0
+      chartName: external-dns
+      chartVersion: 1.18.0+2ccc2d43e7a1
+      configDigest: sha256:d8cb868b13e7fcf71e9bbd987ad0d5209ad8baa6c03e3ac6d5b02b704680fd65
+      digest: sha256:6a7119def5e0a598a4058bf06f9f11d83e4510142fb7b8139b582f5701302a9f
+      firstDeployed: "2025-10-19T15:33:40Z"
+      lastDeployed: "2025-10-19T16:04:28Z"
+      name: external-dns-cloudflare
+      namespace: network
+      ociDigest: sha256:2ccc2d43e7a11e415b336529557117ab37a4a402447395cb6e32195b8fa159b0
+      status: superseded
+      version: 2
+    lastAttemptedConfigDigest: sha256:4646fd4d7b390ddb324275b0ffd94123eaefdb789d051d593a244e3725eaa327
+    lastAttemptedGeneration: 4
+    lastAttemptedReleaseAction: upgrade
+    lastAttemptedReleaseActionDuration: 16.303602845s
+    lastAttemptedRevision: 1.18.0+2ccc2d43e7a1
+    lastAttemptedRevisionDigest: sha256:2ccc2d43e7a11e415b336529557117ab37a4a402447395cb6e32195b8fa159b0
+    lastHandledReconcileAt: "1761704817"
+    observedGeneration: 4
+    storageNamespace: network
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704818"
+    creationTimestamp: "2025-10-19T15:32:47Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 6
+    labels:
+      app.kubernetes.io/name: external-dns-unifi
+      kustomize.toolkit.fluxcd.io/name: external-dns-unifi
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: external-dns-unifi
+    namespace: network
+    resourceVersion: "111203601"
+    uid: 9aaa115e-9ac0-4f76-bf56-5a4066b0bc46
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: external-dns-unifi
+    install:
+      remediation:
+        retries: 3
+    interval: 30m
+    upgrade:
+      cleanupOnFail: true
+      remediation:
+        retries: 3
+        strategy: rollback
+    values:
+      domainFilters:
+      - 56kbps.io
+      - halfduplex.io
+      extraArgs:
+      - --ignore-ingress-tls-spec
+      - --ingress-class=internal
+      - --gateway-namespace=network
+      - --gateway-name=internal-gateway
+      fullnameOverride: external-dns-unifi
+      podAnnotations:
+        secret.reloader.stakater.com/reload: external-dns-unifi-secret
+      policy: sync
+      provider:
+        name: webhook
+        webhook:
+          env:
+          - name: UNIFI_HOST
+            value: https://10.1.0.1
+          - name: UNIFI_USER
+            valueFrom:
+              secretKeyRef:
+                key: EXTERNAL_DNS_UNIFI_USER
+                name: external-dns-unifi-secret
+          - name: UNIFI_PASS
+            valueFrom:
+              secretKeyRef:
+                key: EXTERNAL_DNS_UNIFI_PASS
+                name: external-dns-unifi-secret
+          - name: LOG_LEVEL
+            value: debug
+          image:
+            repository: ghcr.io/kashalls/external-dns-unifi-webhook
+            tag: v0.6.1@sha256:3ab5a077769a01e91c0e59846a7fe3da46e12243320cc948f5ee3d33c7a08064
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http-webhook
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http-webhook
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+      serviceMonitor:
+        enabled: true
+      sources:
+      - service
+      - ingress
+      - gateway-httproute
+      - crd
+      txtOwnerId: stone
+      txtPrefix: k8s.
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T20:45:04Z"
+      message: Helm upgrade succeeded for release network/external-dns-unifi.v5 with
+        chart external-dns@1.18.0+2ccc2d43e7a1
+      observedGeneration: 6
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-28T07:56:35Z"
+      message: Helm upgrade succeeded for release network/external-dns-unifi.v5 with
+        chart external-dns@1.18.0+2ccc2d43e7a1
+      observedGeneration: 6
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Released
+    history:
+    - appVersion: 0.18.0
+      chartName: external-dns
+      chartVersion: 1.18.0+2ccc2d43e7a1
+      configDigest: sha256:45bb9cee3017f1bf4f2da02bda0d5643b3ff97f1f85603c1af489005a6a5f6cb
+      digest: sha256:1278406dadc0cecbb0d52cc09fab078ac239d7ec8258cdbf7e2caab32ad25e98
+      firstDeployed: "2025-10-19T15:33:39Z"
+      lastDeployed: "2025-10-28T07:56:18Z"
+      name: external-dns-unifi
+      namespace: network
+      ociDigest: sha256:2ccc2d43e7a11e415b336529557117ab37a4a402447395cb6e32195b8fa159b0
+      status: deployed
+      version: 5
+    - appVersion: 0.18.0
+      chartName: external-dns
+      chartVersion: 1.18.0+2ccc2d43e7a1
+      configDigest: sha256:7abe4d83247cbf4791b93aaaf7f2fcc356049bc1b6a2ef064c7c6ea484463f53
+      digest: sha256:9791b452642a936f4a5231db1d9540c56bd6714f1022472de64a7c7742535ab1
+      firstDeployed: "2025-10-19T15:33:39Z"
+      lastDeployed: "2025-10-28T07:46:39Z"
+      name: external-dns-unifi
+      namespace: network
+      ociDigest: sha256:2ccc2d43e7a11e415b336529557117ab37a4a402447395cb6e32195b8fa159b0
+      status: superseded
+      version: 4
+    lastAttemptedConfigDigest: sha256:45bb9cee3017f1bf4f2da02bda0d5643b3ff97f1f85603c1af489005a6a5f6cb
+    lastAttemptedGeneration: 6
+    lastAttemptedReleaseAction: upgrade
+    lastAttemptedReleaseActionDuration: 16.99540273s
+    lastAttemptedRevision: 1.18.0+2ccc2d43e7a1
+    lastAttemptedRevisionDigest: sha256:2ccc2d43e7a11e415b336529557117ab37a4a402447395cb6e32195b8fa159b0
+    lastHandledReconcileAt: "1761704818"
+    observedGeneration: 6
+    storageNamespace: network
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704818"
+    creationTimestamp: "2025-10-19T15:31:35Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 4
+    labels:
+      app.kubernetes.io/name: ingress-nginx-external
+      kustomize.toolkit.fluxcd.io/name: ingress-nginx-external
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: ingress-nginx-external
+    namespace: network
+    resourceVersion: "111198321"
+    uid: 2c736d3e-7c44-424e-992a-56d27ddc45d5
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: ingress-nginx
+    install:
+      remediation:
+        retries: 3
+    interval: 30m
+    upgrade:
+      cleanupOnFail: true
+      remediation:
+        retries: 3
+    values:
+      controller:
+        admissionWebhooks:
+          objectSelector:
+            matchExpressions:
+            - key: ingress-class
+              operator: In
+              values:
+              - external
+        allowSnippetAnnotations: true
+        config:
+          annotations-risk-level: Critical
+          block-user-agents: GPTBot,~*GPTBot*,ChatGPT-User,~*ChatGPT-User*,Google-Extended,~*Google-Extended*,CCBot,~*CCBot*,Omgilibot,~*Omgilibot*,FacebookBot,~*FacebookBot*
+          client-body-buffer-size: 100M
+          client-body-timeout: 120
+          client-header-timeout: 120
+          enable-brotli: "true"
+          enable-ocsp: "true"
+          enable-real-ip: "true"
+          force-ssl-redirect: "true"
+          hide-headers: Server,X-Powered-By
+          hsts-max-age: 31449600
+          keep-alive: 120
+          keep-alive-requests: 10000
+          large-client-header-buffers: 2 2k
+          log-format-escape-json: "true"
+          log-format-upstream: |
+            {"time": "$time_iso8601", "remote_addr": "$proxy_protocol_addr", "x_forwarded_for": "$proxy_add_x_forwarded_for", "request_id": "$req_id", "remote_user": "$remote_user", "bytes_sent": $bytes_sent, "request_time": $request_time, "status": $status, "vhost": "$host", "request_proto": "$server_protocol", "path": "$uri", "request_query": "$args", "request_length": $request_length, "duration": $request_time, "method": "$request_method", "http_referrer": "$http_referer", "http_user_agent": "$http_user_agent"}
+          proxy-body-size: 0
+          proxy-buffer-size: 32k
+          proxy-buffers: 8 16k
+          proxy-busy-buffers-size: 64k
+          ssl-protocols: TLSv1.3 TLSv1.2
+          use-forwarded-headers: "true"
+          use-geoip2: "true"
+        extraArgs:
+          default-ssl-certificate: network/56kbps-io-production-tls
+        ingressClass: external
+        ingressClassResource:
+          controllerValue: k8s.io/external
+          default: false
+          name: external
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+            labels:
+              prometheus.io/forward: "true"
+            namespaceSelector:
+              any: true
+        priorityClassName: infrastructure-critical
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 500Mi
+        service:
+          externalTrafficPolicy: Cluster
+      fullnameOverride: ingress-nginx-external
+    valuesFrom:
+    - kind: Secret
+      name: nginx-external-maxmind-secret
+      targetPath: controller.maxmindLicenseKey
+      valuesKey: MAXMIND_LICENSE_KEY
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T20:39:15Z"
+      message: Helm upgrade succeeded for release network/ingress-nginx-external.v4
+        with chart ingress-nginx@4.13.2+1f5d40f230e5
+      observedGeneration: 4
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-20T18:59:14Z"
+      message: Helm upgrade succeeded for release network/ingress-nginx-external.v4
+        with chart ingress-nginx@4.13.2+1f5d40f230e5
+      observedGeneration: 4
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Released
+    history:
+    - appVersion: 1.13.2
+      chartName: ingress-nginx
+      chartVersion: 4.13.2+1f5d40f230e5
+      configDigest: sha256:5148978f983b51352f56252129ac7269d634c5d34825ddd5575e302f93c05e86
+      digest: sha256:cbc940c89ed4e904fc526740edc272ca66561117ae4988096bedfd04e367797e
+      firstDeployed: "2025-10-19T15:49:21Z"
+      lastDeployed: "2025-10-20T18:58:59Z"
+      name: ingress-nginx-external
+      namespace: network
+      ociDigest: sha256:1f5d40f230e5ef7091521b2113c122a6831268b122249b781ea54f72c8bff2a1
+      status: deployed
+      version: 4
+    - appVersion: 1.13.2
+      chartName: ingress-nginx
+      chartVersion: 4.13.2+1f5d40f230e5
+      configDigest: sha256:a9607691664a5d8caf29f51101f83e01b55674aca90fc0f830b138b0cd58ac34
+      digest: sha256:c5c0339b4d8afe9cdab6ad07212c61053526c5eb0549eaa53170a4598e78178f
+      firstDeployed: "2025-10-19T15:49:21Z"
+      lastDeployed: "2025-10-20T17:01:19Z"
+      name: ingress-nginx-external
+      namespace: network
+      ociDigest: sha256:1f5d40f230e5ef7091521b2113c122a6831268b122249b781ea54f72c8bff2a1
+      status: superseded
+      version: 3
+    lastAttemptedConfigDigest: sha256:5148978f983b51352f56252129ac7269d634c5d34825ddd5575e302f93c05e86
+    lastAttemptedGeneration: 4
+    lastAttemptedReleaseAction: upgrade
+    lastAttemptedReleaseActionDuration: 15.847768363s
+    lastAttemptedRevision: 4.13.2+1f5d40f230e5
+    lastAttemptedRevisionDigest: sha256:1f5d40f230e5ef7091521b2113c122a6831268b122249b781ea54f72c8bff2a1
+    lastHandledReconcileAt: "1761704818"
+    observedGeneration: 4
+    storageNamespace: network
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704818"
+    creationTimestamp: "2025-10-19T15:31:35Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 4
+    labels:
+      app.kubernetes.io/name: ingress-nginx-internal
+      kustomize.toolkit.fluxcd.io/name: ingress-nginx-internal
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: ingress-nginx-internal
+    namespace: network
+    resourceVersion: "111199131"
+    uid: bc64ee9b-75a7-4aee-96ed-78fdac0f3a6d
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: ingress-nginx
+    install:
+      remediation:
+        retries: 3
+    interval: 30m
+    upgrade:
+      cleanupOnFail: true
+      remediation:
+        retries: 3
+    values:
+      controller:
+        admissionWebhooks:
+          objectSelector:
+            matchExpressions:
+            - key: ingress-class
+              operator: In
+              values:
+              - internal
+        allowSnippetAnnotations: true
+        config:
+          annotations-risk-level: Critical
+          block-user-agents: GPTBot,~*GPTBot*,ChatGPT-User,~*ChatGPT-User*,Google-Extended,~*Google-Extended*,CCBot,~*CCBot*,Omgilibot,~*Omgilibot*,FacebookBot,~*FacebookBot*
+          client-body-buffer-size: 100M
+          client-body-timeout: 120
+          client-header-timeout: 120
+          enable-brotli: "true"
+          enable-ocsp: "true"
+          enable-real-ip: "true"
+          force-ssl-redirect: "true"
+          hide-headers: Server,X-Powered-By
+          hsts-max-age: 31449600
+          keep-alive: 120
+          keep-alive-requests: 10000
+          log-format-escape-json: "true"
+          log-format-upstream: |
+            {"time": "$time_iso8601", "remote_addr": "$proxy_protocol_addr", "x_forwarded_for": "$proxy_add_x_forwarded_for", "request_id": "$req_id", "remote_user": "$remote_user", "bytes_sent": $bytes_sent, "request_time": $request_time, "status": $status, "vhost": "$host", "request_proto": "$server_protocol", "path": "$uri", "request_query": "$args", "request_length": $request_length, "duration": $request_time, "method": "$request_method", "http_referrer": "$http_referer", "http_user_agent": "$http_user_agent"}
+          proxy-body-size: 0
+          proxy-buffer-size: 32k
+          proxy-buffers: 8 16k
+          proxy-busy-buffers-size: 64k
+          ssl-protocols: TLSv1.3 TLSv1.2
+          use-forwarded-headers: "true"
+        extraArgs:
+          default-ssl-certificate: network/56kbps-io-production-tls
+        ingressClass: internal
+        ingressClassResource:
+          controllerValue: k8s.io/internal
+          default: true
+          name: internal
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+            labels:
+              prometheus.io/forward: "true"
+            namespaceSelector:
+              any: true
+        priorityClassName: infrastructure-critical
+        replicaCount: 1
+        service:
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: internal.56kbps.io
+        terminationGracePeriodSeconds: 120
+        topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: controller
+              app.kubernetes.io/instance: nginx-internal
+              app.kubernetes.io/name: ingress-nginx
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      defaultBackend:
+        enabled: false
+      fullnameOverride: ingress-nginx-internal
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T20:40:07Z"
+      message: Helm upgrade succeeded for release network/ingress-nginx-internal.v9
+        with chart ingress-nginx@4.13.2+1f5d40f230e5
+      observedGeneration: 4
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-20T18:59:13Z"
+      message: Helm upgrade succeeded for release network/ingress-nginx-internal.v9
+        with chart ingress-nginx@4.13.2+1f5d40f230e5
+      observedGeneration: 4
+      reason: UpgradeSucceeded
+      status: "True"
+      type: Released
+    history:
+    - appVersion: 1.13.2
+      chartName: ingress-nginx
+      chartVersion: 4.13.2+1f5d40f230e5
+      configDigest: sha256:c46ab1acb0f5e4979aea5c556f85bf5dc96d574ccbc56f6e34a99c45b6dee8ac
+      digest: sha256:8a4b1f8de21fbe8f70d1a9484f77b7af843aeb52fb4af2c0bd6a25efb9f1b7de
+      firstDeployed: "2025-10-19T15:47:54Z"
+      lastDeployed: "2025-10-20T18:58:55Z"
+      name: ingress-nginx-internal
+      namespace: network
+      ociDigest: sha256:1f5d40f230e5ef7091521b2113c122a6831268b122249b781ea54f72c8bff2a1
+      status: deployed
+      version: 9
+    - appVersion: 1.13.2
+      chartName: ingress-nginx
+      chartVersion: 4.13.2+1f5d40f230e5
+      configDigest: sha256:3e1ef0376cefbc10b7e00f136f0ea0cf12da7b7ee840cdbbc34b5849f47bfb13
+      digest: sha256:fa7df57cf7fc59452d38363b048a5f7b26c6d01f661daf03599d0d78687e65d4
+      firstDeployed: "2025-10-19T15:47:54Z"
+      lastDeployed: "2025-10-20T17:27:38Z"
+      name: ingress-nginx-internal
+      namespace: network
+      ociDigest: sha256:1f5d40f230e5ef7091521b2113c122a6831268b122249b781ea54f72c8bff2a1
+      status: failed
+      version: 8
+    lastAttemptedConfigDigest: sha256:c46ab1acb0f5e4979aea5c556f85bf5dc96d574ccbc56f6e34a99c45b6dee8ac
+    lastAttemptedGeneration: 4
+    lastAttemptedReleaseAction: upgrade
+    lastAttemptedReleaseActionDuration: 17.826863334s
+    lastAttemptedRevision: 4.13.2+1f5d40f230e5
+    lastAttemptedRevisionDigest: sha256:1f5d40f230e5ef7091521b2113c122a6831268b122249b781ea54f72c8bff2a1
+    lastHandledReconcileAt: "1761704818"
+    observedGeneration: 4
+    storageNamespace: network
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704818"
+    creationTimestamp: "2025-10-19T15:34:33Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 1
+    labels:
+      app.kubernetes.io/name: resolver-blocky
+      kustomize.toolkit.fluxcd.io/name: resolver-blocky
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: resolver-blocky
+    namespace: network
+    resourceVersion: "111184516"
+    uid: ff11f794-d106-48be-86a7-c1ac8ee4de21
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: app-template
+    install:
+      remediation:
+        retries: -1
+    interval: 1h
+    upgrade:
+      cleanupOnFail: true
+      remediation:
+        remediateLastFailure: true
+        retries: 3
+        strategy: rollback
+    values:
+      controllers:
+        blocky:
+          annotations:
+            reloader.stakater.com/auto: "true"
+          containers:
+            app:
+              env:
+                HTTP_PORT: 4000
+                TZ: America/Chicago
+              image:
+                repository: ghcr.io/0xerr0r/blocky
+                tag: v0.26
+              probes:
+                liveness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    exec:
+                      command:
+                      - /app/blocky
+                      - healthcheck
+                    failureThreshold: 3
+                    initialDelaySeconds: 15
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+                readiness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    exec:
+                      command:
+                      - /app/blocky
+                      - healthcheck
+                    failureThreshold: 3
+                    initialDelaySeconds: 15
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+              resources:
+                limits:
+                  memory: 1Gi
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  add:
+                  - NET_BIND_SERVICE
+                  drop:
+                  - ALL
+                readOnlyRootFilesystem: false
+          replicas: 2
+          strategy: RollingUpdate
+      defaultPodOptions:
+        securityContext:
+          fsGroup: 100
+          runAsGroup: 100
+          runAsNonRoot: true
+          runAsUser: 100
+        topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: blocky
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      persistence:
+        config:
+          enabled: true
+          globalMounts:
+          - path: /app/config.yml
+            readOnly: true
+            subPath: config.yml
+          name: blocky-config
+          type: configMap
+        tls:
+          enabled: true
+          globalMounts:
+          - path: /app/cert/tls.crt
+            readOnly: true
+            subPath: tls.crt
+          - path: /app/cert/tls.key
+            readOnly: true
+            subPath: tls.key
+          name: resolver-blocky-tls
+          type: secret
+      service:
+        app:
+          controller: blocky
+          ports:
+            http:
+              port: 4000
+        dns:
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: dns.56kbps.io
+            external-dns.alpha.kubernetes.io/ttl: "300"
+            io.cilium/lb-ipam-ips: 10.1.100.53
+          controller: blocky
+          ports:
+            dns-tcp:
+              enabled: true
+              port: 53
+              protocol: TCP
+            dns-udp:
+              enabled: true
+              port: 53
+              protocol: UDP
+            dot:
+              enabled: true
+              port: 853
+              protocol: TCP
+            https:
+              enabled: true
+              port: 443
+              protocol: TCP
+          sessionAffinity: ClientIP
+          sessionAffinityConfig:
+            clientIP:
+              timeoutSeconds: 10800
+          type: LoadBalancer
+      serviceMonitor:
+        app:
+          enabled: true
+          endpoints:
+          - interval: 30s
+            path: /metrics
+            port: http
+            scheme: http
+            scrapeTimeout: 10s
+          labels:
+            prometheus.io/forward: "true"
+          serviceName: blocky
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T20:25:06Z"
+      message: Helm install succeeded for release network/resolver-blocky.v1 with
+        chart app-template@4.2.0+1ef75c09a8b9
+      observedGeneration: 1
+      reason: InstallSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-20T05:32:00Z"
+      message: Helm install succeeded for release network/resolver-blocky.v1 with
+        chart app-template@4.2.0+1ef75c09a8b9
+      observedGeneration: 1
+      reason: InstallSucceeded
+      status: "True"
+      type: Released
+    failures: 54
+    history:
+    - chartName: app-template
+      chartVersion: 4.2.0+1ef75c09a8b9
+      configDigest: sha256:8440cf8d8dde64876bca73ce948b292f9ce682dbe4400f8f9b92380e7b5a264b
+      digest: sha256:7100eba200a0527d691a32bc44129f1dfbcdbc2a1fb40ef0869cae12fd66ef07
+      firstDeployed: "2025-10-20T05:31:35Z"
+      lastDeployed: "2025-10-20T05:31:35Z"
+      name: resolver-blocky
+      namespace: network
+      ociDigest: sha256:1ef75c09a8b97b7f2e26185ec71d620366b365dbb7342aca929aafe497402a2c
+      status: deployed
+      version: 1
+    installFailures: 54
+    lastAttemptedConfigDigest: sha256:8440cf8d8dde64876bca73ce948b292f9ce682dbe4400f8f9b92380e7b5a264b
+    lastAttemptedGeneration: 1
+    lastAttemptedReleaseAction: install
+    lastAttemptedReleaseActionDuration: 24.96948764s
+    lastAttemptedRevision: 4.2.0+1ef75c09a8b9
+    lastAttemptedRevisionDigest: sha256:1ef75c09a8b97b7f2e26185ec71d620366b365dbb7342aca929aafe497402a2c
+    lastHandledReconcileAt: "1761704818"
+    observedGeneration: 1
+    storageNamespace: network
+- apiVersion: helm.toolkit.fluxcd.io/v2
+  kind: HelmRelease
+  metadata:
+    annotations:
+      reconcile.fluxcd.io/requestedAt: "1761704818"
+    creationTimestamp: "2025-10-19T15:32:53Z"
+    finalizers:
+    - finalizers.fluxcd.io
+    generation: 1
+    labels:
+      app.kubernetes.io/name: resolver-dnscrypt-proxy
+      kustomize.toolkit.fluxcd.io/name: resolver-dnscrypt-proxy
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: resolver-dnscrypt-proxy
+    namespace: network
+    resourceVersion: "111225965"
+    uid: 80076d2d-d292-4a1e-a4b0-44e118deeec9
+  spec:
+    chartRef:
+      kind: OCIRepository
+      name: app-template
+    install:
+      remediation:
+        retries: 3
+    interval: 1h
+    upgrade:
+      cleanupOnFail: true
+      remediation:
+        retries: 3
+    values:
+      controllers:
+        dnscrypt-proxy:
+          annotations:
+            reloader.stakater.com/auto: "true"
+          containers:
+            app:
+              env:
+                TZ: America/New_York
+              image:
+                repository: docker.io/klutchell/dnscrypt-proxy
+                tag: 2.1.5
+              probes:
+                liveness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    failureThreshold: 3
+                    initialDelaySeconds: 30
+                    periodSeconds: 10
+                    tcpSocket:
+                      port: 5053
+                    timeoutSeconds: 1
+                readiness:
+                  custom: true
+                  enabled: true
+                  spec:
+                    failureThreshold: 3
+                    initialDelaySeconds: 30
+                    periodSeconds: 10
+                    tcpSocket:
+                      port: 5053
+                    timeoutSeconds: 1
+              resources:
+                limits:
+                  memory: 150Mi
+                requests:
+                  cpu: 50m
+                  memory: 50Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                readOnlyRootFilesystem: true
+          replicas: 2
+          strategy: RollingUpdate
+      defaultPodOptions:
+        securityContext:
+          fsGroup: 568
+          fsGroupChangePolicy: OnRootMismatch
+          runAsGroup: 568
+          runAsUser: 568
+        topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: dnscrypt-proxy
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      persistence:
+        cache:
+          enabled: true
+          globalMounts:
+          - path: /var/cache/dnscrypt-proxy
+          type: emptyDir
+        config:
+          enabled: true
+          globalMounts:
+          - path: /config/dnscrypt-proxy.toml
+            readOnly: true
+            subPath: dnscrypt-proxy.toml
+          name: dnscrypt-proxy-config
+          type: configMap
+      service:
+        app:
+          controller: dnscrypt-proxy
+          ports:
+            dns-tcp:
+              enabled: true
+              port: 5053
+              protocol: TCP
+              targetPort: 5053
+            dns-udp:
+              enabled: true
+              port: 5053
+              protocol: UDP
+              targetPort: 5053
+  status:
+    conditions:
+    - lastTransitionTime: "2026-01-11T21:07:01Z"
+      message: Helm install succeeded for release network/resolver-dnscrypt-proxy.v1
+        with chart app-template@4.2.0+1ef75c09a8b9
+      observedGeneration: 1
+      reason: InstallSucceeded
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-10-19T15:34:28Z"
+      message: Helm install succeeded for release network/resolver-dnscrypt-proxy.v1
+        with chart app-template@4.2.0+1ef75c09a8b9
+      observedGeneration: 1
+      reason: InstallSucceeded
+      status: "True"
+      type: Released
+    history:
+    - chartName: app-template
+      chartVersion: 4.2.0+1ef75c09a8b9
+      configDigest: sha256:65cee109914b345ffdc50f66435ed1fac1bffb36f603d12ead44e2b3c933acbd
+      digest: sha256:91d521e5f963d6e0f6cb998643786d4e3fb9c450cdbf99bb8c644e0060be5b6e
+      firstDeployed: "2025-10-19T15:33:50Z"
+      lastDeployed: "2025-10-19T15:33:50Z"
+      name: resolver-dnscrypt-proxy
+      namespace: network
+      ociDigest: sha256:1ef75c09a8b97b7f2e26185ec71d620366b365dbb7342aca929aafe497402a2c
+      status: deployed
+      version: 1
+    lastAttemptedConfigDigest: sha256:65cee109914b345ffdc50f66435ed1fac1bffb36f603d12ead44e2b3c933acbd
+    lastAttemptedGeneration: 1
+    lastAttemptedReleaseAction: install
+    lastAttemptedReleaseActionDuration: 38.576881172s
+    lastAttemptedRevision: 4.2.0+1ef75c09a8b9
+    lastAttemptedRevisionDigest: sha256:1ef75c09a8b97b7f2e26185ec71d620366b365dbb7342aca929aafe497402a2c
+    lastHandledReconcileAt: "1761704818"
+    observedGeneration: 1
+    storageNamespace: network
+kind: List
+metadata:
+  resourceVersion: ""

@@ -1,0 +1,461 @@
+apiVersion: v1
+items:
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-27T21:24:17Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: authentik
+      kustomize.toolkit.fluxcd.io/name: authentik
+      kustomize.toolkit.fluxcd.io/namespace: security
+    name: authentik-pool
+    resourceVersion: "111107047"
+    uid: f53344ed-ba6f-4c60-b5a8-583dac810cd0
+  spec:
+    blocks:
+    - start: 10.1.100.207
+      stop: 10.1.100.207
+    disabled: false
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-27T21:24:17Z"
+      message: ""
+      observedGeneration: 1
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+    - lastTransitionTime: "2025-10-27T21:24:17Z"
+      message: "1"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-27T21:24:17Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-28T03:23:58Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-19T07:58:58Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/name: cilium
+      kustomize.toolkit.fluxcd.io/name: cilium
+      kustomize.toolkit.fluxcd.io/namespace: kube-system
+    name: cilium-pool
+    resourceVersion: "1649654"
+    uid: 98d0259e-3766-4a2d-b9d6-f91001a03d7d
+  spec:
+    blocks:
+    - start: 10.1.100.220
+      stop: 10.1.100.230
+    disabled: false
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-19T07:58:58Z"
+      message: "11"
+      observedGeneration: 2
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-19T07:58:58Z"
+      message: "11"
+      observedGeneration: 2
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "0"
+      observedGeneration: 2
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+    - lastTransitionTime: "2025-10-20T19:26:55Z"
+      message: ""
+      observedGeneration: 2
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-19T07:58:58Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: cilium
+      kustomize.toolkit.fluxcd.io/name: cilium
+      kustomize.toolkit.fluxcd.io/namespace: kube-system
+    name: dns-pool
+    resourceVersion: "111107042"
+    uid: cf6d6386-b02f-4aca-a8c3-2d0c9e5c486a
+  spec:
+    blocks:
+    - start: 10.1.100.53
+      stop: 10.1.100.53
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        app.kubernetes.io/name: resolver-blocky
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-19T07:58:58Z"
+      message: ""
+      observedGeneration: 1
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+    - lastTransitionTime: "2025-10-19T07:58:58Z"
+      message: "1"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-19T07:58:58Z"
+    generation: 3
+    labels:
+      app.kubernetes.io/name: cilium
+      kustomize.toolkit.fluxcd.io/name: cilium
+      kustomize.toolkit.fluxcd.io/namespace: kube-system
+    name: gateway-external-pool
+    resourceVersion: "111107043"
+    uid: 717377b6-2a2b-4a27-97a5-fa44b5030846
+  spec:
+    blocks:
+    - start: 10.1.100.201
+      stop: 10.1.100.201
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        io.cilium.gateway/owning-gateway: external-gateway
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "1"
+      observedGeneration: 3
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "0"
+      observedGeneration: 3
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "0"
+      observedGeneration: 3
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+    - lastTransitionTime: "2025-10-19T16:26:24Z"
+      message: ""
+      observedGeneration: 3
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-19T07:58:58Z"
+    generation: 3
+    labels:
+      app.kubernetes.io/name: cilium
+      kustomize.toolkit.fluxcd.io/name: cilium
+      kustomize.toolkit.fluxcd.io/namespace: kube-system
+    name: gateway-internal-pool
+    resourceVersion: "111107044"
+    uid: 5b06d893-a732-408a-b34a-c68839002927
+  spec:
+    blocks:
+    - start: 10.1.100.200
+      stop: 10.1.100.200
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        io.cilium.gateway/owning-gateway: internal-gateway
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-19T08:05:39Z"
+      message: "1"
+      observedGeneration: 3
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "0"
+      observedGeneration: 3
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-19T08:05:40Z"
+      message: "0"
+      observedGeneration: 3
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+    - lastTransitionTime: "2025-10-19T16:26:24Z"
+      message: ""
+      observedGeneration: 3
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-20T18:58:58Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: ingress-nginx-external
+      kustomize.toolkit.fluxcd.io/name: ingress-nginx-external
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: ingress-nginx-external-pool
+    resourceVersion: "111107045"
+    uid: 88c43161-153d-4f42-abeb-aef7f67bf1f3
+  spec:
+    blocks:
+    - start: 10.1.100.202
+      stop: 10.1.100.202
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        app.kubernetes.io/instance: ingress-nginx-external
+        app.kubernetes.io/name: ingress-nginx
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-20T18:58:58Z"
+      message: ""
+      observedGeneration: 1
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+    - lastTransitionTime: "2025-10-20T18:58:58Z"
+      message: "1"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-20T18:58:58Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-20T18:59:03Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-20T18:58:54Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: ingress-nginx-internal
+      kustomize.toolkit.fluxcd.io/name: ingress-nginx-internal
+      kustomize.toolkit.fluxcd.io/namespace: network
+    name: ingress-nginx-internal-pool
+    resourceVersion: "111107048"
+    uid: 31c0a8c9-7272-4ca4-ba8e-90b967d2b62c
+  spec:
+    blocks:
+    - start: 10.1.100.203
+      stop: 10.1.100.203
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        app.kubernetes.io/instance: ingress-nginx-internal
+        app.kubernetes.io/name: ingress-nginx
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-20T18:58:54Z"
+      message: ""
+      observedGeneration: 1
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+    - lastTransitionTime: "2025-10-20T18:58:54Z"
+      message: "1"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-20T18:58:54Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-20T18:58:58Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-20T18:31:22Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/name: mosquitto
+      kustomize.toolkit.fluxcd.io/name: mosquitto
+      kustomize.toolkit.fluxcd.io/namespace: database
+    name: mosquitto-pool
+    resourceVersion: "111107046"
+    uid: 23a28a87-93c5-40b4-9bc6-8805a84b2c80
+  spec:
+    blocks:
+    - start: 10.1.100.206
+      stop: 10.1.100.206
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        app.kubernetes.io/name: mosquitto
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-20T18:40:32Z"
+      message: ""
+      observedGeneration: 2
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+    - lastTransitionTime: "2025-10-20T18:31:22Z"
+      message: "1"
+      observedGeneration: 2
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-20T18:32:12Z"
+      message: "0"
+      observedGeneration: 2
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-20T18:32:12Z"
+      message: "0"
+      observedGeneration: 2
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-20T18:36:28Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: plex
+      kustomize.toolkit.fluxcd.io/name: plex
+      kustomize.toolkit.fluxcd.io/namespace: default
+    name: plex-pool
+    resourceVersion: "111107049"
+    uid: 38da5cdf-b80a-4e16-add9-1ebe10eb14d8
+  spec:
+    blocks:
+    - start: 10.1.100.204
+      stop: 10.1.100.204
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        app.kubernetes.io/name: plex
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-20T18:36:28Z"
+      message: ""
+      observedGeneration: 1
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+    - lastTransitionTime: "2025-10-20T18:36:28Z"
+      message: "1"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-20T18:36:28Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-20T18:36:28Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+- apiVersion: cilium.io/v2
+  kind: CiliumLoadBalancerIPPool
+  metadata:
+    creationTimestamp: "2025-10-20T18:36:28Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: qbittorrent
+      kustomize.toolkit.fluxcd.io/name: qbittorrent
+      kustomize.toolkit.fluxcd.io/namespace: default
+    name: qbittorrent-pool
+    resourceVersion: "111107050"
+    uid: 2071f308-08e8-49b9-a675-0792ebeda5be
+  spec:
+    blocks:
+    - start: 10.1.100.205
+      stop: 10.1.100.205
+    disabled: false
+    serviceSelector:
+      matchLabels:
+        app.kubernetes.io/name: qbittorrent
+  status:
+    conditions:
+    - lastTransitionTime: "2025-10-20T18:36:28Z"
+      message: ""
+      observedGeneration: 1
+      reason: resolved
+      status: "False"
+      type: cilium.io/PoolConflict
+    - lastTransitionTime: "2025-10-20T18:36:28Z"
+      message: "1"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsTotal
+    - lastTransitionTime: "2025-10-20T18:36:28Z"
+      message: "0"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsAvailable
+    - lastTransitionTime: "2025-10-20T18:36:31Z"
+      message: "1"
+      observedGeneration: 1
+      reason: noreason
+      status: Unknown
+      type: cilium.io/IPsUsed
+kind: List
+metadata:
+  resourceVersion: ""

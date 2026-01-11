@@ -1,0 +1,154 @@
+apiVersion: v1
+items:
+- apiVersion: kyverno.io/v1
+  kind: ClusterPolicy
+  metadata:
+    annotations:
+      policies.kyverno.io/description: This policy creates auth annotations on ingresses.
+        When the `authentik.home.arpa/internal` annotation is `true` it applies the
+        nginx auth annotations for use with Authentik internally. When the `authentik.home.arpa/external`
+        annotation is `true` it applies the nginx auth annotations for use with Authentik
+        externally.
+      policies.kyverno.io/subject: Ingress
+      policies.kyverno.io/title: Authentik ingress annotations
+    creationTimestamp: "2025-10-19T17:36:00Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: kyverno-policies
+      kustomize.toolkit.fluxcd.io/name: kyverno-policies
+      kustomize.toolkit.fluxcd.io/namespace: kyverno
+    name: add-authentik-ingress-annotations
+    resourceVersion: "272856"
+    uid: 672647ed-a7c0-4d11-b1e9-79403a16123b
+  spec:
+    admission: true
+    background: true
+    emitWarning: false
+    generateExisting: true
+    rules:
+    - match:
+        any:
+        - resources:
+            annotations:
+              authentik.home.arpa/internal: "true"
+            kinds:
+            - Ingress
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              +(external-dns.alpha.kubernetes.io/is-public): "false"
+              +(nginx.ingress.kubernetes.io/auth-response-headers): Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+              +(nginx.ingress.kubernetes.io/auth-signin): https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+              +(nginx.ingress.kubernetes.io/auth-snippet): proxy_set_header X-Forwarded-Host
+                $http_host;
+              +(nginx.ingress.kubernetes.io/auth-url): http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+              +(nginx.ingress.kubernetes.io/large-client-header-buffers): 4 100k
+              +(nginx.ingress.kubernetes.io/proxy-body-size): 1000M
+              +(nginx.ingress.kubernetes.io/proxy-buffer-size): 32k
+              +(nginx.ingress.kubernetes.io/proxy-buffers): 8 16k
+      name: auth-internal
+      skipBackgroundRequests: true
+    - match:
+        any:
+        - resources:
+            annotations:
+              authentik.home.arpa/external: "true"
+            kinds:
+            - Ingress
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              +(external-dns.alpha.kubernetes.io/is-public): "true"
+              +(external-dns.alpha.kubernetes.io/target): external.56kbps.io
+              +(nginx.ingress.kubernetes.io/auth-response-headers): Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,authorization
+              +(nginx.ingress.kubernetes.io/auth-signin): https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
+              +(nginx.ingress.kubernetes.io/auth-snippet): proxy_set_header X-Forwarded-Host
+                $http_host;
+              +(nginx.ingress.kubernetes.io/auth-url): http://ak-outpost-external.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+              +(nginx.ingress.kubernetes.io/large-client-header-buffers): 4 100k
+              +(nginx.ingress.kubernetes.io/proxy-body-size): 1000M
+              +(nginx.ingress.kubernetes.io/proxy-buffer-size): 32k
+              +(nginx.ingress.kubernetes.io/proxy-buffers): 8 16k
+      name: auth-external
+      skipBackgroundRequests: true
+    validationFailureAction: Audit
+  status:
+    autogen: {}
+    conditions:
+    - lastTransitionTime: "2025-10-19T17:36:00Z"
+      message: Ready
+      reason: Succeeded
+      status: "True"
+      type: Ready
+    rulecount:
+      generate: 0
+      mutate: 2
+      validate: 0
+      verifyimages: 0
+    validatingadmissionpolicy:
+      generated: false
+      message: ""
+- apiVersion: kyverno.io/v1
+  kind: ClusterPolicy
+  metadata:
+    annotations:
+      policies.kyverno.io/description: This policy adds reflector annotations to the
+        wildcard certificate secret so it gets synced to the security namespace for
+        authentik outposts
+      policies.kyverno.io/subject: Secret
+      policies.kyverno.io/title: Add reflector annotations to wildcard certificate
+    creationTimestamp: "2025-10-19T17:36:00Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/name: kyverno-policies
+      kustomize.toolkit.fluxcd.io/name: kyverno-policies
+      kustomize.toolkit.fluxcd.io/namespace: kyverno
+    name: add-reflector-cert-annotations
+    resourceVersion: "272865"
+    uid: 0e326805-34f4-422c-afbf-872f7ece1283
+  spec:
+    admission: true
+    background: false
+    emitWarning: false
+    rules:
+    - match:
+        any:
+        - resources:
+            kinds:
+            - Secret
+            names:
+            - 56kbps-io-production-tls
+            namespaces:
+            - network
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              +(reflector.v1.k8s.emberstack.com/reflection-allowed): "true"
+              +(reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces): security
+              +(reflector.v1.k8s.emberstack.com/reflection-auto-enabled): "true"
+              +(reflector.v1.k8s.emberstack.com/reflection-auto-namespaces): security
+      name: add-reflector-annotations
+      skipBackgroundRequests: true
+    validationFailureAction: Audit
+  status:
+    autogen: {}
+    conditions:
+    - lastTransitionTime: "2025-10-19T17:36:01Z"
+      message: Ready
+      reason: Succeeded
+      status: "True"
+      type: Ready
+    rulecount:
+      generate: 0
+      mutate: 1
+      validate: 0
+      verifyimages: 0
+    validatingadmissionpolicy:
+      generated: false
+      message: ""
+kind: List
+metadata:
+  resourceVersion: ""
