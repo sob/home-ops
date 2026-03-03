@@ -3,11 +3,11 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app overseerr-exporter
+  name: &app seerr-exporter
 spec:
   chartRef:
     kind: OCIRepository
-    name: overseerr-exporter
+    name: seerr-exporter
   interval: 30m
   install:
     remediation:
@@ -19,7 +19,7 @@ spec:
       retries: 3
   values:
     controllers:
-      overseerr-exporter:
+      seerr-exporter:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -29,12 +29,12 @@ spec:
               tag: 1.2.1@sha256:b5cbff0fcd04a118190849b1ed92f51669109f766171106fc0b87f7a8562273b
             args:
               - --overseerr.address
-              - http://overseerr.default.svc.cluster.local
+              - http://seerr.default.svc.cluster.local
               - --overseerr.api-key
               - $(OVERSEERR_API_KEY)
             envFrom:
               - secretRef:
-                  name: overseerr-exporter-secret
+                  name: seerr-exporter-secret
             probes:
               liveness:
                 enabled: true

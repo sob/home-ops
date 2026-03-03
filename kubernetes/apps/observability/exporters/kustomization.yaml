@@ -8,7 +8,7 @@ resources:
   - ./jellyseerr-exporter/ks.yaml
   - ./lidarr-exporter/ks.yaml
   - ./mqtt-exporter/ks.yaml
-  - ./overseerr-exporter/ks.yaml
+  - ./seerr-exporter/ks.yaml
   - ./prowlarr-exporter/ks.yaml
   - ./radarr-exporter/ks.yaml
   - ./readarr-exporter/ks.yaml
