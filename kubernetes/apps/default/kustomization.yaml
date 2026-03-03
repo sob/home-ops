@@ -18,7 +18,7 @@ resources:
   - ./enigma-bbs/ks.yaml
 # - ./mystic-bbs/ks.yaml
 # - ./node-red/ks.yaml
-  - ./overseerr/ks.yaml
+  - ./seerr/ks.yaml
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml

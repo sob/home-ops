@@ -3,12 +3,12 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: overseerr
+  name: seerr
 spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: overseerr
+    name: seerr
   install:
     remediation:
       retries: 3
@@ -22,7 +22,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      overseerr:
+      seerr:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -102,13 +102,13 @@ spec:
                       - "true"
     service:
       app:
-        controller: overseerr
+        controller: seerr
         ports:
           http:
             port: *port
     serviceMonitor:
       app:
-        serviceName: overseerr
+        serviceName: seerr
         labels:
           prometheus.io/forward: "true"
         endpoints:
@@ -117,7 +117,7 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}", "requests.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}", "overseerr.${SECRET_DOMAIN}", "requests.${SECRET_DOMAIN}"]
         parentRefs:
           - name: external-gateway
             namespace: network
@@ -135,7 +135,7 @@ spec:
         globalMounts:
           - path: /app/config
       cache:
-        existingClaim: overseerr-cache
+        existingClaim: seerr-cache
         globalMounts:
           - path: /app/config/cache
       logs:
