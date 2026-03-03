@@ -30,6 +30,7 @@ spec:
       APP: *app
       GATUS_SUBDOMAIN: romm
       VOLSYNC_CAPACITY: 5Gi
+      VOLSYNC_CACHE_CAPACITY: 16Gi
       VOLSYNC_STORAGECLASS: ceph-block
       VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
       VOLSYNC_UID: "1000"
