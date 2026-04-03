@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "kubernetes": {
+      "type": "streamable-http",
+      "url": "https://mcp.56kbps.io/mcp"
+    }
+  }
+}
