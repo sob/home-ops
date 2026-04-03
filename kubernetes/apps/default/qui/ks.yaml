@@ -29,6 +29,7 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: qui
+      VOLSYNC_SCHEDULE: "3 1 * * *"
       VOLSYNC_CAPACITY: 1Gi
       VOLSYNC_STORAGECLASS: ceph-block
       VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool

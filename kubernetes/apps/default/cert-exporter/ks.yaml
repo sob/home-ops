@@ -29,6 +29,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      VOLSYNC_SCHEDULE: "15 1 * * *"
       VOLSYNC_CAPACITY: 1Gi
       VOLSYNC_ACCESSMODES: "ReadWriteMany"
       VOLSYNC_STORAGECLASS: "ceph-filesystem"

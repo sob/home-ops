@@ -28,4 +28,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      VOLSYNC_SCHEDULE: "54 0 * * *"
       VOLSYNC_CAPACITY: 5Gi

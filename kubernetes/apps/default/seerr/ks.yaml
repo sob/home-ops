@@ -27,6 +27,7 @@ spec:
       APP: overseerr
       GATUS_SUBDOMAIN: requests
       GATUS_PATH: /api/v1/status
+      VOLSYNC_SCHEDULE: "42 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
       VOLSYNC_UID: "1000"
       VOLSYNC_GID: "1000"

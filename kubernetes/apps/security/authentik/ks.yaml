@@ -31,4 +31,5 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: sso
+      VOLSYNC_SCHEDULE: "36 0 * * *"
       VOLSYNC_CAPACITY: 5Gi

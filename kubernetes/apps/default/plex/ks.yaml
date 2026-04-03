@@ -29,6 +29,7 @@ spec:
     substitute:
       APP: *app
       GATUS_PATH: /web/index.html
+      VOLSYNC_SCHEDULE: "0 0 * * *"
       VOLSYNC_CAPACITY: 30Gi
       VOLSYNC_CACHE_CAPACITY: 40Gi
       VOLSYNC_STORAGECLASS: ceph-block

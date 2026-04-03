@@ -28,5 +28,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      VOLSYNC_SCHEDULE: "21 1 * * *"
       VOLSYNC_CAPACITY: 2Gi
       GATUS_SUBDOMAIN: join

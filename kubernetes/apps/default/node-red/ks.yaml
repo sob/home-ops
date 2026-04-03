@@ -29,4 +29,5 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: node-red
+      VOLSYNC_SCHEDULE: "9 1 * * *"
       VOLSYNC_CAPACITY: 1Gi

@@ -29,6 +29,7 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: romm
+      VOLSYNC_SCHEDULE: "3 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
       VOLSYNC_CACHE_CAPACITY: 16Gi
       VOLSYNC_STORAGECLASS: ceph-block

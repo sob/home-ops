@@ -29,5 +29,6 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: zigbee
+      VOLSYNC_SCHEDULE: "6 1 * * *"
       VOLSYNC_CAPACITY: 1Gi
       VOLSYNC_ACCESSMODES: ReadWriteMany

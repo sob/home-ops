@@ -28,6 +28,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      VOLSYNC_SCHEDULE: "24 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
       VOLSYNC_UID: "1033"
       VOLSYNC_GID: "65536"

@@ -29,6 +29,7 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: qbittorrent
+      VOLSYNC_SCHEDULE: "15 0 * * *"
       VOLSYNC_CAPACITY: 10Gi
       VOLSYNC_STORAGECLASS: ceph-block
       VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool

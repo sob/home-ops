@@ -27,6 +27,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      VOLSYNC_SCHEDULE: "48 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
       GATUS_SUBDOMAIN: sob
       GATUS_PATH: /xrpc/_health
