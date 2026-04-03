@@ -12,6 +12,7 @@ resources:
   - ./intel-device-plugin/ks.yaml
   - ./k8s-digester/ks.yaml
   - ./kubelet-csr-approver/ks.yaml
+  - ./mcp-readonly/ks.yaml
   - ./metrics-server/ks.yaml
   - ./node-feature-discovery/ks.yaml
   - ./priority-classes/ks.yaml
