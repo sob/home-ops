@@ -9,6 +9,7 @@ spec:
     kind: OCIRepository
     name: kyverno
   interval: 30m
+  timeout: 10m
   install:
     remediation:
       retries: 3
