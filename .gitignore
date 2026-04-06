@@ -1,4 +1,5 @@
 # Trash
+.mcp.json
 .DS_Store
 Thumbs.db
 # k8s
