@@ -150,8 +150,7 @@ spec:
         type: emptyDir
       transcode:
         type: emptyDir
-        medium: Memory  # Use RAM for transcoding
-        sizeLimit: 8Gi  # Adjust based on available RAM
+        sizeLimit: 24Gi
       media:
         type: custom
         volumeSpec:
