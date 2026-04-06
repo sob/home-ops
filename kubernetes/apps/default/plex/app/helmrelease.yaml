@@ -68,6 +68,22 @@ spec:
               limits:
                 memory: 16Gi
                 gpu.intel.com/i915: "1"
+          log-tailer:
+            image:
+              repository: busybox
+              tag: latest
+            command: ["/bin/sh", "-c"]
+            args: ["until [ -f /logs/Plex\\ Media\\ Server.log ]; do sleep 1; done; tail -F /logs/Plex\\ Media\\ Server.log"]
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -144,8 +160,12 @@ spec:
           - path: /config/Library/Application Support/Plex Media Server/Cache
       logs:
         type: emptyDir
-        globalMounts:
-          - path: /config/Library/Application Support/Plex Media Server/Logs
+        advancedMounts:
+          plex:
+            app:
+              - path: /config/Library/Application Support/Plex Media Server/Logs
+            log-tailer:
+              - path: /logs
       tmp:
         type: emptyDir
       transcode:
