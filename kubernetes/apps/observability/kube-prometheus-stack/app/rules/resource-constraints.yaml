@@ -142,11 +142,11 @@ spec:
             description: "Node {{ $labels.instance }} CPU usage is {{ $value | printf \"%.1f\" }}%"
             runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/NodeCPUUsageHigh"
 
-        # Pod without resource limits
+        # Pod without resource limits (excludes operator-managed system namespaces)
         - alert: PodWithoutResourceLimits
           expr: |
-            kube_pod_container_info{container!="POD"} 
-            unless on(namespace,pod,container) 
+            kube_pod_container_info{container!="POD",namespace!~"kube-system|rook-ceph|cert-manager|k8s-digester|flux-system"}
+            unless on(namespace,pod,container)
             kube_pod_container_resource_limits{resource="memory"}
           for: 1h
           labels:
