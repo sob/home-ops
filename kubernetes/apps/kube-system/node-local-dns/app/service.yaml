@@ -1,0 +1,41 @@
+---
+# Upstream service so node-local-dns can forward to the real CoreDNS pods
+# without being intercepted by its own CiliumLocalRedirectPolicy on kube-dns.
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns-upstream
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+spec:
+  clusterIP: 10.43.0.11
+  ports:
+    - name: dns
+      port: 53
+      protocol: UDP
+      targetPort: 53
+    - name: dns-tcp
+      port: 53
+      protocol: TCP
+      targetPort: 53
+  selector:
+    k8s-app: kube-dns
+---
+# Headless service so the ServiceMonitor can discover node-local-dns pods.
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-local-dns
+  namespace: kube-system
+  labels:
+    k8s-app: node-local-dns
+spec:
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: 9253
+      protocol: TCP
+      targetPort: 9253
+  selector:
+    k8s-app: node-local-dns

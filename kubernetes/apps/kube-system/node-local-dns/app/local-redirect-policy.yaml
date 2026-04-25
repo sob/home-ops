@@ -1,0 +1,26 @@
+---
+# Redirects pod traffic destined for kube-dns Service to a local
+# node-local-dns pod on the same node. If the local pod is missing
+# Cilium falls back to the regular kube-dns Service endpoints, so
+# this is safe to add without ordering risk.
+apiVersion: cilium.io/v2
+kind: CiliumLocalRedirectPolicy
+metadata:
+  name: nodelocaldns
+  namespace: kube-system
+spec:
+  redirectFrontend:
+    serviceMatcher:
+      serviceName: kube-dns
+      namespace: kube-system
+  redirectBackend:
+    localEndpointSelector:
+      matchLabels:
+        k8s-app: node-local-dns
+    toPorts:
+      - port: "53"
+        protocol: UDP
+        name: dns
+      - port: "53"
+        protocol: TCP
+        name: dns-tcp
