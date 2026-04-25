@@ -5,7 +5,7 @@ metadata:
   name: alertmanager-config
   namespace: observability
 stringData:
-  alertmanager.yml: |
+  alertmanager.yaml: |
     global:
       smtp_smarthost: 'localhost:587'
       smtp_from: 'homeops@56kbps.io'

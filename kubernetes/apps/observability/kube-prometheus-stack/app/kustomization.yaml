@@ -15,4 +15,5 @@ resources:
   - ./rules/flux-infrastructure.yaml
   - ./rules/workload-health.yaml
   - ./rules/resource-constraints.yaml
+  - ./rules/control-plane-health.yaml
 #  - ./scrapeconfig.yaml

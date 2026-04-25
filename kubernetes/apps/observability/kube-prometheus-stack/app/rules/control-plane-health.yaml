@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: control-plane-health
+  namespace: observability
+spec:
+  groups:
+    - name: control-plane.rules
+      interval: 30s
+      rules:
+        - alert: KubeDNSEndpointsBelowMinimum
+          expr: |
+            kube_endpoint_address_available{namespace="kube-system",endpoint="kube-dns"} < 2
+          for: 5m
+          labels:
+            severity: critical
+            component: dns
+            type: infrastructure
+          annotations:
+            summary: "kube-dns has fewer than 2 ready endpoints"
+            description: "kube-dns endpoint count is {{ $value }} (minimum 2). Cluster DNS is at risk."
+
+        - alert: NodeLocalDNSPodsNotReady
+          expr: |
+            kube_daemonset_status_number_ready{namespace="kube-system",daemonset="node-local-dns"}
+              <
+            kube_daemonset_status_desired_number_scheduled{namespace="kube-system",daemonset="node-local-dns"}
+          for: 10m
+          labels:
+            severity: warning
+            component: dns
+            type: infrastructure
+          annotations:
+            summary: "node-local-dns DaemonSet has unready pods"
+            description: "{{ $value }} of {{ with query \"kube_daemonset_status_desired_number_scheduled{namespace='kube-system',daemonset='node-local-dns'}\" }}{{ . | first | value }}{{ end }} node-local-dns pods are ready. Affected nodes will fall back to kube-dns Service routing."
+
+        - alert: EtcdNotHighlyAvailable
+          expr: |
+            count(up{job=~".*etcd.*"} == 1) < 3
+          for: 30m
+          labels:
+            severity: warning
+            component: etcd
+            type: infrastructure
+          annotations:
+            summary: "etcd cluster has fewer than 3 healthy members"
+            description: "etcd has {{ $value }} healthy members (expected 3). Cluster has no fault tolerance and is one failure away from a read-only control plane."
