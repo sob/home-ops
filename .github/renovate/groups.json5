@@ -133,6 +133,7 @@
         "quay.io/prometheus/.*",
         "grafana/grafana"
       ],
+      "matchDatasources": ["helm", "docker"],
       "group": {
         "commitMessageTopic": "monitoring stack"
       },
