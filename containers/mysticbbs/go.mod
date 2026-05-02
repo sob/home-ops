@@ -3,7 +3,7 @@ module mysticbbs
 go 1.22
 
 require (
-	github.com/ory/dockertest/v3 v3.12.0
+	github.com/ory/dockertest/v4 v4.0.0
 	github.com/stretchr/testify v1.11.1
 )
 
