@@ -34,6 +34,7 @@ spec:
               TZ: America/Chicago
               LOG_LEVEL: "info"
               PORT: &port 5055
+              NODE_OPTIONS: --dns-result-order=ipv4first
             probes:
               liveness:
                 enabled: true
@@ -55,8 +56,8 @@ spec:
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
-                  timeoutSeconds: 10
-                  failureThreshold: 3
+                  timeoutSeconds: 15
+                  failureThreshold: 5
               startup:
                 enabled: true
                 custom: true
