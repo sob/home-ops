@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gha-runner-scale-set
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gha-runner-scale-set
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Org-level runners for github.com/doorgames-io. Workflows target these with:
+    #   runs-on: arc-linux
+    githubConfigUrl: https://github.com/doorgames-io
+    # References the Secret materialised by the ExternalSecret above (GitHub App auth).
+    githubConfigSecret: arc-github-app
+    runnerScaleSetName: arc-linux
+    runnerGroup: default
+    # Keep one runner warm; burst up to six on demand. Each job runs in a fresh,
+    # ephemeral pod that is destroyed on completion.
+    minRunners: 1
+    maxRunners: 6
+    containerMode:
+      type: kubernetes
+      # Rootless: container/service jobs run as sibling pods sharing this _work
+      # volume, so it must be ReadWriteMany. ceph-filesystem (CephFS) provides RWX.
+      kubernetesModeWorkVolumeClaim:
+        accessModes: ["ReadWriteMany"]
+        storageClassName: ceph-filesystem
+        resources:
+          requests:
+            storage: 10Gi
