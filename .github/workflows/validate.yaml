@@ -27,7 +27,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -57,7 +57,7 @@ jobs:
     continue-on-error: true  # Make this job non-blocking
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -82,7 +82,7 @@ jobs:
     continue-on-error: true  # Make this job non-blocking
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -150,7 +150,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -191,7 +191,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -292,7 +292,7 @@ jobs:
     if: needs.changed-files.outputs.any_changed == 'true'
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -370,7 +370,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -460,7 +460,7 @@ jobs:
     if: needs.changed-files.outputs.any_changed == 'true'
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -509,7 +509,7 @@ jobs:
     if: needs.changed-files.outputs.any_changed == 'true'
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
