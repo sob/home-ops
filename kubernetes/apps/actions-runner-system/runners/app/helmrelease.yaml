@@ -29,26 +29,17 @@ spec:
     # ephemeral pod that is destroyed on completion.
     minRunners: 1
     maxRunners: 6
-    # The ceph-block (RBD) _work PVC mounts root-owned, but the runner image runs
-    # as the non-root `runner` user (UID 1001). Without this the worker fails to
-    # create /home/runner/_work/_tool with "Permission denied". fsGroup makes the
-    # volume group-owned + group-writable and adds the GID to the process's
-    # supplementary groups, so the runner can write. RBD supports fsGroup (hostPath
-    # would not). Value 123 per GitHub's ARC troubleshooting docs. See actions/
-    # actions-runner-controller#2890.
-    template:
-      spec:
-        securityContext:
-          fsGroup: 123
+    # dind (Docker-in-Docker), NOT kubernetes container mode. In kubernetes mode
+    # every job MUST declare a `container:` — jobs that run steps directly on the
+    # runner (all of ours: the TS/Workers test + deploy jobs migrated from
+    # ubuntu-latest) are rejected with:
+    #   "Jobs without a job container are forbidden on this runner..."
+    # dind runs those jobs directly on an ephemeral runner pod, like a GitHub-hosted
+    # runner, with a privileged docker sidecar available for any container/service
+    # steps. The _work dir is a per-pod emptyDir, which also sidesteps both the
+    # RWO/RBD hook-pod co-scheduling limitation and the _work/_tool ownership error
+    # that kubernetes mode hit (actions/actions-runner-controller#2890). The
+    # actions-runner-system namespace has no restricted PodSecurity enforcement, so
+    # the privileged dind sidecar is permitted.
     containerMode:
-      type: kubernetes
-      # Per-runner ephemeral _work volume. CephFS (ceph-filesystem/RWX) can't mount on
-      # these Talos nodes (no `ceph` kernel module), so use ceph-block (RBD/RWO) like the
-      # rest of the cluster. RWO is fine for ordinary jobs; workflows using `container:`/
-      # `services:` would need their hook pods co-scheduled, or a true RWX backend.
-      kubernetesModeWorkVolumeClaim:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: ceph-block
-        resources:
-          requests:
-            storage: 10Gi
+      type: dind
