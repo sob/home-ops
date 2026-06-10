@@ -6,7 +6,7 @@ terraform {
     }
     onepassword = {
       source  = "1password/onepassword"
-      version = "2.2.1"
+      version = "3.3.1"
     }
     grafana = {
       source  = "grafana/grafana"
