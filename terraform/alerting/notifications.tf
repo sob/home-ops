@@ -14,7 +14,7 @@ resource "grafana_contact_point" "slack_warnings" {
 
   slack {
     url   = module.secrets.items["alertmanager"]["ALERTMANAGER_SLACK_URL"]
-    title = "{{ if eq .Status \"resolved\" }}✅ RESOLVED: Warning - {{ else }}⚠️ Warning - {{ end }}{{ .GroupLabels.alertname }}"
+    title = "{{ if eq .Status \"resolved\" }}✅ RESOLVED: Warning - {{ else }}⚠️ Warning - {{ end }}{{ if .GroupLabels.alert_family }}{{ .GroupLabels.alert_family }}{{ else }}{{ .GroupLabels.alertname }}{{ end }}"
     text  = "{{ range .Alerts }}{{ if .Annotations.description }}• {{ .Annotations.description }}{{ else }}• {{ .Labels.service }}: {{ .Annotations.summary }}{{ end }}\n{{ end }}"
     disable_resolve_message = true
   }
@@ -96,6 +96,20 @@ resource "grafana_notification_policy" "main" {
     group_by        = ["alertname", "instance", "service"]  # Group by alert, instance, and service
     contact_point   = grafana_contact_point.slack_critical.name
     repeat_interval = "4h"
+  }
+
+  # Synthetic test warnings - batch siblings into a single message
+  policy {
+    matcher {
+      label = "alert_family"
+      match = "="
+      value = "SyntheticTestsNotRunning"
+    }
+    group_by        = ["alert_family"]
+    contact_point   = grafana_contact_point.slack_warnings.name
+    group_wait      = "1m"   # Brief wait so peers join the same batch
+    group_interval  = "5m"
+    repeat_interval = "1w"
   }
 
   # Warning alerts - weekly summary

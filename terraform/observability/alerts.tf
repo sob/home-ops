@@ -67,25 +67,26 @@ resource "grafana_rule_group" "synthetic_monitoring" {
       }
       
       labels = {
-        severity = "warning"
-        type     = "synthetic"
-        service  = rule.key
+        severity     = "warning"
+        type         = "synthetic"
+        service      = rule.key
+        alert_family = "SyntheticTestsNotRunning"
       }
-      
+
       for               = "10m"
       condition         = "A"
       no_data_state     = "OK"  # This is handled by the absent() query
       exec_err_state    = "Alerting"
-      
+
       # Query A: Alert when no metrics exist
       data {
         ref_id = "A"
-        
+
         relative_time_range {
           from = 600
           to   = 0
         }
-        
+
         datasource_uid = local.prometheus_datasource_uid
         model = jsonencode({
           expr  = "absent(k6_checks_rate{service=\"${rule.key}\"})"

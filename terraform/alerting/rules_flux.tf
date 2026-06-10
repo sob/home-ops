@@ -74,7 +74,7 @@ resource "grafana_rule_group" "external_secrets" {
     name        = "SecretSyncError"
     annotations = {
       summary     = "External Secret sync error"
-      description = "External secret {{ $labels.name }} in namespace {{ $labels.namespace }} has sync errors"
+      description = "External secret {{ $labels.name }} in namespace {{ $labels.exported_namespace }} has sync errors"
     }
     labels = {
       severity = "critical"
@@ -82,19 +82,20 @@ resource "grafana_rule_group" "external_secrets" {
     }
     for      = "5m"
     condition = "A"
-    no_data_state = "OK"
+    no_data_state  = "OK"
+    exec_err_state = "OK"
 
     data {
       ref_id = "A"
-      
+
       relative_time_range {
         from = 300
         to   = 0
       }
-      
+
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
-        expr = "increase(sync_calls{status=\"error\"}[5m]) by (name, namespace) > 0"
+        expr = "sum by (name, exported_namespace) (increase(sync_calls{status=\"error\"}[5m])) > 0"
         refId = "A"
         instant = true      })
     }
