@@ -304,7 +304,7 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
@@ -390,7 +390,7 @@ jobs:
           path: main
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
