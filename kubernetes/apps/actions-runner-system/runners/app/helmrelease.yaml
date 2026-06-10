@@ -29,6 +29,17 @@ spec:
     # ephemeral pod that is destroyed on completion.
     minRunners: 1
     maxRunners: 6
+    # The ceph-block (RBD) _work PVC mounts root-owned, but the runner image runs
+    # as the non-root `runner` user (UID 1001). Without this the worker fails to
+    # create /home/runner/_work/_tool with "Permission denied". fsGroup makes the
+    # volume group-owned + group-writable and adds the GID to the process's
+    # supplementary groups, so the runner can write. RBD supports fsGroup (hostPath
+    # would not). Value 123 per GitHub's ARC troubleshooting docs. See actions/
+    # actions-runner-controller#2890.
+    template:
+      spec:
+        securityContext:
+          fsGroup: 123
     containerMode:
       type: kubernetes
       # Per-runner ephemeral _work volume. CephFS (ceph-filesystem/RWX) can't mount on
