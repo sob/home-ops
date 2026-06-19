@@ -30,12 +30,10 @@ RUN npm set progress=false && \
     npm install -g npm@latest && \
     npm install -g pm2
 
-# Clone ENiGMA½ BBS repository and checkout the requested version (branch or commit)
-RUN git init /build && \
-    cd /build && \
-    git remote add origin https://github.com/NuSkooler/enigma-bbs.git && \
-    git fetch --depth 1 origin ${ENIGMA_VERSION} && \
-    git checkout ${ENIGMA_VERSION}
+# Fetch ENiGMA½ BBS source for the requested version (branch or commit)
+RUN mkdir -p /build && \
+    curl -fsSL "https://github.com/NuSkooler/enigma-bbs/archive/${ENIGMA_VERSION}.tar.gz" | \
+    tar xz -C /build --strip-components=1
 
 # Install project dependencies (will be cached unless package.json changes)
 # Skip prepare scripts (husky) but rebuild all native modules
