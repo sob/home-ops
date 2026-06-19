@@ -18,8 +18,13 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    serviceAccount:
+      create: true
+      name: gatus
     controllers:
       main:
+        serviceAccount:
+          name: gatus
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
