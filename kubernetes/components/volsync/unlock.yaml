@@ -4,7 +4,7 @@ kind: CronJob
 metadata:
   name: "${APP}-volsync-unlock"
 spec:
-  schedule: "${VOLSYNC_UNLOCK_SCHEDULE:-0 */6 * * *}"
+  schedule: "${VOLSYNC_UNLOCK_SCHEDULE:-0 * * * *}"
   concurrencyPolicy: Forbid
   suspend: ${VOLSYNC_UNLOCK_SUSPENDED:-false}
   jobTemplate:
