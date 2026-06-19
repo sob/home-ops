@@ -66,8 +66,6 @@ ingress:
       originServerName: "sso.halfduplex.io"
   - hostname: "*.halfduplex.io"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "*.halfduplex.io"
   - hostname: "halfduplex.io"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
