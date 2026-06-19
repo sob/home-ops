@@ -1,5 +1,5 @@
 variable "VERSION" {
-  default = "master"
+  default = "0792e93f13e4"
 }
 
 variable "PLATFORMS" {
