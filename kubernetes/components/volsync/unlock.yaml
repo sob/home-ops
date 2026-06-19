@@ -23,6 +23,10 @@ spec:
             runAsGroup: 65534
             seccompProfile:
               type: RuntimeDefault
+          volumes:
+            - name: tmp
+              emptyDir:
+                sizeLimit: 128Mi
           containers:
             - name: unlock
               image: docker.io/restic/restic:0.18.1
@@ -30,6 +34,9 @@ spec:
               envFrom:
                 - secretRef:
                     name: "${APP}-volsync-r2-secret"
+              env:
+                - name: RESTIC_CACHE_DIR
+                  value: /tmp/restic-cache
               command:
                 - /bin/sh
                 - -c
@@ -39,6 +46,9 @@ spec:
                   restic unlock || echo "Unlock failed or no stale locks present"
                   echo "Repository lock status:"
                   restic snapshots --latest 1 2>/dev/null || true
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
               resources:
                 requests:
                   cpu: 10m
