@@ -50,7 +50,7 @@ spec:
         cpu: "${VOLSYNC_CPU_REQUEST:-100m}"
         memory: "${VOLSYNC_MEMORY_REQUEST:-256Mi}"
       limits:
-        memory: "${VOLSYNC_MEMORY_LIMIT:-1Gi}"
+        memory: "${VOLSYNC_MEMORY_LIMIT:-2Gi}"
     moverAffinity:
       nodeAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
@@ -88,4 +88,4 @@ spec:
         cpu: "${VOLSYNC_CPU_REQUEST:-100m}"
         memory: "${VOLSYNC_MEMORY_REQUEST:-256Mi}"
       limits:
-        memory: "${VOLSYNC_MEMORY_LIMIT:-1Gi}"
+        memory: "${VOLSYNC_MEMORY_LIMIT:-2Gi}"
