@@ -5,6 +5,7 @@ kind: Component
 resources:
   - ./claim.yaml
   - ./r2.yaml
+  - ./unlock.yaml
 
 patches:
   - target:

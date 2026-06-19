@@ -40,10 +40,25 @@ spec:
     cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
     storageClassName: "${VOLSYNC_STORAGECLASS:-ceph-block}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
+    capacity: "${VOLSYNC_CAPACITY}"
     moverSecurityContext:
       runAsUser: "${VOLSYNC_UID:-568}"
       runAsGroup: "${VOLSYNC_GID:-568}"
       fsGroup: "${VOLSYNC_FSGROUP:-568}"
+    moverResources:
+      requests:
+        cpu: "${VOLSYNC_CPU_REQUEST:-100m}"
+        memory: "${VOLSYNC_MEMORY_REQUEST:-256Mi}"
+      limits:
+        memory: "${VOLSYNC_MEMORY_LIMIT:-1Gi}"
+    moverAffinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node-role.kubernetes.io/media
+                  operator: DoesNotExist
     retain:
       daily: 7
 ---
@@ -68,3 +83,9 @@ spec:
       runAsUser: "${VOLSYNC_UID:-568}"
       runAsGroup: "${VOLSYNC_GID:-568}"
       fsGroup: "${VOLSYNC_FSGROUP:-568}"
+    moverResources:
+      requests:
+        cpu: "${VOLSYNC_CPU_REQUEST:-100m}"
+        memory: "${VOLSYNC_MEMORY_REQUEST:-256Mi}"
+      limits:
+        memory: "${VOLSYNC_MEMORY_LIMIT:-1Gi}"
