@@ -36,71 +36,86 @@ locals {
 
   proxy_applications = {
     bazarr = {
-      external_host   = "https://bazarr.${local.cluster_domain}"
+      external_host   = "https://bazarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
     dozzle = {
-      external_host = "https://logs.${local.cluster_domain}"
+      external_host = "https://logs.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/dozzle.png"
       group         = resource.authentik_group.observability
       namespace     = "observability"
     },
     echo_server = {
-      external_host = "https://echo-server.${local.cluster_domain}"
+      external_host = "https://echo-server.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
       group         = resource.authentik_group.network
     },
     enigma_code = {
-      external_host = "https://edit.halfduplex.io"
+      external_host = "https://edit.56kbps.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png"
       group         = resource.authentik_group.network
-      cookie_domain = "halfduplex.io"
+      cookie_domain = "56kbps.io"
     },
     enigma_draw = {
-      external_host = "https://draw.halfduplex.io"
+      external_host = "https://draw.56kbps.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/draw.png"
       group         = resource.authentik_group.network
-      cookie_domain = "halfduplex.io"
+      cookie_domain = "56kbps.io"
     },
     homeassistant = {
-      external_host = "https://hass.${local.cluster_domain}"
+      external_host = "https://hass.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
       group         = resource.authentik_group.home
     },
     lidarr = {
-      external_host   = "https://lidarr.${local.cluster_domain}"
+      external_host   = "https://lidarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
     prowlarr = {
-      external_host   = "https://prowlarr.${local.cluster_domain}"
+      external_host   = "https://prowlarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
     radarr = {
-      external_host   = "https://radarr.${local.cluster_domain}"
+      external_host   = "https://radarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
     readarr = {
-      external_host   = "https://readarr.${local.cluster_domain}"
+      external_host   = "https://readarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
+    sabnzbd = {
+      external_host = "https://sab.halfduplex.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sabnzbd.png"
+      group         = resource.authentik_group.media
+    },
     sonarr = {
-      external_host   = "https://sonarr.${local.cluster_domain}"
+      external_host   = "https://sonarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
       group           = resource.authentik_group.media
       skip_path_regex = "^/api([/?].*)?"
     },
+    tautulli = {
+      external_host = "https://tautulli.halfduplex.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png"
+      group         = resource.authentik_group.media
+    },
+    qbittorrent = {
+      external_host = "https://qbittorrent.halfduplex.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/qbittorrent.png"
+      group         = resource.authentik_group.media
+    },
     wizarr = {
-      external_host  = "https://join.${local.cluster_domain}"
+      external_host  = "https://join.halfduplex.io"
       icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png"
       group          = resource.authentik_group.media
     },
