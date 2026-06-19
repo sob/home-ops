@@ -35,15 +35,47 @@ spec:
                 if [ ! -f index.html ]; then
                   echo "Downloading VTX client files..."
                   curl -fsSL https://github.com/codewar65/VTX_ClientServer/archive/refs/heads/master.tar.gz | tar xz --strip-components=2 VTX_ClientServer-master/www
-                  # Update WebSocket URL in index.html
-                   sed -i 's|wsConnect:.*|wsConnect: "wss://wss.56kbps.io",|' index.html
-                   sed -i 's|sysName:.*|sysName: "56kbps BBS",|' index.html
-                  # Fix vtxclient.js filename reference
-                  sed -i 's|vtxclient_94.js|vtxclient.js|' index.html
                   echo "VTX client ready"
                 else
                   echo "VTX client files already exist, skipping download"
                 fi
+                # Ensure WebSocket URL and sysName are always correct
+                sed -i 's|wsConnect:.*|wsConnect: "wss://wss.56kbps.io",|' index.html
+                sed -i 's|sysName:.*|sysName: "56kbps BBS",|' index.html
+                # Fix vtxclient.js filename reference
+                sed -i 's|vtxclient_94.js|vtxclient.js|' index.html
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+          init-config:
+            image:
+              repository: docker.io/alpine
+              tag: 3.21
+            command:
+              - /bin/sh
+              - -c
+              - |
+                CONFIG_FILE=/enigma-bbs/config/config.hjson
+                if [ -f "$CONFIG_FILE" ]; then
+                  echo "Patching ENiGMA config for 56kbps.io..."
+                  sed -i "s|boardName: halfduplex|boardName: 56kbps|" "$CONFIG_FILE"
+                  sed -i "s|prettyBoardName : '|08halfduplex'|prettyBoardName : '|0856kbps'|" "$CONFIG_FILE"
+                  sed -i "s|website         : 'https://halfduplex.io'|website         : 'https://56kbps.io'|" "$CONFIG_FILE"
+                  sed -i "s|menuFile: /enigma-bbs/menus/halfduplex-main.hjson|menuFile: /enigma-bbs/menus/56kbps-main.hjson|" "$CONFIG_FILE"
+                  sed -i "s|domain: halfduplex.io|domain: 56kbps.io|" "$CONFIG_FILE"
+                else
+                  echo "No config.hjson found yet; skipping patch"
+                fi
+                # Rename menu files if they still use the old halfduplex prefix
+                for f in /enigma-bbs/menus/halfduplex-*.hjson; do
+                  [ -e "$f" ] || continue
+                  newname=$(echo "$f" | sed 's/halfduplex-/56kbps-/')
+                  mv "$f" "$newname"
+                done
+                # Update any halfduplex menu references inside menu files
+                 sed -i 's|halfduplex-|56kbps-|g' /enigma-bbs/menus/*.hjson 2>/dev/null || true
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
@@ -352,6 +384,11 @@ spec:
             init-vtx:
               - path: /vtx
                 subPath: vtx
+            init-config:
+              - path: /enigma-bbs/config
+                subPath: config
+              - path: /enigma-bbs/menus
+                subPath: menus
             nginx:
               - path: /usr/share/nginx/html
                 subPath: vtx
