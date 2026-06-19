@@ -6,6 +6,7 @@ resources:
   - ./claim.yaml
   - ./r2.yaml
   - ./unlock.yaml
+  - ./unlock-rbac.yaml
 
 patches:
   - target:

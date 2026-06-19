@@ -17,6 +17,7 @@ spec:
             app.kubernetes.io/name: "${APP}-volsync-unlock"
         spec:
           restartPolicy: OnFailure
+          serviceAccountName: "${APP}-volsync-unlock"
           securityContext:
             runAsNonRoot: true
             runAsUser: 65534
@@ -43,7 +44,18 @@ spec:
                 - |
                   set -e
                   echo "Unlocking restic repository for ${APP}..."
-                  restic unlock || echo "Unlock failed or no stale locks present"
+                  # Only use --remove-all when no active VolSync mover is running for this app.
+                  # Otherwise fall back to the safe stale-lock removal.
+                  if kubectl get pods -n "$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)" \
+                      -l "app.kubernetes.io/created-by=volsync" \
+                      --field-selector=status.phase=Running \
+                      2>/dev/null | grep -q "volsync-src-${APP}-r2"; then
+                    echo "Active VolSync mover found for ${APP}, using safe unlock..."
+                    restic unlock || echo "No stale locks to remove"
+                  else
+                    echo "No active VolSync mover found for ${APP}, using remove-all unlock..."
+                    restic unlock --remove-all || echo "No locks to remove"
+                  fi
                   echo "Repository lock status:"
                   restic snapshots --latest 1 2>/dev/null || true
               volumeMounts:
