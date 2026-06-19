@@ -190,8 +190,9 @@ jobs:
 
       - name: Build App
         id: build
-        uses: docker/bake-action@v7
+        uses: docker/bake-action@v5
         with:
+          workdir: containers/${{ matrix.app }}
           targets: ${{ matrix.app }}
           provenance: false
           set: |
@@ -204,7 +205,7 @@ jobs:
             *.cache-to=type=inline
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
           files: |
-            containers/${{ matrix.app }}/docker-bake.hcl
+            ./docker-bake.hcl
             ${{ steps.meta.outputs.bake-file }}
 
       - name: Export digest
