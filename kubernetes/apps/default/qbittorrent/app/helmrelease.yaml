@@ -110,10 +110,10 @@ spec:
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/target: external.halfduplex.io
         className: external
         hosts:
-          - host: qbittorrent.${SECRET_DOMAIN}
+          - host: qbittorrent.halfduplex.io
             paths:
               - path: /
                 service:

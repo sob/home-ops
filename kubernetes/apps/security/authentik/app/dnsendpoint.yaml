@@ -10,43 +10,84 @@ metadata:
 spec:
   endpoints:
     # Block IPv6 for SSO to prevent upstream lookups returning Cloudflare IPs
-    - dnsName: sso.56kbps.io
+    - dnsName: sso.halfduplex.io
       recordTTL: 300
       recordType: AAAA
       targets:
         - "::1"  # IPv6 localhost - prevents upstream lookup
-    # Also block IPv6 for internal services that should never use Cloudflare
-    - dnsName: radarr.56kbps.io
+    - dnsName: sso.56kbps.io
       recordTTL: 300
       recordType: AAAA
       targets:
         - "::1"
-    - dnsName: sonarr.56kbps.io
+    # Also block IPv6 for homelab services that should never use Cloudflare
+    - dnsName: radarr.halfduplex.io
       recordTTL: 300
       recordType: AAAA
       targets:
         - "::1"
-    - dnsName: lidarr.56kbps.io
+    - dnsName: sonarr.halfduplex.io
       recordTTL: 300
       recordType: AAAA
       targets:
         - "::1"
-    - dnsName: readarr.56kbps.io
+    - dnsName: lidarr.halfduplex.io
       recordTTL: 300
       recordType: AAAA
       targets:
         - "::1"
-    - dnsName: prowlarr.56kbps.io
+    - dnsName: readarr.halfduplex.io
       recordTTL: 300
       recordType: AAAA
       targets:
         - "::1"
-    - dnsName: bazarr.56kbps.io
+    - dnsName: prowlarr.halfduplex.io
       recordTTL: 300
       recordType: AAAA
       targets:
         - "::1"
-    - dnsName: tautulli.56kbps.io
+    - dnsName: bazarr.halfduplex.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: tautulli.halfduplex.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: sab.halfduplex.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: qbittorrent.halfduplex.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: echo-server.halfduplex.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    # Block IPv6 for enigma-bbs services on 56kbps.io
+    - dnsName: 56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: enigma.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: edit.56kbps.io
+      recordTTL: 300
+      recordType: AAAA
+      targets:
+        - "::1"
+    - dnsName: draw.56kbps.io
       recordTTL: 300
       recordType: AAAA
       targets:

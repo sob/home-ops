@@ -28,6 +28,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      GATUS_DOMAIN: halfduplex.io
       VOLSYNC_SCHEDULE: "18 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
       VOLSYNC_CACHE_CAPACITY: 10Gi

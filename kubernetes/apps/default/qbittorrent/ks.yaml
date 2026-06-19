@@ -28,6 +28,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      GATUS_DOMAIN: halfduplex.io
       GATUS_SUBDOMAIN: qbittorrent
       VOLSYNC_SCHEDULE: "15 0 * * *"
       VOLSYNC_CAPACITY: 10Gi
