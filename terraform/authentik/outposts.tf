@@ -51,7 +51,7 @@ resource "authentik_outpost" "halfduplex" {
   config = jsonencode({
     "log_level"                      = "info"
     "docker_labels"                  = null
-    "authentik_host"                 = "https://sso.halfduplex.io/"
+    "authentik_host"                 = "https://sso.${local.cluster_domain}/"
     "docker_network"                 = null
     "container_image"                = null
     "docker_map_ports"               = true
