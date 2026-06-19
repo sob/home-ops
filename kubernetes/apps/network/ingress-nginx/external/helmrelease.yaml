@@ -73,7 +73,7 @@ spec:
           labels:
             prometheus.io/forward: "true"
       extraArgs:
-        default-ssl-certificate: "network/${SECRET_DOMAIN/./-}-production-tls"
+        default-ssl-certificate: "network/halfduplex-io-production-tls"
       resources:
         requests:
           cpu: 100m
