@@ -38,7 +38,7 @@ spec:
               +(nginx.ingress.kubernetes.io/proxy-buffers): |-
                 8 16k
               +(nginx.ingress.kubernetes.io/auth-url): |-
-                http://ak-outpost-internal.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+                http://ak-outpost-56kbps.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
               +(nginx.ingress.kubernetes.io/auth-signin): |-
                 https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
               +(nginx.ingress.kubernetes.io/auth-response-headers): |-
@@ -69,7 +69,7 @@ spec:
               +(nginx.ingress.kubernetes.io/proxy-buffers): |-
                 8 16k
               +(nginx.ingress.kubernetes.io/auth-url): |-
-                http://ak-outpost-external.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+                http://ak-outpost-halfduplex.security.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
               +(nginx.ingress.kubernetes.io/auth-signin): |-
                 https://$http_host/outpost.goauthentik.io/start?rd=https://$http_host$escaped_request_uri
               +(nginx.ingress.kubernetes.io/auth-response-headers): |-
