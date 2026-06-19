@@ -90,3 +90,7 @@ spec:
                 service:
                   identifier: app
                   port: http
+        tls:
+          - hosts:
+              - "{{ .Release.Name }}.halfduplex.io"
+            secretName: halfduplex-io-production-tls

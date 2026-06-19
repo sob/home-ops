@@ -119,6 +119,10 @@ spec:
                 service:
                   identifier: app
                   port: http
+        tls:
+          - hosts:
+              - qbittorrent.halfduplex.io
+            secretName: halfduplex-io-production-tls
     persistence:
       config:
         existingClaim: qbittorrent

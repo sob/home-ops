@@ -238,6 +238,10 @@ spec:
                 service:
                   name: enigma-bbs
                   port: 8443
+        tls:
+          - hosts:
+              - edit.56kbps.io
+            secretName: 56kbps-io-production-tls
       draw:
         enabled: true
         className: external
@@ -251,6 +255,10 @@ spec:
                 service:
                   name: enigma-bbs
                   port: 8888
+        tls:
+          - hosts:
+              - draw.56kbps.io
+            secretName: 56kbps-io-production-tls
     route:
       websocket:
         parentRefs:

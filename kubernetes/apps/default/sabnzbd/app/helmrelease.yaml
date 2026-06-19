@@ -114,6 +114,10 @@ spec:
                 service:
                   identifier: app
                   port: http
+        tls:
+          - hosts:
+              - sab.halfduplex.io
+            secretName: halfduplex-io-production-tls
     persistence:
       config:
         existingClaim: sabnzbd

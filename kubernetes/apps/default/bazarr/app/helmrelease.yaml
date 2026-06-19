@@ -123,6 +123,10 @@ spec:
                 service:
                   identifier: app
                   port: http
+        tls:
+          - hosts:
+              - bazarr.halfduplex.io
+            secretName: halfduplex-io-production-tls
     persistence:
       add-ons:
         type: emptyDir
