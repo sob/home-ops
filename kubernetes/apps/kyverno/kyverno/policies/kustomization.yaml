@@ -1,9 +1,0 @@
----
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - ./add-authentik-ingress-annotations.yaml
-  - ./add-reflector-cert-annotations.yaml
-  - ./cleanup-controller-rbac.yaml
-  - ./cleanup-k6-resources.yaml

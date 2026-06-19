@@ -5,6 +5,11 @@ kind: Certificate
 metadata:
   name: "${SECRET_DOMAIN/./-}-production"
   namespace: network
+  annotations:
+    reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+    reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "default,security"
+    reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+    reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "default,security"
 spec:
   secretName: "${SECRET_DOMAIN/./-}-production-tls"
   issuerRef:

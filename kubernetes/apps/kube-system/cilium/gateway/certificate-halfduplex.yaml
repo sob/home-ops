@@ -5,6 +5,11 @@ kind: Certificate
 metadata:
   name: halfduplex-io-production
   namespace: network
+  annotations:
+    reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+    reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "default,network"
+    reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+    reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "default,network"
 spec:
   secretName: halfduplex-io-production-tls
   issuerRef:

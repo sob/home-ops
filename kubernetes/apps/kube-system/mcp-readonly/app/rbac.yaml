@@ -127,14 +127,6 @@ rules:
     resources:
       - customresourcedefinitions
     verbs: ["get", "list", "watch"]
-  # Kyverno
-  - apiGroups: ["kyverno.io"]
-    resources:
-      - clusterpolicies
-      - policies
-      - policyreports
-      - clusterpolicyreports
-    verbs: ["get", "list", "watch"]
   # Cilium
   - apiGroups: ["cilium.io"]
     resources:
