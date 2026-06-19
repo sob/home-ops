@@ -8,12 +8,13 @@ metadata:
     policies.kyverno.io/title: Add reflector annotations to wildcard certificate
     policies.kyverno.io/subject: Secret
     policies.kyverno.io/description: >-
-      This policy adds reflector annotations to the wildcard certificate secret
-      so it gets synced to the security namespace for authentik outposts
+      This policy adds reflector annotations to the wildcard certificate secrets
+      so they get synced to namespaces that need them for external ingresses and
+      authentik outposts.
 spec:
   background: false
   rules:
-    - name: add-reflector-annotations
+    - name: add-reflector-annotations-56kbps
       match:
         any:
           - resources:
@@ -24,7 +25,22 @@ spec:
         patchStrategicMerge:
           metadata:
             annotations:
-              +(reflector.v1.k8s.emberstack.com/reflection-allowed): "true"
-              +(reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces): "security"
-              +(reflector.v1.k8s.emberstack.com/reflection-auto-enabled): "true"
-              +(reflector.v1.k8s.emberstack.com/reflection-auto-namespaces): "security"
+              (reflector.v1.k8s.emberstack.com/reflection-allowed): "true"
+              (reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces): "default,security"
+              (reflector.v1.k8s.emberstack.com/reflection-auto-enabled): "true"
+              (reflector.v1.k8s.emberstack.com/reflection-auto-namespaces): "default,security"
+    - name: add-reflector-annotations-halfduplex
+      match:
+        any:
+          - resources:
+              kinds: ["Secret"]
+              names: ["halfduplex-io-production-tls"]
+              namespaces: ["network"]
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              (reflector.v1.k8s.emberstack.com/reflection-allowed): "true"
+              (reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces): "default,network"
+              (reflector.v1.k8s.emberstack.com/reflection-auto-enabled): "true"
+              (reflector.v1.k8s.emberstack.com/reflection-auto-namespaces): "default,network"
