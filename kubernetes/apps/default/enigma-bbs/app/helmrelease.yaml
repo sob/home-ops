@@ -61,7 +61,7 @@ spec:
                 if [ -f "$CONFIG_FILE" ]; then
                   echo "Patching ENiGMA config for 56kbps.io..."
                   sed -i "s|boardName: halfduplex|boardName: 56kbps|" "$CONFIG_FILE"
-                  sed -i "s|prettyBoardName : '|08halfduplex'|prettyBoardName : '|0856kbps'|" "$CONFIG_FILE"
+                  sed -i "s#prettyBoardName : '|08halfduplex'#prettyBoardName : '|0856kbps'#" "$CONFIG_FILE"
                   sed -i "s|website         : 'https://halfduplex.io'|website         : 'https://56kbps.io'|" "$CONFIG_FILE"
                   sed -i "s|menuFile: /enigma-bbs/menus/halfduplex-main.hjson|menuFile: /enigma-bbs/menus/56kbps-main.hjson|" "$CONFIG_FILE"
                   sed -i "s|domain: halfduplex.io|domain: 56kbps.io|" "$CONFIG_FILE"
@@ -75,7 +75,7 @@ spec:
                   mv "$f" "$newname"
                 done
                 # Update any halfduplex menu references inside menu files
-                 sed -i 's|halfduplex-|56kbps-|g' /enigma-bbs/menus/*.hjson 2>/dev/null || true
+                sed -i 's|halfduplex-|56kbps-|g' /enigma-bbs/menus/*.hjson 2>/dev/null || true
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
