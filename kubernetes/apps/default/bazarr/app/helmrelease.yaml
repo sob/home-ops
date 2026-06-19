@@ -115,6 +115,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.halfduplex.io
           authentik.home.arpa/internal: "true"
+          fluxcd.io/reconcileTrigger: "reinstall-ingress"
         className: external
         hosts:
           - host: bazarr.halfduplex.io
