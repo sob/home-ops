@@ -40,7 +40,12 @@ resource "authentik_outpost" "main" {
     "kubernetes_json_patches"        = null
     "kubernetes_service_type"        = "ClusterIP"
     "kubernetes_image_pull_secrets"  = []
-    "kubernetes_disabled_components" = ["ingress"]
+    "kubernetes_disabled_components" = []
+    "kubernetes_ingress_class_name"    = "external"
+    "kubernetes_ingress_annotations" = {
+      "external-dns.alpha.kubernetes.io/is-public" = "false"
+      "external-dns.alpha.kubernetes.io/target"    = "external.56kbps.io"
+    }
   })
 }
 
@@ -63,6 +68,11 @@ resource "authentik_outpost" "halfduplex" {
     "kubernetes_json_patches"        = null
     "kubernetes_service_type"        = "ClusterIP"
     "kubernetes_image_pull_secrets"  = []
-    "kubernetes_disabled_components" = ["ingress"]
+    "kubernetes_disabled_components" = []
+    "kubernetes_ingress_class_name"    = "external"
+    "kubernetes_ingress_annotations" = {
+      "external-dns.alpha.kubernetes.io/is-public" = "false"
+      "external-dns.alpha.kubernetes.io/target"    = "external.halfduplex.io"
+    }
   })
 }
