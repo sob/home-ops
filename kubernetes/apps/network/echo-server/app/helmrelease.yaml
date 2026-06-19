@@ -75,7 +75,7 @@ spec:
             scrapeTimeout: 10s
     ingress:
       app:
-         className: external
+        className: external
         annotations:
           external-dns.alpha.kubernetes.io/target: external.halfduplex.io
           nginx.ingress.kubernetes.io/proxy-body-size: 1000M
