@@ -1,0 +1,24 @@
+---
+machine:
+  nodeLabels:
+    # Garage rack / failure domain (existing rack = zone "basement")
+    topology.kubernetes.io/zone: garage
+  type: controlplane
+  network:
+    hostname: metal-09
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: 94:c6:91:19:33:03
+        addresses:
+          - 10.1.100.109/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.1.100.1
+        dhcp: false
+        # Shared control-plane VIP (Talos L2 VIP).
+        # Requires this node on the SAME L2 subnet (10.1.100.0/24) as the other CPs.
+        vip:
+          ip: 10.1.100.100
+  install:
+    diskSelector:
+      serial: '21354S801262'

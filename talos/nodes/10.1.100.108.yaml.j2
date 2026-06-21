@@ -1,0 +1,26 @@
+---
+machine:
+  nodeLabels:
+    # Garage rack / failure domain (existing rack = zone "basement")
+    topology.kubernetes.io/zone: garage
+  type: controlplane
+  network:
+    hostname: metal-08
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: 94:c6:91:a1:ea:79
+        addresses:
+          - 10.1.100.108/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.1.100.1
+        dhcp: false
+        # Shared control-plane VIP (Talos L2 VIP).
+        # Requires this node on the SAME L2 subnet (10.1.100.0/24) as the other CPs.
+        vip:
+          ip: 10.1.100.100
+  install:
+    # ADATA SU800 leaves the ATA serial field empty; its serial (2I3320041424)
+    # is only exposed via the T10 wwid, so we match on that.
+    diskSelector:
+      wwid: '*2I3320041424*'

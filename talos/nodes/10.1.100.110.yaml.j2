@@ -1,0 +1,23 @@
+---
+machine:
+  nodeLabels:
+    # Garage rack / failure domain (existing rack = zone "basement")
+    topology.kubernetes.io/zone: garage
+  type: worker
+  network:
+    hostname: metal-10
+    interfaces:
+      # TODO: MAC of the NEW metal-10 box (the 1c:69:7a box moved to metal-11).
+      # Verify against `talosctl -n <ip> get links --insecure` before applying.
+      - deviceSelector:
+          hardwareAddr: 'REPLACE_WITH_MAC'
+        addresses:
+          - 10.1.100.110/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.1.100.1
+        dhcp: false
+  install:
+    # TODO: read with `talosctl -n <ip> get disks --insecure` after first boot
+    diskSelector:
+      serial: 'REPLACE_WITH_DISK_SERIAL'

@@ -30,6 +30,11 @@ machine:
   install:
     image: factory.talos.dev/metal-installer/{{ ENV.TALOS_SCHEMATIC_ID }}:{{ ENV.TALOS_VERSION }}
     wipe: true
+    extraKernelArgs:
+      # Keep USB HID alive over the IP-KVMs (TinyPilot / GLKVM Comet); without
+      # this the kernel autosuspends the emulated keyboard and it stops responding
+      # after boot even though it works in BIOS.
+      - usbcore.autosuspend=-1
   kernel:
     modules:
       - name: nbd

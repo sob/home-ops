@@ -1,0 +1,25 @@
+---
+machine:
+  nodeLabels:
+    # Garage rack / failure domain (existing rack = zone "basement")
+    topology.kubernetes.io/zone: garage
+    storage.rook.io/ceph: "true"
+  type: worker
+  network:
+    hostname: metal-11
+    interfaces:
+      # Confirmed MAC for metal-11 (the 1c:69:7a box).
+      - deviceSelector:
+          hardwareAddr: 1c:69:7a:63:d6:4a
+        addresses:
+          - 10.1.100.111/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.1.100.1
+        dhcp: false
+  install:
+    # Boot disk only. The Ceph OSD disk (separate device) is declared in the
+    # Rook CephCluster `storage.nodes` list, not here.
+    # TODO: read with `talosctl -n <ip> get disks --insecure` after first boot
+    diskSelector:
+      serial: 'REPLACE_WITH_DISK_SERIAL'
