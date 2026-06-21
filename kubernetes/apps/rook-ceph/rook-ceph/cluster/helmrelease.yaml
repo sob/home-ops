@@ -203,6 +203,15 @@ spec:
           - name: "metal-06"
             devices:
               - name: "/dev/sda"
+          - name: "metal-11"
+            devices:
+              - name: "/dev/sda"
+          - name: "metal-12"
+            devices:
+              - name: "/dev/sda"
+          - name: "metal-13"
+            devices:
+              - name: "/dev/sda"
 
     cephBlockPools:
       - name: ceph-blockpool
