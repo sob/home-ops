@@ -57,8 +57,14 @@ newer NUCs drop that level to `Advanced → Onboard Devices`):
 | **Bluetooth** | Disabled | Same as WLAN |
 | **Enhanced Consumer IR** | Disabled | Remote-control receiver, useless headless |
 | **HDMI CEC Control** | Disabled | TV-remote-over-HDMI; irrelevant via KVM |
-| **Thunderbolt Support** | Disabled | No TB peripherals |
 | **Digital Microphone** | Disabled | N/A |
+
+> **Leave Thunderbolt Support ENABLED fleet-wide.** The rear USB-C on the i5BNH
+> is the Thunderbolt 3 port (doubles as USB 3.1); the GLKVM Comet connects
+> through it, so disabling TB risks killing the KVM. The only reason to disable
+> is physical DMA attack surface, which is moot for a home rack and already
+> mitigated by VT-d (IOMMU) being enabled. The i3 control-plane boards may not
+> expose the toggle at all.
 
 Other: `Advanced → Devices → USB → Portable Device Charging Mode` → **Disabled**;
 `Power → Deep Sleep / Deep S5` → **Disabled** (conflicts with reliable AC-restore
@@ -97,7 +103,25 @@ which Rook requires.
 | Network / PXE boot | **Off** | `Boot → Boot Configuration` (not using PXE) |
 | Boot order | Install disk (NVMe/SATA) first; keep USB available | `Boot → Boot Priority` |
 
-## 5. Operational / power
+## 5. Cooling
+
+Headless rack nodes — noise is irrelevant, thermal headroom/longevity is not.
+The garage is warmer/less stable than the basement, and the i5 Ceph workers see
+sustained load (rebalance/scrub).
+
+| Setting | Value | Path |
+| --- | --- | --- |
+| **Fan Control Mode** | **Cool** | `Cooling` tab |
+
+Default is tuned for a quiet desktop; "Cool" runs the fan more aggressively.
+Avoid "Quiet". "Fixed"/Full-Speed is needless fan wear. Leave the **Performance**
+tab at default (Turbo + Hyper-Threading on) — these are 15W TDP parts; let the
+fan handle heat, don't throttle the CPU.
+
+Verify under load: `talosctl -n <ip> read /sys/class/thermal/thermal_zone0/temp`
+(millidegrees C); keep sustained load under ~75-80°C.
+
+## 6. Operational / power
 
 | Setting | Value | Path |
 | --- | --- | --- |
