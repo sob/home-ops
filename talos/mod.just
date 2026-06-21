@@ -21,6 +21,14 @@ download-image version schematic:
     "https://factory.talos.dev/image/{{ schematic }}/{{ version }}/metal-amd64.iso"
   just log info "Downloaded Talos" version "{{ version }}" schematic "{{ schematic }}"
 
+[doc('Download a NUC BIOS .bio into talos/bios (pass the Intel/ASUS direct .bio URL)')]
+download-bios url:
+  mkdir -p "{{ talos_dir }}/bios"
+  gum spin --title "Downloading $(basename {{ url }}) ..." -- \
+    curl -sfL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
+      -o "{{ talos_dir }}/bios/$(basename {{ url }})" "{{ url }}"
+  just log info "Downloaded BIOS" file "$(basename {{ url }})" dest "talos/bios"
+
 [doc('Generate schematic ID from talos schematic')]
 gen-schematic-id:
   curl -sX POST --binary-data @<(just template "{{ talos_dir }}/schematic.yaml.j2") "https://factory.talos.dev/schematics" | jq -r '.id'

@@ -2,6 +2,9 @@
 .mcp.json
 .DS_Store
 Thumbs.db
+# Firmware / boot media (large binaries, do not commit)
+talos/bios/
+talos/*.iso
 # k8s
 kubeconfig
 .kubeconfig
