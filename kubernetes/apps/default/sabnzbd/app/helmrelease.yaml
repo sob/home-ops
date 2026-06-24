@@ -39,7 +39,7 @@ spec:
                 sabnzbd.default.svc,
                 sabnzbd.default.svc.cluster,
                 sabnzbd.default.svc.cluster.local,
-                sab.${SECRET_DOMAIN}
+                sab.halfduplex.io
             envFrom:
               - secretRef:
                   name: sabnzbd-secret

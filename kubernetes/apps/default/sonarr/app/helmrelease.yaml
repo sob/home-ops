@@ -35,7 +35,7 @@ spec:
               SONARR__LOG__LEVEL: debug
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
-              SONARR__APPLICATION_URL: https://sonarr.${SECRET_DOMAIN}
+              SONARR__APPLICATION_URL: https://sonarr.halfduplex.io
               TZ: America/Chicago
             envFrom: &envFrom
               - secretRef:
