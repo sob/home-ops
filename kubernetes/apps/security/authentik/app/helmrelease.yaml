@@ -34,7 +34,7 @@ spec:
       enabled: false
       redis:
         host: dragonfly.database.svc.cluster.local
-      log_level: trace
+      log_level: info
     postgresql:
       enabled: true
       image:
