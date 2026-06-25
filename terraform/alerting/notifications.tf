@@ -75,9 +75,9 @@ resource "grafana_notification_policy" "main" {
       match = "=~"
       value = "NodeDown|ControlPlaneNodeDown"
     }
-    group_by        = ["alertname", "instance"]
+    group_by        = ["alertname"]  # batch multiple down nodes into ONE message
     contact_point   = grafana_contact_point.slack_critical.name
-    group_wait      = "10s"  # Alert quickly for nodes
+    group_wait      = "30s"  # brief wait so simultaneous node failures batch together
     repeat_interval = "2h"   # Remind every 2 hours
   }
 
@@ -93,8 +93,10 @@ resource "grafana_notification_policy" "main" {
       match = "!="
       value = "true"
     }
-    group_by        = ["alertname", "instance", "service"]  # Group by alert, instance, and service
+    group_by        = ["alertname"]  # batch multiple instances of the same alert into ONE message
     contact_point   = grafana_contact_point.slack_critical.name
+    group_wait      = "30s"
+    group_interval  = "5m"
     repeat_interval = "4h"
   }
 
@@ -135,8 +137,10 @@ resource "grafana_notification_policy" "main" {
       match = "="
       value = "warning"
     }
-    group_by        = ["..."]
+    group_by        = ["alertname"]  # batch e.g. multiple SonosDeviceDown into ONE message listing each
     contact_point   = grafana_contact_point.slack_warnings.name
+    group_wait      = "1m"   # brief wait so sibling instances join the same batch
+    group_interval  = "5m"
     repeat_interval = "1w"  # Weekly
   }
 }
