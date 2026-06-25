@@ -197,7 +197,7 @@ resource "grafana_rule_group" "pdu" {
     name        = "PDUHighLoad"
     annotations = {
       summary     = "PDU high load"
-      description = "PDU rack-pdu.stonehedges.net load is above 90% (current: {{ $values.A }}dA = {{ div $values.A 10 }}A)"
+      description = "PDU rack-pdu.stonehedges.net load is above 90% (current: {{ $values.A }}A)"
     }
     labels = {
       severity = "warning"
