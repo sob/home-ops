@@ -11,7 +11,10 @@ resource "authentik_brand" "homelab" {
 resource "authentik_brand" "halfduplex" {
   domain              = "halfduplex.io"
   branding_title      = "halfduplex.io"
-  branding_logo       = "public/halfduplex.png"
+  # Served from the (public) repo via jsdelivr CDN — bypasses authentik's
+  # media storage, which changed in 2025.12 (/files prefix, /data/media) and
+  # no longer serves volume-mounted files cleanly. Matches the app-icon pattern.
+  branding_logo       = "https://cdn.jsdelivr.net/gh/sob/home-ops@main/kubernetes/apps/security/authentik/app/halfduplex.png"
   branding_favicon    = "/static/dist/assets/icons/icon.png"
   branding_custom_css = file("${path.module}/halfduplex-branding.css")
   flow_authentication = authentik_flow.authentication-halfduplex.uuid

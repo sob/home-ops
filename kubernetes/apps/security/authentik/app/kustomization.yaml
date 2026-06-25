@@ -14,4 +14,3 @@ resources:
   - ./servicemonitor.yaml
   - ./volsync.yaml
   - ./volsync-secret.yaml
-  - ./configmap-halfduplex.yaml

@@ -74,17 +74,6 @@ spec:
               prometheus.io/forward: "true"
       ingress:
         enabled: false
-      volumes:
-        - name: halfduplex-logo
-          configMap:
-            name: authentik-halfduplex-logo
-      volumeMounts:
-        - name: halfduplex-logo
-          # 2025.12 moved local media root from /media to /data/media (served at /files/...).
-          # Brand logo URL (terraform system.tf) updated to /files/public/halfduplex.png separately.
-          mountPath: /data/media/public/halfduplex.png
-          subPath: halfduplex.png
-          readOnly: true
       initContainers:
         - name: wait-for-postgresql
           image: docker.io/library/postgres:17-alpine
