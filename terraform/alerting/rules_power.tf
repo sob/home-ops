@@ -15,18 +15,18 @@ resource "grafana_rule_group" "ups" {
       severity = "critical"
       depends_on_prometheus = "true"
     }
-    for      = "30s"
+    for      = "1m"
     condition = "A"
     no_data_state = "OK"
 
     data {
       ref_id = "A"
-      
+
       relative_time_range {
         from = 60
         to   = 0
       }
-      
+
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "max by (instance) (upsBaseBatteryTimeOnBattery) > 0"
@@ -45,18 +45,18 @@ resource "grafana_rule_group" "ups" {
       severity = "critical"
       depends_on_prometheus = "true"
     }
-    for      = "1m"
+    for      = "5m"
     condition = "A"
     no_data_state = "OK"
 
     data {
       ref_id = "A"
-      
+
       relative_time_range {
         from = 60
         to   = 0
       }
-      
+
       datasource_uid = local.prometheus_pdc_uid
       model          = jsonencode({
         expr = "min by (instance) (upsAdvanceBatteryCapacity) < 25"
