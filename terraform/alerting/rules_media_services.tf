@@ -511,4 +511,36 @@ resource "grafana_rule_group" "arr_stack" {
         instant = true })
     }
   }
+
+  # SQLite "database is locked" storm in a media app (e.g. post-migration/restart
+  # contention, or storage-level locking). A clean restart usually clears a transient one.
+  rule {
+    name = "ArrDatabaseLocked"
+    annotations = {
+      summary     = "Media app SQLite database-locked errors"
+      description = "{{ $values.A }} 'database is locked' errors in 10m from a default-namespace app. If sustained, restart the app; if recurring, investigate storage/SQLite locking."
+    }
+    labels = {
+      severity = "warning"
+      service  = "arr-stack"
+      category = "arr-stack"
+    }
+    for           = "5m"
+    no_data_state = "OK"
+    condition     = "A"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 600
+        to   = 0
+      }
+      datasource_uid = local.loki_metal_uid
+      model = jsonencode({
+        expr      = "sum(count_over_time({namespace=\"default\"} |~ \"database is locked\" [10m])) > 20"
+        refId     = "A"
+        queryType = "instant"
+        instant   = true })
+    }
+  }
 }
