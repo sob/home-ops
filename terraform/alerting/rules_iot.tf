@@ -60,7 +60,7 @@ resource "grafana_rule_group" "iot_availability" {
     name        = "IoTDeviceDown"
     annotations = {
       summary     = "IoT device is unreachable"  
-      description = "{{ .Labels.instance }} has been unreachable for 10 minutes"
+      description = "{{ $labels.instance }} has been unreachable for 10 minutes"
     }
     labels = {
       severity = "warning"
@@ -108,11 +108,11 @@ resource "grafana_rule_group" "iot_availability" {
     name        = "SonosDeviceDown"
     annotations = {
       summary     = "Sonos speaker is unreachable"  
-      description = "Sonos {{ .Labels.instance }} has been unreachable for 15 minutes"
+      description = "Sonos {{ $labels.instance }} has been unreachable for 15 minutes"
     }
     labels = {
       severity = "warning"
-      instance = "{{ .Labels.instance }}"
+      instance = "{{ $labels.instance }}"
     }
     for      = "15m"
     condition = "B"

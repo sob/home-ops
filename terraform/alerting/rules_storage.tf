@@ -351,7 +351,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephMonitorDown"
     annotations = {
       summary     = "Ceph monitor down"
-      description = "{{ .Values.A }} Ceph monitor(s) out of quorum"
+      description = "{{ $values.A }} Ceph monitor(s) out of quorum"
     }
     labels = {
       severity = "critical"
@@ -382,7 +382,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephTooManyPGsPerOSD"
     annotations = {
       summary     = "Too many PGs per OSD"
-      description = "Cluster has {{ .Values.A }} PGs per OSD (max recommended: 250)"
+      description = "Cluster has {{ $values.A }} PGs per OSD (max recommended: 250)"
     }
     labels = {
       severity = "warning"
@@ -413,7 +413,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephOSDSlowOps"
     annotations = {
       summary     = "Ceph cluster experiencing slow operations"
-      description = "Ceph cluster has {{ .Values.A }} slow operations detected"
+      description = "Ceph cluster has {{ $values.A }} slow operations detected"
     }
     labels = {
       severity = "warning"
@@ -444,7 +444,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephOSDNearFull"
     annotations = {
       summary     = "Ceph OSD near full"
-      description = "OSD {{ .Labels.ceph_daemon }} is {{ .Values.A }}% full"
+      description = "OSD {{ $labels.ceph_daemon }} is {{ $values.A }}% full"
     }
     labels = {
       severity = "warning"
@@ -506,7 +506,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephClusterUtilizationHigh"
     annotations = {
       summary     = "Ceph cluster utilization high"
-      description = "Cluster is {{ .Values.A }}% full"
+      description = "Cluster is {{ $values.A }}% full"
     }
     labels = {
       severity = "warning"
@@ -537,7 +537,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephPGsInactive"
     annotations = {
       summary     = "Ceph PGs inactive"
-      description = "{{ .Values.A }} PGs are inactive"
+      description = "{{ $values.A }} PGs are inactive"
     }
     labels = {
       severity = "critical"
@@ -568,7 +568,7 @@ resource "grafana_rule_group" "ceph" {
     name        = "CephPGsUnclean"
     annotations = {
       summary     = "Ceph PGs unclean"
-      description = "{{ .Values.A }} PGs are not clean"
+      description = "{{ $values.A }} PGs are not clean"
     }
     labels = {
       severity = "warning"

@@ -10,7 +10,7 @@ resource "grafana_rule_group" "node_availability" {
     name        = "NodeDown"
     annotations = {
       summary     = "Kubernetes node is down"  
-      description = "Node {{ .Labels.instance }} has been unreachable for 5 minutes"
+      description = "Node {{ $labels.instance }} has been unreachable for 5 minutes"
     }
     labels = {
       severity = "critical"
@@ -59,7 +59,7 @@ resource "grafana_rule_group" "node_availability" {
     name        = "ControlPlaneNodeDown"
     annotations = {
       summary     = "Control plane node is down"
-      description = "Control plane node {{ .Labels.instance }} has been unreachable for 2 minutes"
+      description = "Control plane node {{ $labels.instance }} has been unreachable for 2 minutes"
     }
     labels = {
       severity = "critical"
