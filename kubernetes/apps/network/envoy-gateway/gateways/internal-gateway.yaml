@@ -52,6 +52,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-  addresses:
-    - type: IPAddress
-      value: 10.1.100.220
+  # IP comes from CiliumLoadBalancerIPPool envoy-gateway-internal-pool (.220)
+  # via the owning-gateway-name serviceSelector. Do NOT also set spec.addresses
+  # — the two mechanisms conflict (pool goes Conflicting, IPs get swapped/doubled).
