@@ -536,8 +536,9 @@ resource "grafana_rule_group" "arr_stack" {
         to   = 0
       }
       datasource_uid = local.loki_metal_uid
+      query_type     = "instant"
       model = jsonencode({
-        expr      = "sum by (app) (count_over_time({namespace=\"default\"} |~ \"database is locked\" [10m])) > 20"
+        expr      = "sum by (app) (count_over_time({namespace=\"default\"} |~ `database is locked` | label_format app=`{{ regexReplaceAll \"-[a-z0-9]+-[a-z0-9]+$\" .pod \"\" }}` [10m])) > 20"
         refId     = "A"
         queryType = "instant"
         instant   = true })
