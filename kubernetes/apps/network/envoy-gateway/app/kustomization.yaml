@@ -6,3 +6,4 @@ resources:
   - ./ippool.yaml
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+  - ./gatewayclass.yaml

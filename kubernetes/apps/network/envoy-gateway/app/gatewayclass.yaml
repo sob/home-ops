@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/gatewayclass_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy-gateway
+spec:
+  # Must match config.envoyGateway.gateway.controllerName in the HelmRelease.
+  # Without this GatewayClass the envoy gateways sit at "Waiting for controller".
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
