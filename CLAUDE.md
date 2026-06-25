@@ -27,8 +27,8 @@ This is a GitOps repository for my homelab Kubernetes cluster running on Talos L
 
 - **Cluster**: Single cluster running Talos Linux on bare metal Intel NUC devices
 - **Nodes**: 3 control plane nodes, 4 worker nodes (10.1.1.x subnet)
-- **Storage**: Rook-Ceph for persistent storage, OpenEBS for local storage
-- **Networking**: Cilium CNI with Gateway API, internal (10.1.100.220) and external (10.1.100.221) gateways
+- **Storage**: Rook-Ceph for persistent storage — storage classes `ceph-block` (default) and `ceph-filesystem` (OpenEBS has been removed)
+- **Networking**: Cilium CNI. Production L7 is **Cilium Gateway API** — internal gateway `10.1.100.200`, external `10.1.100.201`. ingress-nginx still fronts the *arr forward-auth (Authentik) apps. A parallel Envoy Gateway (`.220`/`.221`) is half-built and NOT live — see [[gateway-topology]].
 - **DNS**: Blocky for internal DNS, external-dns for managing records
 - **Secrets**: External-secrets with OnePassword, SOPS for sensitive data
 - **Domain**: 56kbps.io (using Cloudflare for external access)
