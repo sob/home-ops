@@ -518,7 +518,7 @@ resource "grafana_rule_group" "arr_stack" {
     name = "ArrDatabaseLocked"
     annotations = {
       summary     = "Media app SQLite database-locked errors"
-      description = "{{ $values.A }} 'database is locked' errors in 10m from a default-namespace app. If sustained, restart the app; if recurring, investigate storage/SQLite locking."
+      description = "{{ $labels.app }} logged {{ $values.A }} 'database is locked' errors in 10m. If sustained, restart it (kubectl rollout restart deploy/{{ $labels.app }} -n default); if recurring, investigate storage/SQLite locking."
     }
     labels = {
       severity = "warning"
@@ -537,7 +537,7 @@ resource "grafana_rule_group" "arr_stack" {
       }
       datasource_uid = local.loki_metal_uid
       model = jsonencode({
-        expr      = "sum(count_over_time({namespace=\"default\"} |~ \"database is locked\" [10m])) > 20"
+        expr      = "sum by (app) (count_over_time({namespace=\"default\"} |~ \"database is locked\" [10m])) > 20"
         refId     = "A"
         queryType = "instant"
         instant   = true })
