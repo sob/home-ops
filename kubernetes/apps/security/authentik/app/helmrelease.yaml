@@ -80,7 +80,9 @@ spec:
             name: authentik-halfduplex-logo
       volumeMounts:
         - name: halfduplex-logo
-          mountPath: /media/public/halfduplex.png
+          # 2025.12 moved local media root from /media to /data/media (served at /files/...).
+          # Brand logo URL (terraform system.tf) updated to /files/public/halfduplex.png separately.
+          mountPath: /data/media/public/halfduplex.png
           subPath: halfduplex.png
           readOnly: true
       initContainers:
