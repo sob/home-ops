@@ -35,19 +35,22 @@
     '**/*.secret.yaml',
   ],
   gitAuthor: 'stimpy-bot <101597957+stimpy-bot[bot]@users.noreply.github.com>',
+  // NOTE: managerFilePatterns treats a bare pattern as a glob; a regex must be
+  // slash-delimited (/.../). Without the slashes these matched 0 files, so no
+  // in-HelmRelease container image was detected (sabnzbd & the whole fleet).
   flux: {
     managerFilePatterns: [
-      '(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$',
+      '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
     ],
   },
   'helm-values': {
     managerFilePatterns: [
-      '(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$',
+      '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
     ],
   },
   kubernetes: {
     managerFilePatterns: [
-      '(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$',
+      '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
     ],
   },
   vulnerabilityAlerts: {
