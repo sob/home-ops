@@ -42,3 +42,7 @@ tfplan
 terraform.plan
 
 .codegpt
+
+# Claude Code: share project config + hook, keep machine-local approvals out
+.claude/settings.local.json
+.claude/*.bak

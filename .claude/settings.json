@@ -1,0 +1,66 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "mcp__kubernetes",
+      "WebSearch",
+      "Bash(cd:*)",
+      "Bash(kubectl get:*)",
+      "Bash(kubectl describe:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl top:*)",
+      "Bash(kubectl events:*)",
+      "Bash(kubectl explain:*)",
+      "Bash(kubectl api-resources:*)",
+      "Bash(kubectl api-versions:*)",
+      "Bash(kubectl version:*)",
+      "Bash(kubectl cluster-info:*)",
+      "Bash(kubectl config get-contexts:*)",
+      "Bash(kubectl config current-context:*)",
+      "Bash(flux get:*)",
+      "Bash(flux logs:*)",
+      "Bash(flux stats:*)",
+      "Bash(flux tree:*)",
+      "Bash(flux diff:*)",
+      "Bash(flux check:*)"
+    ],
+    "ask": [],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)",
+      "Bash(kubectl delete namespace:*)",
+      "Bash(kubectl delete ns:*)",
+      "Bash(kubectl delete node:*)",
+      "Bash(kubectl delete pv:*)",
+      "Bash(kubectl delete persistentvolume:*)",
+      "Bash(kubectl delete pvc:*)",
+      "Bash(kubectl delete crd:*)",
+      "Bash(kubectl delete cephcluster:*)",
+      "Bash(talosctl reset:*)",
+      "Bash(talosctl reboot:*)",
+      "Bash(talosctl shutdown:*)",
+      "Bash(talosctl wipe:*)",
+      "Bash(terraform destroy:*)",
+      "Bash(tofu destroy:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "kubernetes"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/gitops-guard.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
