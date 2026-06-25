@@ -32,9 +32,9 @@ spec:
     authentik:
       # Disable the creation of the default secret since we're using an external secret
       enabled: false
-      redis:
-        host: dragonfly.database.svc.cluster.local
       log_level: info
+      # NOTE: Redis removed in authentik 2025.10 — Dragonfly is no longer used by authentik
+      # (Dragonfly itself stays; other apps still use it). Expect ~50% more Postgres connections.
     postgresql:
       enabled: true
       image:
