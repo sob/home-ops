@@ -1,23 +1,23 @@
 locals {
   main_proxy_provider_ids = [
-    authentik_provider_proxy.main["enigma_code"].id,
-    authentik_provider_proxy.main["enigma_draw"].id,
+    tonumber(authentik_provider_proxy.main["enigma_draw"].id),
+    tonumber(authentik_provider_proxy.main["enigma_code"].id),
   ]
 
   halfduplex_proxy_provider_ids = [
-    authentik_provider_proxy.main["bazarr"].id,
-    authentik_provider_proxy.main["dozzle"].id,
-    authentik_provider_proxy.main["echo_server"].id,
-    authentik_provider_proxy.main["homeassistant"].id,
-    authentik_provider_proxy.main["lidarr"].id,
-    authentik_provider_proxy.main["prowlarr"].id,
-    authentik_provider_proxy.main["qbittorrent"].id,
-    authentik_provider_proxy.main["radarr"].id,
-    authentik_provider_proxy.main["readarr"].id,
-    authentik_provider_proxy.main["sabnzbd"].id,
-    authentik_provider_proxy.main["sonarr"].id,
-    authentik_provider_proxy.main["tautulli"].id,
-    authentik_provider_proxy.main["wizarr"].id,
+    tonumber(authentik_provider_proxy.main["prowlarr"].id),
+    tonumber(authentik_provider_proxy.main["readarr"].id),
+    tonumber(authentik_provider_proxy.main["homeassistant"].id),
+    tonumber(authentik_provider_proxy.main["sonarr"].id),
+    tonumber(authentik_provider_proxy.main["wizarr"].id),
+    tonumber(authentik_provider_proxy.main["echo_server"].id),
+    tonumber(authentik_provider_proxy.main["radarr"].id),
+    tonumber(authentik_provider_proxy.main["bazarr"].id),
+    tonumber(authentik_provider_proxy.main["lidarr"].id),
+    tonumber(authentik_provider_proxy.main["dozzle"].id),
+    tonumber(authentik_provider_proxy.main["sabnzbd"].id),
+    tonumber(authentik_provider_proxy.main["tautulli"].id),
+    tonumber(authentik_provider_proxy.main["qbittorrent"].id),
   ]
 }
 

@@ -39,18 +39,21 @@ locals {
       external_host   = "https://bazarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"
       group           = resource.authentik_group.media
+      cookie_domain   = "halfduplex.io"
       skip_path_regex = "^/api([/?].*)?"
     },
     dozzle = {
       external_host = "https://logs.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/dozzle.png"
       group         = resource.authentik_group.observability
+      cookie_domain = "halfduplex.io"
       namespace     = "observability"
     },
     echo_server = {
       external_host = "https://echo-server.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
       group         = resource.authentik_group.network
+      cookie_domain = "halfduplex.io"
     },
     enigma_code = {
       external_host = "https://edit.56kbps.io"
@@ -68,56 +71,66 @@ locals {
       external_host = "https://hass.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
       group         = resource.authentik_group.home
+      cookie_domain = "halfduplex.io"
     },
     lidarr = {
       external_host   = "https://lidarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
       group           = resource.authentik_group.media
+      cookie_domain   = "halfduplex.io"
       skip_path_regex = "^/api([/?].*)?"
     },
     prowlarr = {
       external_host   = "https://prowlarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
       group           = resource.authentik_group.media
+      cookie_domain   = "halfduplex.io"
       skip_path_regex = "^/api([/?].*)?"
     },
     radarr = {
       external_host   = "https://radarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
       group           = resource.authentik_group.media
+      cookie_domain   = "halfduplex.io"
       skip_path_regex = "^/api([/?].*)?"
     },
     readarr = {
       external_host   = "https://readarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/readarr.png"
       group           = resource.authentik_group.media
+      cookie_domain   = "halfduplex.io"
       skip_path_regex = "^/api([/?].*)?"
     },
     sabnzbd = {
       external_host = "https://sab.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sabnzbd.png"
       group         = resource.authentik_group.media
+      cookie_domain = "halfduplex.io"
     },
     sonarr = {
       external_host   = "https://sonarr.halfduplex.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
       group           = resource.authentik_group.media
+      cookie_domain   = "halfduplex.io"
       skip_path_regex = "^/api([/?].*)?"
     },
     tautulli = {
       external_host = "https://tautulli.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png"
       group         = resource.authentik_group.media
+      cookie_domain = "halfduplex.io"
     },
     qbittorrent = {
       external_host = "https://qbittorrent.halfduplex.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/qbittorrent.png"
       group         = resource.authentik_group.media
+      cookie_domain = "halfduplex.io"
     },
     wizarr = {
       external_host  = "https://join.halfduplex.io"
       icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png"
       group          = resource.authentik_group.media
+      cookie_domain  = "halfduplex.io"
     },
   }
 }
