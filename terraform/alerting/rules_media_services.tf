@@ -359,4 +359,156 @@ resource "grafana_rule_group" "arr_stack" {
         instant = true      })
     }
   }
+
+  # --- Application health (queue / library), via exportarr ---
+
+  # Sonarr's own health checks (indexer down, missing root folder, download client, import failures)
+  # excludes the benign "update available" notice
+  rule {
+    name = "SonarrHealthIssue"
+    annotations = {
+      summary     = "Sonarr health issue: {{ $labels.message }}"
+      description = "Sonarr reported a health check failure ({{ $labels.source }}). See {{ $labels.wikiurl }}"
+    }
+    labels = {
+      severity = "warning"
+      service  = "sonarr"
+      category = "arr-stack"
+    }
+    for           = "15m"
+    no_data_state = "OK"
+    condition     = "A"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = local.prometheus_cloud_uid
+      model = jsonencode({
+        expr    = "sonarr_system_health_issues{type=~\"warning|error\", message!~\".*update is available.*\"} > 0"
+        refId   = "A"
+        instant = true })
+    }
+  }
+
+  # Radarr's own health checks
+  rule {
+    name = "RadarrHealthIssue"
+    annotations = {
+      summary     = "Radarr health issue: {{ $labels.message }}"
+      description = "Radarr reported a health check failure ({{ $labels.source }}). See {{ $labels.wikiurl }}"
+    }
+    labels = {
+      severity = "warning"
+      service  = "radarr"
+      category = "arr-stack"
+    }
+    for           = "15m"
+    no_data_state = "OK"
+    condition     = "A"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = local.prometheus_cloud_uid
+      model = jsonencode({
+        expr    = "radarr_system_health_issues{type=~\"warning|error\", message!~\".*update is available.*\"} > 0"
+        refId   = "A"
+        instant = true })
+    }
+  }
+
+  # Queue items stuck in a failed/blocked state (excludes normal transient importPending)
+  rule {
+    name = "SonarrQueueStuck"
+    annotations = {
+      summary     = "Sonarr has stuck queue items"
+      description = "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Sonarr > Activity > Queue."
+    }
+    labels = {
+      severity = "warning"
+      service  = "sonarr"
+      category = "arr-stack"
+    }
+    for           = "2h"
+    no_data_state = "OK"
+    condition     = "A"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 7200
+        to   = 0
+      }
+      datasource_uid = local.prometheus_cloud_uid
+      model = jsonencode({
+        expr    = "sum(sonarr_queue_total{download_status=~\"warning|error\", download_state!=\"importPending\"}) > 0"
+        refId   = "A"
+        instant = true })
+    }
+  }
+
+  rule {
+    name = "RadarrQueueStuck"
+    annotations = {
+      summary     = "Radarr has stuck queue items"
+      description = "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Radarr > Activity > Queue."
+    }
+    labels = {
+      severity = "warning"
+      service  = "radarr"
+      category = "arr-stack"
+    }
+    for           = "2h"
+    no_data_state = "OK"
+    condition     = "A"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 7200
+        to   = 0
+      }
+      datasource_uid = local.prometheus_cloud_uid
+      model = jsonencode({
+        expr    = "sum(radarr_queue_total{download_status=~\"warning|error\", download_state!=\"importPending\"}) > 0"
+        refId   = "A"
+        instant = true })
+    }
+  }
+
+  # Media library storage running low (would block imports) — shared NFS, watched via Radarr's root folder
+  rule {
+    name = "MediaLibraryStorageLow"
+    annotations = {
+      summary     = "Media library storage is low"
+      description = "Less than 50GB free on the media library root folder. New downloads/imports will start failing."
+    }
+    labels = {
+      severity = "warning"
+      service  = "media"
+      category = "arr-stack"
+    }
+    for           = "30m"
+    no_data_state = "OK"
+    condition     = "A"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = local.prometheus_cloud_uid
+      model = jsonencode({
+        expr    = "min(radarr_rootfolder_freespace_bytes) < 50000000000"
+        refId   = "A"
+        instant = true })
+    }
+  }
 }
