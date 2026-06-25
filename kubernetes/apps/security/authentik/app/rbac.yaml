@@ -1,0 +1,32 @@
+---
+# Supplemental RBAC for the outpost controller.
+#
+# The upstream authentik chart's Role grants the `authentik` ServiceAccount
+# get/create/delete/list/patch on apps/deployments but NOT `update`. The
+# outpost controller bumps the managed-outpost image via a full update()
+# (replace) call, which 403s silently — freezing managed outposts at their
+# creation-time image so they never track the server version on upgrade.
+# This adds the missing `update` verb so outposts auto-update going forward.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: authentik-outpost-update
+  namespace: security
+rules:
+  - apiGroups: ["apps", "extensions"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: authentik-outpost-update
+  namespace: security
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: authentik-outpost-update
+subjects:
+  - kind: ServiceAccount
+    name: authentik
+    namespace: security

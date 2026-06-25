@@ -6,6 +6,7 @@ resources:
   - ./externalsecret.yaml
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+  - ./rbac.yaml
   - ./httproute-56kbps.yaml
   - ./httproute-halfduplex.yaml
   - ./ippool.yaml
