@@ -17,5 +17,4 @@ resources:
   - ./promtail/ks.yaml
   - ./robusta/ks.yaml
   - ./unifi-poller/ks.yaml
-  - ./k6-operator/ks.yaml
   - ./exporters
