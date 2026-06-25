@@ -112,6 +112,22 @@ resource "grafana_notification_policy" "main" {
     repeat_interval = "1w"
   }
 
+  # Media / *arr health issues - route to the watched channel and remind often.
+  # These are the "up but broken" failures (queue stuck, indexer down, import
+  # failures, db locked) that otherwise hide in the weekly digest for weeks.
+  policy {
+    matcher {
+      label = "category"
+      match = "="
+      value = "arr-stack"
+    }
+    group_by        = ["alertname", "service"]
+    contact_point   = grafana_contact_point.slack_critical.name
+    group_wait      = "30s"
+    group_interval  = "5m"
+    repeat_interval = "12h"  # keep pinging until fixed (kills "broken for weeks")
+  }
+
   # Warning alerts - weekly summary
   policy {
     matcher {
