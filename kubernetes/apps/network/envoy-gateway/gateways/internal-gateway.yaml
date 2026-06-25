@@ -52,6 +52,18 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-56kbps-apex
+      protocol: HTTPS
+      port: 443
+      hostname: "${SECRET_DOMAIN}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: "${SECRET_DOMAIN/./-}-production-tls"
+      allowedRoutes:
+        namespaces:
+          from: All
   # IP comes from CiliumLoadBalancerIPPool envoy-gateway-internal-pool (.220)
   # via the owning-gateway-name serviceSelector. Do NOT also set spec.addresses
   # — the two mechanisms conflict (pool goes Conflicting, IPs get swapped/doubled).
