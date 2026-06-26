@@ -41,7 +41,7 @@ spec:
           app:
             image:
               repository: docker.io/klutchell/dnscrypt-proxy
-              tag: 2.1.5
+              tag: 2.1.16
             env:
               TZ: America/New_York
             resources:
