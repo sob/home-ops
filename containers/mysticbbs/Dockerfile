@@ -6,7 +6,7 @@
 # - Environment variables and configuration
 
 # Version definitions
-ARG UBUNTU_VERSION="24.04"
+ARG UBUNTU_VERSION="26.04"
 ARG UNRAR_VERSION="7.1.10"
 ARG CRYPTLIB_VERSION="345"
 ARG CRYPTLIB_SO_VERSION="3.4.5"
