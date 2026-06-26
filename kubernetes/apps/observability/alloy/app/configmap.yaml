@@ -385,8 +385,6 @@ data:
     // Scrape ingress metrics
     prometheus.scrape "ingress" {
       targets = [
-        {"__address__" = "ingress-nginx-internal-controller-metrics.network.svc.cluster.local:10254"},
-        {"__address__" = "ingress-nginx-external-controller-metrics.network.svc.cluster.local:10254"},
       ]
       
       forward_to = [prometheus.relabel.ingress.receiver]

@@ -106,12 +106,8 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "sab.halfduplex.io"
-  - hostname: "*.halfduplex.io"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "halfduplex.io"
   - hostname: "halfduplex.io"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "halfduplex.io"
   - hostname: "56kbps.io"
@@ -138,6 +134,4 @@ ingress:
     service: http://enigma-bbs.default.svc.cluster.local:8811
   - hostname: "mailer.56kbps.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:24554
-  - hostname: "${SECRET_DOMAIN}"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - service: http_status:404
