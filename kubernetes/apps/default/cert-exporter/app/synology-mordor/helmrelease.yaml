@@ -39,6 +39,12 @@ spec:
             envFrom:
               - secretRef:
                   name: cert-exporter-mordor-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
     persistence:
       scripts:
         name: cert-exporter-configmap
