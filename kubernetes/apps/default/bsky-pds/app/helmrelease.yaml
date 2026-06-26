@@ -73,24 +73,30 @@ spec:
         ports:
           http:
             port: *port
-    ingress:
+    route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        className: external
-        hosts:
-          - host: ${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-          - host: sob.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        hostnames:
+          - "${SECRET_DOMAIN}"
+          - "sob.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps-apex
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps-apex
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       pds:
         existingClaim: bsky-pds
