@@ -30,7 +30,7 @@ spec:
                 sizeLimit: 128Mi
           containers:
             - name: unlock
-              image: docker.io/restic/restic:0.18.1
+              image: docker.io/restic/restic:0.19.0
               imagePullPolicy: IfNotPresent
               envFrom:
                 - secretRef:
