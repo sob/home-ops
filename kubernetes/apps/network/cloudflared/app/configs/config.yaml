@@ -1,15 +1,15 @@
 ---
 ingress:
   - hostname: "sso.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "sso.${SECRET_DOMAIN}"
   - hostname: "jellyfin.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "jellyfin.${SECRET_DOMAIN}"
   - hostname: "jelly.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "jelly.${SECRET_DOMAIN}"
   - hostname: "jellyseerr.${SECRET_DOMAIN}"
@@ -17,11 +17,11 @@ ingress:
     originRequest:
       originServerName: "jellyseerr.${SECRET_DOMAIN}"
   - hostname: "plex.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "plex.${SECRET_DOMAIN}"
   - hostname: "flux-webhook.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "flux-webhook.${SECRET_DOMAIN}"
   - hostname: "wizarr.${SECRET_DOMAIN}"
@@ -45,23 +45,23 @@ ingress:
     originRequest:
       originServerName: "logs.${SECRET_DOMAIN}"
   - hostname: "overseerr.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "overseerr.${SECRET_DOMAIN}"
   - hostname: "requests.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "requests.${SECRET_DOMAIN}"
   - hostname: "socket.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "socket.${SECRET_DOMAIN}"
   - hostname: "bbs.${SECRET_DOMAIN}"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "bbs.${SECRET_DOMAIN}"
   - hostname: "sso.halfduplex.io"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "sso.halfduplex.io"
   - hostname: "*.halfduplex.io"
@@ -73,11 +73,11 @@ ingress:
     originRequest:
       originServerName: "halfduplex.io"
   - hostname: "56kbps.io"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "56kbps.io"
   - hostname: "enigma.56kbps.io"
-    service: https://cilium-gateway-external-gateway.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "enigma.56kbps.io"
   - hostname: "edit.56kbps.io"
