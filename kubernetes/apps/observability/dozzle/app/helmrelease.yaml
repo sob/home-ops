@@ -54,6 +54,7 @@ spec:
               limits:
                 memory: 256Mi
     defaultPodOptions:
+      automountServiceAccountToken: true # 5.0 defaults false; DOZZLE_MODE=k8s needs API token
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

@@ -57,6 +57,7 @@ spec:
               limits:
                 memory: 128Mi
     defaultPodOptions:
+      automountServiceAccountToken: true # 5.0 defaults false; mcp-server needs in-cluster API token
       dnsConfig:
         options:
           - { name: ndots, value: "1" }
