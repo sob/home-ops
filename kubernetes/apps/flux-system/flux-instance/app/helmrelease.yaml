@@ -122,4 +122,3 @@ spec:
             target:
               kind: Deployment
               name: helm-controller
-

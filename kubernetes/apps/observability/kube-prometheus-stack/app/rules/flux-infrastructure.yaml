@@ -24,7 +24,7 @@ spec:
             description: "Kustomization {{ $labels.name }} in namespace {{ $labels.namespace }} has been failing for over 5 minutes. Reason: {{ $labels.reason }}"
             runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/FluxKustomizationFailed"
 
-        # Flux HelmRelease health  
+        # Flux HelmRelease health
         - alert: FluxHelmReleaseFailed
           expr: |
             gotk_reconcile_condition{type="Ready",status="False",kind="HelmRelease"} == 1

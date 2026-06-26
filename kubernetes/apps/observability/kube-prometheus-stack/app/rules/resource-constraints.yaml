@@ -14,7 +14,7 @@ spec:
         - alert: PodMemoryUsageHigh
           expr: |
             (
-              container_memory_working_set_bytes{container!="",image!=""} / 
+              container_memory_working_set_bytes{container!="",image!=""} /
               container_spec_memory_limit_bytes{container!="",image!=""} * 100
             ) > 85
           for: 15m
@@ -31,7 +31,7 @@ spec:
         - alert: PodMemoryUsageCritical
           expr: |
             (
-              container_memory_working_set_bytes{container!="",image!=""} / 
+              container_memory_working_set_bytes{container!="",image!=""} /
               container_spec_memory_limit_bytes{container!="",image!=""} * 100
             ) > 95
           for: 5m
@@ -48,7 +48,7 @@ spec:
         - alert: PodCPUUsageHigh
           expr: |
             (
-              rate(container_cpu_usage_seconds_total{container!="",image!=""}[5m]) / 
+              rate(container_cpu_usage_seconds_total{container!="",image!=""}[5m]) /
               (container_spec_cpu_quota{container!="",image!=""} / container_spec_cpu_period{container!="",image!=""}) * 100
             ) > 90
           for: 15m
@@ -65,7 +65,7 @@ spec:
         - alert: PersistentVolumeUsageHigh
           expr: |
             (
-              kubelet_volume_stats_used_bytes / 
+              kubelet_volume_stats_used_bytes /
               kubelet_volume_stats_capacity_bytes * 100
             ) > 85
           for: 5m
@@ -82,7 +82,7 @@ spec:
         - alert: PersistentVolumeUsageCritical
           expr: |
             (
-              kubelet_volume_stats_used_bytes / 
+              kubelet_volume_stats_used_bytes /
               kubelet_volume_stats_capacity_bytes * 100
             ) > 95
           for: 2m
@@ -99,7 +99,7 @@ spec:
         - alert: NodeFilesystemUsageHigh
           expr: |
             (
-              node_filesystem_size_bytes{fstype!="tmpfs"} - 
+              node_filesystem_size_bytes{fstype!="tmpfs"} -
               node_filesystem_free_bytes{fstype!="tmpfs"}
             ) / node_filesystem_size_bytes{fstype!="tmpfs"} * 100 > 85
           for: 5m

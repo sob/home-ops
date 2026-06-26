@@ -21,7 +21,7 @@ spec:
     tokenSecretName: grafana-pdc-secret
     cluster: prod-us-east-0
     hostedGrafanaId: "1348624"
-    
+
     resources:
       requests:
         cpu: 100m
@@ -29,10 +29,10 @@ spec:
       limits:
         memory: 1Gi
         cpu: 500m
-    
+
     # High availability - run 3 replicas
     replicaCount: 3
-    
+
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
@@ -45,13 +45,13 @@ spec:
                     values:
                       - pdc-agent
               topologyKey: kubernetes.io/hostname
-    
+
     # Security context to allow SSH tunnel creation
     podSecurityContext:
       runAsUser: 30000
       runAsGroup: 30000
       fsGroup: 30000
-    
+
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:

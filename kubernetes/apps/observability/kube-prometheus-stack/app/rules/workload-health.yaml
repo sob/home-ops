@@ -28,7 +28,7 @@ spec:
         - alert: PodsNotReady
           expr: |
             (
-              kube_pod_status_ready{condition="false"} * on(namespace,pod) 
+              kube_pod_status_ready{condition="false"} * on(namespace,pod)
               kube_pod_info{created_by_kind!="Job"}
             ) > 0
           for: 10m
@@ -44,7 +44,7 @@ spec:
         # Pod stuck in pending
         - alert: PodStuckPending
           expr: |
-            kube_pod_status_phase{phase="Pending"} * on(namespace,pod) 
+            kube_pod_status_phase{phase="Pending"} * on(namespace,pod)
             kube_pod_info{created_by_kind!="Job"} > 0
           for: 10m
           labels:
@@ -115,8 +115,8 @@ spec:
         # Pod OOMKilled
         - alert: PodOOMKilled
           expr: |
-            increase(kube_pod_container_status_restarts_total[1h]) > 0 
-            and on(namespace,pod,container) 
+            increase(kube_pod_container_status_restarts_total[1h]) > 0
+            and on(namespace,pod,container)
             kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1
           for: 0m
           labels:

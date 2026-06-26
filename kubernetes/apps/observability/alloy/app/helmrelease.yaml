@@ -21,16 +21,16 @@ spec:
     alloy:
       clustering:
         enabled: false
-      
+
       configMap:
         create: false
         name: alloy-config
         key: config.alloy
-      
+
       envFrom:
         - secretRef:
             name: alloy-secret
-      
+
       resources:
         requests:
           cpu: 100m
@@ -38,11 +38,11 @@ spec:
         limits:
           memory: 1Gi
           cpu: 500m
-    
+
     controller:
       type: deployment
       replicas: 1
-      
+
     # Service monitor for self-monitoring
     serviceMonitor:
       enabled: true

@@ -22,12 +22,12 @@ spec:
           annotations:
             summary: "VolSync backup completed suspiciously fast for {{ $labels.namespace }}/{{ $labels.name }}"
             description: |
-              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }} 
+              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }}
               completed in under 5 seconds, which might indicate:
               - The directory being backed up is empty
               - The application is using emptyDir instead of a PVC
               - Very little data is being backed up
-              
+
               Duration: {{ $value }}s
               Check the application's persistence configuration and ReplicationSource logs.
 
@@ -41,9 +41,9 @@ spec:
           annotations:
             summary: "VolSync backup failed for {{ $labels.namespace }}/{{ $labels.name }}"
             description: |
-              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }} 
+              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }}
               has failed its backup operation.
-              
+
               Check the ReplicationSource logs for details.
 
         - alert: VolsyncBackupStale
@@ -56,9 +56,9 @@ spec:
           annotations:
             summary: "VolSync backup is stale for {{ $labels.namespace }}/{{ $labels.name }}"
             description: |
-              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }} 
+              VolSync replication source {{ $labels.namespace }}/{{ $labels.name }}
               hasn't completed a backup in over 24 hours.
-              
+
               Last backup was {{ $value | humanizeDuration }} ago.
 
         - alert: VolsyncRestoreFailed
@@ -71,7 +71,7 @@ spec:
           annotations:
             summary: "VolSync restore failed for {{ $labels.namespace }}/{{ $labels.name }}"
             description: |
-              VolSync replication destination {{ $labels.namespace }}/{{ $labels.name }} 
+              VolSync replication destination {{ $labels.namespace }}/{{ $labels.name }}
               has failed its restore operation.
-              
+
               Check the ReplicationDestination logs for details.

@@ -10,12 +10,12 @@ data:
     prometheus.remote_write "grafana_cloud" {
       endpoint {
         url = sys.env("GRAFANA_CLOUD_METRICS_URL")
-        
+
         basic_auth {
           username = sys.env("GRAFANA_CLOUD_METRICS_ID")
           password = sys.env("GRAFANA_CLOUD_API_KEY")
         }
-        
+
         write_relabel_config {
           // Drop high cardinality labels (but NOT __name__)
           regex = "(container_id|pod_ip|uid|id|image_id)"
@@ -23,14 +23,14 @@ data:
         }
       }
     }
-    
+
     // Scrape infrastructure metrics (node-exporter and kube-state-metrics)
     prometheus.operator.servicemonitors "infrastructure_metrics" {
       forward_to = [prometheus.relabel.infrastructure_metrics.receiver]
-      
+
       // Only scrape infrastructure monitoring
       namespaces = ["observability"]
-      
+
       selector {
         match_expression {
           key = "app.kubernetes.io/name"
@@ -39,7 +39,7 @@ data:
         }
       }
     }
-    
+
     // Scrape blackbox-exporter probes for node monitoring - one scrape per target
     prometheus.scrape "blackbox_node_probe_101" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.101"}]
@@ -52,7 +52,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_node_probe_102" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.102"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
@@ -64,7 +64,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_node_probe_103" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.103"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
@@ -76,7 +76,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_node_probe_104" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.104"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
@@ -88,7 +88,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_node_probe_105" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.105"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
@@ -100,7 +100,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_node_probe_106" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.106"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
@@ -112,7 +112,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_node_probe_107" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "10.1.100.107"}]
       forward_to = [prometheus.relabel.blackbox.receiver]
@@ -124,7 +124,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     // Scrape IoT device probes for monitoring
     prometheus.scrape "blackbox_iot_hue" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "hue.stonehedges.net"}]
@@ -137,7 +137,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_iot_lutron" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "lutron.stonehedges.net"}]
       forward_to = [prometheus.relabel.blackbox_iot.receiver]
@@ -149,7 +149,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     // Scrape Sonos device probes
     prometheus.scrape "blackbox_sonos_back_deck" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-back-deck.stonehedges.net"}]
@@ -162,7 +162,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_sonos_fire_pit" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-fire-pit.stonehedges.net"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
@@ -174,7 +174,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_sonos_hottub" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-hottub.stonehedges.net"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
@@ -186,7 +186,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_sonos_kitchen" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-kitchen.stonehedges.net"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
@@ -198,7 +198,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_sonos_livingroom" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-livingroom.stonehedges.net"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
@@ -210,7 +210,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_sonos_office" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-office.stonehedges.net"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
@@ -222,7 +222,7 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     prometheus.scrape "blackbox_sonos_trampoline" {
       targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-trampoline.stonehedges.net"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
@@ -234,14 +234,14 @@ data:
         "module" = ["icmp"],
       }
     }
-    
+
     // Scrape application metrics from service monitors
     prometheus.operator.servicemonitors "apps" {
       forward_to = [prometheus.relabel.applications.receiver]
-      
+
       // Only scrape from specific namespaces
       namespaces = ["default", "media", "home", "security", "network"]
-      
+
       // Only scrape services with specific labels
       selector {
         match_labels = {
@@ -249,19 +249,19 @@ data:
         }
       }
     }
-    
+
     // Filter infrastructure metrics to essential ones only
     prometheus.relabel "infrastructure_metrics" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-      
+
       // Keep only essential metrics
       rule {
         source_labels = ["__name__"]
         regex = "up|node_cpu_seconds_total|node_memory_MemAvailable_bytes|node_memory_MemTotal_bytes|node_filesystem_avail_bytes|node_filesystem_size_bytes|node_disk_io_time_seconds_total|node_network_receive_bytes_total|node_network_transmit_bytes_total|node_load1|node_load5|node_load15|kube_node_status_condition|kube_node_info|kube_node_status_allocatable|kube_node_status_capacity"
         action = "keep"
       }
-      
-      // Keep instance and job labels  
+
+      // Keep instance and job labels
       rule {
         source_labels = ["instance"]
         target_label = "node"
@@ -269,103 +269,103 @@ data:
         replacement = "${1}"
       }
     }
-    
+
     // Forward blackbox probe metrics to Grafana Cloud
     prometheus.relabel "blackbox" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-      
+
       // Keep only probe metrics for node monitoring
       rule {
         source_labels = ["__name__"]
         regex = "probe_.*"
         action = "keep"
       }
-      
+
       // Add probe type label for easy filtering
       rule {
         target_label = "probe_type"
         replacement = "node_icmp"
       }
-      
+
       // Set job name
       rule {
         target_label = "job"
         replacement = "blackbox-node-probes"
       }
     }
-    
+
     // Forward IoT blackbox probe metrics to Grafana Cloud
     prometheus.relabel "blackbox_iot" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-      
+
       // Keep only probe metrics
       rule {
         source_labels = ["__name__"]
         regex = "probe_.*"
         action = "keep"
       }
-      
+
       // Add probe type label for easy filtering
       rule {
         target_label = "probe_type"
         replacement = "iot_icmp"
       }
-      
+
       // Set job name
       rule {
         target_label = "job"
         replacement = "blackbox-iot-probes"
       }
     }
-    
+
     // Forward Sonos blackbox probe metrics to Grafana Cloud
     prometheus.relabel "blackbox_sonos" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-      
+
       // Keep only probe metrics
       rule {
         source_labels = ["__name__"]
         regex = "probe_.*"
         action = "keep"
       }
-      
+
       // Add probe type label for easy filtering
       rule {
         target_label = "probe_type"
         replacement = "sonos_icmp"
       }
-      
+
       // Set job name
       rule {
         target_label = "job"
         replacement = "blackbox-sonos-probes"
       }
-      
+
       // Add device type label
       rule {
         target_label = "device_type"
         replacement = "sonos"
       }
     }
-    
+
     // Relabel and filter application metrics
     prometheus.relabel "applications" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-      
+
       // Keep only essential metrics for applications
       rule {
         source_labels = ["__name__"]
         regex = "up|.*_info|.*_requests_total|.*_request_duration_seconds.*|.*_errors_total|.*_restart_total|.*_ready"
         action = "keep"
       }
-      
+
       // Drop metrics from non-critical pods
       rule {
         source_labels = ["namespace"]
         regex = "kube-system|rook-ceph|flux-system|storage|external-secrets"
         action = "drop"
       }
-      
+
       // Aggregate by removing pod name for deployments (keep for statefulsets)
       rule {
         source_labels = ["__name__", "statefulset"]
@@ -373,7 +373,7 @@ data:
         target_label = "__tmp_keep_pod"
         replacement = "false"
       }
-      
+
       rule {
         source_labels = ["__tmp_keep_pod", "pod"]
         regex = "false;.*"
@@ -381,28 +381,28 @@ data:
         replacement = ""
       }
     }
-    
+
     // Scrape ingress metrics
     prometheus.scrape "ingress" {
       targets = [
       ]
-      
+
       forward_to = [prometheus.relabel.ingress.receiver]
-      
+
       scrape_interval = "30s"
     }
-    
+
     // Filter ingress metrics
     prometheus.relabel "ingress" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-      
+
       // Keep only essential ingress metrics
       rule {
         source_labels = ["__name__"]
         regex = "nginx_ingress_controller_requests|nginx_ingress_controller_request_duration_seconds.*|nginx_ingress_controller_ssl_expire_time_seconds"
         action = "keep"
       }
-      
+
       // Keep only important status codes
       rule {
         source_labels = ["status"]
@@ -410,7 +410,7 @@ data:
         action = "keep"
       }
     }
-    
+
     // Scrape critical app endpoints directly
     prometheus.scrape "critical_apps" {
       targets = [
@@ -418,36 +418,36 @@ data:
         {"__address__" = "gatus.observability.svc.cluster.local:80", "app" = "gatus", "namespace" = "observability"},
         {"__address__" = "home-assistant.home.svc.cluster.local:8123", "app" = "home-assistant", "namespace" = "home"},
       ]
-      
+
       forward_to = [prometheus.relabel.critical.receiver]
-      
+
       scrape_interval = "60s"
       metrics_path = "/metrics"
     }
-    
+
     // Minimal filtering for critical apps
     prometheus.relabel "critical" {
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
-      
+
       // Add environment label
       rule {
         target_label = "environment"
         replacement = "production"
       }
-      
+
       // Keep app label
       rule {
         source_labels = ["app"]
         target_label = "application"
       }
-      
+
       // Add job label from app
       rule {
         source_labels = ["app"]
         target_label = "job"
       }
     }
-    
+
     // Self-monitoring
     prometheus.scrape "alloy" {
       targets = [{"__address__" = "127.0.0.1:12345"}]

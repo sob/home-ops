@@ -20,10 +20,10 @@ stringData:
     route:
       group_by: ['alertname', 'cluster', 'namespace']
       group_wait: 10s        # Wait for additional alerts in group
-      group_interval: 5m     # Send group summary every 5 minutes  
+      group_interval: 5m     # Send group summary every 5 minutes
       repeat_interval: 12h   # Don't repeat for 12 hours
       receiver: 'default'
-      
+
       routes:
       # Send all alerts to Robusta for analysis and continue to other routes
       - receiver: 'robusta'
@@ -39,19 +39,19 @@ stringData:
         group_wait: 5s
         group_interval: 1m
         repeat_interval: 1h
-        
+
       # Flux/Infrastructure warnings - Slack only
       - match_re:
           component: flux|k6-operator
         receiver: 'infrastructure-alerts'
-        
+
       # Resource constraint warnings - Slack with longer interval
       - match:
           type: resource
         receiver: 'resource-alerts'
         group_interval: 15m
         repeat_interval: 6h
-        
+
       # Workload issues - Slack
       - match:
           type: workload
@@ -123,7 +123,7 @@ stringData:
     # Resource constraint alerts
     - name: 'resource-alerts'
       slack_configs:
-      - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url' 
+      - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url'
         channel: '#alerts'
         title: '📊 Resource Alert'
         text: |
@@ -140,7 +140,7 @@ stringData:
     - name: 'workload-alerts'
       slack_configs:
       - api_url_file: '/etc/alertmanager/secrets/alertmanager-secret/slack-webhook-url'
-        channel: '#alerts'  
+        channel: '#alerts'
         title: '🔧 Workload Alert'
         text: |
           {{ range .Alerts }}
@@ -161,7 +161,7 @@ stringData:
       target_matchers:
       - severity="warning"
       equal: ['namespace']
-    
+
     # Suppress resource alerts if pods are crash looping
     - source_matchers:
       - alertname="PodCrashLooping"

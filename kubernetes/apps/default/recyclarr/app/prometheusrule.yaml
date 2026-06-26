@@ -19,7 +19,7 @@ spec:
           labels:
             severity: warning
             app: recyclarr
-            
+
         - alert: RecyclarrJobFailed
           annotations:
             summary: Recyclarr sync job failed
@@ -30,7 +30,7 @@ spec:
           labels:
             severity: warning
             app: recyclarr
-            
+
         - alert: RecyclarrMultipleFailures
           annotations:
             summary: Recyclarr has failed multiple times

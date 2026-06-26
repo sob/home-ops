@@ -42,7 +42,7 @@ spec:
             )
           labels:
             unit: "millicores"
-            
+
         # CPU limits in millicores for all pods
         - record: pod:cpu_limit_millicores
           expr: |
@@ -69,7 +69,7 @@ spec:
             )
           labels:
             unit: "percent"
-            
+
         # CPU usage percentage against limit (NaN if no limit)
         - record: pod:cpu_limit_percent
           expr: |
@@ -117,7 +117,7 @@ spec:
             )
           labels:
             unit: "mebibytes"
-            
+
         # Memory limits in MiB for all pods
         - record: pod:memory_limit_mb
           expr: |
@@ -146,7 +146,7 @@ spec:
             )
           labels:
             unit: "percent"
-            
+
         # Memory usage percentage against limit (NaN if no limit)
         - record: pod:memory_limit_percent
           expr: |
@@ -156,5 +156,3 @@ spec:
             )
           labels:
             unit: "percent"
-
-

@@ -26,7 +26,7 @@ data:
     {{ define "homeops.pushover.text" }}
     {{ range .Alerts }}
     {{ .Annotations.summary }}
-    
+
     {{ .Annotations.description }}
     {{ if .Labels.namespace }}
     Namespace: {{ .Labels.namespace }}{{ end }}
