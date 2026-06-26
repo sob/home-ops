@@ -40,7 +40,7 @@ spec:
       image:
         registry: docker.io
         repository: library/postgres
-        tag: 17.6-alpine
+        tag: 17.10-alpine
       auth:
         existingSecret: authentik
         secretKeys:
