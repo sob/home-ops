@@ -40,8 +40,8 @@ spec:
                   echo "VTX client files already exist, skipping download"
                 fi
                 # Ensure WebSocket URL and sysName are always correct
-                sed -i 's|wsConnect:.*|wsConnect: "wss://wss.56kbps.io",|' index.html
-                sed -i 's|sysName:.*|sysName: "56kbps BBS",|' index.html
+                sed -i 's|wsConnect:.*|wsConnect: "wss://wss.halfduplex.io",|' index.html
+                sed -i 's|sysName:.*|sysName: "halfduplex BBS",|' index.html
                 # Fix vtxclient.js filename reference
                 sed -i 's|vtxclient_94.js|vtxclient.js|' index.html
             securityContext:
@@ -59,23 +59,23 @@ spec:
               - |
                 CONFIG_FILE=/enigma-bbs/config/config.hjson
                 if [ -f "$CONFIG_FILE" ]; then
-                  echo "Patching ENiGMA config for 56kbps.io..."
-                  sed -i "s|boardName: halfduplex|boardName: 56kbps|" "$CONFIG_FILE"
-                  sed -i "s#prettyBoardName : '|08halfduplex'#prettyBoardName : '|0856kbps'#" "$CONFIG_FILE"
-                  sed -i "s|website         : 'https://halfduplex.io'|website         : 'https://56kbps.io'|" "$CONFIG_FILE"
-                  sed -i "s|menuFile: /enigma-bbs/menus/halfduplex-main.hjson|menuFile: /enigma-bbs/menus/56kbps-main.hjson|" "$CONFIG_FILE"
-                  sed -i "s|domain: halfduplex.io|domain: 56kbps.io|" "$CONFIG_FILE"
+                  echo "Patching ENiGMA config for halfduplex.io..."
+                  sed -i "s|boardName: 56kbps|boardName: halfduplex|" "$CONFIG_FILE"
+                  sed -i "s#prettyBoardName : '|0856kbps'#prettyBoardName : '|08halfduplex'#" "$CONFIG_FILE"
+                  sed -i "s|website         : 'https://56kbps.io'|website         : 'https://halfduplex.io'|" "$CONFIG_FILE"
+                  sed -i "s|menuFile: /enigma-bbs/menus/56kbps-main.hjson|menuFile: /enigma-bbs/menus/halfduplex-main.hjson|" "$CONFIG_FILE"
+                  sed -i "s|domain: 56kbps.io|domain: halfduplex.io|" "$CONFIG_FILE"
                 else
                   echo "No config.hjson found yet; skipping patch"
                 fi
-                # Rename menu files if they still use the old halfduplex prefix
-                for f in /enigma-bbs/menus/halfduplex-*.hjson; do
+                # Rename menu files if they still use the old 56kbps prefix
+                for f in /enigma-bbs/menus/56kbps-*.hjson; do
                   [ -e "$f" ] || continue
-                  newname=$(echo "$f" | sed 's/halfduplex-/56kbps-/')
+                  newname=$(echo "$f" | sed 's/56kbps-/halfduplex-/')
                   mv "$f" "$newname"
                 done
-                # Update any halfduplex menu references inside menu files
-                sed -i 's|halfduplex-|56kbps-|g' /enigma-bbs/menus/*.hjson 2>/dev/null || true
+                # Update any 56kbps menu references inside menu files
+                sed -i 's|56kbps-|halfduplex-|g' /enigma-bbs/menus/*.hjson 2>/dev/null || true
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
@@ -251,24 +251,24 @@ spec:
             protocol: TCP
             targetPort: 3000
     route:
-      # code-server editor (edit.56kbps.io) — Authentik forward-auth enforced by
+      # code-server editor (edit.halfduplex.io) — Authentik forward-auth enforced by
       # securitypolicy.yaml; login flow served by httproute-outpost.yaml.
       code:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/target: external.halfduplex.io
         hostnames:
-          - edit.56kbps.io
+          - edit.halfduplex.io
         parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: external-gateway
             namespace: network
-            sectionName: https-56kbps
+            sectionName: https-halfduplex
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: internal-gateway
             namespace: network
-            sectionName: https-56kbps
+            sectionName: https-halfduplex
         rules:
           - backendRefs:
               - name: enigma-bbs
@@ -277,23 +277,23 @@ spec:
               - path:
                   type: PathPrefix
                   value: /
-      # draw app (draw.56kbps.io) — public, no auth (no SecurityPolicy targets it).
+      # draw app (draw.halfduplex.io) — public, no auth (no SecurityPolicy targets it).
       draw:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/target: external.halfduplex.io
         hostnames:
-          - draw.56kbps.io
+          - draw.halfduplex.io
         parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: external-gateway
             namespace: network
-            sectionName: https-56kbps
+            sectionName: https-halfduplex
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: internal-gateway
             namespace: network
-            sectionName: https-56kbps
+            sectionName: https-halfduplex
         rules:
           - backendRefs:
               - name: enigma-bbs
@@ -308,14 +308,14 @@ spec:
             kind: Gateway
             name: external-gateway
             namespace: network
-            sectionName: https-56kbps
+            sectionName: https-halfduplex
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: internal-gateway
             namespace: network
-            sectionName: https-56kbps
+            sectionName: https-halfduplex
         hostnames:
-          - wss.56kbps.io
+          - wss.halfduplex.io
         rules:
           - backendRefs:
               - name: enigma-bbs
@@ -330,15 +330,15 @@ spec:
             kind: Gateway
             name: external-gateway
             namespace: network
-            sectionName: https-56kbps-apex
+            sectionName: https-halfduplex-apex
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: internal-gateway
             namespace: network
-            sectionName: https-56kbps-apex
+            sectionName: https-halfduplex-apex
         hostnames:
-          - 56kbps.io
-          - enigma.56kbps.io
+          - halfduplex.io
+          - enigma.halfduplex.io
         rules:
           - backendRefs:
               - name: enigma-bbs

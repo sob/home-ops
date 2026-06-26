@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
-# Authentik login/callback flow for the edit.56kbps.io code editor, outside the
+# Authentik login/callback flow for the edit.halfduplex.io code editor, outside the
 # SecurityPolicy so the redirect/callback is reachable unauthenticated.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -11,18 +11,18 @@ spec:
   parentRefs:
     - name: external-gateway
       namespace: network
-      sectionName: https-56kbps
+      sectionName: https-halfduplex
     - name: internal-gateway
       namespace: network
-      sectionName: https-56kbps
+      sectionName: https-halfduplex
   hostnames:
-    - "edit.56kbps.io"
+    - "edit.halfduplex.io"
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /outpost.goauthentik.io
       backendRefs:
-        - name: ak-outpost-56kbps
+        - name: ak-outpost-halfduplex
           namespace: security
           port: 9000

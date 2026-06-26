@@ -64,74 +64,68 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "sso.halfduplex.io"
-  # Migrated to envoy gateway (forward-auth via SecurityPolicy). Must precede the
-  # *.halfduplex.io nginx wildcard below; remove once the wildcard flips to envoy.
-  - hostname: "echo-server.halfduplex.io"
+  - hostname: "echo-server.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "echo-server.halfduplex.io"
-  - hostname: "bazarr.halfduplex.io"
+      originServerName: "echo-server.56kbps.io"
+  - hostname: "bazarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "bazarr.halfduplex.io"
-  - hostname: "lidarr.halfduplex.io"
+      originServerName: "bazarr.56kbps.io"
+  - hostname: "lidarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "lidarr.halfduplex.io"
-  - hostname: "prowlarr.halfduplex.io"
+      originServerName: "lidarr.56kbps.io"
+  - hostname: "prowlarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "prowlarr.halfduplex.io"
-  - hostname: "radarr.halfduplex.io"
+      originServerName: "prowlarr.56kbps.io"
+  - hostname: "radarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "radarr.halfduplex.io"
-  - hostname: "readarr.halfduplex.io"
+      originServerName: "radarr.56kbps.io"
+  - hostname: "readarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "readarr.halfduplex.io"
-  - hostname: "sonarr.halfduplex.io"
+      originServerName: "readarr.56kbps.io"
+  - hostname: "sonarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "sonarr.halfduplex.io"
-  - hostname: "tautulli.halfduplex.io"
+      originServerName: "sonarr.56kbps.io"
+  - hostname: "tautulli.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "tautulli.halfduplex.io"
-  - hostname: "qbittorrent.halfduplex.io"
+      originServerName: "tautulli.56kbps.io"
+  - hostname: "qbittorrent.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "qbittorrent.halfduplex.io"
-  - hostname: "sab.halfduplex.io"
+      originServerName: "qbittorrent.56kbps.io"
+  - hostname: "sab.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "sab.halfduplex.io"
+      originServerName: "sab.56kbps.io"
   - hostname: "halfduplex.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "halfduplex.io"
-  - hostname: "56kbps.io"
+  - hostname: "enigma.halfduplex.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "56kbps.io"
-  - hostname: "enigma.56kbps.io"
+      originServerName: "enigma.halfduplex.io"
+  - hostname: "edit.halfduplex.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "enigma.56kbps.io"
-  - hostname: "edit.56kbps.io"
+      originServerName: "edit.halfduplex.io"
+  - hostname: "draw.halfduplex.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "edit.56kbps.io"
-  - hostname: "draw.56kbps.io"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "draw.56kbps.io"
-  - hostname: "telnet.56kbps.io"
+      originServerName: "draw.halfduplex.io"
+  - hostname: "telnet.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:23
-  - hostname: "ssh.56kbps.io"
+  - hostname: "ssh.halfduplex.io"
     service: ssh://enigma-bbs.default.svc.cluster.local:22
-  - hostname: "wss.56kbps.io"
+  - hostname: "wss.halfduplex.io"
     service: http://enigma-bbs.default.svc.cluster.local:8811
-  - hostname: "mailer.56kbps.io"
+  - hostname: "mailer.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:24554
   - service: http_status:404

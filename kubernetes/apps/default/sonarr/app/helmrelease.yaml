@@ -35,7 +35,7 @@ spec:
               SONARR__LOG__LEVEL: debug
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
-              SONARR__APPLICATION_URL: https://sonarr.halfduplex.io
+              SONARR__APPLICATION_URL: https://sonarr.56kbps.io
               TZ: America/Chicago
             envFrom: &envFrom
               - secretRef:
@@ -102,16 +102,16 @@ spec:
     route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.halfduplex.io
+          external-dns.alpha.kubernetes.io/target: external.56kbps.io
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["sonarr.halfduplex.io"]
+        hostnames: ["sonarr.56kbps.io"]
         parentRefs:
           - name: external-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
           - name: internal-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
         rules:
           - backendRefs:
               - identifier: app

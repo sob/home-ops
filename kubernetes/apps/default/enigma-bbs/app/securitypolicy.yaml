@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Authentik forward-auth for the enigma-bbs code editor (edit.56kbps.io) via the
+# Authentik forward-auth for the enigma-bbs code editor (edit.halfduplex.io) via the
 # 56kbps outpost. Targets only the `code` route — the web/websocket/draw routes
 # remain public.
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -27,7 +27,7 @@ spec:
     http:
       backendRefs:
         - kind: Service
-          name: ak-outpost-56kbps
+          name: ak-outpost-halfduplex
           namespace: security
           port: 9000
       path: /outpost.goauthentik.io/auth/envoy

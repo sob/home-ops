@@ -39,7 +39,7 @@ spec:
                 sabnzbd.default.svc,
                 sabnzbd.default.svc.cluster,
                 sabnzbd.default.svc.cluster.local,
-                sab.halfduplex.io
+                sab.56kbps.io
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -105,16 +105,16 @@ spec:
     route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.halfduplex.io
+          external-dns.alpha.kubernetes.io/target: external.56kbps.io
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["sab.halfduplex.io"]
+        hostnames: ["sab.56kbps.io"]
         parentRefs:
           - name: external-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
           - name: internal-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
         rules:
           - backendRefs:
               - identifier: app

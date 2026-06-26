@@ -12,18 +12,18 @@ spec:
   parentRefs:
     - name: external-gateway
       namespace: network
-      sectionName: https-halfduplex
+      sectionName: https-56kbps
     - name: internal-gateway
       namespace: network
-      sectionName: https-halfduplex
+      sectionName: https-56kbps
   hostnames:
-    - "sonarr.halfduplex.io"
+    - "sonarr.56kbps.io"
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /outpost.goauthentik.io
       backendRefs:
-        - name: ak-outpost-halfduplex
+        - name: ak-outpost-56kbps
           namespace: security
           port: 9000

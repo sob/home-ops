@@ -29,7 +29,7 @@ spec:
     http:
       backendRefs:
         - kind: Service
-          name: ak-outpost-halfduplex
+          name: ak-outpost-56kbps
           namespace: security
           port: 9000
       path: /outpost.goauthentik.io/auth/envoy

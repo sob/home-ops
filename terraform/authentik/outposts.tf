@@ -1,11 +1,7 @@
 locals {
+  # 56kbps outpost = all homelab apps (cookie domain 56kbps.io via authentik_host sso.56kbps.io)
   main_proxy_provider_ids = [
-    tonumber(authentik_provider_proxy.main["enigma_draw"].id),
-    tonumber(authentik_provider_proxy.main["enigma_code"].id),
     tonumber(authentik_provider_proxy.main["dozzle"].id),
-  ]
-
-  halfduplex_proxy_provider_ids = [
     tonumber(authentik_provider_proxy.main["prowlarr"].id),
     tonumber(authentik_provider_proxy.main["readarr"].id),
     tonumber(authentik_provider_proxy.main["homeassistant"].id),
@@ -18,6 +14,12 @@ locals {
     tonumber(authentik_provider_proxy.main["sabnzbd"].id),
     tonumber(authentik_provider_proxy.main["tautulli"].id),
     tonumber(authentik_provider_proxy.main["qbittorrent"].id),
+  ]
+
+  # halfduplex outpost = BBS only (cookie domain halfduplex.io via authentik_host sso.halfduplex.io)
+  halfduplex_proxy_provider_ids = [
+    tonumber(authentik_provider_proxy.main["enigma_draw"].id),
+    tonumber(authentik_provider_proxy.main["enigma_code"].id),
   ]
 }
 
@@ -54,9 +56,11 @@ resource "authentik_outpost" "halfduplex" {
   service_connection = authentik_service_connection_kubernetes.local.id
   protocol_providers = local.halfduplex_proxy_provider_ids
   config = jsonencode({
-    "log_level"                      = "info"
-    "docker_labels"                  = null
-    "authentik_host"                 = "https://sso.${local.cluster_domain}/"
+    "log_level"     = "info"
+    "docker_labels" = null
+    # BBS lives on halfduplex.io — the outpost must issue halfduplex.io proxy
+    # cookies, which follow this authentik_host domain (not the provider field).
+    "authentik_host"                 = "https://sso.halfduplex.io/"
     "docker_network"                 = null
     "container_image"                = null
     "docker_map_ports"               = true
