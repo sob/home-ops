@@ -83,7 +83,7 @@ spec:
           valkey:
             image:
               repository: valkey/valkey
-              tag: 8.0-alpine@sha256:cbead4404c7f5679bdf39ace40d9ca8023fdfe3faea4f4e7b437d2ce7b467513
+              tag: 8.1-alpine@sha256:18c7010efe0a74c334ee01bd2c5632735d2c0d9518f85b9ad3d995314c6a0b7a
             args:
               - --dir
               - /data
