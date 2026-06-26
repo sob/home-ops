@@ -72,18 +72,22 @@ spec:
             port: *serverPort
           health:
             port: *healthPort
-    ingress:
+    route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        className: external
-        hosts:
-          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *serverPort
     persistence:
       config-file:
         type: configMap

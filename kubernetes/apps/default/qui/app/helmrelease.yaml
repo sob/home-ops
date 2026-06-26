@@ -82,18 +82,17 @@ spec:
           prometheus.io/forward: "true"
         endpoints:
           - port: http
-    ingress:
+    route:
       app:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-        className: internal
-        hosts:
-          - host: qui.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+        hostnames: ["qui.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       config:
         existingClaim: qui

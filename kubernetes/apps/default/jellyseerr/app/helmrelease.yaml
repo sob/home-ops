@@ -80,19 +80,22 @@ spec:
           prometheus.io/forward: "true"
         endpoints:
           - port: http
-    ingress:
+    route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           external-dns.alpha.kubernetes.io/is-public: "true"
-        className: external
-        hosts:
-          - host: jellyseerr.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+        hostnames: ["jellyseerr.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       config:
         existingClaim: jellyseerr

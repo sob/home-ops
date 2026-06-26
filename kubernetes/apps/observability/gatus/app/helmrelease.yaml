@@ -105,18 +105,22 @@ spec:
             path: /metrics
             interval: 1m
             scrapeTimeout: 10s
-    ingress:
+    route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        className: external
-        hosts:
-          - host: status.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        hostnames: ["status.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       config:
         type: emptyDir

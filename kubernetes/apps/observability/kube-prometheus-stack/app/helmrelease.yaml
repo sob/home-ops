@@ -30,10 +30,7 @@ spec:
     alertmanager:
       enabled: true
       ingress:
-        enabled: true
-        ingressClassName: internal
-        hosts: ["alertmanager.${SECRET_DOMAIN}"]
-        pathType: Prefix
+        enabled: false  # served via standalone HTTPRoute (httproute.yaml) on the internal gateway
       alertmanagerSpec:
         useExistingSecret: true
         configSecret: alertmanager-config
@@ -75,10 +72,7 @@ spec:
       enabled: false
     prometheus:
       ingress:
-        enabled: true
-        ingressClassName: internal
-        hosts: ["prometheus.${SECRET_DOMAIN}"]
-        pathType: Prefix
+        enabled: false  # served via standalone HTTPRoute (httproute.yaml) on the internal gateway
       prometheusSpec:
         enableRemoteWriteReceiver: true
         scrapeInterval: 30s # More frequent for local monitoring

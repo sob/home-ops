@@ -20,15 +20,7 @@ spec:
   values:
     fullnameOverride: *app
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-      className: internal
-      hosts:
-        - host: &host blackbox.${SECRET_DOMAIN}
-          paths:
-            - path: /
-              pathType: Prefix
+      enabled: false  # served via standalone HTTPRoute (httproute.yaml) on the internal gateway
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false

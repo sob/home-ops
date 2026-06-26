@@ -64,18 +64,17 @@ spec:
           prometheus.io/forward: "true"
         endpoints:
           - port: http
-    ingress:
+    route:
       app:
-        enabled: true
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        hosts:
-          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
-            paths: &paths
-              - path: /
-                service:
-                  identifier: app
-        className: external
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 3000
     persistence:
       appdata:
         existingClaim: homarr
