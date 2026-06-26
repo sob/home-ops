@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/referencegrant_v1beta1.json
+# Allows the *arr forward-auth apps (in default/network/observability) to
+# reference the Authentik proxy outposts in the security namespace — both from
+# their HTTPRoute (the /outpost.goauthentik.io login-flow rule) and from their
+# Envoy SecurityPolicy (extAuth backendRef). Required for Envoy Gateway to honor
+# cross-namespace backendRefs.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: gateway-to-outposts
+  namespace: security
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: network
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: default
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: observability
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: default
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: observability
+  to:
+    - group: ""
+      kind: Service
+      name: ak-outpost-halfduplex
+    - group: ""
+      kind: Service
+      name: ak-outpost-56kbps

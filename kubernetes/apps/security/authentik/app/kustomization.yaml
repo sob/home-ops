@@ -9,6 +9,7 @@ resources:
   - ./rbac.yaml
   - ./httproute-56kbps.yaml
   - ./httproute-halfduplex.yaml
+  - ./referencegrant.yaml
   - ./ippool.yaml
   - ./service-lb.yaml
   - ./servicemonitor.yaml

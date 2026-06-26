@@ -64,6 +64,12 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "sso.halfduplex.io"
+  # Migrated to envoy gateway (forward-auth via SecurityPolicy). Must precede the
+  # *.halfduplex.io nginx wildcard below; remove once the wildcard flips to envoy.
+  - hostname: "echo-server.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "echo-server.halfduplex.io"
   - hostname: "*.halfduplex.io"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
