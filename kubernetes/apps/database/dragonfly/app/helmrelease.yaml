@@ -65,6 +65,7 @@ spec:
               readOnlyRootFilesystem: true
               capabilities: { drop: [ALL] }
         pod:
+          automountServiceAccountToken: true # 5.0 defaults false; operator needs API access to watch Dragonfly CRDs
           securityContext:
             runAsUser: 65534
             runAsGroup: 65534
