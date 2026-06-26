@@ -41,7 +41,7 @@ ingress:
     originRequest:
       originServerName: "status.${SECRET_DOMAIN}"
   - hostname: "logs.${SECRET_DOMAIN}"
-    service: https://ingress-nginx-internal-controller.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "logs.${SECRET_DOMAIN}"
   - hostname: "overseerr.${SECRET_DOMAIN}"
@@ -70,6 +70,42 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "echo-server.halfduplex.io"
+  - hostname: "bazarr.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "bazarr.halfduplex.io"
+  - hostname: "lidarr.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "lidarr.halfduplex.io"
+  - hostname: "prowlarr.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "prowlarr.halfduplex.io"
+  - hostname: "radarr.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "radarr.halfduplex.io"
+  - hostname: "readarr.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "readarr.halfduplex.io"
+  - hostname: "sonarr.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "sonarr.halfduplex.io"
+  - hostname: "tautulli.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "tautulli.halfduplex.io"
+  - hostname: "qbittorrent.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "qbittorrent.halfduplex.io"
+  - hostname: "sab.halfduplex.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "sab.halfduplex.io"
   - hostname: "*.halfduplex.io"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
     originRequest:
@@ -87,11 +123,11 @@ ingress:
     originRequest:
       originServerName: "enigma.56kbps.io"
   - hostname: "edit.56kbps.io"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "edit.56kbps.io"
   - hostname: "draw.56kbps.io"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "draw.56kbps.io"
   - hostname: "telnet.56kbps.io"

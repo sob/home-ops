@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+# Authentik login/callback flow for dozzle, outside the SecurityPolicy.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dozzle-outpost
+  namespace: observability
+spec:
+  parentRefs:
+    - name: external-gateway
+      namespace: network
+      sectionName: https-56kbps
+    - name: internal-gateway
+      namespace: network
+      sectionName: https-56kbps
+  hostnames:
+    - "logs.${SECRET_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: ak-outpost-56kbps
+          namespace: security
+          port: 9000

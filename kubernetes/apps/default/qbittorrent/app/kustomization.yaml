@@ -6,4 +6,6 @@ resources:
   - ./externalsecret.yaml
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+  - ./httproute-outpost.yaml
+  - ./securitypolicy.yaml
   - ./external-ip.yaml
