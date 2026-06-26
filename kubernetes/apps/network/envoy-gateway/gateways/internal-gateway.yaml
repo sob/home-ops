@@ -66,6 +66,12 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-  # IP comes from CiliumLoadBalancerIPPool envoy-gateway-internal-pool (.200)
-  # via the owning-gateway-name serviceSelector. Do NOT also set spec.addresses
-  # — the two mechanisms conflict (pool goes Conflicting, IPs get swapped/doubled).
+  # Pin the LB IP via the Cilium annotation on the generated Service. The
+  # envoy-gateway-internal-pool's owning-gateway-name selector alone is NOT
+  # deterministic: cilium-pool has no serviceSelector (matches every LB Service)
+  # and its .220-.230 range would otherwise win. Requesting .200 forces the
+  # envoy pool (only it contains .200). Do NOT use spec.addresses — Envoy Gateway
+  # echoes it into status but does not propagate it to the Service's loadBalancerIP.
+  infrastructure:
+    annotations:
+      io.cilium/lb-ipam-ips: "10.1.100.200"
