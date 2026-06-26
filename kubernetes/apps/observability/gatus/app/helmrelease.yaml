@@ -19,12 +19,11 @@ spec:
       retries: 3
   values:
     serviceAccount:
-      create: true
-      name: gatus
+      gatus: {} # 5.0: serviceAccount is a map of named instances (was create/name)
     controllers:
       main:
         serviceAccount:
-          name: gatus
+          identifier: gatus
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
