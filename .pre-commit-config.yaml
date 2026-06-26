@@ -1,5 +1,12 @@
 ---
 # See https://pre-commit.com for more information
+#
+# Two-tier model:
+#   pre-commit (fast, every commit): whitespace, YAML parse + lint, secrets, naming
+#   pre-push   (heavy, before remote): kustomize build + kubeconform
+# `pre-commit install` wires both hook types (default_install_hook_types below);
+# `mise install` runs that for you via the postinstall hook in .mise.toml.
+default_install_hook_types: [pre-commit, pre-push]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -15,17 +22,12 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args:
           - -c
           - ".yamllint.yaml"
-
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
-    hooks:
-      - id: gitleaks
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
@@ -41,13 +43,31 @@ repos:
 
   - repo: local
     hooks:
+      # Use the mise-pinned gitleaks binary (language: system) instead of the
+      # upstream golang hook, which compiles gitleaks from source on every machine.
+      - id: gitleaks
+        name: Detect hardcoded secrets (gitleaks)
+        entry: mise exec -- gitleaks git --staged --pre-commit --redact --verbose
+        language: system
+        pass_filenames: false
+
+      # Validate each changed file against the JSON schema in its
+      # `# yaml-language-server` modeline — i.e. app-template HelmRelease
+      # spec.values (typos / indentation / wrong types) and Flux resources.
+      - id: schema-validation
+        name: JSON schema (app-template values, Flux)
+        entry: mise exec -- .github/scripts/validate-schemas.sh
+        language: system
+        files: '^kubernetes/.*\.yaml$'
+        exclude: '\.sops\.yaml$'
+
       - id: validate-sops
         name: Validate SOPS files
         entry: >-
           bash -c 'for file in "$@"; do
             if [[ "$file" == *.sops.yaml ]]; then
               if ! head -1 "$file" | grep -q "^sops:"; then
-                echo "ERROR: $file is a .sops.yaml file but doesn't appear to be encrypted";
+                echo "ERROR: $file is a .sops.yaml file but does not appear to be encrypted";
                 exit 1;
               fi;
             fi;
@@ -62,7 +82,7 @@ repos:
             if [[ "$file" =~ kubernetes/apps/.*/.*\.yaml$ ]] &&
                 [[ ! "$file" =~ (kustomization|helmrelease|ks|externalsecret|secret\.sops)\.yaml$ ]] &&
                 [[ ! "$file" =~ kubernetes/apps/.*/app/ ]]; then
-              echo "ERROR: $file doesn't follow naming conventions";
+              echo "ERROR: $file does not follow naming conventions";
               exit 1;
             fi;
           done' --
@@ -70,18 +90,28 @@ repos:
         files: '^kubernetes/.*\.yaml$'
 
       - id: no-direct-secrets
-        name: Check for direct secrets
-        entry: >-
-          bash -c 'for file in "$@"; do
-            if [[ "$file" =~ \.yaml$ ]] && [[ ! "$file" =~ \.sops\.yaml$ ]] &&
-                grep -E "(password|token|key|secret):\s*['\''\""]?[^$\{]" "$file" 2>/dev/null |
-                grep -v "secretName" | grep -v "kind: Secret"; then
-              echo "ERROR: $file may contain unencrypted secrets";
-              exit 1;
-            fi;
-          done' --
+        name: Check for plaintext secrets
+        entry: mise exec -- .github/scripts/check-plaintext-secrets.sh
         language: system
         files: '\.yaml$'
+        exclude: '\.sops\.yaml$'
+
+      # --- Heavy checks: pre-push only (too slow for every commit) ---
+      - id: kustomize-build
+        name: Kustomize build (all overlays)
+        entry: mise exec -- task validate:kustomize
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: kubeconform
+        name: Kubeconform schema validation
+        entry: mise exec -- task validate:kubeconform
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
 
 exclude: |
   (?x)^(
