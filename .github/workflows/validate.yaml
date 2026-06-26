@@ -2,16 +2,13 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Validate"
 
+# Runs on every PR (no path filter) so the `Validate Success` gate always
+# reports — required-status-check branch protection blocks a PR forever if a
+# path-filtered workflow is skipped. Heavy jobs are gated internally on the
+# `changes` job instead, so unrelated PRs finish in seconds.
 on:
   pull_request:
     branches: ["main"]
-    paths:
-      - "kubernetes/**"
-      - ".github/workflows/validate.yaml"
-      - ".github/scripts/**"
-      - ".github/policies/**"
-      - ".mise.toml"
-      - ".yamllint.yaml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -22,12 +19,33 @@ permissions:
   contents: read
 
 jobs:
-  # Single job that runs the same `task validate:*` commands you run locally
-  # (via pre-push hooks / `task validate`). Tools come from .mise.toml so the
-  # versions here match your machine exactly. All steps are BLOCKING.
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      kubernetes: ${{ steps.filter.outputs.kubernetes }}
+    steps:
+      - name: Filter changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            kubernetes:
+              - 'kubernetes/**'
+              - '.github/workflows/validate.yaml'
+              - '.github/scripts/**'
+              - '.github/policies/**'
+              - '.mise.toml'
+              - '.yamllint.yaml'
+
+  # Runs the same `task validate:*` commands you run locally (via pre-push hooks
+  # / `task validate`). Tools come from .mise.toml so versions match your machine.
+  # All steps are BLOCKING. Only runs when manifests/config changed.
   validate:
     name: Validate
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.kubernetes == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -56,6 +74,8 @@ jobs:
   opa-policies:
     name: OPA Policies
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.kubernetes == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -98,6 +118,8 @@ jobs:
   flux-diff:
     name: Flux Diff
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.kubernetes == 'true'
     permissions:
       contents: read
       pull-requests: write
@@ -170,7 +192,9 @@ jobs:
 
             </details>
 
-  # Merge gate — the single required check. Fails if any blocking job failed.
+  # Merge gate — the single required status check. Always runs and reports.
+  # A skipped job (PR touched no manifests) counts as success; only an actual
+  # failure/cancellation blocks the merge.
   validate-success:
     name: Validate Success
     runs-on: ubuntu-latest
@@ -179,10 +203,18 @@ jobs:
     steps:
       - name: Check results
         run: |
-          if [[ "${{ needs.validate.result }}" != "success" \
-            || "${{ needs.opa-policies.result }}" != "success" \
-            || "${{ needs.secret-scan.result }}" != "success" ]]; then
-            echo "::error::One or more validation checks failed"
+          for result in \
+            "validate=${{ needs.validate.result }}" \
+            "opa-policies=${{ needs.opa-policies.result }}" \
+            "secret-scan=${{ needs.secret-scan.result }}"; do
+            name="${result%%=*}"
+            status="${result#*=}"
+            if [[ "$status" == "failure" || "$status" == "cancelled" ]]; then
+              echo "::error::${name} ${status}"
+              failed=true
+            fi
+          done
+          if [[ "${failed:-false}" == "true" ]]; then
             exit 1
           fi
-          echo "✅ All validation checks passed"
+          echo "✅ Validation gate satisfied"
