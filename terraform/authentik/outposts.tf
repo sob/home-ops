@@ -2,6 +2,7 @@ locals {
   main_proxy_provider_ids = [
     tonumber(authentik_provider_proxy.main["enigma_draw"].id),
     tonumber(authentik_provider_proxy.main["enigma_code"].id),
+    tonumber(authentik_provider_proxy.main["dozzle"].id),
   ]
 
   halfduplex_proxy_provider_ids = [
@@ -14,7 +15,6 @@ locals {
     tonumber(authentik_provider_proxy.main["radarr"].id),
     tonumber(authentik_provider_proxy.main["bazarr"].id),
     tonumber(authentik_provider_proxy.main["lidarr"].id),
-    tonumber(authentik_provider_proxy.main["dozzle"].id),
     tonumber(authentik_provider_proxy.main["sabnzbd"].id),
     tonumber(authentik_provider_proxy.main["tautulli"].id),
     tonumber(authentik_provider_proxy.main["qbittorrent"].id),
@@ -40,8 +40,8 @@ resource "authentik_outpost" "main" {
     "kubernetes_json_patches"        = null
     "kubernetes_service_type"        = "ClusterIP"
     "kubernetes_image_pull_secrets"  = []
-    "kubernetes_disabled_components" = []
-    "kubernetes_ingress_class_name"    = "external"
+    "kubernetes_disabled_components" = ["ingress"]
+    "kubernetes_ingress_class_name"  = "external"
     "kubernetes_ingress_annotations" = {
       "external-dns.alpha.kubernetes.io/is-public" = "false"
       "external-dns.alpha.kubernetes.io/target"    = "external.56kbps.io"
@@ -68,8 +68,8 @@ resource "authentik_outpost" "halfduplex" {
     "kubernetes_json_patches"        = null
     "kubernetes_service_type"        = "ClusterIP"
     "kubernetes_image_pull_secrets"  = []
-    "kubernetes_disabled_components" = []
-    "kubernetes_ingress_class_name"    = "external"
+    "kubernetes_disabled_components" = ["ingress"]
+    "kubernetes_ingress_class_name"  = "external"
     "kubernetes_ingress_annotations" = {
       "external-dns.alpha.kubernetes.io/is-public" = "false"
       "external-dns.alpha.kubernetes.io/target"    = "external.halfduplex.io"

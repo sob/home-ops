@@ -51,24 +51,24 @@ spec:
           prometheus.io/forward: "true"
         endpoints:
           - port: http
-    ingress:
+    route:
       app:
-        className: external
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        hosts:
-          - host: wizarr.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-          - host: join.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        hostnames:
+          - wizarr.${SECRET_DOMAIN}
+          - join.${SECRET_DOMAIN}
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 5690
     persistence:
       config:
         existingClaim: *app

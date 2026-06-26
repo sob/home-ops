@@ -25,11 +25,11 @@ ingress:
     originRequest:
       originServerName: "flux-webhook.${SECRET_DOMAIN}"
   - hostname: "wizarr.${SECRET_DOMAIN}"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "wizarr.${SECRET_DOMAIN}"
   - hostname: "join.${SECRET_DOMAIN}"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "join.${SECRET_DOMAIN}"
   - hostname: "kromgo.${SECRET_DOMAIN}"

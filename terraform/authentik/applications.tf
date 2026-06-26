@@ -43,10 +43,10 @@ locals {
       skip_path_regex = "^/api([/?].*)?"
     },
     dozzle = {
-      external_host = "https://logs.halfduplex.io"
+      external_host = "https://logs.56kbps.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/dozzle.png"
       group         = resource.authentik_group.observability
-      cookie_domain = "halfduplex.io"
+      cookie_domain = "56kbps.io"
       namespace     = "observability"
     },
     echo_server = {
@@ -127,10 +127,10 @@ locals {
       cookie_domain = "halfduplex.io"
     },
     wizarr = {
-      external_host  = "https://join.halfduplex.io"
-      icon_url       = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png"
-      group          = resource.authentik_group.media
-      cookie_domain  = "halfduplex.io"
+      external_host = "https://join.halfduplex.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png"
+      group         = resource.authentik_group.media
+      cookie_domain = "halfduplex.io"
     },
   }
 }
@@ -191,7 +191,7 @@ resource "authentik_provider_oauth2" "oauth2" {
   allowed_redirect_uris = [
     {
       matching_mode = "strict",
-      url = each.value.redirect_uri
+      url           = each.value.redirect_uri
     }
   ]
 }
