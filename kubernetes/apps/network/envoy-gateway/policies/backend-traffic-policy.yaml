@@ -9,10 +9,10 @@ spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
-      name: internal-gateway-envoy
+      name: internal-gateway
     - group: gateway.networking.k8s.io
       kind: Gateway
-      name: external-gateway-envoy
+      name: external-gateway
   # Timeouts
   timeout:
     tcp:

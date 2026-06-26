@@ -3,7 +3,11 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: external-gateway-envoy
+  # Took over the cilium external-gateway's name + IP (.201) during the
+  # Cilium->Envoy L7 cutover. external-dns (cloudflare) filters on
+  # --gateway-name=external-gateway, so this name is load-bearing for DNS.
+  # target matches the old cilium external gateway (external.56kbps.io).
+  name: external-gateway
   namespace: network
   annotations:
     external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
@@ -77,6 +81,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-  # IP comes from CiliumLoadBalancerIPPool envoy-gateway-external-pool (.221)
+  # IP comes from CiliumLoadBalancerIPPool envoy-gateway-external-pool (.201)
   # via the owning-gateway-name serviceSelector. Do NOT also set spec.addresses
   # — the two mechanisms conflict (pool goes Conflicting, IPs get swapped/doubled).

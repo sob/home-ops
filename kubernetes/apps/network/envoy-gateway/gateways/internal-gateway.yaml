@@ -3,10 +3,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: internal-gateway-envoy
+  # Took over the cilium internal-gateway's name + IP (.200) during the
+  # Cilium->Envoy L7 cutover. external-dns (unifi) filters on
+  # --gateway-name=internal-gateway, so this name is load-bearing for DNS.
+  # No external-dns target annotation (matches old cilium gw → A record to .200).
+  name: internal-gateway
   namespace: network
-  annotations:
-    external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
 spec:
   gatewayClassName: envoy-gateway
   listeners:
@@ -64,6 +66,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-  # IP comes from CiliumLoadBalancerIPPool envoy-gateway-internal-pool (.220)
+  # IP comes from CiliumLoadBalancerIPPool envoy-gateway-internal-pool (.200)
   # via the owning-gateway-name serviceSelector. Do NOT also set spec.addresses
   # — the two mechanisms conflict (pool goes Conflicting, IPs get swapped/doubled).
