@@ -50,13 +50,13 @@ REASONS = {
 # ---- generic safe tools (so `kubectl ... | jq | grep` stays fully auto) ----
 NEUTRAL = {
     "ls", "cat", "head", "tail", "grep", "rg", "egrep", "fgrep", "zgrep", "jq",
-    "yq", "awk", "gawk", "sed", "cut", "tr", "sort", "uniq", "wc", "echo",
+    "yq", "awk", "gawk", "sed", "perl", "cut", "tr", "sort", "uniq", "wc", "echo",
     "printf", "find", "basename", "dirname", "realpath", "stat", "file", "which",
     "pwd", "true", "false", "test", "[", "date", "env", "printenv", "whoami",
     "uname", "hostname", "column", "tee", "dig", "nslookup", "host", "base64",
     "sha256sum", "md5sum", "comm", "paste", "fold", "nl", "tac", "seq", "sleep",
     "openssl", "curl", "wget", "gron", "dyff", "kubeconform", "yamllint", "sops",
-    "age", "mkdir", "touch", "cp", "mv", "ln", "chmod", "diff", "cmp", "tree",
+    "age", "mkdir", "touch", "cp", "mv", "ln", "chmod", "diff", "cmp", "tree", "read",
     "du", "df", "cd", "export", "pushd", "popd", "skopeo", "crane", "op",
 }
 
@@ -126,6 +126,18 @@ HF_ALLOW = {"diff", "template", "list", "lint", "build", "version", "status", "d
 WRAPPERS = {"sudo", "nohup", "time", "nice", "ionice", "command", "stdbuf", "env"}
 ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 
+# Shell control keywords that prefix the *real* command in a compound construct.
+# Stripping them lets the body be classified: `do perl ...` -> classify `perl ...`,
+# `if kubectl apply ...` -> classify the condition `kubectl apply ...`. Pure
+# keywords (`done`, `fi`, `{`) strip to an empty segment -> ALLOW.
+SHELL_SKIP = {
+    "do", "done", "then", "else", "elif", "fi", "while", "until", "if",
+    "{", "}", "!", "(", ")",
+}
+# Loop/case headers: the tokens after these are a loop variable + word LIST (data,
+# never executed as a command), so the whole header segment is inert -> ALLOW.
+SHELL_HEADER = {"for", "select", "case", "in"}
+
 
 def strip_wrappers(tokens):
     """Drop leading env-assignments, sudo/timeout/xargs/etc. to reach the real cmd."""
@@ -136,7 +148,7 @@ def strip_wrappers(tokens):
         if ENV_ASSIGN.match(t):
             i += 1
             continue
-        if t in WRAPPERS:
+        if t in WRAPPERS or t in SHELL_SKIP:
             i += 1
             continue
         if t == "timeout":
@@ -269,6 +281,8 @@ def classify_segment(tokens):
     tokens = strip_wrappers(tokens)
     if not tokens:
         return ALLOW
+    if tokens[0] in SHELL_HEADER:
+        return ALLOW  # `for h in a b c` / `case $x in` -> just a word list, nothing runs
     base = tokens[0].split("/")[-1]
     if base in ("kubectl", "k", "kubectl.exe"):
         return classify_kubectl(tokens)
