@@ -86,8 +86,12 @@ spec:
         enableFeatures:
           - memory-snapshot-on-shutdown
           - native-histograms
-        retention: 2h  # Short local retention since we upload to R2
-        retentionSize: 10GB
+        # Local retention bumped to 48h so the self-hosted Grafana pane and the
+        # daily Claude health-review job have a usable recent window. Long-term
+        # history still lives in R2 via the Thanos sidecar (query it by adding
+        # Thanos Query/Store later — see docs/log-monitoring.md).
+        retention: 48h
+        retentionSize: 24GB
         resources:
           requests:
             cpu: 200m
@@ -177,4 +181,57 @@ spec:
                         path: [metadata, creationTimestamp]
                         nilIsZero: true
     grafana:
-      enabled: false  # Using Grafana Cloud instead
+      # Self-hosted single pane of glass. Grafana Cloud is now used ONLY for
+      # off-cluster alerting (the "is the homelab reachable" safety net); all
+      # day-to-day dashboards + log exploration live here on cheap local storage.
+      enabled: true
+      fullnameOverride: grafana
+      replicas: 1
+      admin:
+        existingSecret: grafana-admin-secret
+        userKey: admin-user
+        passwordKey: admin-password
+      persistence:
+        enabled: true
+        storageClassName: ceph-block
+        size: 5Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+      ingress:
+        enabled: false  # served via standalone HTTPRoute (httproute.yaml)
+      grafana.ini:
+        server:
+          root_url: "https://grafana.${SECRET_DOMAIN}"
+        analytics:
+          reporting_enabled: false
+          check_for_updates: false
+        auth.anonymous:
+          enabled: false
+      sidecar:
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
+          label: grafana_dashboard
+          labelValue: "1"
+          folderAnnotation: grafana_folder
+          provider:
+            foldersFromFilesStructure: true
+        datasources:
+          enabled: true
+          searchNamespace: ALL
+          label: grafana_datasource
+          labelValue: "1"
+      # Prometheus + Alertmanager datasources are auto-provisioned by the stack.
+      # Add the self-hosted Loki here so logs + metrics share one pane.
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          uid: loki
+          access: proxy
+          url: http://loki-headless.observability.svc.cluster.local:3100
+          jsonData:
+            maxLines: 1000

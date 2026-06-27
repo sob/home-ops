@@ -54,6 +54,14 @@ machine:
     nameservers:
       - 1.1.1.1
       - 1.0.0.1
+  # Ship kernel + service logs to the in-cluster Vector log-edge (LoadBalancer
+  # 10.1.100.210). Vector tags these with source="talos" and forwards to Loki.
+  logging:
+    destinations:
+      - endpoint: udp://10.1.100.210:5170
+        format: json_lines
+        extraTags:
+          source: talos
   nodeLabels:
     node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main

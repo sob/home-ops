@@ -1,0 +1,97 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-review-scripts
+  namespace: observability
+data:
+  prompt.md: |
+    You are the daily SRE health reviewer for a single-cluster Talos/Kubernetes
+    homelab managed with Flux GitOps (repo: home-ops). You will be given a
+    snapshot of the last 24h gathered from in-cluster Prometheus and Loki.
+
+    Produce a CONCISE daily health digest in GitHub-flavoured Markdown with:
+    1. A one-line overall status: 🟢 healthy / 🟡 needs attention / 🔴 critical.
+    2. "Top issues" — at most 5 bullet points, each: what, where (namespace/host/
+       device), severity, and a concrete next step. Prioritise: firing alerts,
+       crashloops/OOM, Ceph health, Flux failures, Talos kernel/hardware errors,
+       UniFi firewall/IDS spikes, UPS/power, Synology disk/volume errors.
+    3. "Trends to watch" — at most 3 bullets on slow-moving regressions.
+    4. "All clear" — a short list of subsystems that look fine.
+
+    Rules: be specific and quantitative (cite counts/rates). Do NOT invent data
+    not present in the snapshot. If a section is empty, say so in one line. Keep
+    the whole digest under ~400 words. If anything is genuinely critical
+    (data-loss risk, node/Ceph/UPS emergency), start that bullet with "CRITICAL:".
+
+  run.sh: |
+    #!/usr/bin/env bash
+    set -uo pipefail
+
+    PROM="${PROM_URL:-http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090}"
+    LOKI="${LOKI_URL:-http://loki-headless.observability.svc.cluster.local:3100}"
+    CTX="/tmp/context.txt"
+    REPORT="/tmp/report.md"
+    : > "$CTX"
+
+    pq() { # prometheus instant query -> append to context
+      local title="$1" expr="$2"
+      echo "### ${title}" >> "$CTX"
+      curl -sS -G "${PROM}/api/v1/query" --data-urlencode "query=${expr}" \
+        | head -c 8000 >> "$CTX"
+      echo -e "\n" >> "$CTX"
+    }
+
+    lq() { # loki instant query (metric) -> append to context
+      local title="$1" expr="$2"
+      echo "### ${title}" >> "$CTX"
+      curl -sS -G "${LOKI}/loki/api/v1/query" --data-urlencode "query=${expr}" \
+        | head -c 8000 >> "$CTX"
+      echo -e "\n" >> "$CTX"
+    }
+
+    echo "# Homelab snapshot ($(date -u +%FT%TZ))" >> "$CTX"
+
+    pq "Firing alerts"            'ALERTS{alertstate="firing"}'
+    pq "Ceph health (0=OK,1=WARN,2=ERR)" 'ceph_health_status'
+    pq "Flux not-ready"           'gotk_reconcile_condition{type="Ready",status="False"}'
+    pq "Container restarts 24h"   'topk(15, sum by (namespace,pod) (increase(kube_pod_container_status_restarts_total[24h])) > 2)'
+    pq "OOMKilled (last term)"    'kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1'
+    pq "Node mem available %"     '100 * min by (kubernetes_node) (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)'
+    pq "PVC used % (top)"         'topk(10, 100 * kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes)'
+    pq "UPS runtime remaining"    'min by (instance) (upsAdvanceBatteryRunTimeRemaining)'
+    pq "UPS on battery"           'max by (instance) (upsBaseBatteryTimeOnBattery)'
+    pq "Log events/s by source"   'sum by (source) (rate(vector_log_events_total[1h]))'
+
+    lq "Error log volume by ns (1h)" 'sum by (namespace) (count_over_time({namespace=~".+"} |~ `(?i)\b(error|fatal|panic)\b` [1h]))'
+    lq "Talos host errors (1h)"      'sum by (host) (count_over_time({source="talos"} |~ `(?i)(error|fail|mce|I/O error)` [1h]))'
+    lq "UniFi firewall/IDS (1h)"     'sum (count_over_time({source="unifi"} |~ `(?i)(firewall|DROP|IDS|IPS|threat)` [1h]))'
+
+    # Run Claude Code headless to produce the digest.
+    if ! claude -p "$(cat /config/prompt.md)
+
+    Here is the 24h snapshot (raw Prometheus/Loki JSON):
+
+    $(cat "$CTX")" --output-format text --dangerously-skip-permissions > "$REPORT" 2>/tmp/claude.err; then
+      echo "Claude run failed:" && cat /tmp/claude.err
+      REPORT_TEXT="⚠️ Daily health review failed to generate (Claude error). See CronJob logs."
+    else
+      REPORT_TEXT="$(cat "$REPORT")"
+    fi
+
+    # Post to Slack (JSON-encode via node, which ships in the image).
+    if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+      payload=$(REPORT_TEXT="$REPORT_TEXT" node -e 'process.stdout.write(JSON.stringify({text: ":stethoscope: *Daily Homelab Health Review*\n\n" + process.env.REPORT_TEXT}))')
+      curl -sS -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL" >/dev/null || echo "slack post failed"
+    fi
+
+    # Escalate to Pushover if Claude flagged anything CRITICAL.
+    if printf '%s' "$REPORT_TEXT" | grep -q "CRITICAL:" && [ -n "${PUSHOVER_TOKEN:-}" ]; then
+      curl -sS --form-string "token=${PUSHOVER_TOKEN}" --form-string "user=${PUSHOVER_USER}" \
+        --form-string "title=Homelab health: CRITICAL findings" \
+        --form-string "priority=1" \
+        --form-string "message=$(printf '%s' "$REPORT_TEXT" | grep 'CRITICAL:' | head -c 900)" \
+        https://api.pushover.net/1/messages.json >/dev/null || echo "pushover post failed"
+    fi
+
+    echo "Done."

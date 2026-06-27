@@ -32,32 +32,106 @@ spec:
         replication_factor: 1
       ingester:
         chunk_encoding: snappy
+      # Cheap storage: chunks + ruler live in Cloudflare R2, not on replicated Ceph.
       storage:
-        type: filesystem
+        type: s3
+        bucketNames:
+          chunks: loki-logs
+          ruler: loki-logs
+          admin: loki-logs
+        s3:
+          # Credentials are injected via env (loki-secret) and expanded at runtime.
+          endpoint: "${R2_ENDPOINT}"
+          region: auto
+          accessKeyId: "${AWS_ACCESS_KEY_ID}"
+          secretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
+          s3ForcePathStyle: true
+          insecure: false
       schemaConfig:
         configs:
           - from: "2024-04-01" # quote
             store: tsdb
-            object_store: filesystem
+            object_store: s3
             schema: v13
             index:
               prefix: loki_index_
               period: 24h
+      # Compactor enforces retention and prunes objects from R2.
+      compactor:
+        retention_enabled: true
+        delete_request_store: s3
+        compaction_interval: 10m
+        retention_delete_delay: 2h
       limits_config:
-        retention_period: 14d
+        # Default "hot" retention. Chunks always live in R2 (cheap); retention
+        # simply governs how far back they remain queryable.
+        retention_period: 720h # 30d
+        # "Cold" tier: keep high-value forensic streams ~9 months.
+        retention_stream:
+          - selector: '{source="talos"}'
+            priority: 10
+            period: 6480h # 270d
+          - selector: '{source="unifi"}'
+            priority: 10
+            period: 6480h # 270d
+          - selector: '{source="synology"}'
+            priority: 10
+            period: 6480h # 270d
+          - selector: '{source="network"}'
+            priority: 10
+            period: 6480h # 270d
+          - selector: '{namespace=~"kube-system|flux-system|security"}'
+            priority: 5
+            period: 6480h # 270d
+        # Modest cost controls on ingest.
+        ingestion_rate_mb: 12
+        ingestion_burst_size_mb: 18
+        max_global_streams_per_user: 10000
+        reject_old_samples: true
+        reject_old_samples_max_age: 168h
+        max_query_series: 10000
+        volume_enabled: true
+      # Log-based alerting: ruler evaluates rules mounted from a ConfigMap and
+      # fires to the in-cluster Alertmanager.
+      rulerConfig:
+        enable_api: true
+        wal:
+          dir: /var/loki/ruler-wal
+        storage:
+          type: local
+          local:
+            directory: /etc/loki/rules
+        rule_path: /tmp/loki/rules-tmp
+        alertmanager_url: http://kube-prometheus-stack-alertmanager.observability.svc.cluster.local:9093
+        enable_alertmanager_v2: true
+        evaluation_interval: 1m
+        poll_interval: 1m
     singleBinary:
       replicas: 1
+      # Expand ${VAR} from loki-secret into the rendered config at runtime.
+      extraArgs:
+        - "-config.expand-env=true"
+      extraEnvFrom:
+        - secretRef:
+            name: loki-secret
+      extraVolumes:
+        - name: loki-alerting-rules
+          configMap:
+            name: loki-alerting-rules
+      extraVolumeMounts:
+        - name: loki-alerting-rules
+          mountPath: /etc/loki/rules/fake
       persistence:
         enabled: true
         storageClass: ceph-block
-        size: 50Gi
+        # Much smaller now: only index cache, WAL and compactor working set.
+        size: 20Gi
       resources:
         requests:
-          cpu: 20m
-          memory: 256Mi
+          cpu: 50m
+          memory: 384Mi
         limits:
-          cpu: 40m
-          memory: 512Mi
+          memory: 768Mi
     gateway:
       replicas: 0
     backend:

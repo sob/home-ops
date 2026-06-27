@@ -1,0 +1,108 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-aggregator-config
+  namespace: observability
+data:
+  vector.yaml: |
+    data_dir: /vector-data-dir
+    api:
+      enabled: true
+      address: 0.0.0.0:8686
+
+    sources:
+      # Classic syslog (RFC3164 / RFC5424 auto-detected) from network gear.
+      syslog_udp:
+        type: syslog
+        mode: udp
+        address: 0.0.0.0:514
+      syslog_tcp:
+        type: syslog
+        mode: tcp
+        address: 0.0.0.0:514
+      # Dedicated RFC5424-over-TCP port (e.g. Synology, printers).
+      syslog_rfc5424:
+        type: syslog
+        mode: tcp
+        address: 0.0.0.0:601
+      # Talos host logs: machine.logging ships json_lines over UDP.
+      talos_json:
+        type: socket
+        mode: udp
+        address: 0.0.0.0:5170
+        max_length: 102400
+        decoding:
+          codec: json
+      internal:
+        type: internal_metrics
+
+    transforms:
+      # Tag each syslog event with a coarse, low-cardinality "source" label so
+      # Loki retention tiers and dashboards can route on it.
+      classify_syslog:
+        type: remap
+        inputs: [syslog_udp, syslog_tcp, syslog_rfc5424]
+        source: |
+          .host = to_string(.hostname) ?? to_string(.source_ip) ?? "unknown"
+          host_l = downcase(.host)
+          if match(host_l, r'(udm|usw|uap|unifi|gateway|switch|^ap-)') {
+            .source = "unifi"
+          } else if match(host_l, r'(doom|mordor|synology|nas)') {
+            .source = "synology"
+          } else if match(host_l, r'(printer|epson|brother|hpprinter)') {
+            .source = "printer"
+          } else {
+            .source = "network"
+          }
+          .severity = to_string(.severity) ?? "info"
+          .facility = to_string(.facility) ?? "user"
+
+      classify_talos:
+        type: remap
+        inputs: [talos_json]
+        source: |
+          .source = "talos"
+          .host = to_string(."talos-node") ?? to_string(.host) ?? to_string(.hostname) ?? "unknown"
+          .severity = to_string(.severity) ?? "info"
+          if exists(.msg) { .message = to_string(.msg) ?? .message }
+
+      # Drop health-check / probe spam before it ever hits storage.
+      drop_noise:
+        type: filter
+        inputs: [classify_syslog, classify_talos]
+        condition: |
+          !match(to_string(.message) ?? "", r'(?i)(kube-probe|GET /healthz|/-/ready|/-/healthy|favicon\.ico)')
+
+      # Cheap, queryable metrics derived from logs (alert on these instead of
+      # scanning logs): per-source / per-severity event counters.
+      log_metrics:
+        type: log_to_metric
+        inputs: [drop_noise]
+        metrics:
+          - type: counter
+            field: message
+            name: log_events_total
+            namespace: vector
+            tags:
+              source: "{{ source }}"
+              host: "{{ host }}"
+              severity: "{{ severity }}"
+
+    sinks:
+      loki:
+        type: loki
+        inputs: [drop_noise]
+        endpoint: http://loki-headless.observability.svc.cluster.local:3100
+        out_of_order_action: accept
+        encoding:
+          codec: json
+        labels:
+          source: "{{ source }}"
+          host: "{{ host }}"
+          severity: "{{ severity }}"
+          facility: "{{ facility }}"
+      metrics:
+        type: prometheus_exporter
+        inputs: [internal, log_metrics]
+        address: 0.0.0.0:9598
