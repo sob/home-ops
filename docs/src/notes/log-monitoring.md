@@ -102,6 +102,37 @@ existing `kube-prometheus-stack` Thanos bucket).
 5. Visit `https://grafana.${SECRET_DOMAIN}` and confirm the Logs and
    Network & Syslog dashboards populate.
 
+## Per-app alerting (metrics)
+
+Alerting is moving to **co-located per-app `PrometheusRule`s** (alongside each app's
+ServiceMonitor + gatus check + dashboard), so the SPOG assembles itself from each
+app's own folder. The matching Terraform/Grafana-Cloud rules are **kept running in
+parallel** during cutover (delete later once the in-cluster ones are confirmed) —
+expect temporary duplicate pages.
+
+Added/migrated in-cluster (reusing the exact PromQL from Terraform):
+- **Media/*arr**: Plex, Jellyfin, Sonarr, Radarr, Prowlarr, Readarr, Lidarr, Bazarr,
+  SABnzbd, Seerr (down/health/queue/indexers/storage).
+- **Infra**: Authentik, Blocky, Gatus, Cloudflared.
+- **Ceph** (was Cloud-only — now in-cluster under `rook-ceph`), **UPS/PDU** (under
+  `snmp-exporter`), **IoT/Sonos/Chamberlain** (under blackbox/unifi-poller).
+- **New gap alerts**: Dragonfly (down + memory), Mosquitto/MQTT telemetry,
+  Home Assistant, Zigbee2MQTT.
+- **Log-based**: `ArrDatabaseLocked` added to the Loki ruler.
+
+Routing: in-cluster rules use `severity` + `type` labels → Alertmanager →
+Pushover/Slack (existing config). Grafana **Cloud keeps only** the off-cluster
+safety nets (NodeDown, AllNodesUnreachable, MetricsForwardingDown,
+PrometheusDataSourceDown, CloudflareTunnelDown).
+
+Known not-yet-homed / needs-wiring:
+- `IngressControllerDown` / `HighErrorRate` / `HighIngressLatency` — no `ingress-nginx`
+  app dir found; left in Terraform pending a deliberate home.
+- Home Assistant & Zigbee2MQTT alerts need their **local Prometheus scrape** wired
+  (HA is currently scraped only by Alloy→Cloud; `scrapeconfig.yaml` is commented out).
+  The rules are intentionally dormant (no `absent()` guard) until then; gatus still
+  covers reachability.
+
 ## Follow-ups (intentionally deferred)
 
 - **Thanos Query + Store Gateway** to read the long-term metrics already in R2

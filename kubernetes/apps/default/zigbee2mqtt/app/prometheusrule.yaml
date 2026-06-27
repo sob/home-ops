@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: zigbee2mqtt
+  namespace: default
+spec:
+  groups:
+    - name: zigbee2mqtt.rules
+      interval: 1m
+      rules:
+        # NOTE: requires Zigbee2MQTT to expose/forward Prometheus metrics (job
+        # "zigbee2mqtt"). Until the scrape is wired, this stays dormant (no
+        # absent() guard) — reachability is still covered today by the gatus check.
+        - alert: Zigbee2MQTTDown
+          expr: |
+            up{job=~".*zigbee2mqtt.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            type: workload
+          annotations:
+            summary: "Zigbee2MQTT is down"
+            description: "Zigbee2MQTT has been unreachable for 5m — all Zigbee devices/automations are offline."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/Zigbee2MQTTDown"

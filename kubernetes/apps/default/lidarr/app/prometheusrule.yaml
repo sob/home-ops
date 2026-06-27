@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lidarr
+  namespace: default
+spec:
+  groups:
+    - name: lidarr.rules
+      interval: 1m
+      rules:
+        - alert: LidarrDown
+          expr: |
+            (min(up{job="lidarr",namespace="default"}) < 1) or (min(up{job="lidarr-exporter",namespace="observability"}) < 1)
+          for: 15m
+          labels:
+            severity: info
+            type: workload
+          annotations:
+            summary: "Lidarr music manager is down"
+            description: "Lidarr has been unreachable for 15 minutes. Music automation is halted."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/LidarrDown"

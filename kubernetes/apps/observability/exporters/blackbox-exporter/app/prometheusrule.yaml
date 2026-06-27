@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: blackbox-exporter
+  namespace: observability
+spec:
+  groups:
+    - name: iot.rules
+      interval: 1m
+      rules:
+        - alert: IoTDeviceDown
+          expr: |
+            probe_success{probe_type="iot_icmp"} == 0
+          for: 10m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "IoT device is unreachable"
+            description: "{{ $labels.instance }} has been unreachable for 10 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/IoTDeviceDown"
+
+        - alert: SonosDeviceDown
+          expr: |
+            probe_success{probe_type="sonos_icmp"} == 0
+          for: 15m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "Sonos speaker is unreachable"
+            description: "Sonos {{ $labels.instance }} has been unreachable for 15 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/SonosDeviceDown"

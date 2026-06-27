@@ -8,3 +8,4 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./external-ip.yaml
+  - ./prometheusrule.yaml

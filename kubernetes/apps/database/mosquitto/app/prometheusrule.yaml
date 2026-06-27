@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: mosquitto
+  namespace: database
+spec:
+  groups:
+    - name: mosquitto.rules
+      interval: 1m
+      rules:
+        # The MQTT broker has no direct exporter; mqtt-exporter subscribes to it,
+        # so loss of mqtt-exporter scrape is the proxy for broker/telemetry health.
+        # (Replaces the orphaned EMQXDown rule still in Terraform.)
+        - alert: MosquittoBrokerTelemetryDown
+          expr: |
+            up{job=~".*mqtt-exporter.*"} == 0 or absent(up{job=~".*mqtt-exporter.*"})
+          for: 5m
+          labels:
+            severity: critical
+            type: database
+          annotations:
+            summary: "MQTT broker telemetry is down"
+            description: "mqtt-exporter has been unreachable for 5m — the Mosquitto broker may be down, breaking Zigbee2MQTT / Home Assistant / Node-RED."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/MosquittoBrokerTelemetryDown"

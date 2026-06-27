@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: readarr
+  namespace: default
+spec:
+  groups:
+    - name: readarr.rules
+      interval: 1m
+      rules:
+        - alert: ReadarrDown
+          expr: |
+            (min(up{job="readarr",namespace="default"}) < 1) or (min(up{job="readarr-exporter",namespace="observability"}) < 1)
+          for: 15m
+          labels:
+            severity: info
+            type: workload
+          annotations:
+            summary: "Readarr book manager is down"
+            description: "Readarr has been unreachable for 15 minutes. Book automation is halted."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/ReadarrDown"

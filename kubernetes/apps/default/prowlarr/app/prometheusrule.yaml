@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prowlarr
+  namespace: default
+spec:
+  groups:
+    - name: prowlarr.rules
+      interval: 1m
+      rules:
+        - alert: ProwlarrDown
+          expr: |
+            (min(up{job="prowlarr",namespace="default"}) < 1) or (min(up{job="prowlarr-exporter",namespace="observability"}) < 1)
+          for: 10m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Prowlarr indexer manager is down"
+            description: "Prowlarr has been unreachable for 10 minutes. Indexer searches are failing."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/ProwlarrDown"
+
+        - alert: IndexersFailing
+          expr: |
+            prowlarr_indexer_status{status!="enabled"} > 2
+          for: 15m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Multiple indexers are failing"
+            description: "{{ $value }} indexers are currently failing health checks in Prowlarr"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/IndexersFailing"

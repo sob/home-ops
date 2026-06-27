@@ -37,6 +37,20 @@ data:
             annotations:
               summary: "Out-of-memory signature in logs for {{ $labels.namespace }}/{{ $labels.app }}"
               description: "Container logs contain OOM/allocation-failure messages in the last 10m."
+          # Migrated from the Terraform/Loki Cloud rule (log-based, so it lives in
+          # the ruler rather than a PrometheusRule).
+          - alert: ArrDatabaseLocked
+            expr: |
+              sum by (app) (
+                count_over_time({namespace="default"} |~ `database is locked` [10m])
+              ) > 20
+            for: 5m
+            labels:
+              severity: warning
+              type: workload
+            annotations:
+              summary: "Arr app {{ $labels.app }} hitting 'database is locked'"
+              description: ">20 'database is locked' log lines in 10m for {{ $labels.app }} — SQLite contention; consider moving to Postgres or reducing concurrency."
 
       - name: talos-host-logs
         rules:

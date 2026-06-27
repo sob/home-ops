@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dragonfly
+  namespace: database
+spec:
+  groups:
+    - name: dragonfly.rules
+      interval: 1m
+      rules:
+        - alert: DragonflyDown
+          expr: |
+            up{job=~".*dragonfly.*"} == 0 or absent(up{job=~".*dragonfly.*"})
+          for: 5m
+          labels:
+            severity: critical
+            type: database
+          annotations:
+            summary: "Dragonfly (Redis) is down"
+            description: "Dragonfly has been unreachable for 5m — apps depending on it (caching/sessions) will degrade."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/DragonflyDown"
+        - alert: DragonflyHighMemory
+          # Metric names follow the Dragonfly exporter; tune if your version differs.
+          expr: |
+            (dragonfly_memory_used_bytes / dragonfly_max_memory_bytes) * 100 > 90
+          for: 15m
+          labels:
+            severity: warning
+            type: database
+          annotations:
+            summary: "Dragonfly memory usage high"
+            description: "Dragonfly is using {{ $value | printf \"%.1f\" }}% of its max memory — eviction/instability risk."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/DragonflyHighMemory"

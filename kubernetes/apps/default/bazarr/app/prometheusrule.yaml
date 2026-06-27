@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: bazarr
+  namespace: default
+spec:
+  groups:
+    - name: bazarr.rules
+      interval: 1m
+      rules:
+        - alert: BazarrDown
+          expr: |
+            (min(up{job="bazarr",namespace="default"}) < 1) or (min(up{job="bazarr-exporter",namespace="observability"}) < 1)
+          for: 15m
+          labels:
+            severity: info
+            type: workload
+          annotations:
+            summary: "Bazarr subtitle manager is down"
+            description: "Bazarr has been unreachable for 15 minutes. Subtitle downloads are halted."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/BazarrDown"

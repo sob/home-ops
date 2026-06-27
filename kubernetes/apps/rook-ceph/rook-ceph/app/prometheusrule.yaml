@@ -1,0 +1,155 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ceph
+  namespace: rook-ceph
+spec:
+  groups:
+    - name: ceph.rules
+      interval: 1m
+      rules:
+        - alert: CephHealthError
+          expr: |
+            max(ceph_health_status) == 2
+          for: 1m
+          labels:
+            severity: critical
+            type: storage
+          annotations:
+            summary: "Ceph cluster health error"
+            description: "Ceph cluster is in ERROR state"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephHealthError"
+
+        - alert: CephOSDDown
+          expr: |
+            sum(ceph_osd_down) > 0
+          for: 5m
+          labels:
+            severity: critical
+            type: storage
+          annotations:
+            summary: "Ceph OSD down"
+            description: "{{ $values.A }} Ceph OSD(s) are down"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephOSDDown"
+
+        - alert: CephPGsDegraded
+          expr: |
+            sum(ceph_pg_degraded) > 0
+          for: 10m
+          labels:
+            severity: critical
+            type: storage
+          annotations:
+            summary: "Ceph PGs degraded"
+            description: "{{ $values.A }} PGs are in degraded state"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPGsDegraded"
+
+        - alert: CephPoolNearFull
+          expr: |
+            max by (pool) ((ceph_pool_bytes_used / ceph_pool_max_avail) * 100) > 85
+          for: 5m
+          labels:
+            severity: critical
+            type: storage
+          annotations:
+            summary: "Ceph pool near full"
+            description: "Ceph pool {{ $labels.pool }} is {{ $values.A }}% full"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPoolNearFull"
+
+        - alert: CephMonitorDown
+          expr: |
+            (ceph_mon_quorum_status == 0) > 0
+          for: 5m
+          labels:
+            severity: critical
+            type: storage
+          annotations:
+            summary: "Ceph monitor down"
+            description: "{{ $values.A }} Ceph monitor(s) out of quorum"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephMonitorDown"
+
+        - alert: CephTooManyPGsPerOSD
+          expr: |
+            (sum(ceph_pool_pg_num) / count(ceph_osd_up)) > 250
+          for: 30m
+          labels:
+            severity: warning
+            type: storage
+          annotations:
+            summary: "Too many PGs per OSD"
+            description: "Cluster has {{ $values.A }} PGs per OSD (max recommended: 250)"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephTooManyPGsPerOSD"
+
+        - alert: CephOSDSlowOps
+          expr: |
+            ceph_healthcheck_slow_ops > 0
+          for: 10m
+          labels:
+            severity: warning
+            type: storage
+          annotations:
+            summary: "Ceph cluster experiencing slow operations"
+            description: "Ceph cluster has {{ $values.A }} slow operations detected"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephOSDSlowOps"
+
+        - alert: CephOSDNearFull
+          expr: |
+            max by (ceph_daemon) ((ceph_osd_stat_bytes_used / ceph_osd_stat_bytes) * 100) > 80
+          for: 5m
+          labels:
+            severity: warning
+            type: storage
+          annotations:
+            summary: "Ceph OSD near full"
+            description: "OSD {{ $labels.ceph_daemon }} is {{ $values.A }}% full"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephOSDNearFull"
+
+        - alert: CephMgrDown
+          expr: |
+            up{job="rook-ceph-mgr"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            type: storage
+          annotations:
+            summary: "Ceph Manager daemon down"
+            description: "No active Ceph Manager daemon"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephMgrDown"
+
+        - alert: CephClusterUtilizationHigh
+          expr: |
+            (sum(ceph_cluster_total_used_bytes) / sum(ceph_cluster_total_bytes)) * 100 > 70
+          for: 5m
+          labels:
+            severity: warning
+            type: storage
+          annotations:
+            summary: "Ceph cluster utilization high"
+            description: "Cluster is {{ $values.A }}% full"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephClusterUtilizationHigh"
+
+        - alert: CephPGsInactive
+          expr: |
+            sum(ceph_pg_inactive) > 0
+          for: 5m
+          labels:
+            severity: critical
+            type: storage
+          annotations:
+            summary: "Ceph PGs inactive"
+            description: "{{ $values.A }} PGs are inactive"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPGsInactive"
+
+        - alert: CephPGsUnclean
+          expr: |
+            sum(ceph_pg_total - ceph_pg_clean) > 0
+          for: 15m
+          labels:
+            severity: warning
+            type: storage
+          annotations:
+            summary: "Ceph PGs unclean"
+            description: "{{ $values.A }} PGs are not clean"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPGsUnclean"

@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cloudflared
+  namespace: network
+spec:
+  groups:
+    - name: cloudflared.rules
+      interval: 1m
+      rules:
+        - alert: CloudflareTunnelDown
+          expr: |
+            min(up{job="cloudflared",namespace="network"}) < 1
+          for: 5m
+          labels:
+            severity: warning
+            type: infrastructure
+          annotations:
+            summary: "Cloudflare tunnel is down"
+            description: "Cloudflared has been unreachable for 5 minutes. External access via tunnel is offline."
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CloudflareTunnelDown"

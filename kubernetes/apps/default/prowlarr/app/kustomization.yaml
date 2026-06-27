@@ -8,3 +8,4 @@ resources:
   - ./helmrelease.yaml
   - ./httproute-outpost.yaml
   - ./securitypolicy.yaml
+  - ./prometheusrule.yaml

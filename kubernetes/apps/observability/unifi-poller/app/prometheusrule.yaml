@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: unifi-poller
+  namespace: observability
+spec:
+  groups:
+    - name: iot.rules
+      interval: 1m
+      rules:
+        - alert: ChamberlainMyQOffline
+          expr: |
+            unpoller_client_uptime_seconds{mac="64:52:99:07:a8:59"} < 1
+            or absent(unpoller_client_uptime_seconds{mac="64:52:99:07:a8:59"})
+          for: 10m
+          labels:
+            severity: critical
+            type: network
+          annotations:
+            summary: "Chamberlain MyQ garage door opener is offline"
+            description: "MyQ device has been disconnected from WiFi for 10 minutes"
+            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/ChamberlainMyQOffline"

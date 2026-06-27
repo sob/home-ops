@@ -6,3 +6,4 @@ resources:
   - ./synology-nas
   - ./cyberpower-pdu
   - ./cyberpower-ups
+  - ./prometheusrule.yaml
