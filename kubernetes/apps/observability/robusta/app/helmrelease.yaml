@@ -20,6 +20,20 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
+  values:
+    # flux-local/CI renders this chart WITHOUT the secret-provided values, so the
+    # chart's required-value guards (clusterName, globalConfig, sinksConfig) fail.
+    # These inline placeholders apply ONLY when valuesFrom is absent (CI); in
+    # cluster the robusta-secret deep-merges over them, so prod is unchanged.
+    clusterName: ci-placeholder
+    globalConfig:
+      signing_key: ci-placeholder
+      account_id: ci-placeholder
+    sinksConfig:
+      - slack_sink:
+          name: ci-placeholder
+          slack_channel: ci-placeholder
+          api_key: ci-placeholder
   valuesFrom:
     - kind: Secret
       name: robusta-secret

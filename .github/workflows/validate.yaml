@@ -244,6 +244,20 @@ jobs:
             "-output" "json"
           )
 
+          # Substitute the committed cluster-settings placeholders before
+          # kubeconform so HTTPRoute hostnames render to valid values and are
+          # actually VALIDATED (not skipped). yq-free parse keeps the wrapper light.
+          CS="${KUBERNETES_DIR}/components/common/cluster-settings/configmap.yaml"
+          SED_ARGS=()
+          if [ -f "$CS" ]; then
+            while IFS= read -r line; do
+              key="${line%%:*}"; key="${key#"${key%%[![:space:]]*}"}"
+              val="${line#*: }"
+              SED_ARGS+=(-e "s|\${${key}}|${val}|g")
+            done < <(awk '/^data:/{f=1;next} f&&/^  [A-Za-z]/{print} f&&/^[^ ]/{f=0}' "$CS")
+          fi
+          [ ${#SED_ARGS[@]} -eq 0 ] && SED_ARGS=(-e '')
+
           if [ -n "$SPECIFIC_DIRS" ]; then
             echo "=== Validating specific directories ==="
             for dir in $SPECIFIC_DIRS; do
@@ -256,6 +270,7 @@ jobs:
               elif [ -f "$dir/kustomization.yaml" ]; then
                 echo "Validating: ${dir}"
                 kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone | \
+                  sed "${SED_ARGS[@]}" | \
                   kubeconform "${kubeconform_args[@]}"
               fi
             done
@@ -273,6 +288,7 @@ jobs:
               dir="${file%/kustomization.yaml}"
               echo "Validating: ${dir}"
               kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone | \
+                sed "${SED_ARGS[@]}" | \
                 kubeconform "${kubeconform_args[@]}"
             done
           fi

@@ -25,6 +25,13 @@ spec:
     githubConfigSecret: arc-github-app
     runnerScaleSetName: arc-linux
     runnerGroup: default
+    # Name the controller SA explicitly so `helm template` (flux-local CI) doesn't
+    # need to discover the live controller Deployment (which fails outside a real
+    # cluster). MUST match the deployed gha-runner-scale-set-controller SA — verify
+    # with: kubectl -n actions-runner-system get sa | grep controller
+    controllerServiceAccount:
+      namespace: actions-runner-system
+      name: gha-runner-scale-set-controller
     # Keep one runner warm; burst up to six on demand. Each job runs in a fresh,
     # ephemeral pod that is destroyed on completion.
     minRunners: 1
