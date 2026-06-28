@@ -1,5 +1,4 @@
 ---
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 # NON-SECRET, COMMITTED defaults for Flux postBuild substitution.
 #
 # These are DUMMY/placeholder values. In production the real values come from
