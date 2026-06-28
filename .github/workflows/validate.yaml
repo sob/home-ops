@@ -237,15 +237,26 @@ jobs:
             "-kubernetes-version" "${KUBERNETES_VERSION}"
             "-strict"
             "-ignore-missing-schemas"
-            # HTTPRoute hostnames use ${SECRET_DOMAIN} (resolved by Flux postBuild,
-            # not by plain `kustomize build`), so they can't pass the strict
-            # hostname schema here. flux-local validates the substituted output.
-            "-skip" "Secret,ExternalSecret,SopsSecret,HTTPRoute"
+            "-skip" "Secret,ExternalSecret,SopsSecret"
             "-schema-location" "default"
             "-schema-location" "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
             "-summary"
             "-output" "json"
           )
+
+          # Substitute the committed cluster-settings placeholders before
+          # kubeconform so HTTPRoute hostnames render to valid values and are
+          # actually VALIDATED (not skipped). yq-free parse keeps the wrapper light.
+          CS="${KUBERNETES_DIR}/components/common/cluster-settings/configmap.yaml"
+          SED_ARGS=()
+          if [ -f "$CS" ]; then
+            while IFS= read -r line; do
+              key="${line%%:*}"; key="${key#"${key%%[![:space:]]*}"}"
+              val="${line#*: }"
+              SED_ARGS+=(-e "s|\${${key}}|${val}|g")
+            done < <(awk '/^data:/{f=1;next} f&&/^  [A-Za-z]/{print} f&&/^[^ ]/{f=0}' "$CS")
+          fi
+          [ ${#SED_ARGS[@]} -eq 0 ] && SED_ARGS=(-e '')
 
           if [ -n "$SPECIFIC_DIRS" ]; then
             echo "=== Validating specific directories ==="
@@ -259,6 +270,7 @@ jobs:
               elif [ -f "$dir/kustomization.yaml" ]; then
                 echo "Validating: ${dir}"
                 kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone | \
+                  sed "${SED_ARGS[@]}" | \
                   kubeconform "${kubeconform_args[@]}"
               fi
             done
@@ -276,6 +288,7 @@ jobs:
               dir="${file%/kustomization.yaml}"
               echo "Validating: ${dir}"
               kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone | \
+                sed "${SED_ARGS[@]}" | \
                 kubeconform "${kubeconform_args[@]}"
             done
           fi
