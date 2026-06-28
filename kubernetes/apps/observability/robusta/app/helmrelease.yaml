@@ -20,6 +20,16 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
+  values:
+    # flux-local/CI renders this chart WITHOUT the secret-provided values, which
+    # fails "at least one sink must be defined". This inline placeholder sink only
+    # applies when valuesFrom is absent (CI); in-cluster the robusta-secret's
+    # sinksConfig replaces it.
+    sinksConfig:
+      - slack_sink:
+          name: ci-placeholder
+          slack_channel: ci-placeholder
+          api_key: ci-placeholder
   valuesFrom:
     - kind: Secret
       name: robusta-secret
