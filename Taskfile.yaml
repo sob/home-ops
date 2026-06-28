@@ -25,12 +25,12 @@ includes:
   alerting: .taskfiles/alerting
   bucket: .taskfiles/bucket
   kube: .taskfiles/kube
-  flux: .taskfiles/flux
+  flux: .taskfiles/Flux
   media: .taskfiles/media
   pds: .taskfiles/pds
-  sops: .taskfiles/sops
+  sops: .taskfiles/Sops
   volsync: .taskfiles/volsync
-  workstation: .taskfiles/workstation
+  workstation: .taskfiles/Workstation
   validate: .taskfiles/validation
 
 tasks:
