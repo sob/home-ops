@@ -31,7 +31,7 @@ logs — with a self-hosted single pane of glass and a daily Claude health diges
 | Component | Path | Role |
 |---|---|---|
 | Loki (R2 backend) | `kubernetes/apps/observability/loki` | Log store; chunks/ruler in R2 bucket `loki-logs` |
-| Vector log-edge | `kubernetes/apps/observability/vector-aggregator` | Syslog + Talos json receiver (LoadBalancer `10.1.100.210`) |
+| Vector log-edge | `kubernetes/apps/observability/vector-aggregator` | Syslog + Talos json receiver (the `vector-aggregator` syslog LoadBalancer Service) |
 | Talos logging | `talos/machineconfig.yaml.j2` | Ships kernel/service logs to the edge |
 | Grafana (self-hosted) | `kube-prometheus-stack` HelmRelease | Single pane; dashboards `Logs — Overview`, `Network & Syslog` |
 | Network/log alerts | `kube-prometheus-stack/app/rules/network-health.yaml`, `log-pipeline-health.yaml`, `loki/app/rules.yaml` | In-cluster alerts |
@@ -47,7 +47,7 @@ logs — with a self-hosted single pane of glass and a daily Claude health diges
   dashboards/alerts query cheap metrics instead of scanning logs.
 - Ceph PVC shrunk to **20Gi** (index cache/WAL only).
 
-## Syslog source ports (point devices here → `10.1.100.210`)
+## Syslog source ports (point devices at the Vector syslog LoadBalancer IP)
 
 | Source | Protocol / Port |
 |---|---|
@@ -56,7 +56,8 @@ logs — with a self-hosted single pane of glass and a daily Claude health diges
 | Talos host logs (json_lines) | UDP **5170** (auto-configured via machineconfig) |
 
 Configure UniFi (Settings → System → Remote Logging), Synology (Log Center →
-syslog), CyberPower, and printers to send to `10.1.100.210`.
+syslog), CyberPower, and printers to send to the Vector syslog LoadBalancer IP
+(the `io.cilium/lb-ipam-ips` value on the `vector-aggregator` syslog Service).
 
 ## Network-device analysis & alerting recommendations
 
@@ -95,10 +96,11 @@ existing `kube-prometheus-stack` Thanos bucket).
 1. Create the 1Password items and the `loki-logs` R2 bucket (above).
 2. Merge the PR; Flux reconciles the observability namespace.
 3. **Apply the Talos change** (host log shipping) — regenerate and apply machine
-   config to each node, e.g. `task talos:apply-node IP=10.1.100.10x` (or your
+   config to each node, e.g. `task talos:apply-node IP=<node-ip>` (or your
    existing talhelper/talosctl workflow). This is required for `source=talos`
    logs to flow.
-4. Point network devices' remote-syslog at `10.1.100.210` (see ports above).
+4. Point network devices' remote-syslog at the Vector syslog LoadBalancer IP
+   (see ports above).
 5. Visit `https://grafana.${SECRET_DOMAIN}` and confirm the Logs and
    Network & Syslog dashboards populate.
 

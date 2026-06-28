@@ -188,8 +188,12 @@ jobs:
             echo "has_diff=true" >> $GITHUB_OUTPUT
             # Build the comment body as a file and pass it via message-path.
             # Inlining a large diff into the action's `message:` input pushes it
-            # through an env var; a 50KB diff overflows the runner's execve
-            # ARG_MAX ("Argument list too long"). A file sidesteps that entirely.
+            # through an env var; a big diff overflows the runner's execve
+            # ARG_MAX ("Argument list too long"). A file sidesteps that.
+            # Separately, GitHub caps issue-comment bodies at 65536 chars and
+            # flux-local --limit-bytes is per-resource, so the combined diff can
+            # still exceed the limit. Cap the diff body and point at the logs.
+            MAX_DIFF_BYTES=60000
             {
               echo "### Flux ${{ matrix.resource }} diff"
               echo
@@ -197,7 +201,11 @@ jobs:
               echo "<summary>View diff</summary>"
               echo
               echo '```diff'
-              cat diff.patch
+              head -c "${MAX_DIFF_BYTES}" diff.patch
+              if [ "$(wc -c < diff.patch)" -gt "${MAX_DIFF_BYTES}" ]; then
+                echo
+                echo "... diff truncated (exceeds GitHub's comment-size limit) — see the workflow run logs for the full diff."
+              fi
               echo '```'
               echo
               echo "</details>"
