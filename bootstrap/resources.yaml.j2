@@ -23,3 +23,29 @@ metadata:
   namespace: flux-system
 stringData:
   age.agekey: op://STONEHEDGES/sops/SOPS_PRIVATE_KEY
+---
+# Seed flux-system/cluster-secrets at bootstrap (via the local `op` CLI) so Flux
+# postBuild ${SECRET_*} substitution has REAL values from the very first apply —
+# before onepassword-connect (and thus the cluster-secrets ExternalSecret) is up.
+# The ExternalSecret adopts and refreshes this Secret once Connect is running.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster-secrets
+  namespace: flux-system
+stringData:
+  SECRET_DOMAIN: op://STONEHEDGES/cluster-secrets/SECRET_DOMAIN
+  SECRET_EXTERNAL_DOMAIN: op://STONEHEDGES/cluster-secrets/SECRET_EXTERNAL_DOMAIN
+  SECRET_INTERNAL_DOMAIN: op://STONEHEDGES/cluster-secrets/SECRET_INTERNAL_DOMAIN
+  SECRET_ACME_EMAIL: op://STONEHEDGES/cluster-secrets/SECRET_ACME_EMAIL
+  SECRET_CIDR: op://STONEHEDGES/cluster-secrets/SECRET_CIDR
+  SECRET_CLOUDFLARE_TUNNEL_ID: op://STONEHEDGES/cluster-secrets/SECRET_CLOUDFLARE_TUNNEL_ID
+  SECRET_NAS_DOOM: op://STONEHEDGES/cluster-secrets/SECRET_NAS_DOOM
+  SECRET_NAS_MORDOR: op://STONEHEDGES/cluster-secrets/SECRET_NAS_MORDOR
+  SECRET_NFS_SERVER: op://STONEHEDGES/cluster-secrets/SECRET_NFS_SERVER
+  SECRET_NFS_PATH_MEDIA: op://STONEHEDGES/cluster-secrets/SECRET_NFS_PATH_MEDIA
+  SECRET_VIP_PLEX: op://STONEHEDGES/cluster-secrets/SECRET_VIP_PLEX
+  SECRET_VIP_SMTP: op://STONEHEDGES/cluster-secrets/SECRET_VIP_SMTP
+  SECRET_VIP_ZIGBEE: op://STONEHEDGES/cluster-secrets/SECRET_VIP_ZIGBEE
+  CILIUM_LB_RANGE_START: op://STONEHEDGES/cluster-secrets/CILIUM_LB_RANGE_START
+  CILIUM_LB_RANGE_END: op://STONEHEDGES/cluster-secrets/CILIUM_LB_RANGE_END

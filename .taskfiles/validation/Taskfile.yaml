@@ -14,7 +14,7 @@ tasks:
         echo "=== Running All Validation Checks ==="
         echo
         failed_checks=""
-        
+
         # Run each validation and track failures
         if task validate:yaml; then
           echo "✓ YAML lint passed"
@@ -22,49 +22,49 @@ tasks:
           echo "✗ YAML lint failed"
           failed_checks="${failed_checks}yaml "
         fi
-        
+
         if task validate:schema; then
           echo "✓ Schema validation passed"
         else
           echo "✗ Schema validation failed"
           failed_checks="${failed_checks}schema "
         fi
-        
+
         if task validate:secrets; then
           echo "✓ Secret scanning passed"
         else
           echo "✗ Secret scanning failed"
           failed_checks="${failed_checks}secrets "
         fi
-        
+
         if task validate:kustomize; then
           echo "✓ Kustomize builds passed"
         else
           echo "✗ Kustomize builds failed"
           failed_checks="${failed_checks}kustomize "
         fi
-        
+
         if task validate:kubeconform; then
           echo "✓ Kubeconform validation passed"
         else
           echo "✗ Kubeconform validation failed"
           failed_checks="${failed_checks}kubeconform "
         fi
-        
+
         if task validate:flux; then
           echo "✓ Flux local test passed"
         else
           echo "✗ Flux local test failed"
           failed_checks="${failed_checks}flux "
         fi
-        
+
         if task validate:opa; then
           echo "✓ OPA policy validation passed"
         else
           echo "✗ OPA policy validation failed"
           failed_checks="${failed_checks}opa "
         fi
-        
+
         echo
         if [ -z "$failed_checks" ]; then
           echo "=== All validation checks passed! ==="
@@ -80,32 +80,27 @@ tasks:
     cmds:
       - "yamllint -c {{.ROOT_DIR}}/.yamllint.yaml {{.KUBERNETES_DIR}}"
     silent: true
-    ignore_error: true
     preconditions:
       - sh: command -v yamllint
-        msg: "yamllint not installed. Install with: brew install yamllint"
+        msg: "yamllint not installed. Run: mise install"
 
   schema:
-    desc: Validate YAML files against their declared schemas
+    desc: Validate files against their declared JSON schemas (app-template spec.values, Flux)
     cmds:
-      - "{{.ROOT_DIR}}/.github/scripts/validate-yaml-schemas.sh"
+      - "{{.ROOT_DIR}}/.github/scripts/validate-schemas.sh"
     silent: true
-    ignore_error: true
     preconditions:
-      - sh: test -f {{.ROOT_DIR}}/.github/scripts/validate-yaml-schemas.sh
-        msg: "Schema validation script not found"
-      - sh: test -x {{.ROOT_DIR}}/.github/scripts/validate-yaml-schemas.sh
-        msg: "Schema validation script is not executable"
+      - sh: command -v check-jsonschema
+        msg: "check-jsonschema not installed. Run: mise install"
 
   secrets:
     desc: Run secret scanning with pre-commit
     cmds:
       - "pre-commit run gitleaks --all-files"
     silent: true
-    ignore_error: true
     preconditions:
       - sh: command -v pre-commit
-        msg: "pre-commit not installed. Install with: brew install pre-commit"
+        msg: "pre-commit not installed. Run: mise install"
 
   kustomize:
     desc: Validate all kustomizations build successfully
@@ -130,7 +125,6 @@ tasks:
         fi
         echo "✓ All kustomizations build successfully"
     silent: true
-    ignore_error: true
 
   kubeconform:
     desc: Run kubeconform validation
@@ -138,6 +132,23 @@ tasks:
       - |
         echo "=== Running Kubeconform ==="
         errors=0
+        # Substitute the ${SECRET_*}/CILIUM_* placeholders before kubeconform so
+        # HTTPRoute hostnames render to valid values and are actually VALIDATED
+        # (not skipped). Built from the committed cluster-settings ConfigMap (same
+        # dummies flux-local uses) when present; otherwise the domains (the only
+        # vars that land in schema-checked fields). sed avoids an envsubst/gettext
+        # dependency so local == CI via mise.
+        CS="{{.KUBERNETES_DIR}}/components/common/cluster-settings/configmap.yaml"
+        SED_ARGS=()
+        if [ -f "${CS}" ]; then
+          while IFS="=" read -r k v; do
+            SED_ARGS+=(-e "s|\${${k}}|${v}|g")
+          done < <(yq '.data | to_entries | .[] | .key + "=" + .value' "${CS}")
+        else
+          SED_ARGS+=(-e 's|${SECRET_DOMAIN}|example.com|g' \
+                     -e 's|${SECRET_EXTERNAL_DOMAIN}|example.com|g' \
+                     -e 's|${SECRET_INTERNAL_DOMAIN}|example.internal|g')
+        fi
         # Validate flux manifests
         find {{.KUBERNETES_DIR}}/flux -type f -name "*.yaml" \
           -not -path "*/kustomization.yaml" \
@@ -159,6 +170,7 @@ tasks:
           -not -path "*/components/*" | while read -r file; do
           dir="${file%/kustomization.yaml}"
           if ! kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone 2>/dev/null | \
+            sed "${SED_ARGS[@]}" | \
             kubeconform \
               -strict \
               -ignore-missing-schemas \
@@ -177,10 +189,9 @@ tasks:
         fi
         echo "✓ Kubeconform validation passed"
     silent: true
-    ignore_error: true
     preconditions:
       - sh: command -v kubeconform
-        msg: "kubeconform not installed. Install with: go install github.com/yannh/kubeconform/cmd/kubeconform@latest"
+        msg: "kubeconform not installed. Run: mise install"
 
   flux:
     desc: Run flux-local test
@@ -197,16 +208,14 @@ tasks:
           --verbosity 1
         echo "✓ Flux local test passed"
     silent: true
-    ignore_error: true
     preconditions:
       - sh: command -v flux-local
-        msg: "flux-local not installed. Install with: pip install flux-local[helm]"
+        msg: "flux-local not installed. Run: mise install"
 
   opa:
     desc: Run OPA policy validation
     cmds:
       - "{{.ROOT_DIR}}/.github/scripts/validate-opa.sh {{.KUBERNETES_DIR}} {{.POLICY_FILE}}"
-    ignore_error: true
     preconditions:
       - sh: test -f {{.ROOT_DIR}}/.github/scripts/validate-opa.sh
         msg: "OPA validation script not found"
@@ -215,9 +224,10 @@ tasks:
 
 
   quick:
-    desc: Run quick validation (YAML + Kustomize only)
+    desc: Run quick validation (YAML + schema + Kustomize)
     cmds:
       - task: yaml
+      - task: schema
       - task: kustomize
 
   pre-commit:

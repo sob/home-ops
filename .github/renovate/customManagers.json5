@@ -24,6 +24,20 @@
       "matchStrings": ["imageName: (?<depName>\\S+):(?<currentValue>.*\\-.*)"],
       "datasourceTemplate": "docker",
       "versioningTemplate": "redhat"
+    },
+    {
+      // Keep the bjw-s app-template `# yaml-language-server` schema modeline
+      // pinned to the chart version. Uses the same OCI datasource as the
+      // OCIRepository, so the schema tag bumps in lockstep with the chart.
+      "customType": "regex",
+      "description": ["Pin app-template JSON schema modeline to the chart version"],
+      "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"],
+      "matchStrings": [
+        "helm-charts/app-template-(?<currentValue>[^/]+)/charts/other/app-template/schemas/"
+      ],
+      "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "semver"
     }
   ]
 }
