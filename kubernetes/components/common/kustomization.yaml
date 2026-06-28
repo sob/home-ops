@@ -6,4 +6,5 @@ resources:
   - ./namespace.yaml
   - ./repos
   - ./sops
+  - ./cluster-settings
   - ./cluster-secrets

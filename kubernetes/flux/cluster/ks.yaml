@@ -59,6 +59,11 @@ spec:
               name: sops-age-secret
           postBuild:
             substituteFrom:
+              # Non-secret committed defaults (also what CI renders against);
+              # cluster-secrets (1Password) is listed after and overrides these.
+              - name: cluster-settings
+                kind: ConfigMap
+                optional: true
               - name: cluster-secrets
                 kind: Secret
                 optional: true

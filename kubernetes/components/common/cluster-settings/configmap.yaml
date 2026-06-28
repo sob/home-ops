@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# NON-SECRET, COMMITTED defaults for Flux postBuild substitution.
+#
+# These are DUMMY/placeholder values. In production the real values come from
+# the `cluster-secrets` ExternalSecret (1Password), which is listed AFTER this
+# ConfigMap in substituteFrom and therefore overrides every key here. CI (which
+# has neither 1Password nor SOPS) renders against these dummies so kubeconform /
+# flux-local validate cleanly. Real domains/IPs stay out of git (in 1Password).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-settings
+  namespace: flux-system
+data:
+  SECRET_DOMAIN: example.com
+  SECRET_EXTERNAL_DOMAIN: example.com
+  SECRET_INTERNAL_DOMAIN: example.internal
+  SECRET_ACME_EMAIL: acme@example.com
+  SECRET_CIDR: 10.0.0.0/16
+  SECRET_CLOUDFLARE_TUNNEL_ID: 00000000-0000-0000-0000-000000000000
+  SECRET_NAS_DOOM: 10.0.0.20
+  SECRET_NAS_MORDOR: 10.0.0.21
+  SECRET_NFS_SERVER: 10.0.0.30
+  SECRET_NFS_PATH_MEDIA: /mnt/media
+  SECRET_VIP_PLEX: 10.0.0.50
+  SECRET_VIP_SMTP: 10.0.0.51
+  SECRET_VIP_ZIGBEE: 10.0.0.52
+  CILIUM_LB_RANGE_START: 10.0.0.100
+  CILIUM_LB_RANGE_END: 10.0.0.200

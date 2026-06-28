@@ -237,7 +237,10 @@ jobs:
             "-kubernetes-version" "${KUBERNETES_VERSION}"
             "-strict"
             "-ignore-missing-schemas"
-            "-skip" "Secret,ExternalSecret,SopsSecret"
+            # HTTPRoute hostnames use ${SECRET_DOMAIN} (resolved by Flux postBuild,
+            # not by plain `kustomize build`), so they can't pass the strict
+            # hostname schema here. flux-local validates the substituted output.
+            "-skip" "Secret,ExternalSecret,SopsSecret,HTTPRoute"
             "-schema-location" "default"
             "-schema-location" "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
             "-summary"
