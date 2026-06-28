@@ -28,24 +28,24 @@ data:
     #!/usr/bin/env bash
     set -uo pipefail
 
-    PROM="${PROM_URL:-http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090}"
-    LOKI="${LOKI_URL:-http://loki-headless.observability.svc.cluster.local:3100}"
+    PROM="$${PROM_URL:-http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090}"
+    LOKI="$${LOKI_URL:-http://loki-headless.observability.svc.cluster.local:3100}"
     CTX="/tmp/context.txt"
     REPORT="/tmp/report.md"
     : > "$CTX"
 
     pq() { # prometheus instant query -> append to context
       local title="$1" expr="$2"
-      echo "### ${title}" >> "$CTX"
-      curl -sS -G "${PROM}/api/v1/query" --data-urlencode "query=${expr}" \
+      echo "### $${title}" >> "$CTX"
+      curl -sS -G "$${PROM}/api/v1/query" --data-urlencode "query=$${expr}" \
         | head -c 8000 >> "$CTX"
       echo -e "\n" >> "$CTX"
     }
 
     lq() { # loki instant query (metric) -> append to context
       local title="$1" expr="$2"
-      echo "### ${title}" >> "$CTX"
-      curl -sS -G "${LOKI}/loki/api/v1/query" --data-urlencode "query=${expr}" \
+      echo "### $${title}" >> "$CTX"
+      curl -sS -G "$${LOKI}/loki/api/v1/query" --data-urlencode "query=$${expr}" \
         | head -c 8000 >> "$CTX"
       echo -e "\n" >> "$CTX"
     }
@@ -80,14 +80,14 @@ data:
     fi
 
     # Post to Slack (JSON-encode via node, which ships in the image).
-    if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+    if [ -n "$${SLACK_WEBHOOK_URL:-}" ]; then
       payload=$(REPORT_TEXT="$REPORT_TEXT" node -e 'process.stdout.write(JSON.stringify({text: ":stethoscope: *Daily Homelab Health Review*\n\n" + process.env.REPORT_TEXT}))')
       curl -sS -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL" >/dev/null || echo "slack post failed"
     fi
 
     # Escalate to Pushover if Claude flagged anything CRITICAL.
-    if printf '%s' "$REPORT_TEXT" | grep -q "CRITICAL:" && [ -n "${PUSHOVER_TOKEN:-}" ]; then
-      curl -sS --form-string "token=${PUSHOVER_TOKEN}" --form-string "user=${PUSHOVER_USER}" \
+    if printf '%s' "$REPORT_TEXT" | grep -q "CRITICAL:" && [ -n "$${PUSHOVER_TOKEN:-}" ]; then
+      curl -sS --form-string "token=$${PUSHOVER_TOKEN}" --form-string "user=$${PUSHOVER_USER}" \
         --form-string "title=Homelab health: CRITICAL findings" \
         --form-string "priority=1" \
         --form-string "message=$(printf '%s' "$REPORT_TEXT" | grep 'CRITICAL:' | head -c 900)" \
