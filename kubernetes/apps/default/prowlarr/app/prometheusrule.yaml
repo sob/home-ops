@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "Prowlarr indexer manager is down"
             description: "Prowlarr has been unreachable for 10 minutes. Indexer searches are failing."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/ProwlarrDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/ProwlarrDown"
 
         - alert: IndexersFailing
           expr: |
@@ -32,4 +32,4 @@ spec:
           annotations:
             summary: "Multiple indexers are failing"
             description: "{{ $value }} indexers are currently failing health checks in Prowlarr"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/IndexersFailing"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/IndexersFailing"

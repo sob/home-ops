@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "Dragonfly (Redis) is down"
             description: "Dragonfly has been unreachable for 5m — apps depending on it (caching/sessions) will degrade."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/DragonflyDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/DragonflyDown"
         - alert: DragonflyHighMemory
           # Metric names follow the Dragonfly exporter; tune if your version differs.
           expr: |
@@ -32,4 +32,4 @@ spec:
           annotations:
             summary: "Dragonfly memory usage high"
             description: "Dragonfly is using {{ $value | printf \"%.1f\" }}% of its max memory — eviction/instability risk."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/DragonflyHighMemory"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/DragonflyHighMemory"

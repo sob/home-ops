@@ -23,4 +23,4 @@ spec:
           annotations:
             summary: "MQTT broker telemetry is down"
             description: "mqtt-exporter has been unreachable for 5m — the Mosquitto broker may be down, breaking Zigbee2MQTT / Home Assistant / Node-RED."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/MosquittoBrokerTelemetryDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/MosquittoBrokerTelemetryDown"

@@ -23,4 +23,4 @@ spec:
           annotations:
             summary: "Zigbee2MQTT is down"
             description: "Zigbee2MQTT has been unreachable for 5m — all Zigbee devices/automations are offline."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/Zigbee2MQTTDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/Zigbee2MQTTDown"

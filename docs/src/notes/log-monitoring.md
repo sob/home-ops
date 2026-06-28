@@ -87,6 +87,8 @@ Create these in the `STONEHEDGES` vault (referenced by ExternalSecrets):
 | `cloudflare` *(existing)* | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_ACCOUNT_ID` — reused by Loki |
 | `grafana` *(new)* | `GRAFANA_ADMIN_USER`, `GRAFANA_ADMIN_PASSWORD` |
 | `claude-health` *(new)* | `ANTHROPIC_API_KEY`, `SLACK_WEBHOOK_URL`, `PUSHOVER_TOKEN`, `PUSHOVER_USER` |
+| `cluster-secrets` *(existing)* | add `SECRET_VIP_LOG_EDGE` — the syslog LoadBalancer IP (kept out of git; substituted into the vector-aggregator Service) |
+| `talos` *(existing)* | add `LOG_ENDPOINT` = `udp://<that-same-VIP>:5170` — referenced by the Talos `machine.logging` destination |
 
 Also create the **`loki-logs`** bucket in Cloudflare R2 (same account as the
 existing `kube-prometheus-stack` Thanos bucket).

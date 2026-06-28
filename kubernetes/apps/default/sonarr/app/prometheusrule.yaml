@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "Sonarr TV manager is down"
             description: "Sonarr has been unreachable for 10 minutes. TV show automation is halted."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/SonarrDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonarrDown"
 
         - alert: MultipleArrServicesDown
           expr: |
@@ -32,7 +32,7 @@ spec:
           annotations:
             summary: "Multiple *arr services are down"
             description: "{{ $value }} *arr services are currently down. Media automation is severely impacted."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/MultipleArrServicesDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/MultipleArrServicesDown"
 
         - alert: SonarrHealthIssue
           expr: |
@@ -44,7 +44,7 @@ spec:
           annotations:
             summary: "Sonarr health issue: {{ $labels.message }}"
             description: "Sonarr reported a health check failure ({{ $labels.source }}). See {{ $labels.wikiurl }}"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/SonarrHealthIssue"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonarrHealthIssue"
 
         - alert: SonarrQueueStuck
           expr: |
@@ -56,4 +56,4 @@ spec:
           annotations:
             summary: "Sonarr has stuck queue items"
             description: "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Sonarr > Activity > Queue."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/SonarrQueueStuck"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonarrQueueStuck"

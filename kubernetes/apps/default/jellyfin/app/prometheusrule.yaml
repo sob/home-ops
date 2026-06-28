@@ -20,4 +20,4 @@ spec:
           annotations:
             summary: "Jellyfin media server is down"
             description: "Jellyfin has been unreachable for 5 minutes"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/JellyfinDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/JellyfinDown"

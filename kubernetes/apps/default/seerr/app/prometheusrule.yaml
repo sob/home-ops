@@ -20,4 +20,4 @@ spec:
           annotations:
             summary: "Overseerr request system is down"
             description: "Overseerr has been unreachable for 5 minutes. Users cannot request media."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/OverseerrDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/OverseerrDown"

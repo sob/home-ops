@@ -54,11 +54,12 @@ machine:
     nameservers:
       - 1.1.1.1
       - 1.0.0.1
-  # Ship kernel + service logs to the in-cluster Vector log-edge (LoadBalancer
-  # 10.1.100.210). Vector tags these with source="talos" and forwards to Loki.
+  # Ship kernel + service logs to the in-cluster Vector log-edge (the syslog
+  # LoadBalancer). Vector tags these with source="talos" and forwards to Loki.
+  # Endpoint (udp://<vip>:5170) is held in 1Password to keep the IP out of git.
   logging:
     destinations:
-      - endpoint: udp://10.1.100.210:5170
+      - endpoint: op://STONEHEDGES/talos/LOG_ENDPOINT
         format: json_lines
         extraTags:
           source: talos

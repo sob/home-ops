@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "Plex media server is down"
             description: "Plex has been unreachable for 5 minutes. Users cannot stream media."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PlexDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/PlexDown"
 
         - alert: HighPlexLoad
           expr: |
@@ -32,7 +32,7 @@ spec:
           annotations:
             summary: "High Plex streaming load"
             description: "Plex has {{ $value }} concurrent streams (threshold: 10)"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/HighPlexLoad"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/HighPlexLoad"
 
         - alert: MediaLibraryStorageLow
           expr: |
@@ -44,4 +44,4 @@ spec:
           annotations:
             summary: "Media library storage is low"
             description: "Less than 50GB free on the media library root folder. New downloads/imports will start failing."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/MediaLibraryStorageLow"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/MediaLibraryStorageLow"

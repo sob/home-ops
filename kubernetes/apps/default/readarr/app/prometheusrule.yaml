@@ -20,4 +20,4 @@ spec:
           annotations:
             summary: "Readarr book manager is down"
             description: "Readarr has been unreachable for 15 minutes. Book automation is halted."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/ReadarrDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/ReadarrDown"

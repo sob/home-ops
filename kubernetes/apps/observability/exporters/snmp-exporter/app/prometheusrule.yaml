@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "UPS running on battery"
             description: "UPS rack-ups is running on battery power"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/UPSOnBattery"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSOnBattery"
 
         - alert: UPSBatteryLow
           expr: |
@@ -32,7 +32,7 @@ spec:
           annotations:
             summary: "UPS battery low"
             description: "UPS rack-ups battery is below 25% (current: {{ $values.A }}%)"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/UPSBatteryLow"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSBatteryLow"
 
         - alert: UPSBatteryReplaceNeeded
           expr: |
@@ -44,7 +44,7 @@ spec:
           annotations:
             summary: "UPS battery needs replacement"
             description: "UPS rack-ups battery needs to be replaced"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/UPSBatteryReplaceNeeded"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSBatteryReplaceNeeded"
 
         - alert: UPSOverload
           expr: |
@@ -56,7 +56,7 @@ spec:
           annotations:
             summary: "UPS overloaded"
             description: "UPS rack-ups load is above 80% (current: {{ $values.A }}%)"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/UPSOverload"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSOverload"
 
         - alert: UPSCommunicationLost
           expr: |
@@ -68,7 +68,7 @@ spec:
           annotations:
             summary: "Lost communication with UPS"
             description: "Cannot communicate with UPS rack-ups"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/UPSCommunicationLost"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSCommunicationLost"
 
         - alert: PDUCommunicationLost
           expr: |
@@ -80,7 +80,7 @@ spec:
           annotations:
             summary: "Lost communication with PDU"
             description: "Cannot communicate with PDU rack-pdu"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PDUCommunicationLost"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/PDUCommunicationLost"
 
         - alert: PDUHighLoad
           expr: |
@@ -92,4 +92,4 @@ spec:
           annotations:
             summary: "PDU high load"
             description: "PDU rack-pdu load is above 90% (current: {{ $values.A }}A)"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/PDUHighLoad"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/PDUHighLoad"

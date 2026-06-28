@@ -20,4 +20,4 @@ spec:
           annotations:
             summary: "Lidarr music manager is down"
             description: "Lidarr has been unreachable for 15 minutes. Music automation is halted."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/LidarrDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/LidarrDown"

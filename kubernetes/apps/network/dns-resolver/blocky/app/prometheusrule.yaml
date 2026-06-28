@@ -20,4 +20,4 @@ spec:
           annotations:
             summary: "Blocky DNS resolver is down"
             description: "Blocky has been unreachable for 3 minutes. Internal DNS resolution may be failing."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/BlockyDNSDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/BlockyDNSDown"

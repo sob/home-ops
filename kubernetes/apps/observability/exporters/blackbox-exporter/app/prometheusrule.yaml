@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "IoT device is unreachable"
             description: "{{ $labels.instance }} has been unreachable for 10 minutes"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/IoTDeviceDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/IoTDeviceDown"
 
         - alert: SonosDeviceDown
           expr: |
@@ -32,4 +32,4 @@ spec:
           annotations:
             summary: "Sonos speaker is unreachable"
             description: "Sonos {{ $labels.instance }} has been unreachable for 15 minutes"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/SonosDeviceDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonosDeviceDown"

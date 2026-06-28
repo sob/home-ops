@@ -24,4 +24,4 @@ spec:
           annotations:
             summary: "Home Assistant is down"
             description: "Home Assistant has been unreachable for 5m — automations, dashboards and integrations are offline."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/HomeAssistantDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/HomeAssistantDown"

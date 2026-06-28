@@ -21,4 +21,4 @@ spec:
           annotations:
             summary: "Chamberlain MyQ garage door opener is offline"
             description: "MyQ device has been disconnected from WiFi for 10 minutes"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/ChamberlainMyQOffline"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/ChamberlainMyQOffline"

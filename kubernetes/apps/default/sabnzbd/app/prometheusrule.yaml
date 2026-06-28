@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "SABnzbd download client is down"
             description: "SABnzbd has been unreachable for 10 minutes. Downloads are halted."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/SABnzbdDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SABnzbdDown"
 
         - alert: HighQueueBacklog
           expr: |
@@ -32,7 +32,7 @@ spec:
           annotations:
             summary: "High download queue backlog"
             description: "{{ $labels.app }} has {{ $value }} items in queue for over 30 minutes"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/HighQueueBacklog"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/HighQueueBacklog"
 
         - alert: FailedDownloads
           expr: |
@@ -44,4 +44,4 @@ spec:
           annotations:
             summary: "Multiple failed downloads detected"
             description: "SABnzbd has {{ $value }} failed downloads in the last hour"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/FailedDownloads"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/FailedDownloads"

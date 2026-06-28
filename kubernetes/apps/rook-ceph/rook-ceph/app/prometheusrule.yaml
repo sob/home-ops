@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "Ceph cluster health error"
             description: "Ceph cluster is in ERROR state"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephHealthError"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephHealthError"
 
         - alert: CephOSDDown
           expr: |
@@ -32,7 +32,7 @@ spec:
           annotations:
             summary: "Ceph OSD down"
             description: "{{ $values.A }} Ceph OSD(s) are down"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephOSDDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephOSDDown"
 
         - alert: CephPGsDegraded
           expr: |
@@ -44,7 +44,7 @@ spec:
           annotations:
             summary: "Ceph PGs degraded"
             description: "{{ $values.A }} PGs are in degraded state"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPGsDegraded"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPGsDegraded"
 
         - alert: CephPoolNearFull
           expr: |
@@ -56,7 +56,7 @@ spec:
           annotations:
             summary: "Ceph pool near full"
             description: "Ceph pool {{ $labels.pool }} is {{ $values.A }}% full"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPoolNearFull"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPoolNearFull"
 
         - alert: CephMonitorDown
           expr: |
@@ -68,7 +68,7 @@ spec:
           annotations:
             summary: "Ceph monitor down"
             description: "{{ $values.A }} Ceph monitor(s) out of quorum"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephMonitorDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephMonitorDown"
 
         - alert: CephTooManyPGsPerOSD
           expr: |
@@ -80,7 +80,7 @@ spec:
           annotations:
             summary: "Too many PGs per OSD"
             description: "Cluster has {{ $values.A }} PGs per OSD (max recommended: 250)"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephTooManyPGsPerOSD"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephTooManyPGsPerOSD"
 
         - alert: CephOSDSlowOps
           expr: |
@@ -92,7 +92,7 @@ spec:
           annotations:
             summary: "Ceph cluster experiencing slow operations"
             description: "Ceph cluster has {{ $values.A }} slow operations detected"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephOSDSlowOps"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephOSDSlowOps"
 
         - alert: CephOSDNearFull
           expr: |
@@ -104,7 +104,7 @@ spec:
           annotations:
             summary: "Ceph OSD near full"
             description: "OSD {{ $labels.ceph_daemon }} is {{ $values.A }}% full"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephOSDNearFull"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephOSDNearFull"
 
         - alert: CephMgrDown
           expr: |
@@ -116,7 +116,7 @@ spec:
           annotations:
             summary: "Ceph Manager daemon down"
             description: "No active Ceph Manager daemon"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephMgrDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephMgrDown"
 
         - alert: CephClusterUtilizationHigh
           expr: |
@@ -128,7 +128,7 @@ spec:
           annotations:
             summary: "Ceph cluster utilization high"
             description: "Cluster is {{ $values.A }}% full"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephClusterUtilizationHigh"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephClusterUtilizationHigh"
 
         - alert: CephPGsInactive
           expr: |
@@ -140,7 +140,7 @@ spec:
           annotations:
             summary: "Ceph PGs inactive"
             description: "{{ $values.A }} PGs are inactive"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPGsInactive"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPGsInactive"
 
         - alert: CephPGsUnclean
           expr: |
@@ -152,4 +152,4 @@ spec:
           annotations:
             summary: "Ceph PGs unclean"
             description: "{{ $values.A }} PGs are not clean"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/CephPGsUnclean"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPGsUnclean"

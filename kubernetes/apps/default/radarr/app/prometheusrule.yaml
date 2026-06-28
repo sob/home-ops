@@ -20,7 +20,7 @@ spec:
           annotations:
             summary: "Radarr movie manager is down"
             description: "Radarr has been unreachable for 10 minutes. Movie automation is halted."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/RadarrDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/RadarrDown"
 
         - alert: RadarrHealthIssue
           expr: |
@@ -32,7 +32,7 @@ spec:
           annotations:
             summary: "Radarr health issue: {{ $labels.message }}"
             description: "Radarr reported a health check failure ({{ $labels.source }}). See {{ $labels.wikiurl }}"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/RadarrHealthIssue"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/RadarrHealthIssue"
 
         - alert: RadarrQueueStuck
           expr: |
@@ -44,4 +44,4 @@ spec:
           annotations:
             summary: "Radarr has stuck queue items"
             description: "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Radarr > Activity > Queue."
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/RadarrQueueStuck"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/RadarrQueueStuck"

@@ -20,4 +20,4 @@ spec:
           annotations:
             summary: "Authentik SSO is down"
             description: "Authentik has been unreachable for 3 minutes. Authentication services are offline!"
-            runbook_url: "https://github.com/seobrien/home-ops/wiki/Alerts/AuthentikDown"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/AuthentikDown"
