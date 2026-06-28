@@ -14,7 +14,7 @@ spec:
     template:
       engineVersion: v2
       data:
-        admin-user: "{{ .GRAFANA_ADMIN_USER }}"
+        admin-user: "{{ .GRAFANA_ADMIN_USERNAME }}"
         admin-password: "{{ .GRAFANA_ADMIN_PASSWORD }}"
   dataFrom:
     - extract:
