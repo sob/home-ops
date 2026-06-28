@@ -186,11 +186,22 @@ jobs:
 
           if [ -s diff.patch ]; then
             echo "has_diff=true" >> $GITHUB_OUTPUT
+            # Build the comment body as a file and pass it via message-path.
+            # Inlining a large diff into the action's `message:` input pushes it
+            # through an env var; a 50KB diff overflows the runner's execve
+            # ARG_MAX ("Argument list too long"). A file sidesteps that entirely.
             {
-              echo 'diff<<EOF'
+              echo "### Flux ${{ matrix.resource }} diff"
+              echo
+              echo "<details>"
+              echo "<summary>View diff</summary>"
+              echo
+              echo '```diff'
               cat diff.patch
-              echo 'EOF'
-            } >> $GITHUB_OUTPUT
+              echo '```'
+              echo
+              echo "</details>"
+            } > comment.md
           else
             echo "has_diff=false" >> $GITHUB_OUTPUT
           fi
@@ -200,17 +211,7 @@ jobs:
         uses: mshick/add-pr-comment@v2
         with:
           message-id: flux-diff-${{ matrix.resource }}
-          message: |
-            ### Flux ${{ matrix.resource }} diff
-
-            <details>
-            <summary>View diff</summary>
-
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
-
-            </details>
+          message-path: comment.md
 
   # Merge gate — the single required status check. Always runs and reports.
   # A skipped job (PR touched no manifests) counts as success; only an actual
