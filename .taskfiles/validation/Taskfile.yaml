@@ -132,6 +132,23 @@ tasks:
       - |
         echo "=== Running Kubeconform ==="
         errors=0
+        # Substitute the ${SECRET_*}/CILIUM_* placeholders before kubeconform so
+        # HTTPRoute hostnames render to valid values and are actually VALIDATED
+        # (not skipped). Built from the committed cluster-settings ConfigMap (same
+        # dummies flux-local uses) when present; otherwise the domains (the only
+        # vars that land in schema-checked fields). sed avoids an envsubst/gettext
+        # dependency so local == CI via mise.
+        CS="{{.KUBERNETES_DIR}}/components/common/cluster-settings/configmap.yaml"
+        SED_ARGS=()
+        if [ -f "${CS}" ]; then
+          while IFS="=" read -r k v; do
+            SED_ARGS+=(-e "s|\${${k}}|${v}|g")
+          done < <(yq '.data | to_entries | .[] | .key + "=" + .value' "${CS}")
+        else
+          SED_ARGS+=(-e 's|${SECRET_DOMAIN}|example.com|g' \
+                     -e 's|${SECRET_EXTERNAL_DOMAIN}|example.com|g' \
+                     -e 's|${SECRET_INTERNAL_DOMAIN}|example.internal|g')
+        fi
         # Validate flux manifests
         find {{.KUBERNETES_DIR}}/flux -type f -name "*.yaml" \
           -not -path "*/kustomization.yaml" \
@@ -153,6 +170,7 @@ tasks:
           -not -path "*/components/*" | while read -r file; do
           dir="${file%/kustomization.yaml}"
           if ! kustomize build "${dir}" --load-restrictor=LoadRestrictionsNone 2>/dev/null | \
+            sed "${SED_ARGS[@]}" | \
             kubeconform \
               -strict \
               -ignore-missing-schemas \
