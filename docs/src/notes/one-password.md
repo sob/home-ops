@@ -32,6 +32,13 @@ Flux postBuild substitution reads, in order:
 Real domains/IPs therefore live only in 1Password (out of git); only fake
 placeholders are committed.
 
+**Bootstrap seeding.** `bootstrap/resources.yaml.j2` also seeds
+`flux-system/cluster-secrets` from the local `op` CLI, so postBuild substitution
+has real values from the first bootstrap apply — before onepassword-connect (and
+the ExternalSecret) is up. The ExternalSecret adopts/refreshes that Secret once
+Connect is running. This closes the brief from-scratch-bootstrap window where
+apps would otherwise render against the `cluster-settings` placeholders.
+
 ## Required 1Password fields (verify BEFORE merging the SOPS-minimization PR)
 
 Removing the SOPS copies makes 1Password the sole source — these fields must
