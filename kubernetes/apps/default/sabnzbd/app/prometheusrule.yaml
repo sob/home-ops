@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sabnzbd
+  namespace: default
+spec:
+  groups:
+    - name: sabnzbd.rules
+      interval: 1m
+      rules:
+        - alert: SABnzbdDown
+          expr: |
+            (min(up{job="sabnzbd",namespace="default"}) < 1) or (min(up{job="sabnzbd-exporter",namespace="observability"}) < 1)
+          for: 10m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "SABnzbd download client is down"
+            description: "SABnzbd has been unreachable for 10 minutes. Downloads are halted."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SABnzbdDown"
+
+        - alert: HighQueueBacklog
+          expr: |
+            sonarr_queue_total > 10 or radarr_queue_total > 10
+          for: 30m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "High download queue backlog"
+            description: "{{ $labels.app }} has {{ $value }} items in queue for over 30 minutes"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/HighQueueBacklog"
+
+        - alert: FailedDownloads
+          expr: |
+            increase(sabnzbd_article_cache_misses[1h]) > 5
+          for: 10m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Multiple failed downloads detected"
+            description: "SABnzbd has {{ $value }} failed downloads in the last hour"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/FailedDownloads"

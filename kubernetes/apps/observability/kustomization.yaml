@@ -10,6 +10,7 @@ resources:
   - ./dozzle/ks.yaml
   - ./gatus/ks.yaml
   - ./grafana-pdc/ks.yaml
+  - ./health-review/ks.yaml
   - ./kromgo/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./loki/ks.yaml
@@ -17,4 +18,5 @@ resources:
   - ./promtail/ks.yaml
   - ./robusta/ks.yaml
   - ./unifi-poller/ks.yaml
+  - ./vector-aggregator/ks.yaml
   - ./exporters

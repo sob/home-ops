@@ -1,0 +1,65 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: log-pipeline-health
+  namespace: observability
+spec:
+  groups:
+    - name: logpipeline.rules
+      interval: 1m
+      rules:
+        # The logging backend itself must alert on its own failure.
+        - alert: LokiDown
+          expr: |
+            up{job=~".*loki.*"} == 0 or absent(up{job=~".*loki.*"})
+          for: 5m
+          labels:
+            severity: critical
+            type: infrastructure
+          annotations:
+            summary: "Loki is down"
+            description: "Loki has been unreachable for 5m — no logs are queryable or being retained."
+        - alert: VectorLogEdgeDown
+          expr: |
+            up{job=~".*vector-aggregator.*"} == 0 or absent(up{job=~".*vector-aggregator.*"})
+          for: 5m
+          labels:
+            severity: critical
+            type: infrastructure
+          annotations:
+            summary: "Vector log-edge is down"
+            description: "The Vector aggregator (syslog + Talos host logs) is unreachable for 5m — network/host logs are being dropped."
+        - alert: VectorComponentErrors
+          expr: |
+            sum by (component_id) (rate(vector_component_errors_total[10m])) > 0
+          for: 15m
+          labels:
+            severity: warning
+            type: infrastructure
+          annotations:
+            summary: "Vector component {{ $labels.component_id }} erroring"
+            description: "Vector component {{ $labels.component_id }} has reported errors for 15m (parse/sink failures)."
+        # Dead-man's switch: log ingest should never flatline while the cluster runs.
+        - alert: LogIngestStalled
+          expr: |
+            sum(rate(vector_log_events_total[15m])) == 0
+          for: 20m
+          labels:
+            severity: warning
+            type: infrastructure
+          annotations:
+            summary: "Log ingestion has stalled"
+            description: "No log events have flowed through the Vector edge for 20m — sources may be misconfigured or the pipeline is wedged."
+        # Loki write/flush failures (chunks not reaching R2).
+        - alert: LokiFlushFailures
+          expr: |
+            sum(rate(loki_ingester_chunks_flush_failures_total[10m])) > 0
+          for: 15m
+          labels:
+            severity: critical
+            type: infrastructure
+          annotations:
+            summary: "Loki failing to flush chunks to R2"
+            description: "Loki has been failing to flush chunks for 15m — check R2 credentials/connectivity; recent logs are at risk."

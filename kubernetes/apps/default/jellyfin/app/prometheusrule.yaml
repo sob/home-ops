@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: jellyfin
+  namespace: default
+spec:
+  groups:
+    - name: jellyfin.rules
+      interval: 1m
+      rules:
+        - alert: JellyfinDown
+          expr: |
+            min(up{job="jellyfin",namespace="default"}) < 1
+          for: 5m
+          labels:
+            severity: critical
+            type: workload
+          annotations:
+            summary: "Jellyfin media server is down"
+            description: "Jellyfin has been unreachable for 5 minutes"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/JellyfinDown"

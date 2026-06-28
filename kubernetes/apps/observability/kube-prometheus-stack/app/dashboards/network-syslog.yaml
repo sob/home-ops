@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-network-syslog
+  namespace: observability
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Infrastructure & Platform"
+data:
+  network-syslog.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "graphTooltip": 0,
+      "schemaVersion": 39,
+      "tags": ["network", "syslog", "infrastructure"],
+      "title": "Network & Syslog",
+      "uid": "network-syslog",
+      "time": { "from": "now-12h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Syslog events/s by source",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum by (source) (rate(vector_log_events_total{source=~\"unifi|synology|network|printer\"}[5m]))",
+              "legendFormat": "{{source}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Talos host log rate by node",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum by (host) (rate(vector_log_events_total{source=\"talos\"}[5m]))",
+              "legendFormat": "{{host}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "UniFi firewall / IDS-IPS events",
+          "type": "logs",
+          "datasource": { "type": "loki", "uid": "loki" },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+          "options": { "showTime": true, "wrapLogMessage": true },
+          "targets": [
+            {
+              "expr": "{source=\"unifi\"} |~ `(?i)(firewall|DROP|IDS|IPS|threat|block)`",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Talos kernel / hardware errors",
+          "type": "logs",
+          "datasource": { "type": "loki", "uid": "loki" },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
+          "options": { "showTime": true, "wrapLogMessage": true },
+          "targets": [
+            {
+              "expr": "{source=\"talos\"} |~ `(?i)(error|fail|mce|I/O error|link is down|resetting)`",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }

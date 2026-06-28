@@ -1,0 +1,115 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.0.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vector-aggregator
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      vector-aggregator:
+        type: deployment
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/timberio/vector
+              tag: 0.48.0-debian
+            args: ["--config", "/etc/vector/vector.yaml"]
+            env:
+              VECTOR_DATA_DIR: /vector-data-dir
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: { path: /health, port: 8686 }
+                  initialDelaySeconds: 15
+                  periodSeconds: 30
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: { path: /health, port: 8686 }
+                  initialDelaySeconds: 15
+                  periodSeconds: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                add: ["NET_BIND_SERVICE"]
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: vector-aggregator
+        ports:
+          metrics:
+            port: 9598
+      syslog:
+        controller: vector-aggregator
+        type: LoadBalancer
+        # Stable IP is required: network devices/Talos point their log target here.
+        annotations:
+          io.cilium/lb-ipam-ips: "${SECRET_VIP_LOG_EDGE}"
+          io.cilium/lb-ipam-sharing-key: "log-edge"
+        ports:
+          syslog-udp:
+            port: 514
+            protocol: UDP
+          syslog-tcp:
+            port: 514
+            protocol: TCP
+          rfc5424:
+            port: 601
+            protocol: TCP
+          talos-json:
+            port: 5170
+            protocol: UDP
+    serviceMonitor:
+      app:
+        serviceName: vector-aggregator
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 30s
+    persistence:
+      config:
+        type: configMap
+        name: vector-aggregator-config
+        globalMounts:
+          - path: /etc/vector/vector.yaml
+            subPath: vector.yaml
+            readOnly: true
+      data:
+        type: emptyDir
+        globalMounts:
+          - path: /vector-data-dir

@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: seerr
+  namespace: default
+spec:
+  groups:
+    - name: seerr.rules
+      interval: 1m
+      rules:
+        - alert: OverseerrDown
+          expr: |
+            (min(up{job="overseerr",namespace="default"}) < 1) or (min(up{job="overseerr-exporter",namespace="observability"}) < 1)
+          for: 5m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Overseerr request system is down"
+            description: "Overseerr has been unreachable for 5 minutes. Users cannot request media."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/OverseerrDown"

@@ -8,6 +8,7 @@ resources:
   - ./helmrelease.yaml
   - ./httproute-outpost.yaml
   - ./securitypolicy.yaml
+  - ./prometheusrule.yaml
 configMapGenerator:
   - name: radarr-configmap
     files:

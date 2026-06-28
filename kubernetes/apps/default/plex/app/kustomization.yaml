@@ -6,6 +6,7 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./external-ip.yaml
+  - ./prometheusrule.yaml
 configMapGenerator:
   - name: plex-loki-rules
     files:

@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: snmp-exporter-power
+  namespace: observability
+spec:
+  groups:
+    - name: power.rules
+      interval: 1m
+      rules:
+        - alert: UPSOnBattery
+          expr: |
+            max by (instance) (upsBaseBatteryTimeOnBattery) > 0
+          for: 1m
+          labels:
+            severity: critical
+            type: power
+          annotations:
+            summary: "UPS running on battery"
+            description: "UPS rack-ups is running on battery power"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSOnBattery"
+
+        - alert: UPSBatteryLow
+          expr: |
+            min by (instance) (upsAdvanceBatteryCapacity) < 25
+          for: 5m
+          labels:
+            severity: critical
+            type: power
+          annotations:
+            summary: "UPS battery low"
+            description: "UPS rack-ups battery is below 25% (current: {{ $values.A }}%)"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSBatteryLow"
+
+        - alert: UPSBatteryReplaceNeeded
+          expr: |
+            max by (instance) (upsAdvanceBatteryReplaceIndicator) == 2
+          for: 24h
+          labels:
+            severity: warning
+            type: power
+          annotations:
+            summary: "UPS battery needs replacement"
+            description: "UPS rack-ups battery needs to be replaced"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSBatteryReplaceNeeded"
+
+        - alert: UPSOverload
+          expr: |
+            max by (instance) (upsAdvanceOutputLoad) > 80
+          for: 5m
+          labels:
+            severity: critical
+            type: power
+          annotations:
+            summary: "UPS overloaded"
+            description: "UPS rack-ups load is above 80% (current: {{ $values.A }}%)"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSOverload"
+
+        - alert: UPSCommunicationLost
+          expr: |
+            up{job="snmp-exporter-cyberpower-ups"} == 0 or absent(up{job="snmp-exporter-cyberpower-ups"})
+          for: 2m
+          labels:
+            severity: critical
+            type: power
+          annotations:
+            summary: "Lost communication with UPS"
+            description: "Cannot communicate with UPS rack-ups"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSCommunicationLost"
+
+        - alert: PDUCommunicationLost
+          expr: |
+            up{job="snmp-exporter-cyberpower-pdu"} == 0 or absent(up{job="snmp-exporter-cyberpower-pdu"})
+          for: 2m
+          labels:
+            severity: critical
+            type: power
+          annotations:
+            summary: "Lost communication with PDU"
+            description: "Cannot communicate with PDU rack-pdu"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/PDUCommunicationLost"
+
+        - alert: PDUHighLoad
+          expr: |
+            (ePDU2BankStatusLoad / 10) > 10.8
+          for: 10m
+          labels:
+            severity: warning
+            type: power
+          annotations:
+            summary: "PDU high load"
+            description: "PDU rack-pdu load is above 90% (current: {{ $values.A }}A)"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/PDUHighLoad"

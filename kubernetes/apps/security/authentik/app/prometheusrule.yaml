@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: authentik
+  namespace: security
+spec:
+  groups:
+    - name: authentik.rules
+      interval: 1m
+      rules:
+        - alert: AuthentikDown
+          expr: |
+            min(up{job="authentik",namespace="security"}) < 1
+          for: 3m
+          labels:
+            severity: critical
+            type: infrastructure
+          annotations:
+            summary: "Authentik SSO is down"
+            description: "Authentik has been unreachable for 3 minutes. Authentication services are offline!"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/AuthentikDown"

@@ -54,6 +54,15 @@ machine:
     nameservers:
       - 1.1.1.1
       - 1.0.0.1
+  # Ship kernel + service logs to the in-cluster Vector log-edge (the syslog
+  # LoadBalancer). Vector tags these with source="talos" and forwards to Loki.
+  # Endpoint (udp://<vip>:5170) is held in 1Password to keep the IP out of git.
+  logging:
+    destinations:
+      - endpoint: op://STONEHEDGES/talos/LOG_ENDPOINT
+        format: json_lines
+        extraTags:
+          source: talos
   nodeLabels:
     node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main

@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: blocky
+  namespace: network
+spec:
+  groups:
+    - name: blocky.rules
+      interval: 1m
+      rules:
+        - alert: BlockyDNSDown
+          expr: |
+            min(up{job="resolver-blocky",namespace="network"}) < 1
+          for: 3m
+          labels:
+            severity: critical
+            type: infrastructure
+          annotations:
+            summary: "Blocky DNS resolver is down"
+            description: "Blocky has been unreachable for 3 minutes. Internal DNS resolution may be failing."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/BlockyDNSDown"

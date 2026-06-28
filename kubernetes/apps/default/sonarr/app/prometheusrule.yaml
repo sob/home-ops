@@ -1,0 +1,59 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sonarr
+  namespace: default
+spec:
+  groups:
+    - name: sonarr.rules
+      interval: 1m
+      rules:
+        - alert: SonarrDown
+          expr: |
+            (min(up{job="sonarr",namespace="default"}) < 1) or (min(up{job="sonarr-exporter",namespace="observability"}) < 1)
+          for: 10m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Sonarr TV manager is down"
+            description: "Sonarr has been unreachable for 10 minutes. TV show automation is halted."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonarrDown"
+
+        - alert: MultipleArrServicesDown
+          expr: |
+            count(up{job=~"(sonarr|radarr|prowlarr|bazarr|lidarr|readarr)",namespace="default"} < 1) > 2
+          for: 5m
+          labels:
+            severity: critical
+            type: workload
+          annotations:
+            summary: "Multiple *arr services are down"
+            description: "{{ $value }} *arr services are currently down. Media automation is severely impacted."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/MultipleArrServicesDown"
+
+        - alert: SonarrHealthIssue
+          expr: |
+            sonarr_system_health_issues{type=~"warning|error", message!~".*update is available.*"} > 0
+          for: 15m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Sonarr health issue: {{ $labels.message }}"
+            description: "Sonarr reported a health check failure ({{ $labels.source }}). See {{ $labels.wikiurl }}"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonarrHealthIssue"
+
+        - alert: SonarrQueueStuck
+          expr: |
+            sum(sonarr_queue_total{download_status=~"warning|error", download_state!="importPending"}) > 0
+          for: 2h
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Sonarr has stuck queue items"
+            description: "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Sonarr > Activity > Queue."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonarrQueueStuck"

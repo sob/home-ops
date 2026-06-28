@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: radarr
+  namespace: default
+spec:
+  groups:
+    - name: radarr.rules
+      interval: 1m
+      rules:
+        - alert: RadarrDown
+          expr: |
+            (min(up{job="radarr",namespace="default"}) < 1) or (min(up{job="radarr-exporter",namespace="observability"}) < 1)
+          for: 10m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Radarr movie manager is down"
+            description: "Radarr has been unreachable for 10 minutes. Movie automation is halted."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/RadarrDown"
+
+        - alert: RadarrHealthIssue
+          expr: |
+            radarr_system_health_issues{type=~"warning|error", message!~".*update is available.*"} > 0
+          for: 15m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Radarr health issue: {{ $labels.message }}"
+            description: "Radarr reported a health check failure ({{ $labels.source }}). See {{ $labels.wikiurl }}"
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/RadarrHealthIssue"
+
+        - alert: RadarrQueueStuck
+          expr: |
+            sum(radarr_queue_total{download_status=~"warning|error", download_state!="importPending"}) > 0
+          for: 2h
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "Radarr has stuck queue items"
+            description: "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Radarr > Activity > Queue."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/RadarrQueueStuck"

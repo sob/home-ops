@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gatus
+  namespace: observability
+spec:
+  groups:
+    - name: gatus.rules
+      interval: 1m
+      rules:
+        - alert: GatusDown
+          expr: |
+            min(up{job="gatus",namespace="observability"}) < 1
+          for: 10m
+          labels:
+            severity: info
+            type: infrastructure
+          annotations:
+            summary: "Gatus status page is down"
+            description: "Gatus has been unreachable for 10 minutes. Status monitoring page is offline."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/GatusDown"

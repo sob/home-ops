@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homeassistant
+  namespace: default
+spec:
+  groups:
+    - name: homeassistant.rules
+      interval: 1m
+      rules:
+        # NOTE: requires Home Assistant to be scraped by the in-cluster Prometheus
+        # (job "home-assistant"). It is currently scraped by Alloy → Grafana Cloud;
+        # enable the local scrape (scrapeconfig.yaml) for this to be active.
+        # No absent() guard, so it won't false-fire until the scrape exists.
+        - alert: HomeAssistantDown
+          expr: |
+            up{job=~".*home.?assistant.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            type: workload
+          annotations:
+            summary: "Home Assistant is down"
+            description: "Home Assistant has been unreachable for 5m — automations, dashboards and integrations are offline."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/HomeAssistantDown"

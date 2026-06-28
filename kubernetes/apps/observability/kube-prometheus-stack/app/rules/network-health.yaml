@@ -1,0 +1,113 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: network-health
+  namespace: observability
+spec:
+  groups:
+    - name: network.unifi.rules
+      interval: 1m
+      rules:
+        # If unifi-poller stops exporting, all UniFi visibility is blind.
+        - alert: UnifiPollerDown
+          expr: |
+            up{job=~".*unifi-poller.*"} == 0 or absent(up{job=~".*unifi-poller.*"})
+          for: 5m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "UniFi Poller is down"
+            description: "unifi-poller has not been scrapeable for 5m — UniFi switch/AP/gateway metrics are unavailable."
+        # WAN/gateway uplink down (unpoller exposes per-device uptime; a WAN drop
+        # zeroes/removes the gateway series). NOTE: adjust the metric/label to your
+        # unpoller version if names differ.
+        - alert: UnifiDeviceOffline
+          expr: |
+            max by (name) (unpoller_device_uptime_seconds) == 0
+          for: 5m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "UniFi device {{ $labels.name }} offline"
+            description: "UniFi device {{ $labels.name }} has reported zero uptime for 5m (offline/rebooting)."
+        # Switch port error storm (CRC/RX errors usually mean a bad cable/SFP).
+        - alert: UnifiSwitchPortErrors
+          expr: |
+            sum by (name) (rate(unpoller_device_port_rx_errors_total[5m])) > 1
+          for: 10m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "UniFi switch {{ $labels.name }} reporting RX errors"
+            description: "Port RX error rate >1/s for 10m on {{ $labels.name }} — check cabling/SFP."
+
+    - name: network.power.rules
+      interval: 1m
+      rules:
+        # Estimated battery runtime remaining low (CyberPower MIB, seconds).
+        # Complements the existing on-battery/low-capacity alerts in Terraform.
+        - alert: UPSRuntimeLow
+          expr: |
+            min by (instance) (upsAdvanceBatteryRunTimeRemaining) < 600
+          for: 1m
+          labels:
+            severity: critical
+            type: power
+          annotations:
+            summary: "UPS estimated runtime low"
+            description: "UPS {{ $labels.instance }} estimates < 10 minutes of battery runtime remaining."
+
+    - name: network.storage.rules
+      interval: 1m
+      rules:
+        # Synology SNMP unreachable (covers both doom and mordor).
+        - alert: SynologySNMPDown
+          expr: |
+            up{job=~".*synology.*"} == 0 or absent(up{job=~".*synology.*"})
+          for: 5m
+          labels:
+            severity: warning
+            type: storage
+          annotations:
+            summary: "Synology SNMP target down"
+            description: "Synology NAS SNMP exporter has been unreachable for 5m — disk/volume metrics unavailable."
+
+    - name: network.wan.rules
+      interval: 1m
+      rules:
+        # ISP throughput regression (speedtest-exporter runs hourly).
+        - alert: WANDownloadDegraded
+          expr: |
+            max(speedtest_download_bits_per_second) < 200e6
+          for: 90m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "WAN download throughput degraded"
+            description: "Measured download < 200 Mbps for 90m (sustained across multiple speedtests)."
+        - alert: WANUploadDegraded
+          expr: |
+            max(speedtest_upload_bits_per_second) < 10e6
+          for: 90m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "WAN upload throughput degraded"
+            description: "Measured upload < 10 Mbps for 90m."
+        - alert: WANLatencyHigh
+          expr: |
+            max(speedtest_ping_latency_milliseconds) > 80
+          for: 30m
+          labels:
+            severity: warning
+            type: network
+          annotations:
+            summary: "WAN latency high"
+            description: "Speedtest ping latency > 80ms for 30m — possible ISP/upstream congestion."

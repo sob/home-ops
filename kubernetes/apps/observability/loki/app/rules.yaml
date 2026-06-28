@@ -1,0 +1,119 @@
+---
+# Loki ruler rules — log-derived alerts evaluated against LogQL and routed to
+# Alertmanager. Mounted at /etc/loki/rules/fake (tenant "fake" since auth is off).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-alerting-rules
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: loki
+data:
+  rules.yaml: |
+    groups:
+      - name: container-logs
+        rules:
+          - alert: ContainerHighErrorLogRate
+            expr: |
+              sum by (namespace, app) (
+                rate({namespace=~".+"} |~ `(?i)\b(panic|fatal|unrecoverable)\b` [5m])
+              ) > 5
+            for: 10m
+            labels:
+              severity: warning
+              type: workload
+            annotations:
+              summary: "High fatal/panic log rate in {{ $labels.namespace }}/{{ $labels.app }}"
+              description: "{{ $labels.namespace }}/{{ $labels.app }} is emitting >5 fatal/panic log lines per second over 10m."
+          - alert: ContainerOOMLogged
+            expr: |
+              sum by (namespace, app) (
+                count_over_time({namespace=~".+"} |~ `(?i)out of memory|oom-kill|cannot allocate memory` [10m])
+              ) > 0
+            for: 1m
+            labels:
+              severity: warning
+              type: workload
+            annotations:
+              summary: "Out-of-memory signature in logs for {{ $labels.namespace }}/{{ $labels.app }}"
+              description: "Container logs contain OOM/allocation-failure messages in the last 10m."
+          # Migrated from the Terraform/Loki Cloud rule (log-based, so it lives in
+          # the ruler rather than a PrometheusRule).
+          - alert: ArrDatabaseLocked
+            expr: |
+              sum by (app) (
+                count_over_time({namespace="default"} |~ `database is locked` [10m])
+              ) > 20
+            for: 5m
+            labels:
+              severity: warning
+              type: workload
+            annotations:
+              summary: "Arr app {{ $labels.app }} hitting 'database is locked'"
+              description: ">20 'database is locked' log lines in 10m for {{ $labels.app }} — SQLite contention; consider moving to Postgres or reducing concurrency."
+
+      - name: talos-host-logs
+        rules:
+          - alert: TalosKernelErrors
+            expr: |
+              sum by (host) (
+                count_over_time({source="talos"} |~ `(?i)\b(I/O error|EXT4-fs error|XFS.*error|mce:|Hardware Error|nvme.*resetting|link is down)\b` [10m])
+              ) > 0
+            for: 5m
+            labels:
+              severity: critical
+              type: infrastructure
+            annotations:
+              summary: "Talos host {{ $labels.host }} logged kernel/hardware errors"
+              description: "Kernel I/O, filesystem, MCE or NIC-link errors seen in the last 10m on {{ $labels.host }}."
+          - alert: TalosServiceRestarts
+            expr: |
+              sum by (host) (
+                count_over_time({source="talos"} |~ `(?i)service .* failed|restarting service|task .* failed` [15m])
+              ) > 3
+            for: 5m
+            labels:
+              severity: warning
+              type: infrastructure
+            annotations:
+              summary: "Talos services flapping on {{ $labels.host }}"
+              description: "More than 3 Talos service failure/restart messages in 15m on {{ $labels.host }}."
+
+      - name: network-syslog
+        rules:
+          - alert: UnifiFirewallDropSpike
+            expr: |
+              sum (
+                rate({source="unifi"} |~ `(?i)(\[wan_.*-default-D\]|firewall.*DROP|IDS|IPS|threat)` [5m])
+              ) > 50
+            for: 10m
+            labels:
+              severity: warning
+              type: network
+            annotations:
+              summary: "UniFi firewall/IDS event spike"
+              description: ">50 firewall-drop / IDS-IPS syslog events per second over 10m from UniFi gateway."
+          - alert: NetworkAuthFailures
+            expr: |
+              sum by (host) (
+                count_over_time({source=~"unifi|synology|network"} |~ `(?i)(authentication failure|failed login|invalid user|login failed)` [10m])
+              ) > 10
+            for: 5m
+            labels:
+              severity: warning
+              type: network
+            annotations:
+              summary: "Repeated auth failures on {{ $labels.host }}"
+              description: ">10 authentication-failure log lines in 10m from {{ $labels.host }} — possible brute force."
+          - alert: SynologyVolumeErrors
+            expr: |
+              sum by (host) (
+                count_over_time({source="synology"} |~ `(?i)(volume.*(degraded|crashed)|disk.*(failed|bad sector)|smart.*(warning|error)|scrub.*error)` [15m])
+              ) > 0
+            for: 5m
+            labels:
+              severity: critical
+              type: storage
+            annotations:
+              summary: "Synology {{ $labels.host }} logged volume/disk errors"
+              description: "Volume-degraded, disk-failure, SMART or scrub errors in the last 15m on {{ $labels.host }}."
