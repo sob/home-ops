@@ -31,7 +31,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph OSD down"
-            description: "{{ $values.A }} Ceph OSD(s) are down"
+            description: "{{ $value }} Ceph OSD(s) are down"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephOSDDown"
 
         - alert: CephPGsDegraded
@@ -43,7 +43,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph PGs degraded"
-            description: "{{ $values.A }} PGs are in degraded state"
+            description: "{{ $value }} PGs are in degraded state"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPGsDegraded"
 
         - alert: CephPoolNearFull
@@ -55,7 +55,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph pool near full"
-            description: "Ceph pool {{ $labels.pool }} is {{ $values.A }}% full"
+            description: "Ceph pool {{ $labels.pool }} is {{ $value }}% full"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPoolNearFull"
 
         - alert: CephMonitorDown
@@ -67,7 +67,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph monitor down"
-            description: "{{ $values.A }} Ceph monitor(s) out of quorum"
+            description: "{{ $value }} Ceph monitor(s) out of quorum"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephMonitorDown"
 
         - alert: CephTooManyPGsPerOSD
@@ -79,7 +79,7 @@ spec:
             type: storage
           annotations:
             summary: "Too many PGs per OSD"
-            description: "Cluster has {{ $values.A }} PGs per OSD (max recommended: 250)"
+            description: "Cluster has {{ $value }} PGs per OSD (max recommended: 250)"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephTooManyPGsPerOSD"
 
         - alert: CephOSDSlowOps
@@ -91,7 +91,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph cluster experiencing slow operations"
-            description: "Ceph cluster has {{ $values.A }} slow operations detected"
+            description: "Ceph cluster has {{ $value }} slow operations detected"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephOSDSlowOps"
 
         - alert: CephOSDNearFull
@@ -103,7 +103,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph OSD near full"
-            description: "OSD {{ $labels.ceph_daemon }} is {{ $values.A }}% full"
+            description: "OSD {{ $labels.ceph_daemon }} is {{ $value }}% full"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephOSDNearFull"
 
         - alert: CephMgrDown
@@ -127,7 +127,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph cluster utilization high"
-            description: "Cluster is {{ $values.A }}% full"
+            description: "Cluster is {{ $value }}% full"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephClusterUtilizationHigh"
 
         - alert: CephPGsInactive
@@ -139,7 +139,7 @@ spec:
             type: storage
           annotations:
             summary: "Ceph PGs inactive"
-            description: "{{ $values.A }} PGs are inactive"
+            description: "{{ $value }} PGs are inactive"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPGsInactive"
 
         - alert: CephPGsUnclean
@@ -151,5 +151,5 @@ spec:
             type: storage
           annotations:
             summary: "Ceph PGs unclean"
-            description: "{{ $values.A }} PGs are not clean"
+            description: "{{ $value }} PGs are not clean"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/CephPGsUnclean"

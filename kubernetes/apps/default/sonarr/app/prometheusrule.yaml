@@ -55,5 +55,5 @@ spec:
             type: workload
           annotations:
             summary: "Sonarr has stuck queue items"
-            description: "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Sonarr > Activity > Queue."
+            description: "{{ $value }} item(s) stuck in a failed/import-blocked state for 2h. Check Sonarr > Activity > Queue."
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SonarrQueueStuck"

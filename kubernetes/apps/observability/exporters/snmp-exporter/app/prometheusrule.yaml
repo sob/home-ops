@@ -31,7 +31,7 @@ spec:
             type: power
           annotations:
             summary: "UPS battery low"
-            description: "UPS rack-ups battery is below 25% (current: {{ $values.A }}%)"
+            description: "UPS rack-ups battery is below 25% (current: {{ $value }}%)"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSBatteryLow"
 
         - alert: UPSBatteryReplaceNeeded
@@ -55,7 +55,7 @@ spec:
             type: power
           annotations:
             summary: "UPS overloaded"
-            description: "UPS rack-ups load is above 80% (current: {{ $values.A }}%)"
+            description: "UPS rack-ups load is above 80% (current: {{ $value }}%)"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/UPSOverload"
 
         - alert: UPSCommunicationLost
@@ -91,5 +91,5 @@ spec:
             type: power
           annotations:
             summary: "PDU high load"
-            description: "PDU rack-pdu load is above 90% (current: {{ $values.A }}A)"
+            description: "PDU rack-pdu load is above 90% (current: {{ $value }}A)"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/PDUHighLoad"

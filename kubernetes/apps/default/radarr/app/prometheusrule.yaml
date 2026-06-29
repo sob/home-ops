@@ -43,5 +43,5 @@ spec:
             type: workload
           annotations:
             summary: "Radarr has stuck queue items"
-            description: "{{ $values.A }} item(s) stuck in a failed/import-blocked state for 2h. Check Radarr > Activity > Queue."
+            description: "{{ $value }} item(s) stuck in a failed/import-blocked state for 2h. Check Radarr > Activity > Queue."
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/RadarrQueueStuck"
