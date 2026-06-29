@@ -1,0 +1,19 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: envoy-proxy-config
+  namespace: network
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      # The generated LoadBalancer Service defaults to externalTrafficPolicy:
+      # Local. With Cilium L2 announcement the ARP responder (lease holder) is
+      # elected independently of which node runs the envoy pod and is NOT
+      # endpoint-locality aware, so the announcing node frequently has no local
+      # endpoint and silently drops traffic to the gateway VIP (.200/.201).
+      # Cluster lets any node forward to the pod, matching the working pattern
+      # used by the blocky LB service.
+      envoyService:
+        externalTrafficPolicy: Cluster

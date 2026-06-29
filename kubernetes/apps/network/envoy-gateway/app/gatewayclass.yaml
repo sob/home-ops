@@ -8,3 +8,10 @@ spec:
   # Must match config.envoyGateway.gateway.controllerName in the HelmRelease.
   # Without this GatewayClass the envoy gateways sit at "Waiting for controller".
   controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  # Applies the EnvoyProxy infra config (externalTrafficPolicy: Cluster) to all
+  # gateways of this class so the Cilium-L2-announced VIPs are reachable.
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: envoy-proxy-config
+    namespace: network
