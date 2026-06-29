@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: loki
-      namespace: flux-system
+      namespace: observability
   path: ./kubernetes/apps/observability/vector-aggregator/app
   prune: true
   sourceRef:
