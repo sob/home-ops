@@ -12,11 +12,16 @@ spec:
   timeout: 15m
   install:
     crds: Skip
+    # metal-08 (control-plane) is intentionally offline (garage-rack buildout), so the
+    # node-exporter DaemonSet is permanently 9/10 available. Without disableWait, helm
+    # waits on full rollout and every install/upgrade times out on that DaemonSet.
+    disableWait: true
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
     crds: Skip
+    disableWait: true  # see install.disableWait (node-exporter DS never reaches 10/10 while metal-08 is down)
     remediation:
       strategy: rollback
       retries: 3
@@ -195,6 +200,18 @@ spec:
         enabled: true
         storageClassName: ceph-block
         size: 5Gi
+      # ceph-block (consumer-SSD OSDs, no PLP) has ~2-3s fsync latency, so Grafana's
+      # ~600 first-boot DB migrations take 30+ min. The chart has no startupProbe, so
+      # widen the liveness window enough to survive that one-time migration; subsequent
+      # boots skip migrations and come up in seconds.
+      livenessProbe:
+        httpGet:
+          path: /api/health
+          port: 3000
+        initialDelaySeconds: 60
+        periodSeconds: 15
+        timeoutSeconds: 30
+        failureThreshold: 200
       resources:
         requests:
           cpu: 50m
