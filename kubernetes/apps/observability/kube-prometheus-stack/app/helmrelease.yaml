@@ -200,18 +200,6 @@ spec:
         enabled: true
         storageClassName: ceph-block
         size: 5Gi
-      # ceph-block (consumer-SSD OSDs, no PLP) has ~2-3s fsync latency, so Grafana's
-      # ~600 first-boot DB migrations take 30+ min. The chart has no startupProbe, so
-      # widen the liveness window enough to survive that one-time migration; subsequent
-      # boots skip migrations and come up in seconds.
-      livenessProbe:
-        httpGet:
-          path: /api/health
-          port: 3000
-        initialDelaySeconds: 60
-        periodSeconds: 15
-        timeoutSeconds: 30
-        failureThreshold: 200
       resources:
         requests:
           cpu: 50m
@@ -228,6 +216,11 @@ spec:
           check_for_updates: false
         auth.anonymous:
           enabled: false
+        database:
+          # ceph-block (consumer-SSD OSDs, no PLP) has slow per-commit fsync, which made
+          # the ~665 first-boot sqlite migrations take 30+ min and tripped every probe /
+          # deadline. WAL batches syncs at checkpoints: first boot drops to ~14s.
+          wal: true
       sidecar:
         dashboards:
           enabled: true
