@@ -9,8 +9,6 @@ stringData:
     global:
       smtp_smarthost: 'localhost:587'
       smtp_from: 'homeops@56kbps.io'
-      # Pushover API endpoint
-      pushover_api_url: 'https://api.pushover.net/1/messages.json'
 
     # Template definitions
     templates:
