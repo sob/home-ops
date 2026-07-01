@@ -6,8 +6,11 @@ MINIJINJA_CONFIG_FILE = '{{config_root}}/.minijinja.toml'
 TALOS_DIR = '{{config_root}}/talos'
 SOPS_AGE_KEY_FILE = '{{config_root}}/age.key'
 TALOSCONFIG = '{{config_root}}/.talosconfig'
-# Tolerant: returns empty when the `op` CLI is absent (e.g. CI) so `mise install` never fails.
-TF_VAR_onepassword_account = "{{ exec(command='bash -c \"op account list --format json 2>/dev/null | jq -r .[0].url 2>/dev/null || true\"') }}"
+# Tolerant: returns empty when the `op` CLI is absent (e.g. CI) or unresponsive.
+# Bounded by timeout/gtimeout so a hung `op` (e.g. waiting on 1Password app
+# authorization) can never block shell startup, since mise evaluates this env
+# on activation in this directory. Falls back to empty if no timeout binary.
+TF_VAR_onepassword_account = "{{ exec(command='bash -c \"T=$(command -v gtimeout || command -v timeout || echo false); $T 5 op account list --format json 2>/dev/null | jq -r .[0].url 2>/dev/null || true\"') }}"
 TF_VAR_authentik_url = "https://10.1.100.207"
 TFE_PARALLELISM = 5
 

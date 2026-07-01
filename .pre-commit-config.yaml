@@ -7,6 +7,11 @@
 # `pre-commit install` wires both hook types (default_install_hook_types below);
 # `mise install` runs that for you via the postinstall hook in .mise.toml.
 default_install_hook_types: [pre-commit, pre-push]
+# Pin python-language hooks (e.g. yamllint) to python3.14 so they don't fall
+# back to the system python3 (3.9.6), which is too old for modern yamllint.
+# Matches the mise-pinned python 3.14.x used in CI (local == CI).
+default_language_version:
+  python: python3.14
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
