@@ -31,7 +31,7 @@ spec:
     # with: kubectl -n actions-runner-system get sa | grep controller
     controllerServiceAccount:
       namespace: actions-runner-system
-      name: gha-runner-scale-set-controller
+      name: gha-runner-scale-set-controller-gha-rs-controller
     # Keep one runner warm; burst up to six on demand. Each job runs in a fresh,
     # ephemeral pod that is destroyed on completion.
     minRunners: 1
