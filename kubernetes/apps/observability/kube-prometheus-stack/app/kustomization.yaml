@@ -22,4 +22,5 @@ resources:
   - ./rules/control-plane-health.yaml
   - ./rules/network-health.yaml
   - ./rules/log-pipeline-health.yaml
+  - ./rules/volsync-backups.yaml
 #  - ./scrapeconfig.yaml

@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: volsync-backups
+  namespace: observability
+spec:
+  groups:
+    - name: volsync.rules
+      interval: 1m
+      rules:
+        # Safety net for the cron-less unlock design: the periodic restic-unlock
+        # CronJob was removed in favour of spec.restic.unlock (unlock once, in the
+        # mover). A stale lock left by a killed mover would then silently block
+        # that source's backups until VOLSYNC_UNLOCK is bumped in its ks.yaml, so
+        # alert when a backup source stays out of sync. role="source" only —
+        # ReplicationDestinations use manual restore-once triggers and are
+        # permanently "out of sync" by design.
+        - alert: VolsyncBackupOutOfSync
+          expr: |
+            volsync_volume_out_of_sync{role="source"} == 1
+          for: 6h
+          labels:
+            severity: warning
+            type: infrastructure
+          annotations:
+            summary: "Volsync backup out of sync: {{ $labels.obj_namespace }}/{{ $labels.obj_name }}"
+            description: >-
+              {{ $labels.obj_namespace }}/{{ $labels.obj_name }} has not completed a
+              scheduled restic backup for 6h. Often a stale repository lock from a
+              mover killed mid-backup — bump VOLSYNC_UNLOCK in that app's ks.yaml to
+              re-run `restic unlock` on the next sync.

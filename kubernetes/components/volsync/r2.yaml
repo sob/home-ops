@@ -32,6 +32,12 @@ spec:
     schedule: "${VOLSYNC_SCHEDULE:-0 0 * * *}"
   restic:
     copyMethod: "${VOLSYNC_COPYMETHOD:-Snapshot}"
+    # Native unlock: the mover runs `restic unlock` then the backup in the SAME
+    # pod, so no separate unlock CronJob is needed. Volsync only re-runs it when
+    # this value changes (it records status.restic.lastUnlocked). Bump
+    # VOLSYNC_UNLOCK in an app's ks.yaml to clear a stale lock left by a mover
+    # that was killed mid-backup (e.g. a node crash).
+    unlock: "${VOLSYNC_UNLOCK:-1}"
     pruneIntervalDays: 7
     repository: "${APP}-volsync-r2-secret"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-csi-ceph-blockpool}"
