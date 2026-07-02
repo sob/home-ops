@@ -111,13 +111,7 @@ spec:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      app:
-        serviceName: seerr
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: seerr has no native /metrics; metrics come from seerr-exporter.
     route:
       app:
         annotations:

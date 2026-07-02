@@ -95,13 +95,7 @@ spec:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      app:
-        serviceName: sabnzbd
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: SABnzbd has no native /metrics; metrics come from sabnzbd-exporter.
     route:
       app:
         annotations:

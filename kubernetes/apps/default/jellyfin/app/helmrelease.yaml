@@ -83,13 +83,7 @@ spec:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      app:
-        serviceName: jellyfin
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: Jellyfin's native Prometheus endpoint is disabled (/metrics 404).
     route:
       app:
         annotations:

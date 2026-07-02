@@ -119,13 +119,7 @@ spec:
         ports:
           http:
             port: 32400
-    serviceMonitor:
-      app:
-        serviceName: plex-app
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: Plex serves no unauthenticated /metrics (needs an X-Plex-Token).
     route:
       app:
         enabled: true

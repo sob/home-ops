@@ -89,13 +89,7 @@ spec:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      app:
-        serviceName: tautulli
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: Tautulli has no native /metrics; metrics come from tautulli-exporter.
     route:
       app:
         annotations:

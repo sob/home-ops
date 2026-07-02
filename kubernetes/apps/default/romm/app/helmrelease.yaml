@@ -144,13 +144,7 @@ spec:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      app:
-        serviceName: romm
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: romm exposes no Prometheus metrics (/metrics returns the SPA).
     route:
       app:
         enabled: true
