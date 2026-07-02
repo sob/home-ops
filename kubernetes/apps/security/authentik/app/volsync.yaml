@@ -11,6 +11,13 @@ spec:
     schedule: "0 3 * * *"  # Daily at 3 AM
   restic:
     copyMethod: Snapshot
+    # Required: the cluster has no default VolumeSnapshotClass, so without this
+    # every snapshot failed ("cannot find default snapshot class") and this
+    # backup was stuck "Synchronizing" from 2025-10-19 onward.
+    volumeSnapshotClassName: csi-ceph-blockpool
+    # Native unlock (same design as components/volsync): unlock-then-backup in
+    # the mover. Bump the suffix to re-run after a stale lock.
+    unlock: "unlock-1"
     cacheStorageClassName: ceph-block
     cacheCapacity: 2Gi
     moverSecurityContext:
@@ -38,6 +45,7 @@ spec:
     manual: restore-once
   restic:
     copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-blockpool
     repository: authentik-postgresql-restic-secret
     cacheStorageClassName: ceph-block
     cacheCapacity: 2Gi
