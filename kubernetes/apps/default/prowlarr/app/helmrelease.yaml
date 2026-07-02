@@ -63,6 +63,36 @@ spec:
                 memory: 111Mi
               limits:
                 memory: 1Gi
+          # exportarr sidecar (localhost) — see radarr HR for rationale.
+          exportarr:
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.2.0@sha256:320b0ea7399f4b9af4741dcdddd7d40c05c36b0359679305d8a54df4e97065df
+            args:
+              - prowlarr
+              - --enable-additional-metrics
+            env:
+              PORT: "9707"
+              URL: http://localhost
+              APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: prowlarr-secret
+                    key: PROWLARR__AUTH__APIKEY
+            probes:
+              liveness: { enabled: false }
+              readiness: { enabled: false }
+              startup: { enabled: false }
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -91,13 +121,19 @@ spec:
         ports:
           http:
             port: *port
+          metrics:
+            port: 9707
     serviceMonitor:
       app:
         serviceName: main
         labels:
           prometheus.io/forward: "true"
         endpoints:
-          - port: http
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 5m
+            scrapeTimeout: 1m
     route:
       app:
         annotations:

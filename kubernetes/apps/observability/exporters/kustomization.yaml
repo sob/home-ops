@@ -6,15 +6,12 @@ resources:
   - ./bazarr-exporter/ks.yaml
   - ./blackbox-exporter/ks.yaml
   - ./jellyseerr-exporter/ks.yaml
-  - ./lidarr-exporter/ks.yaml
   - ./mqtt-exporter/ks.yaml
   - ./seerr-exporter/ks.yaml
-  - ./prowlarr-exporter/ks.yaml
-  - ./radarr-exporter/ks.yaml
-  - ./readarr-exporter/ks.yaml
   - ./sabnzbd-exporter/ks.yaml
   - ./smartctl-exporter/ks.yaml
   - ./snmp-exporter/ks.yaml
-  - ./sonarr-exporter/ks.yaml
   - ./speedtest-exporter/ks.yaml
   - ./tautulli-exporter/ks.yaml
+  # radarr/sonarr/prowlarr/lidarr/readarr exporters now run as exportarr
+  # sidecars in their app pods (kubernetes/apps/default/<app>) — see radarr HR.
