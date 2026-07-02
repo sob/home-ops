@@ -32,6 +32,11 @@ metadata:
     prometheus.io/forward: "true"
 spec:
   jobLabel: app.kubernetes.io/name
+  # authentik's :9300 /metrics serves plaintext, but with native-histograms
+  # enabled Prometheus otherwise negotiates protobuf and fails to parse it
+  # ("proto: wrong wireType = 0 for field Metric" → up=0). Force text scraping.
+  scrapeProtocols:
+    - PrometheusText0.0.4
   endpoints:
     - port: http-metrics
       interval: 60s
