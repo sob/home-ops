@@ -100,13 +100,6 @@ spec:
           bittorrent-tcp:
             port: *torrentPort
             protocol: TCP
-    serviceMonitor:
-      app:
-        serviceName: qbittorrent
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
     route:
       app:
         annotations:

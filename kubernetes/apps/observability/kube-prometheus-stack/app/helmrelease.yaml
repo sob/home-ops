@@ -32,6 +32,11 @@ spec:
     crds:
       enabled: false
     cleanPrometheusOperatorObjectNames: true
+    defaultRules:
+      rules:
+        kubeApiserverBurnrate: false
+        kubeApiserverAvailability: false
+        kubeApiserverHistogram: false
     alertmanager:
       enabled: true
       ingress:
@@ -99,10 +104,10 @@ spec:
         retentionSize: 24GB
         resources:
           requests:
-            cpu: 200m
+            cpu: 500m
             memory: 2.20Gi
           limits:
-            cpu: 500m
+            cpu: 2000m
             memory: 4.39Gi
         storageSpec: {}
         # Enable Thanos sidecar for R2 upload
