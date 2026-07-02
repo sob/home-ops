@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: robusta-ci-defaults
+  namespace: observability
+data:
+  # CI / flux-local renders this chart without the 1Password-backed
+  # robusta-secret, and the chart's required() guards (clusterName,
+  # globalConfig, sinksConfig) fail without them. These placeholders satisfy
+  # those guards. IN-CLUSTER they are overridden by robusta-secret, which is
+  # listed AFTER this ConfigMap in the HelmRelease valuesFrom (Flux merges
+  # valuesFrom in order, later wins). This is why the placeholders must NOT
+  # live in spec.values — inline values take precedence over valuesFrom, which
+  # was masking robusta-secret's real robusta_sink and crashlooping the runner.
+  values.yaml: |
+    clusterName: ci-placeholder
+    globalConfig:
+      signing_key: ci-placeholder
+      account_id: ci-placeholder
+    sinksConfig:
+      - slack_sink:
+          name: ci-placeholder
+          slack_channel: ci-placeholder
+          api_key: ci-placeholder
