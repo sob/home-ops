@@ -94,7 +94,9 @@ spec:
             protocol: UDP
     serviceMonitor:
       app:
-        serviceName: vector-aggregator
+        # two services exist (app + syslog) so app-template suffixes the key;
+        # the metrics Service is vector-aggregator-app, not vector-aggregator.
+        serviceName: vector-aggregator-app
         endpoints:
           - port: metrics
             scheme: http

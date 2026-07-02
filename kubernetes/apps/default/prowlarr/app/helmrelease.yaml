@@ -125,7 +125,7 @@ spec:
             port: 9707
     serviceMonitor:
       app:
-        serviceName: main
+        serviceName: prowlarr
         labels:
           prometheus.io/forward: "true"
         endpoints:

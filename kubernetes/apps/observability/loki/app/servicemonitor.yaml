@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki
+  namespace: observability
+  labels:
+    prometheus.io/forward: "true"
+spec:
+  # The loki chart ships no ServiceMonitor, so Loki was never scraped and the
+  # LokiDown alert (up{job=~".*loki.*"} == 0 or absent(...)) fired permanently.
+  # Match the loki services on http-metrics but exclude the gateway (its
+  # http-metrics is the nginx :80 API, not Prometheus metrics).
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: NotIn
+        values: ["gateway"]
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 1m
+      scrapeTimeout: 30s

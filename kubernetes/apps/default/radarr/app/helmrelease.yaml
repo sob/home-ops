@@ -131,7 +131,9 @@ spec:
             port: 9707
     serviceMonitor:
       app:
-        serviceName: main
+        # must equal the Service's app.kubernetes.io/service label (the release
+        # name), not the controller name, or the SM selector matches nothing.
+        serviceName: radarr
         labels:
           prometheus.io/forward: "true"
         endpoints:

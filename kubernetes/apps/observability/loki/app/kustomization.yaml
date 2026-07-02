@@ -7,3 +7,4 @@ resources:
   - ./rules.yaml
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+  - ./servicemonitor.yaml
