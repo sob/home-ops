@@ -57,13 +57,7 @@ spec:
         ports:
           http:
             port: 3000
-    serviceMonitor:
-      app:
-        serviceName: *app
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: homarr does not expose Prometheus metrics (/metrics 404).
     route:
       app:
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]

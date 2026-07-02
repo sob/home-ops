@@ -44,13 +44,7 @@ spec:
         ports:
           http:
             port: 5690
-    serviceMonitor:
-      app:
-        serviceName: wizarr
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: wizarr does not expose Prometheus metrics (/metrics 404).
     route:
       app:
         annotations:

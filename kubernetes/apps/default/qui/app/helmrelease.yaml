@@ -75,13 +75,7 @@ spec:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      app:
-        serviceName: qui
-        labels:
-          prometheus.io/forward: "true"
-        endpoints:
-          - port: http
+    # No serviceMonitor: qui does not expose unauthenticated Prometheus metrics (/metrics 401).
     route:
       app:
         hostnames: ["qui.${SECRET_DOMAIN}"]
