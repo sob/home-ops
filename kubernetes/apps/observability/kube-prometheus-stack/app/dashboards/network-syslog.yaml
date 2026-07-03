@@ -35,8 +35,12 @@ data:
           },
           {
             "name": "port_top",
-            "type": "custom",
-            "query": "1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47",
+            "type": "query",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "query": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
+            "definition": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
+            "refresh": 2,
+            "sort": 3,
             "multi": true,
             "includeAll": true,
             "hide": 2,
@@ -44,17 +48,12 @@ data:
           },
           {
             "name": "port_bottom",
-            "type": "custom",
-            "query": "2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48",
-            "multi": true,
-            "includeAll": true,
-            "hide": 2,
-            "current": { "selected": true, "text": "All", "value": "$__all" }
-          },
-          {
-            "name": "port_sfp",
-            "type": "custom",
-            "query": "49,50,51,52",
+            "type": "query",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "query": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
+            "definition": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
+            "refresh": 2,
+            "sort": 3,
             "multi": true,
             "includeAll": true,
             "hide": 2,
@@ -127,51 +126,6 @@ data:
           "targets": [
             {
               "expr": "(\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n)\nor\n  unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_bottom\"} * 0",
-              "legendFormat": "{{port_num}}",
-              "refId": "A"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  { "color": "green", "value": null },
-                  { "color": "#EAB839", "value": 0.01 },
-                  { "color": "red", "value": 1 }
-                ]
-              },
-              "color": { "mode": "thresholds" },
-              "decimals": 1,
-              "noValue": "—"
-            },
-            "overrides": []
-          },
-          "options": {
-            "textMode": "none",
-            "colorMode": "background_gradient",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto"
-          }
-        },
-        {
-          "id": 103,
-          "title": "SFP $port_sfp",
-          "type": "stat",
-          "repeat": "port_sfp",
-          "repeatDirection": "h",
-          "maxPerRow": 4,
-          "gridPos": { "h": 2, "w": 1, "x": 0, "y": 5 },
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "(\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_sfp\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_sfp\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_sfp\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_sfp\"}[5m])\n)\nor\n  unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_sfp\"} * 0",
               "legendFormat": "{{port_num}}",
               "refId": "A"
             }
