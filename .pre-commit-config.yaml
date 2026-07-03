@@ -71,7 +71,7 @@ repos:
         entry: >-
           bash -c 'for file in "$@"; do
             if [[ "$file" == *.sops.yaml ]]; then
-              if ! head -1 "$file" | grep -q "^sops:"; then
+              if ! grep -q "ENC\[AES256_GCM" "$file"; then
                 echo "ERROR: $file is a .sops.yaml file but does not appear to be encrypted";
                 exit 1;
               fi;
@@ -79,6 +79,7 @@ repos:
           done' --
         language: system
         files: '\.sops\.yaml$'
+        exclude: '^\.sops\.yaml$'
 
       - id: validate-kubernetes-files
         name: Validate Kubernetes file naming

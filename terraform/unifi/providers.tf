@@ -1,7 +1,9 @@
 terraform {
+  required_version = ">= 1.5.0"
+
   backend "s3" {
     bucket = "stone-terraform-state"
-    key    = "observability/terraform.tfstate"
+    key    = "unifi/terraform.tfstate"
     endpoints = {
       s3 = "https://c22e00d98ac0a9cf99b28d585113a449.r2.cloudflarestorage.com"
     }
@@ -15,37 +17,27 @@ terraform {
   }
 
   required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.0"
+    unifi = {
+      source  = "ubiquiti-community/unifi"
+      version = "~> 0.53"
     }
     onepassword = {
       source  = "1password/onepassword"
       version = "3.3.1"
     }
-    grafana = {
-      source  = "grafana/grafana"
-      version = "4.39.0"
+    sops = {
+      source  = "carlpett/sops"
+      version = "~> 1.0"
     }
   }
 }
 
-provider "kubernetes" {
-  config_path = "../../.kubeconfig"
-}
-
 provider "onepassword" {
-  # Using OnePassword CLI authentication
-  # Requires 'op' CLI to be installed and authenticated
   account = var.onepassword_account
 }
 
-provider "grafana" {
-  url          = local.grafana_url
-  auth         = local.grafana_auth
-  http_headers = {
-    "Content-Type" = "application/json"
-  }
-  retries      = 3
-  retry_wait   = 5
+provider "unifi" {
+  api_url        = nonsensitive(local.unifi_fields["URL"])
+  api_key        = sensitive(local.unifi_fields["API_KEY"])
+  allow_insecure = true
 }

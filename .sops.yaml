@@ -10,6 +10,12 @@ creation_rules:
       - age:
           - *user_sob
 
+  - path_regex: terraform/.+\.sops\.yaml
+    encrypted_regex: ^(clients)$
+    key_groups:
+      - age:
+          - *user_sob
+
   - path_regex: kubernetes/.+\.sops\.yaml
     encrypted_regex: ^(token|crt|key|id|secret|secretboxEncryptionSecret|ca)$
     mac_only_encrypted: true
