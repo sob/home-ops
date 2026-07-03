@@ -5,6 +5,5 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - ./rbac.yaml
-  - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml

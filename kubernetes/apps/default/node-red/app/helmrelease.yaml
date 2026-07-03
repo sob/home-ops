@@ -7,7 +7,8 @@ metadata:
 spec:
   chartRef:
     kind: OCIRepository
-    name: node-red
+    name: app-template
+    namespace: flux-system
   releaseName: node-red
   interval: 15m
   maxHistory: 3
