@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: switch-port-map
+  namespace: observability
+spec:
+  groups:
+    - name: switch.port.map
+      interval: 5m
+      rules:
+        # Model → port-count mapping (evaluated first, used by switch_port_exists below)
+        #   USF5P    →  5 ports (1-5)
+        #   US8      →  8 ports (1-8)
+        #   US8P60   →  8 ports (1-8)
+        #   US8P150  → 10 ports (1-8 copper + 9-10 SFP)
+        #   UDMPRO   → 11 ports (1-8 LAN + 9 SFP + 10 SFP+ + 11 WAN2)
+        #   USPM16P  → 18 ports (1-16 copper + 17-18 SFP+)
+        #   US48PRO  → 52 ports (1-48 copper + 49-52 SFP+)
+
+        - record: switch_port_base_all
+          expr: max by (name) (unpoller_device_info{type=~"usw|udm", model=~"USF5P|US8|US8P60|US8P150|UDMPRO|USPM16P|US48PRO"}) * 0 - 1
+        - record: switch_port_base_8plus
+          expr: max by (name) (unpoller_device_info{type=~"usw|udm", model=~"US8|US8P60|US8P150|UDMPRO|USPM16P|US48PRO"}) * 0 - 1
+        - record: switch_port_base_10plus
+          expr: max by (name) (unpoller_device_info{type=~"usw|udm", model=~"US8P150|UDMPRO|USPM16P|US48PRO"}) * 0 - 1
+        - record: switch_port_base_11plus
+          expr: max by (name) (unpoller_device_info{type=~"usw|udm", model=~"UDMPRO|USPM16P|US48PRO"}) * 0 - 1
+        - record: switch_port_base_16plus
+          expr: max by (name) (unpoller_device_info{type=~"usw|udm", model=~"USPM16P|US48PRO"}) * 0 - 1
+        - record: switch_port_base_48
+          expr: max by (name) (unpoller_device_info{type=~"usw|udm", model="US48PRO"}) * 0 - 1
+
+        # Ports 1-5 (all switch models)
+        - record: switch_port_exists
+          expr: |
+            label_replace(switch_port_base_all, "port_num", "1", "", "")
+            or label_replace(switch_port_base_all, "port_num", "2", "", "")
+            or label_replace(switch_port_base_all, "port_num", "3", "", "")
+            or label_replace(switch_port_base_all, "port_num", "4", "", "")
+            or label_replace(switch_port_base_all, "port_num", "5", "", "")
+        # Ports 6-8 (8+ port models)
+        - record: switch_port_exists
+          expr: |
+            label_replace(switch_port_base_8plus, "port_num", "6", "", "")
+            or label_replace(switch_port_base_8plus, "port_num", "7", "", "")
+            or label_replace(switch_port_base_8plus, "port_num", "8", "", "")
+        # Ports 9-10 (10+ port models)
+        - record: switch_port_exists
+          expr: |
+            label_replace(switch_port_base_10plus, "port_num", "9", "", "")
+            or label_replace(switch_port_base_10plus, "port_num", "10", "", "")
+        # Port 11 (UDMPRO, USPM16P, US48PRO)
+        - record: switch_port_exists
+          expr: |
+            label_replace(switch_port_base_11plus, "port_num", "11", "", "")
+        # Ports 12-18 (16+ port models)
+        - record: switch_port_exists
+          expr: |
+            label_replace(switch_port_base_16plus, "port_num", "12", "", "")
+            or label_replace(switch_port_base_16plus, "port_num", "13", "", "")
+            or label_replace(switch_port_base_16plus, "port_num", "14", "", "")
+            or label_replace(switch_port_base_16plus, "port_num", "15", "", "")
+            or label_replace(switch_port_base_16plus, "port_num", "16", "", "")
+            or label_replace(switch_port_base_16plus, "port_num", "17", "", "")
+            or label_replace(switch_port_base_16plus, "port_num", "18", "", "")
+        # Ports 19-52 (US48PRO only)
+        - record: switch_port_exists
+          expr: |
+            label_replace(switch_port_base_48, "port_num", "19", "", "")
+            or label_replace(switch_port_base_48, "port_num", "20", "", "")
+            or label_replace(switch_port_base_48, "port_num", "21", "", "")
+            or label_replace(switch_port_base_48, "port_num", "22", "", "")
+            or label_replace(switch_port_base_48, "port_num", "23", "", "")
+            or label_replace(switch_port_base_48, "port_num", "24", "", "")
+            or label_replace(switch_port_base_48, "port_num", "25", "", "")
+            or label_replace(switch_port_base_48, "port_num", "26", "", "")
+            or label_replace(switch_port_base_48, "port_num", "27", "", "")
+            or label_replace(switch_port_base_48, "port_num", "28", "", "")
+            or label_replace(switch_port_base_48, "port_num", "29", "", "")
+            or label_replace(switch_port_base_48, "port_num", "30", "", "")
+            or label_replace(switch_port_base_48, "port_num", "31", "", "")
+            or label_replace(switch_port_base_48, "port_num", "32", "", "")
+            or label_replace(switch_port_base_48, "port_num", "33", "", "")
+            or label_replace(switch_port_base_48, "port_num", "34", "", "")
+            or label_replace(switch_port_base_48, "port_num", "35", "", "")
+            or label_replace(switch_port_base_48, "port_num", "36", "", "")
+            or label_replace(switch_port_base_48, "port_num", "37", "", "")
+            or label_replace(switch_port_base_48, "port_num", "38", "", "")
+            or label_replace(switch_port_base_48, "port_num", "39", "", "")
+            or label_replace(switch_port_base_48, "port_num", "40", "", "")
+            or label_replace(switch_port_base_48, "port_num", "41", "", "")
+            or label_replace(switch_port_base_48, "port_num", "42", "", "")
+            or label_replace(switch_port_base_48, "port_num", "43", "", "")
+            or label_replace(switch_port_base_48, "port_num", "44", "", "")
+            or label_replace(switch_port_base_48, "port_num", "45", "", "")
+            or label_replace(switch_port_base_48, "port_num", "46", "", "")
+            or label_replace(switch_port_base_48, "port_num", "47", "", "")
+            or label_replace(switch_port_base_48, "port_num", "48", "", "")
+            or label_replace(switch_port_base_48, "port_num", "49", "", "")
+            or label_replace(switch_port_base_48, "port_num", "50", "", "")
+            or label_replace(switch_port_base_48, "port_num", "51", "", "")
+            or label_replace(switch_port_base_48, "port_num", "52", "", "")

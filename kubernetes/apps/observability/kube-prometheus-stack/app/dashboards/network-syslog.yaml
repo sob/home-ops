@@ -26,8 +26,8 @@ data:
             "label": "Switch",
             "type": "query",
             "datasource": { "type": "prometheus", "uid": "prometheus" },
-            "query": "label_values(unpoller_device_port_port_speed_bps, name)",
-            "definition": "label_values(unpoller_device_port_port_speed_bps, name)",
+            "query": "label_values(switch_port_exists, name)",
+            "definition": "label_values(switch_port_exists, name)",
             "refresh": 2,
             "sort": 1,
             "multi": false,
@@ -37,8 +37,8 @@ data:
             "name": "port_top",
             "type": "query",
             "datasource": { "type": "prometheus", "uid": "prometheus" },
-            "query": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
-            "definition": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
+            "query": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
+            "definition": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
             "refresh": 2,
             "sort": 3,
             "multi": true,
@@ -50,8 +50,8 @@ data:
             "name": "port_bottom",
             "type": "query",
             "datasource": { "type": "prometheus", "uid": "prometheus" },
-            "query": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
-            "definition": "label_values({__name__=~\"unpoller_device_port_.+\", name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
+            "query": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
+            "definition": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
             "refresh": 2,
             "sort": 3,
             "multi": true,
@@ -80,7 +80,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
-              "expr": "(\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n)\nor\n  unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_top\"} * 0",
+              "expr": "max by (name, port_num) (\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n)\nor\n  max by (name, port_num) (unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_top\"}) * 0\nor\n  switch_port_exists{name=\"$switch\", port_num=\"$port_top\"}",
               "legendFormat": "{{port_num}}",
               "refId": "A"
             }
@@ -90,7 +90,9 @@ data:
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  { "color": "green", "value": null },
+                  { "color": "#2C3235", "value": null },
+                  { "color": "#3D3D3D", "value": -1 },
+                  { "color": "green", "value": 0 },
                   { "color": "#EAB839", "value": 0.01 },
                   { "color": "red", "value": 1 }
                 ]
@@ -125,7 +127,7 @@ data:
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
-              "expr": "(\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n)\nor\n  unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_bottom\"} * 0",
+              "expr": "max by (name, port_num) (\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n)\nor\n  max by (name, port_num) (unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_bottom\"}) * 0\nor\n  switch_port_exists{name=\"$switch\", port_num=\"$port_bottom\"}",
               "legendFormat": "{{port_num}}",
               "refId": "A"
             }
@@ -135,7 +137,9 @@ data:
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  { "color": "green", "value": null },
+                  { "color": "#2C3235", "value": null },
+                  { "color": "#3D3D3D", "value": -1 },
+                  { "color": "green", "value": 0 },
                   { "color": "#EAB839", "value": 0.01 },
                   { "color": "red", "value": 1 }
                 ]
