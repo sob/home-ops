@@ -89,21 +89,18 @@ spec:
             cpu: "500m"
             memory: "512Mi"
           limits:
-            cpu: "2000m"
             memory: "4Gi"
         mon:
           requests:
             cpu: "100m"
             memory: "128Mi"
           limits:
-            cpu: "500m"
             memory: "1Gi"
         mgr:
           requests:
             cpu: "100m"
             memory: "256Mi"
           limits:
-            cpu: "500m"
             memory: "1Gi"
         mds: *defaultResources
         rgw:
