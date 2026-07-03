@@ -10,6 +10,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   interval: 30m
+  retryInterval: 1m
   path: ./kubernetes/apps/flux-system/flux-operator/app
   prune: false
   sourceRef:

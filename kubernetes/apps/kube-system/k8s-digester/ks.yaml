@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   interval: 10m
+  retryInterval: 1m
   path: ./kubernetes/apps/kube-system/k8s-digester/app
   prune: true
   sourceRef:
