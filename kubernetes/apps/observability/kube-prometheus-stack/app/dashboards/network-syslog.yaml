@@ -32,6 +32,32 @@ data:
             "sort": 1,
             "multi": false,
             "includeAll": false
+          },
+          {
+            "name": "port_top",
+            "type": "query",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "query": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
+            "definition": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[13579]\"}, port_num)",
+            "refresh": 2,
+            "sort": 3,
+            "multi": true,
+            "includeAll": true,
+            "hide": 2,
+            "current": { "selected": true, "text": "All", "value": "$__all" }
+          },
+          {
+            "name": "port_bottom",
+            "type": "query",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "query": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
+            "definition": "label_values(switch_port_exists{name=\"$switch\", port_num=~\".*[02468]\"}, port_num)",
+            "refresh": 2,
+            "sort": 3,
+            "multi": true,
+            "includeAll": true,
+            "hide": 2,
+            "current": { "selected": true, "text": "All", "value": "$__all" }
           }
         ]
       },
@@ -45,24 +71,18 @@ data:
         },
         {
           "id": 101,
-          "title": "Odd ports (top row)",
+          "title": "Port $port_top",
           "type": "stat",
-          "gridPos": { "h": 3, "w": 24, "x": 0, "y": 1 },
+          "repeat": "port_top",
+          "repeatDirection": "h",
+          "maxPerRow": 24,
+          "gridPos": { "h": 2, "w": 1, "x": 0, "y": 1 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
-              "expr": "sort_desc(\n  max by (port_num) (\n    rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=~\".*[13579]\"}[5m])\n    + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=~\".*[13579]\"}[5m])\n    + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=~\".*[13579]\"}[5m])\n    + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=~\".*[13579]\"}[5m])\n  )\n)\nor\n  max by (port_num) (unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=~\".*[13579]\"}) * 0\nor\n  switch_port_exists{name=\"$switch\", port_num=~\".*[13579]\"}",
+              "expr": "max by (name, port_num) (\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_top\"}[5m])\n)\nor\n  max by (name, port_num) (unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_top\"}) * 0\nor\n  switch_port_exists{name=\"$switch\", port_num=\"$port_top\"}",
               "legendFormat": "{{port_num}}",
               "refId": "A"
-            }
-          ],
-          "transformations": [
-            {
-              "id": "sortBy",
-              "options": {
-                "fields": {},
-                "sort": [{ "field": "Time", "desc": false }]
-              }
             }
           ],
           "fieldConfig": {
@@ -84,7 +104,7 @@ data:
             "overrides": []
           },
           "options": {
-            "textMode": "name",
+            "textMode": "none",
             "colorMode": "background",
             "graphMode": "none",
             "justifyMode": "center",
@@ -93,29 +113,23 @@ data:
               "fields": "",
               "values": false
             },
-            "orientation": "horizontal"
+            "orientation": "auto"
           }
         },
         {
           "id": 102,
-          "title": "Even ports (bottom row)",
+          "title": "Port $port_bottom",
           "type": "stat",
-          "gridPos": { "h": 3, "w": 24, "x": 0, "y": 4 },
+          "repeat": "port_bottom",
+          "repeatDirection": "h",
+          "maxPerRow": 24,
+          "gridPos": { "h": 2, "w": 1, "x": 0, "y": 3 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
-              "expr": "sort_desc(\n  max by (port_num) (\n    rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=~\".*[02468]\"}[5m])\n    + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=~\".*[02468]\"}[5m])\n    + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=~\".*[02468]\"}[5m])\n    + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=~\".*[02468]\"}[5m])\n  )\n)\nor\n  max by (port_num) (unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=~\".*[02468]\"}) * 0\nor\n  switch_port_exists{name=\"$switch\", port_num=~\".*[02468]\"}",
+              "expr": "max by (name, port_num) (\n  rate(unpoller_device_port_receive_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_errors_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_receive_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n  + rate(unpoller_device_port_transmit_dropped_total{name=\"$switch\", port_num=\"$port_bottom\"}[5m])\n)\nor\n  max by (name, port_num) (unpoller_device_port_port_speed_bps{name=\"$switch\", port_num=\"$port_bottom\"}) * 0\nor\n  switch_port_exists{name=\"$switch\", port_num=\"$port_bottom\"}",
               "legendFormat": "{{port_num}}",
               "refId": "A"
-            }
-          ],
-          "transformations": [
-            {
-              "id": "sortBy",
-              "options": {
-                "fields": {},
-                "sort": [{ "field": "Time", "desc": false }]
-              }
             }
           ],
           "fieldConfig": {
@@ -137,7 +151,7 @@ data:
             "overrides": []
           },
           "options": {
-            "textMode": "name",
+            "textMode": "none",
             "colorMode": "background",
             "graphMode": "none",
             "justifyMode": "center",
@@ -146,21 +160,21 @@ data:
               "fields": "",
               "values": false
             },
-            "orientation": "horizontal"
+            "orientation": "auto"
           }
         },
         {
           "id": 200,
           "type": "row",
           "title": "Port Error History",
-          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
           "collapsed": false
         },
         {
           "id": 201,
           "title": "Port error rate",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 21 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
@@ -187,7 +201,7 @@ data:
           "id": 202,
           "title": "Port traffic (top 10)",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 21 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
@@ -217,7 +231,7 @@ data:
           "id": 300,
           "type": "row",
           "title": "Syslog & Logs",
-          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 },
           "collapsed": false
         },
         {
@@ -225,7 +239,7 @@ data:
           "title": "Syslog events/s by source",
           "type": "timeseries",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
           "targets": [
             {
               "expr": "sum by (source) (rate(vector_log_events_total{source=~\"unifi|synology|network|printer\"}[5m]))",
@@ -239,7 +253,7 @@ data:
           "title": "Talos host log rate by node",
           "type": "timeseries",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
           "targets": [
             {
               "expr": "sum by (host) (rate(vector_log_events_total{source=\"talos\"}[5m]))",
@@ -253,7 +267,7 @@ data:
           "title": "UniFi firewall / IDS-IPS events",
           "type": "logs",
           "datasource": { "type": "loki", "uid": "loki" },
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 25 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 38 },
           "options": { "showTime": true, "wrapLogMessage": true },
           "targets": [
             {
@@ -267,7 +281,7 @@ data:
           "title": "Talos kernel / hardware errors",
           "type": "logs",
           "datasource": { "type": "loki", "uid": "loki" },
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 35 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 48 },
           "options": { "showTime": true, "wrapLogMessage": true },
           "targets": [
             {
