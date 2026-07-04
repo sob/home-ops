@@ -71,7 +71,7 @@ data:
         },
         {
           "id": 101,
-          "title": "Port $port_top",
+          "title": "$port_top",
           "type": "stat",
           "repeat": "port_top",
           "repeatDirection": "h",
@@ -91,7 +91,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   { "color": "#2C3235", "value": null },
-                  { "color": "#3D3D3D", "value": -1 },
+                  { "color": "#4A4A4A", "value": -1 },
                   { "color": "green", "value": 0 },
                   { "color": "#EAB839", "value": 0.01 },
                   { "color": "red", "value": 1 }
@@ -118,7 +118,7 @@ data:
         },
         {
           "id": 102,
-          "title": "Port $port_bottom",
+          "title": "$port_bottom",
           "type": "stat",
           "repeat": "port_bottom",
           "repeatDirection": "h",
@@ -138,7 +138,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   { "color": "#2C3235", "value": null },
-                  { "color": "#3D3D3D", "value": -1 },
+                  { "color": "#4A4A4A", "value": -1 },
                   { "color": "green", "value": 0 },
                   { "color": "#EAB839", "value": 0.01 },
                   { "color": "red", "value": 1 }
