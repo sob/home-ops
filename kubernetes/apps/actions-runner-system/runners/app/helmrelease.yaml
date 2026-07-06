@@ -52,7 +52,7 @@ spec:
       spec:
         containers:
           - name: runner
-            image: ghcr.io/sob/arc-runner:rolling
+            image: ghcr.io/sob/arc-runner:sha256-afd2062efcca6484262e8d95f18ec8fe26b233b174b50fe700c92a2bd938540e
             command: ["/home/runner/run.sh"]
             env:
               - name: ANDROID_HOME
