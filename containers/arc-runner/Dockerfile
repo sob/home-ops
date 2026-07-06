@@ -2,7 +2,7 @@
 # Based on the official GitHub Actions runner image
 
 # renovate: datasource=docker depName=ghcr.io/actions/actions-runner
-ARG RUNNER_VERSION="2.325.0"
+ARG RUNNER_VERSION="2.335.1"
 
 FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION}
 
@@ -22,7 +22,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ARG TARGETARCH
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${TARGETARCH}
 
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
     wget -q "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS_VERSION}_latest.zip" -O /tmp/cmdline-tools.zip && \
