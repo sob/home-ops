@@ -48,5 +48,18 @@ spec:
     # that kubernetes mode hit (actions/actions-runner-controller#2890). The
     # actions-runner-system namespace has no restricted PodSecurity enforcement, so
     # the privileged dind sidecar is permitted.
+    template:
+      spec:
+        containers:
+          - name: runner
+            image: ghcr.io/sob/arc-runner:rolling
+            command: ["/home/runner/run.sh"]
+            env:
+              - name: ANDROID_HOME
+                value: /opt/android-sdk
+              - name: ANDROID_SDK_ROOT
+                value: /opt/android-sdk
+              - name: JAVA_HOME
+                value: /usr/lib/jvm/java-17-openjdk-amd64
     containerMode:
       type: dind
