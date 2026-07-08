@@ -17,6 +17,7 @@ ENV ANDROID_SDK_ROOT=${ANDROID_HOME}
 ENV PATH="${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     openjdk-17-jdk-headless \
     unzip \
     wget \
