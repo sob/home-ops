@@ -1,0 +1,18 @@
+libraries:
+  Movies:
+    collection_files:
+      - default: universe
+      - default: franchise
+      - file: /config/collections/marvel.yml
+      - file: /config/collections/spider-man.yml
+    operations:
+      mass_collection_mode: hide_items
+
+plex:
+  url: http://plex.default.svc.cluster.local:32400
+  token: <<plex_token>>
+
+tmdb:
+  apikey: <<tmdb_apikey>>
+  language: en
+  region: US

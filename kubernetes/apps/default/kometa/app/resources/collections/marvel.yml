@@ -1,0 +1,83 @@
+collections:
+  Marvel Cinematic Universe (Chronological):
+    sort_title: "!010_MCU"
+    collection_order: custom
+    sync_mode: sync
+    summary: "The Marvel Cinematic Universe in in-universe chronological order."
+    tmdb_movie:
+      # Phase 1
+      - 13475    # Captain America: The First Avenger (1940s)
+      - 604     # Captain Marvel (1995)
+      - 1726    # Iron Man (2008)
+      - 1724    # The Incredible Hulk (2008)
+      - 10138   # Iron Man 2 (2010)
+      - 10195   # Thor (2011)
+      - 24428   # The Avengers (2012)
+      # Phase 2
+      - 68721   # Iron Man 3 (2012)
+      - 76338   # Thor: The Dark World (2013)
+      - 100402  # Captain America: The Winter Soldier (2014)
+      - 118340  # Guardians of the Galaxy (2014)
+      - 283995  # Guardians of the Galaxy Vol. 2 (2014)
+      - 99861   # Avengers: Age of Ultron (2015)
+      - 102899  # Ant-Man (2015)
+      # Phase 3
+      - 271110  # Captain America: Civil War (2016)
+      - 284052  # Doctor Strange (2016-2017)
+      - 315635  # Spider-Man: Homecoming (2016)
+      - 284053  # Thor: Ragnarok (2017)
+      - 211672  # Black Panther (2017)
+      - 284054  # Avengers: Infinity War (2018)
+      - 299536  # Ant-Man and the Wasp (2018)
+      - 299534  # Avengers: Endgame (2018-2023)
+      # Phase 4
+      - 497698  # Black Widow (2016-2021)
+      - 566525  # Shang-Chi and the Legend of the Ten Rings (2024)
+      - 524434  # Eternals (2024)
+      - 634649  # Spider-Man: No Way Home (2024)
+      - 453395  # Doctor Strange in the Multiverse of Madness (2024)
+      - 616037  # Thor: Love and Thunder (2024)
+      - 505642  # Black Panther: Wakanda Forever (2024)
+      # Phase 5
+      - 640146  # Ant-Man and the Wasp: Quantumania (2025)
+      - 447365  # Guardians of the Galaxy Vol. 3 (2025)
+      - 609681  # The Marvels (2025)
+      - 822119  # Captain America: Brave New World (2025)
+      - 986056  # Thunderbolts* (2025)
+      # Phase 6
+      - 1003596 # The Fantastic Four: First Steps (2025)
+      - 533535  # Deadpool & Wolverine (timeline anomaly)
+
+  Marvel Legacy:
+    sort_title: "!011_Marvel_Legacy"
+    collection_order: release
+    sync_mode: sync
+    summary: "Pre-MCU Marvel films and Sony/Fox Marvel productions."
+    tmdb_movie:
+      - 36647   # Blade (1998)
+      - 36586   # Blade II (2002)
+      - 36585   # Blade: Trinity (2004)
+      - 36657   # X-Men (2000)
+      - 36658   # X2 (2003)
+      - 36668   # X-Men: The Last Stand (2006)
+      - 2080    # Spider-Man (2002)
+      - 558     # Spider-Man 2 (2004)
+      - 559     # Spider-Man 3 (2007)
+      - 9738    # Fantastic Four (2005)
+      - 1979    # Fantastic Four: Rise of the Silver Surfer (2007)
+      - 9480    # Daredevil (2003)
+      - 8909    # Elektra (2005)
+      - 7220    # The Punisher (2004)
+      - 16076   # Punisher: War Zone (2008)
+      - 2080    # Ghost Rider (2007)
+      - 1927    # Hulk (2003)
+      - 127585  # X-Men: Days of Future Past (2014)
+      - 246655  # X-Men: Apocalypse (2016)
+      - 320288  # X-Men: Dark Phoenix (2019)
+      - 340102  # The New Mutants (2020)
+      - 2048    # X-Men Origins: Wolverine (2009)
+      - 76170   # The Wolverine (2013)
+      - 263115  # Logan (2017)
+      - 526896  # Morbius (2022)
+      - 987917  # Madame Web (2024)
+      - 539972  # Kraven the Hunter (2024)

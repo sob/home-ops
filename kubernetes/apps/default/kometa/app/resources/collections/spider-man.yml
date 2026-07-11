@@ -1,0 +1,22 @@
+collections:
+  Spider-Man:
+    sort_title: "!012_Spider-Man"
+    collection_order: release
+    sync_mode: sync
+    summary: "All Spider-Man films — Tobey Maguire (2002–2007), Andrew Garfield (2012–2014), Tom Holland (2017–2021), and the animated Spider-Verse."
+    tmdb_movie:
+      # Tobey Maguire era
+      - 2080    # Spider-Man (2002)
+      - 558     # Spider-Man 2 (2004)
+      - 559     # Spider-Man 3 (2007)
+      # Andrew Garfield era
+      - 1930    # The Amazing Spider-Man (2012)
+      - 102382  # The Amazing Spider-Man 2 (2014)
+      # Tom Holland era (MCU)
+      - 315635  # Spider-Man: Homecoming (2017)
+      - 429617  # Spider-Man: Far From Home (2019)
+      - 634649  # Spider-Man: No Way Home (2021)
+      # Animated Spider-Verse
+      - 324857  # Spider-Man: Into the Spider-Verse (2018)
+      - 569094  # Spider-Man: Across the Spider-Verse (2023)
+      - 1209290 # Spider-Man: Beyond the Spider-Verse (TBA)
