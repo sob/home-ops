@@ -7,5 +7,4 @@ resources:
   - ./helmrelease.yaml
   - ./httproute-outpost.yaml
   - ./securitypolicy.yaml
-  - ./ocirepository.yaml
   - ./rbac.yaml

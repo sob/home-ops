@@ -8,7 +8,8 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: plex
+    name: app-template
+    namespace: flux-system
   install:
     remediation:
       retries: 3
@@ -71,7 +72,7 @@ spec:
           log-tailer:
             image:
               repository: busybox
-              tag: latest
+              tag: 1.37.0@sha256:9532d8c39891ca2ecde4d30d7710e01fb739c87a8b9299685c63704296b16028
             command: ["/bin/sh", "-c"]
             args: ["until [ -f /logs/Plex\\ Media\\ Server.log ]; do sleep 1; done; tail -F /logs/Plex\\ Media\\ Server.log"]
             securityContext:
