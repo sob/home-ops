@@ -39,10 +39,10 @@ spec:
             command: ["/bin/sh", "-c"]
             args:
               - |
-                cp /configmap/config.yml /config/config.yml
+                cp -f /configmap/config.yml /config/config.yml
                 mkdir -p /config/collections
-                cp /configmap/marvel.yml /config/collections/marvel.yml
-                cp /configmap/spider-man.yml /config/collections/spider-man.yml
+                cp -f /configmap/marvel.yml /config/collections/marvel.yml
+                cp -f /configmap/spider-man.yml /config/collections/spider-man.yml
             securityContext:
               allowPrivilegeEscalation: false
               capabilities: { drop: ["ALL"] }
