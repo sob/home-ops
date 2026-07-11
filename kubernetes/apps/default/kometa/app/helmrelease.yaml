@@ -39,7 +39,7 @@ spec:
             command: ["/bin/sh", "-c"]
             args:
               - |
-                cat /configmap/config.yml > /config/config.yml
+                cat /secret/config.yml > /config/config.yml
                 mkdir -p /config/collections
                 cat /configmap/marvel.yml > /config/collections/marvel.yml
                 cat /configmap/spider-man.yml > /config/collections/spider-man.yml
@@ -55,16 +55,6 @@ spec:
               TZ: America/Chicago
               KOMETA_RUN: "true"
               KOMETA_CONFIG: /config/config.yml
-              KOMETA_PLEX_TOKEN:
-                valueFrom:
-                  secretKeyRef:
-                    name: kometa-secret
-                    key: PLEX_TOKEN
-              KOMETA_TMDB_APIKEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: kometa-secret
-                    key: TMDB_APIKEY
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
@@ -86,6 +76,14 @@ spec:
     persistence:
       config:
         existingClaim: kometa
+      secret:
+        type: secret
+        name: kometa-secret
+        advancedMounts:
+          kometa:
+            copy-config:
+              - path: /secret
+                readOnly: true
       configmap:
         type: configMap
         name: kometa-configmap
