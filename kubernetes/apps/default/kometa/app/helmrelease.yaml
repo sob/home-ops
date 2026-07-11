@@ -79,8 +79,8 @@ spec:
             subPath: config.yml
             readOnly: true
           - path: /config/collections/marvel.yml
-            subPath: collections/marvel.yml
+            subPath: marvel.yml
             readOnly: true
           - path: /config/collections/spider-man.yml
-            subPath: collections/spider-man.yml
+            subPath: spider-man.yml
             readOnly: true

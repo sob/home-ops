@@ -10,7 +10,7 @@ configMapGenerator:
   - name: kometa-configmap
     files:
       - config.yml=./resources/config.yml
-      - collections/marvel.yml=./resources/collections/marvel.yml
-      - collections/spider-man.yml=./resources/collections/spider-man.yml
+      - marvel.yml=./resources/collections/marvel.yml
+      - spider-man.yml=./resources/collections/spider-man.yml
 generatorOptions:
   disableNameSuffixHash: true
