@@ -10,9 +10,9 @@ libraries:
 
 plex:
   url: http://plex.default.svc.cluster.local:32400
-  token: <<plex_token>>
+  token: <<PLEX_TOKEN>>
 
 tmdb:
-  apikey: <<tmdb_apikey>>
+  apikey: <<TMDB_APIKEY>>
   language: en
   region: US
