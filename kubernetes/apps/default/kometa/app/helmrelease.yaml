@@ -31,6 +31,21 @@ spec:
           successfulJobsHistory: 1
           failedJobsHistory: 1
           backoffLimit: 3
+        initContainers:
+          copy-config:
+            image:
+              repository: busybox
+              tag: latest
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                cp /configmap/config.yml /config/config.yml
+                mkdir -p /config/collections
+                cp /configmap/marvel.yml /config/collections/marvel.yml
+                cp /configmap/spider-man.yml /config/collections/spider-man.yml
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
@@ -71,16 +86,11 @@ spec:
     persistence:
       config:
         existingClaim: kometa
-      config-file:
+      configmap:
         type: configMap
         name: kometa-configmap
-        globalMounts:
-          - path: /config/config.yml
-            subPath: config.yml
-            readOnly: true
-          - path: /config/collections/marvel.yml
-            subPath: marvel.yml
-            readOnly: true
-          - path: /config/collections/spider-man.yml
-            subPath: spider-man.yml
-            readOnly: true
+        advancedMounts:
+          kometa:
+            copy-config:
+              - path: /configmap
+                readOnly: true
