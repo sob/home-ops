@@ -53,6 +53,19 @@ sub vcl_recv {
     return (hash);
 }
 
+sub vcl_hash {
+    hash_data(req.url);
+    # Seerr answers to three hostnames (seerr/overseerr/requests) that serve
+    # identical artwork, so key those on the URL alone to share one object.
+    # /MediaCover art differs per app, so keep the host in the key there.
+    if (req.url ~ "^/imageproxy/") {
+        hash_data("seerr");
+    } else {
+        hash_data(req.http.host);
+    }
+    return (lookup);
+}
+
 sub vcl_backend_response {
     if (bereq.url ~ "^/MediaCover/" || bereq.url ~ "^/imageproxy/") {
         if (beresp.status == 200) {
