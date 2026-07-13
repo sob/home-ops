@@ -36,7 +36,7 @@ spec:
               - -a
               - :8080
               - -s
-              - malloc,512m
+              - malloc,2g
             probes:
               liveness:
                 enabled: true
@@ -66,9 +66,9 @@ spec:
             resources:
               requests:
                 cpu: 25m
-                memory: 128Mi
+                memory: 256Mi
               limits:
-                memory: 768Mi
+                memory: 2560Mi
       warmer:
         type: cronjob
         cronjob:
