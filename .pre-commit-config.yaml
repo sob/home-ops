@@ -87,7 +87,7 @@ repos:
           bash -c 'for file in "$@"; do
             if [[ "$file" =~ kubernetes/apps/.*/.*\.yaml$ ]] &&
                 [[ ! "$file" =~ (kustomization|helmrelease|ks|externalsecret|secret\.sops)\.yaml$ ]] &&
-                [[ ! "$file" =~ kubernetes/apps/.*/app/ ]]; then
+                [[ ! "$file" =~ ^kubernetes/apps/[^/]+/[^/]+/.+/ ]]; then
               echo "ERROR: $file does not follow naming conventions";
               exit 1;
             fi;
