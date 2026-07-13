@@ -7,3 +7,4 @@ resources:
   - ./helmrelease.yaml
   - ./pvc.yaml
   - ./prometheusrule.yaml
+  - ./backendtrafficpolicy.yaml

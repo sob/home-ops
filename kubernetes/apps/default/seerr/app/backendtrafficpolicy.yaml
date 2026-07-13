@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/backendtrafficpolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: seerr
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: seerr
+  # Seerr is a single Node process that fans each API call out to TMDB. With
+  # HTTP/2 the browser can fire 100+ concurrent lookups at once (e.g. the
+  # Requests page), which floods and crashes it; the global 3x retry-on-504
+  # then amplifies the spike 4x. Cap concurrency so excess requests queue
+  # instead of overwhelming Seerr, and never retry a timeout. Circuit breakers
+  # are per-cluster, so this does not throttle the fast /imageproxy -> varnish
+  # backend on the same route.
+  circuitBreaker:
+    maxParallelRequests: 40
+    maxPendingRequests: 512
+    maxConnections: 512
+  retry:
+    numRetries: 1
+    retryOn:
+      httpStatusCodes:
+        - 503
+  timeout:
+    http:
+      requestTimeout: 30s
