@@ -9,18 +9,20 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: seerr
-  # The real killer of Seerr under HTTP/2 was the global 3x retry-on-504:
-  # a burst of concurrent TMDB-backed lookups (e.g. the Requests page) that
-  # timed out got retried 4x, snowballing into a crash (observed 185 UT /
-  # 172 504 / exitCode 1). Seerr itself handles ~80 concurrent fine (<600ms).
-  # So: never retry a timeout (503 only, once), and keep a high circuit-breaker
-  # purely as an aggregate safety net that won't reject a single client's
-  # burst. Circuit breakers are per-cluster, so the fast /imageproxy -> varnish
-  # backend on the same route is unaffected.
+  # Seerr is a single-threaded Node process (SSR is CPU-bound and blocks the
+  # event loop). The gateway->seerr upstream is HTTP/1.1, so maxConnections is
+  # the real concurrency limiter: one request per connection. HTTP/2 let the
+  # browser open 100+ concurrent streams, Envoy fanned them onto that many h1
+  # connections, saturated the event loop for >60s, and the liveness probe
+  # killed the pod (observed UF/UC/UT + repeated restarts).
+  #
+  # Cap connections to ~20 concurrent and QUEUE the rest via maxPendingRequests
+  # (queuing, not 503 rejection). Never retry a timeout. Circuit breakers are
+  # per-cluster, so the fast /imageproxy -> varnish backend is unaffected.
   circuitBreaker:
-    maxParallelRequests: 100
-    maxPendingRequests: 512
-    maxConnections: 512
+    maxConnections: 20
+    maxPendingRequests: 1024
+    maxParallelRequests: 1024
   retry:
     numRetries: 1
     retryOn:
