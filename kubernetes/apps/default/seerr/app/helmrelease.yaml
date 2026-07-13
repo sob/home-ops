@@ -125,6 +125,15 @@ spec:
             namespace: network
             sectionName: https-56kbps
         rules:
+          # TMDB artwork is served through the Varnish cache; everything else
+          # (UI, API) goes straight to the app.
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /imageproxy
+            backendRefs:
+              - name: varnish
+                port: 80
           - backendRefs:
               - port: *port
                 identifier: app

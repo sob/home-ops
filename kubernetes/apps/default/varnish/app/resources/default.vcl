@@ -18,19 +18,28 @@ backend sonarr {
     .port = "80";
 }
 
+backend seerr {
+    .host = "seerr.default.svc.cluster.local";
+    .port = "5055";
+}
+
 sub vcl_recv {
     # Pick the backend by hostname (the gateway preserves the Host header).
+    # Sonarr/Radarr serve cover art at /MediaCover/*; Seerr proxies TMDB
+    # artwork at /imageproxy/* (and answers to three hostnames).
     if (req.http.host ~ "(?i)^radarr\.") {
         set req.backend_hint = radarr;
     } else if (req.http.host ~ "(?i)^sonarr\.") {
         set req.backend_hint = sonarr;
+    } else if (req.http.host ~ "(?i)^(seerr|overseerr|requests)\.") {
+        set req.backend_hint = seerr;
     } else {
         return (synth(404, "No backend for host"));
     }
 
     # Safety net: only image assets should ever reach us, but pass anything
     # else straight through uncached just in case.
-    if (req.url !~ "^/MediaCover/") {
+    if (req.url !~ "^/MediaCover/" && req.url !~ "^/imageproxy/") {
         return (pass);
     }
     if (req.method != "GET" && req.method != "HEAD") {
@@ -45,7 +54,7 @@ sub vcl_recv {
 }
 
 sub vcl_backend_response {
-    if (bereq.url ~ "^/MediaCover/") {
+    if (bereq.url ~ "^/MediaCover/" || bereq.url ~ "^/imageproxy/") {
         if (beresp.status == 200) {
             unset beresp.http.set-cookie;
             set beresp.ttl = 30d;
