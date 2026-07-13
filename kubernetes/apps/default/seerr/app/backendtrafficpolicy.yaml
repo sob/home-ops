@@ -9,15 +9,16 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: seerr
-  # Seerr is a single Node process that fans each API call out to TMDB. With
-  # HTTP/2 the browser can fire 100+ concurrent lookups at once (e.g. the
-  # Requests page), which floods and crashes it; the global 3x retry-on-504
-  # then amplifies the spike 4x. Cap concurrency so excess requests queue
-  # instead of overwhelming Seerr, and never retry a timeout. Circuit breakers
-  # are per-cluster, so this does not throttle the fast /imageproxy -> varnish
-  # backend on the same route.
+  # The real killer of Seerr under HTTP/2 was the global 3x retry-on-504:
+  # a burst of concurrent TMDB-backed lookups (e.g. the Requests page) that
+  # timed out got retried 4x, snowballing into a crash (observed 185 UT /
+  # 172 504 / exitCode 1). Seerr itself handles ~80 concurrent fine (<600ms).
+  # So: never retry a timeout (503 only, once), and keep a high circuit-breaker
+  # purely as an aggregate safety net that won't reject a single client's
+  # burst. Circuit breakers are per-cluster, so the fast /imageproxy -> varnish
+  # backend on the same route is unaffected.
   circuitBreaker:
-    maxParallelRequests: 40
+    maxParallelRequests: 100
     maxPendingRequests: 512
     maxConnections: 512
   retry:
