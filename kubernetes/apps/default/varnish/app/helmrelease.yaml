@@ -1,0 +1,160 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.0.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: varnish
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: varnish
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: docker.io/library/varnish
+              tag: 7.6.1
+            command:
+              - varnishd
+              - -F
+              - -f
+              - /etc/varnish/default.vcl
+              - -a
+              - :8080
+              - -s
+              - malloc,512m
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 8080
+                  initialDelaySeconds: 10
+                  periodSeconds: 20
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 8080
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  failureThreshold: 3
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 768Mi
+      warmer:
+        type: cronjob
+        cronjob:
+          schedule: "0 */6 * * *"
+          concurrencyPolicy: Forbid
+          startingDeadlineSeconds: 300
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+          backoffLimit: 2
+        containers:
+          app:
+            image:
+              repository: docker.io/library/python
+              tag: 3.12-alpine
+            command: ["python3", "/scripts/warm.py"]
+            env:
+              DOMAIN: "${SECRET_DOMAIN}"
+              VARNISH_URL: http://varnish.default.svc.cluster.local
+              RADARR_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: radarr-secret
+                    key: RADARR__AUTH__APIKEY
+              SONARR_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: sonarr-secret
+                    key: SONARR__AUTH__APIKEY
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: main
+        ports:
+          http:
+            port: 80
+            targetPort: 8080
+    persistence:
+      vcl:
+        type: configMap
+        name: varnish-configmap
+        advancedMounts:
+          main:
+            app:
+              - path: /etc/varnish/default.vcl
+                subPath: default.vcl
+                readOnly: true
+      workdir:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 128Mi
+        advancedMounts:
+          main:
+            app:
+              - path: /var/lib/varnish
+      tmp:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 16Mi
+        advancedMounts:
+          main:
+            app:
+              - path: /tmp
+      scripts:
+        type: configMap
+        name: varnish-configmap
+        defaultMode: 0555
+        advancedMounts:
+          warmer:
+            app:
+              - path: /scripts/warm.py
+                subPath: warm.py
+                readOnly: true

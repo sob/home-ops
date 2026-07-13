@@ -34,4 +34,5 @@ resources:
   - ./sonarr/ks.yaml
   - ./tautulli/ks.yaml
 # - ./ultrafeeder/ks.yaml
+  - ./varnish/ks.yaml
   - ./wizarr/ks.yaml

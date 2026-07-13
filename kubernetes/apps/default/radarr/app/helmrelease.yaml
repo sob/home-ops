@@ -156,6 +156,16 @@ spec:
             namespace: network
             sectionName: https-56kbps
         rules:
+          # Poster/cover art is served through the Varnish cache; everything
+          # else (UI, API) goes straight to the app. Auth still applies to
+          # both rules via the SecurityPolicy targeting this HTTPRoute.
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /MediaCover
+            backendRefs:
+              - name: varnish
+                port: 80
           - backendRefs:
               - identifier: app
                 port: *port
