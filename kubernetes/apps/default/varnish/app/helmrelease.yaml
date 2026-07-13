@@ -82,7 +82,7 @@ spec:
           app:
             image:
               repository: docker.io/library/python
-              tag: 3.12-alpine
+              tag: 3.14-alpine
             command: ["python3", "/scripts/warm.py"]
             env:
               DOMAIN: "${SECRET_DOMAIN}"
