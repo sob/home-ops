@@ -13,7 +13,14 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       name: external-gateway
-  # HTTP/2 support
+  # HTTP/2 support. The http2 block only tunes h2 parameters; the downstream
+  # listener still won't advertise h2 unless it is in the ALPN list, so set it
+  # explicitly (browsers otherwise fall back to HTTP/1.1 and its 6-connection
+  # cap, which serialised Seerr's ~47 JS chunks into an 11s load).
+  tls:
+    alpnProtocols:
+      - h2
+      - http/1.1
   http2:
     initialConnectionWindowSize: 1048576  # 1MB
     initialStreamWindowSize: 65536        # 64KB
