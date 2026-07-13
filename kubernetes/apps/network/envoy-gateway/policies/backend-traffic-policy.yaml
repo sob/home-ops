@@ -19,14 +19,15 @@ spec:
       connectTimeout: 10s
     http:
       requestTimeout: 30s
-  # Retry policy
+  # Retry policy. Deliberately excludes 504: retrying a request that already
+  # burned the 30s requestTimeout rarely helps and amplifies a backend
+  # overload into a cascade (it snowballed a Seerr request burst into a crash).
   retry:
     numRetries: 3
     retryOn:
       httpStatusCodes:
         - 502
         - 503
-        - 504
   # Load balancer
   loadBalancer:
     type: RoundRobin
