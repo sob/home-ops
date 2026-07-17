@@ -48,8 +48,11 @@ spec:
                     port: 32400
                   initialDelaySeconds: 0
                   periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
+                  # /identity can take >1s when Plex is busy or its SQLite DB is
+                  # waiting on ceph-block; a 1s timeout was SIGKILLing Plex
+                  # (exitCode 137, 12 restarts) and dropping client sessions.
+                  timeoutSeconds: 10
+                  failureThreshold: 5
               readiness: *probes
               startup:
                 enabled: true
