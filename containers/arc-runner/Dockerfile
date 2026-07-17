@@ -7,8 +7,8 @@ ARG RUNNER_VERSION="2.335.1"
 FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION}
 
 ARG ANDROID_CMDLINE_TOOLS_VERSION="11076708"
-ARG ANDROID_BUILD_TOOLS_VERSION="35.0.0"
-ARG ANDROID_PLATFORM_VERSION="35"
+ARG ANDROID_BUILD_TOOLS_VERSION="37.0.0"
+ARG ANDROID_PLATFORM_VERSION="37"
 
 USER root
 
@@ -36,7 +36,9 @@ RUN yes | sdkmanager --licenses > /dev/null 2>&1 && \
     sdkmanager \
       "platform-tools" \
       "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
-      "platforms;android-${ANDROID_PLATFORM_VERSION}"
+      "build-tools;35.0.0" \
+      "platforms;android-${ANDROID_PLATFORM_VERSION}" \
+      "platforms;android-35"
 
 RUN chown -R runner:runner ${ANDROID_HOME}
 
