@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: docker.io/timberio/vector
-              tag: 0.56.0-debian
+              tag: 0.57.0-debian
             args: ["--config", "/etc/vector/vector.yaml"]
             env:
               VECTOR_DATA_DIR: /vector-data-dir
