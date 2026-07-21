@@ -32,10 +32,13 @@ spec:
     controllerServiceAccount:
       namespace: actions-runner-system
       name: gha-runner-scale-set-controller-gha-rs-controller
-    # Keep one runner warm; burst up to six on demand. Each job runs in a fresh,
-    # ephemeral pod that is destroyed on completion.
+    # Keep one runner warm; burst up to ten on demand. Each job runs in a fresh,
+    # ephemeral pod that is destroyed on completion. The runner container sets
+    # resource requests (below) so the scheduler spreads these heavy Android
+    # builds across nodes instead of stacking them onto whichever node has the
+    # image cached (which pegged metal-05 at 101% CPU).
     minRunners: 1
-    maxRunners: 6
+    maxRunners: 10
     # dind (Docker-in-Docker), NOT kubernetes container mode. In kubernetes mode
     # every job MUST declare a `container:` — jobs that run steps directly on the
     # runner (all of ours: the TS/Workers test + deploy jobs migrated from
@@ -54,6 +57,16 @@ spec:
           - name: runner
             image: ghcr.io/sob/arc-runner:sha256-661e50e7ed3a77556b84dce014c9fccef1e7034ea6fc98a54a7947fd763716dc
             command: ["/home/runner/run.sh"]
+            # Android builds observed to burst to ~3 cores / ~4.8Gi. Request a
+            # realistic floor so the scheduler spreads runners (~2 per ~4-core
+            # node max) instead of stacking them; leave CPU unlimited so builds
+            # can still burst on idle cores, and cap memory above the peak.
+            resources:
+              requests:
+                cpu: 1500m
+                memory: 3Gi
+              limits:
+                memory: 8Gi
             env:
               - name: ANDROID_HOME
                 value: /opt/android-sdk
