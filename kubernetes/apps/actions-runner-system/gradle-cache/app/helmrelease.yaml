@@ -23,6 +23,26 @@ spec:
         # RWO cache volume — recreate (not rolling) so the new pod can attach
         # the RBD after the old one detaches.
         strategy: Recreate
+        initContainers:
+          # The node only allows anonymous access if config.yaml sets it, and
+          # that file must live on the writable data dir (a read-only mount
+          # breaks the node, which rewrites it). Seed it onto the PVC each start.
+          copy-config:
+            image:
+              repository: docker.io/library/busybox
+              tag: latest
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                mkdir -p /data/conf
+                cp /configmap/config.yaml /data/conf/config.yaml
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
@@ -84,5 +104,17 @@ spec:
         accessMode: ReadWriteOnce
         size: 30Gi
         storageClass: ceph-block
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          main:
+            copy-config:
+              - path: /data
+            app:
+              - path: /data
+      config:
+        type: configMap
+        name: gradle-cache-configmap
+        advancedMounts:
+          main:
+            copy-config:
+              - path: /configmap
+                readOnly: true

@@ -1,0 +1,7 @@
+version: 5
+cache:
+  # Anonymous read+write: the ephemeral CI runners push and pull without
+  # credentials. Safe because this node is only reachable inside the cluster
+  # (ClusterIP, never exposed) and holds nothing but regenerable build outputs.
+  accessControl:
+    anonymousLevel: "readwrite"

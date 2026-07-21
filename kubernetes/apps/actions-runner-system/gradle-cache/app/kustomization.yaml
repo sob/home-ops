@@ -5,3 +5,9 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+configMapGenerator:
+  - name: gradle-cache-configmap
+    files:
+      - config.yaml=./resources/config.yaml
+generatorOptions:
+  disableNameSuffixHash: true
