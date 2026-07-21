@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.0.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gradle-cache
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gradle-cache
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      main:
+        # RWO cache volume — recreate (not rolling) so the new pod can attach
+        # the RBD after the old one detaches.
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: docker.io/gradle/build-cache-node
+              tag: "21.2"
+            # Standalone remote build cache. Anonymous read+write is allowed by
+            # default; the flags just silence the insecure-config warnings — fine
+            # for a cache that's only reachable in-cluster (never exposed).
+            args:
+              - start
+              - --no-warn-anon-cache-write
+              - --no-warn-anon-ui-access
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5071
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5071
+                  initialDelaySeconds: 15
+                  periodSeconds: 15
+                  failureThreshold: 5
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: main
+        ports:
+          http:
+            port: 5071
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 30Gi
+        storageClass: ceph-block
+        globalMounts:
+          - path: /data

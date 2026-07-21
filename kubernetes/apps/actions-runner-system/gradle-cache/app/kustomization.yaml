@@ -2,10 +2,6 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: actions-runner-system
-components:
-  - ../../components/common
 resources:
-  - ./controller/ks.yaml
-  - ./gradle-cache/ks.yaml
-  - ./runners/ks.yaml
+  - ./ocirepository.yaml
+  - ./helmrelease.yaml
