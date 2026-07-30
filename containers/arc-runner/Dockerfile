@@ -1,4 +1,4 @@
-# Custom ARC runner with Android SDK
+# Custom ARC runner with Android SDK and the GitHub CLI
 # Based on the official GitHub Actions runner image
 
 # renovate: datasource=docker depName=ghcr.io/actions/actions-runner
@@ -41,5 +41,30 @@ RUN yes | sdkmanager --licenses > /dev/null 2>&1 && \
       "platforms;android-35"
 
 RUN chown -R runner:runner ${ANDROID_HOME}
+
+# GitHub CLI. The official actions-runner base image does not ship `gh`, but
+# every GitHub-hosted ubuntu-* image does — so workflows moved onto this pool
+# from `ubuntu-latest` bring `gh` calls with them and fail at job time with
+# `gh: command not found` (exit 127). Worse where the call is wrapped in
+# `2>/dev/null || true`: those degrade silently rather than going red.
+# (doorgames-io/blockhead lost 8 jobs to this, including its Sentry
+# crash-alert pipeline, which dropped alerts unnoticed for three days.)
+#
+# Installed from the release tarball rather than the cli.github.com apt repo:
+# the version stays pinned and renovate-visible, no extra keyring/source to
+# maintain, and one expression covers both build platforms via TARGETARCH.
+# Placed after the Android SDK layers so a gh bump doesn't invalidate them.
+#
+# The trailing `gh --version` fails the build here rather than at job time on a
+# runner — the check that would have caught this gap when the pool was created.
+#
+# renovate: datasource=github-releases depName=cli/cli
+ARG GH_CLI_VERSION="2.96.0"
+RUN gh_dir="/tmp/gh_${GH_CLI_VERSION}_linux_${TARGETARCH}" && \
+    wget -qO- "https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_${TARGETARCH}.tar.gz" \
+      | tar -xz -C /tmp && \
+    install -m 0755 "${gh_dir}/bin/gh" /usr/local/bin/gh && \
+    rm -rf "${gh_dir}" && \
+    gh --version
 
 USER runner
