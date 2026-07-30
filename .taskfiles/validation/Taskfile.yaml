@@ -107,6 +107,14 @@ tasks:
     cmds:
       - |
         echo "=== Validating Kustomize Builds ==="
+        # Overlays with remote resources (apps/kube-system/k8s-digester pulls
+        # google/k8s-digester.git) make kustomize shell out to git. Under the
+        # pre-push hook git exports GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE, the
+        # child git inherits them, and `git remote add origin` then targets THIS
+        # repo instead of kustomize's temp clone:
+        #   error: remote origin already exists
+        # That fails the task on every push while passing when run by hand.
+        unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
         errors=0
         find {{.KUBERNETES_DIR}} -type f -name kustomization.yaml \
           -not -path "*/components/*" | while read -r file; do
@@ -131,6 +139,9 @@ tasks:
     cmds:
       - |
         echo "=== Running Kubeconform ==="
+        # Same inherited-git-env problem as validate:kustomize above — this task
+        # shells out to `kustomize build` too. See the comment there.
+        unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
         errors=0
         # Substitute the ${SECRET_*}/CILIUM_* placeholders before kubeconform so
         # HTTPRoute hostnames render to valid values and are actually VALIDATED
