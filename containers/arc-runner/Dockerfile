@@ -8,7 +8,12 @@ FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION}
 
 ARG ANDROID_CMDLINE_TOOLS_VERSION="11076708"
 ARG ANDROID_BUILD_TOOLS_VERSION="37.0.0"
-ARG ANDROID_PLATFORM_VERSION="37"
+# 36, not 37: Google publishes build-tools;37.0.0 but the highest platform in
+# the SDK repository is platforms;android-36. 631bdcad bumped both, so every
+# image build since 2026-07-17 has died here with
+#   Warning: Failed to find package 'platforms;android-37'
+# before reaching any later layer. Raise this to 37 once Google ships it.
+ARG ANDROID_PLATFORM_VERSION="36"
 
 USER root
 
