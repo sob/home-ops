@@ -55,7 +55,7 @@ spec:
       spec:
         containers:
           - name: runner
-            image: ghcr.io/sob/arc-runner:sha256-661e50e7ed3a77556b84dce014c9fccef1e7034ea6fc98a54a7947fd763716dc
+            image: ghcr.io/sob/arc-runner:sha256-96a5705d29f80f7c6227cafb9a1401af4141578bfe5fb91586af8651718bd1f4
             command: ["/home/runner/run.sh"]
             # Android builds observed to burst to ~3 cores / ~4.8Gi. Request a
             # realistic floor so the scheduler spreads runners (~2 per ~4-core
