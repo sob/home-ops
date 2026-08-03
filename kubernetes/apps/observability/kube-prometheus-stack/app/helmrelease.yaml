@@ -112,7 +112,7 @@ spec:
         storageSpec: {}
         # Enable Thanos sidecar for R2 upload
         thanos:
-          image: quay.io/thanos/thanos:v0.37.2
+          image: quay.io/thanos/thanos:v0.42.4
           version: v0.37.2
           objectStorageConfig:
             existingSecret:
