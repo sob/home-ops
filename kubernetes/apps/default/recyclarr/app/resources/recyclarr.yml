@@ -253,3 +253,23 @@ radarr:
           - name: HD - 720p/1080p
           - name: Ultra-HD
             score: 0
+      # LQ catches low-quality release groups — YTS/YIFY, OFT, WiKi, FGT, AOC,
+      # RARBG, GalaxyRG and ~90 others. It was only ever scored on
+      # HD - 720p/1080p and Ultra-HD, which between them hold 25 of ~1166 movies.
+      # The other 1141 sit on the Any profile, where every custom format scored 0
+      # — so nothing penalised an LQ release there. That is how Twisters was
+      # imported as YTS.MX at 5.9GB while a 23GB DV release existed.
+      #
+      # Scope note: this assigns LQ only. Adding the blocks above to Any would
+      # apply audio, movie-version and release-group scoring across all 1141
+      # movies, which is a much larger behaviour change than blocking junk groups.
+      #
+      # This blocks FUTURE grabs only. The Any profile has upgradeAllowed=false,
+      # so Radarr will not replace the 27 existing LQ-group files (489GB) already
+      # in the library — min_format_score: 0 simply rejects new releases scoring
+      # negative. Replacing what is already there needs upgrades enabled on Any
+      # and is a separate decision.
+      - trash_ids:
+          - 90a6f9a284dff5103f6346090e6280c8  # LQ
+        quality_profiles:
+          - name: Any
