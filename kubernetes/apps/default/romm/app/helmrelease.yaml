@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/rommapp/romm
-              tag: 4.1.6@sha256:2e9cd221a9cefe093c327258e148b762b0e5491ff72f6f79fbe9fc336852654c
+              tag: 4.9.2@sha256:c81778afcafe7c865bdf156d1c62349aec3dfca3aca5ec0d6c2c2e8bfa9fb071
             env:
               TZ: America/Chicago
               ROMM_BASE_URL: "https://romm.${SECRET_DOMAIN}"
