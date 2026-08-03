@@ -1,32 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "packageRules": [
-    // Critical Infrastructure - No automerge
-    {
-      "description": "Critical infrastructure - manual approval required",
-      "matchPackagePatterns": [
-        "fluxcd/flux2",
-        "fluxcd/.*-controller",
-        "rook/rook",
-        "rook/ceph",
-        "cilium/cilium",
-        "cert-manager/cert-manager",
-        "external-secrets/external-secrets",
-        "1password/connect",
-        "kubernetes-sigs/external-dns",
-        "ingress-nginx/controller"
-      ],
-      "automerge": false,
-      "minimumReleaseAge": "7 days"
-    },
 
+  // NOTE: matchPackagePatterns was REMOVED in Renovate v40 (we run 44.x). It is
+  // not migrated — Renovate logs "No config migration necessary" and simply
+  // ignores the key. A rule whose only matcher is unrecognised has no
+  // constraints, so it matched EVERY package; last-wins precedence then let the
+  // permissive rules override "critical infrastructure", and rook-ceph /
+  // cert-manager PRs came out as "Automerge: Enabled".
+  //
+  // All matchers below use matchPackageNames. A value wrapped in /.../ is a
+  // regex (unanchored unless you anchor it); anything else is an exact name.
+  //
+  // Ordering matters: rules apply in order and later rules win. The
+  // critical-infrastructure rule is deliberately LAST so nothing can re-enable
+  // automerge for it. That matters because ghcr.io/home-operations/ holds both
+  // media apps (sonarr, plex, ...) and infra chart mirrors
+  // (charts-mirror/cilium, charts-mirror/external-dns).
+  "packageRules": [
     // Data/Storage - Automerge patches only
     {
       "description": "Data and storage services - patches only",
-      "matchPackagePatterns": [
-        "cloudnative-pg/postgres-operator",
-        "emqx/emqx",
-        "dragonflydb/dragonfly"
+      "matchPackageNames": [
+        "/^ghcr\\.io/dragonflydb/",
+        "/^docker\\.io/library/(postgres|mariadb)$/",
+        "/^docker\\.io/valkey/valkey$/",
       ],
       "matchUpdateTypes": ["patch"],
       "automerge": true,
@@ -35,14 +32,17 @@
       "minimumReleaseAge": "5 days"
     },
 
-    // Media apps - Fast automerge
+    // Media apps - Fast automerge.
+    // [^/]+$ deliberately matches only single-segment paths, so
+    // ghcr.io/home-operations/sonarr matches but
+    // ghcr.io/home-operations/charts-mirror/cilium does not.
     {
       "description": "Media applications - fast updates",
-      "matchPackagePatterns": [
-        "ghcr.io/onedr0p/.*",
-        "ghcr.io/home-operations/.*",
-        "jellyfin/jellyfin",
-        "wizarrrr/wizarr"
+      "matchPackageNames": [
+        "/^ghcr\\.io/home-operations/[^/]+$/",
+        "/^ghcr\\.io/onedr0p/[^/]+$/",
+        "/jellyfin/jellyfin$/",
+        "/wizarrrr/wizarr$/",
       ],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true,
@@ -53,18 +53,14 @@
     // Utility packages - Safe minor updates
     {
       "description": "Utility packages - minor and patch updates",
-      "matchPackagePatterns": [
-        "stakater/reloader",
-        "reloader",
-        "kured",
-        "node-feature-discovery",
-        "metrics-server",
-        "prometheus-operator/prometheus-config-reloader",
-        "grafana/.*",
-        "descheduler",
-        "system-upgrade-controller",
-        "volsync/volsync",
-        "mozilla/sops"
+      "matchPackageNames": [
+        "/reloader$/",
+        "/node-feature-discovery$/",
+        "/^ghcr\\.io/grafana/helm-charts/",
+        "/charts-mirror/(metrics-server|descheduler|volsync|alloy|intel-device-plugins-.*)$/",
+        "/kured$/",
+        "/system-upgrade-controller$/",
+        "/mozilla/sops$/",
       ],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true,
@@ -120,6 +116,24 @@
       "matchUpdateTypes": ["major"],
       "automerge": false,
       "dependencyDashboardApproval": true
+    },
+
+    // Critical Infrastructure - No automerge.
+    // LAST on purpose: this must override every rule above it.
+    {
+      "description": "Critical infrastructure - manual approval required",
+      "matchPackageNames": [
+        "/^ghcr\\.io/rook/",
+        "/charts-mirror/cilium$/",
+        "/cert-manager$/",
+        "/external-secrets$/",
+        "/flux-(instance|operator)$/",
+        "/^fluxcd/flux2$/",
+        "/charts-mirror/external-dns$/",
+        "/^docker\\.io/1password/",
+      ],
+      "automerge": false,
+      "minimumReleaseAge": "7 days"
     }
   ]
 }
