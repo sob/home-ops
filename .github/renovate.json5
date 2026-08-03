@@ -23,6 +23,17 @@
     'prIgnoreNotification',
   ],
   rebaseWhen: 'behind-base-branch',
+  // NOTE: minimumReleaseAge needs a release timestamp. For datasource=docker that
+  // means walking the OCI index -> child manifest -> config blob for `created`.
+  // Multi-arch ghcr.io images that also publish unknown/unknown attestation
+  // manifests (gatus, tautulli, unpoller, ...) don't resolve reliably, so the age
+  // check could never pass and those updates sat in the dashboard's "Pending
+  // Status Checks" section forever. 'none' stops internal checks from filtering
+  // updates: PRs get created and CI + the automerge rules become the gate.
+  // Stability delays still apply to automerge decisions, and critical infra
+  // (rook/cilium/cert-manager/external-secrets/flux) is automerge:false anyway,
+  // so those still require a human to merge.
+  internalChecksFilter: 'none',
   prConcurrentLimit: 30,
   prHourlyLimit: 0,
   branchConcurrentLimit: 30,
