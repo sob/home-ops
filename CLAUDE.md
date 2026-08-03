@@ -1,46 +1,15 @@
 # Claude Assistant Context for home-ops Repository
 
-## Your Role
-
-You are an expert Kubernetes and GitOps engineer helping manage my homelab infrastructure. You have deep knowledge of:
-
-- Kubernetes (K8s) orchestration and troubleshooting
-- Flux CD for GitOps workflows
-- Helm charts and Kustomize for application deployment
-- Talos Linux as the Kubernetes distribution
-- Rook-Ceph and OpenEBS for storage
-- Cilium for networking and Gateway API
-- The bjw-s app-template chart patterns
-
-## Repository Structure
-
-This is a GitOps repository for my homelab Kubernetes cluster running on Talos Linux. Key directories:
-
-- `/kubernetes/apps/` - Application deployments organized by namespace
-- `/kubernetes/flux/` - Flux CD system configurations
-- `/kubernetes/components/` - Reusable Kustomize components (volsync, gatus, etc.)
-- `/bootstrap/` - Helmfile for cluster bootstrapping
-- `/.github/` - CI/CD workflows and Renovate configuration
-- `/terraform/` - Infrastructure as Code for external services
-
 ## Key Infrastructure Details
 
 - **Cluster**: Single cluster running Talos Linux on bare metal Intel NUC devices
 - **Nodes**: 3 control plane nodes, 4 worker nodes (10.1.1.x subnet)
 - **Storage**: Rook-Ceph for persistent storage — storage classes `ceph-block` (default) and `ceph-filesystem` (OpenEBS has been removed)
-- **Networking**: Cilium CNI. Production L7 is **Cilium Gateway API** — internal gateway `10.1.100.200`, external `10.1.100.201`. ingress-nginx still fronts the *arr forward-auth (Authentik) apps. A parallel Envoy Gateway (`.220`/`.221`) is half-built and NOT live — see [[gateway-topology]].
+- **Networking**: Cilium CNI. Production L7 is **Envoy Gateway** — internal gateway `10.1.100.200`, external `10.1.100.201`. External path is Cloudflare Tunnel → cloudflared → gateway service. Authentik forward-auth runs as an Envoy `SecurityPolicy` ext-auth (ingress-nginx has been removed).
 - **DNS**: Blocky for internal DNS, external-dns for managing records
 - **Secrets**: External-secrets with OnePassword, SOPS for sensitive data
 - **Domain**: 56kbps.io (using Cloudflare for external access)
 - **Backup**: Volsync with Restic to Cloudflare R2
-
-## Application Stack
-
-- **Media**: Plex, Jellyfin, Sonarr, Radarr, Prowlarr, SABnzbd
-- **Home Automation**: Home Assistant, Zigbee2MQTT, Node-RED
-- **Monitoring**: Prometheus, Grafana, Loki, Alertmanager
-- **Security**: Authentik for SSO, cert-manager for TLS
-- **Databases**: PostgreSQL (via CloudNativePG), Dragonfly (Redis)
 
 ## Working Guidelines
 
@@ -55,18 +24,12 @@ This is a GitOps repository for my homelab Kubernetes cluster running on Talos L
 ### Kubernetes Operations
 
 1. Use `task` commands when available (e.g., `task flux:hr APP=appname`)
-2. Prefer editing existing resources over creating new ones
-3. Follow existing patterns in the repository
-4. Use `existingClaim` for PVCs when they already exist
-5. Check logs and events when troubleshooting
+2. Use `existingClaim` for PVCs when they already exist
 
 ### Common Tasks & Commands
 
 - **Reconcile app**: `task flux:hr APP=<app-name>`
 - **Force flux sync**: `task flux:ks APP=cluster-apps`
-- **Check app status**: `kubectl get helmrelease -n <namespace> <app>`
-- **View logs**: `kubectl logs -n <namespace> deployment/<app>`
-- **Restart app**: `kubectl rollout restart -n <namespace> deployment/<app>`
 
 ### Known Issues & Workarounds
 
@@ -99,38 +62,5 @@ This is a GitOps repository for my homelab Kubernetes cluster running on Talos L
 - Use tool calls efficiently - batch operations when possible
 - Don't create new files unless absolutely necessary
 - Follow existing patterns and conventions in the codebase
-
-## Grafana & Prometheus Guidelines
-
-### Dashboard Best Practices
-
-1. **Stat Panel Configuration**: Use `textMode: "value"` with proper mappings for status displays
-2. **Metric Aggregation**: Use `max()` function when multiple pods query the same physical device to avoid duplicate lines/gauges
-3. **Panel Organization**: Group related metrics by device/service with clear section headers including model numbers
-4. **Threshold Settings**: Set appropriate warning levels (e.g., PDU at 90% load for 15A circuits)
-
-### Common Prometheus Query Patterns
-
-- **Multiple Pod Aggregation**: `max(metric_name)` - prevents duplicate data from multiple exporters
-- **Device Status**: Map binary values (0/1) to meaningful text (Offline/Online)
-- **Power Source Detection**: Use time-on-battery metric with 0 mapping to "Grid" for normal operation
-- **Unit Conversions**: Apply necessary transformations in queries (e.g., `/10` for decivolts to volts)
-
-## Current Focus Areas
-
-- Maintaining service availability and performance
-- Automating routine maintenance tasks
-- Improving monitoring and alerting
-- Optimizing resource usage
-- Keeping dependencies up to date via Renovate
-
-## Session Context
-
-When starting a new session, check:
-
-1. Current git status and recent commits
-2. Any failing HelmReleases or Kustomizations
-3. Recent changes that might need follow-up
-4. Open PRs from Renovate that need attention
 
 Remember: This is a production homelab - stability and reliability are important, but it's also a learning environment where we can experiment with new technologies and approaches.
