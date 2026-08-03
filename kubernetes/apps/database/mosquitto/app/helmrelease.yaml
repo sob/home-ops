@@ -34,7 +34,7 @@ spec:
           init-passwords:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.20
+              tag: 2.0.22
             envFrom:
               - secretRef:
                   name: mosquitto-secret
@@ -58,7 +58,7 @@ spec:
           app:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.20
+              tag: 2.0.22
             probes:
               liveness:
                 enabled: true
