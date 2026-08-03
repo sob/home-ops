@@ -27,7 +27,7 @@ spec:
           app:
             image:
               repository: ghcr.io/kpetremann/mqtt-exporter
-              tag: 1.7.2@sha256:7e2a27e3dce10427ae46490ede2f74fb7799e9e909baae6f8642fb4d5794f1e0
+              tag: 1.12.1@sha256:dca3255f35310f6ceb80ed1de94eebd1fe9def7aacaec4107fe37cdaa9eb3be0
             env:
               MQTT_ADDRESS: mosquitto.database.svc.cluster.local
               MQTT_V5_PROTOCOL: false
