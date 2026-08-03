@@ -23,28 +23,30 @@
     'prIgnoreNotification',
   ],
   rebaseWhen: 'behind-base-branch',
-  // NOTE: minimumReleaseAge needs a release timestamp. For datasource=docker that
-  // means walking the OCI index -> child manifest -> config blob for `created`.
-  // Multi-arch ghcr.io images that also publish unknown/unknown attestation
-  // manifests (gatus, tautulli, unpoller, ...) don't resolve reliably, so the age
-  // check could never pass and those updates sat in the dashboard's "Pending
-  // Status Checks" section forever. 'none' stops internal checks from filtering
-  // updates: PRs get created and CI + the automerge rules become the gate.
-  // Stability delays still apply to automerge decisions, and critical infra
-  // (rook/cilium/cert-manager/external-secrets/flux) is automerge:false anyway,
-  // so those still require a human to merge.
+  // NOTE: minimumReleaseAge was removed because it never worked here. It needs a
+  // release timestamp, and for our datasources Renovate can't get one: Helm OCI
+  // artifacts publish a application/vnd.cncf.helm.config.v1+json config (no
+  // `created`), and multi-arch ghcr.io images add unknown/unknown attestation
+  // manifests. With no timestamp the check does not fail loudly — it reports
+  // "Updates have not met minimum release age requirement" forever.
+  //
+  // Measured on run 30839924395: 44/44 branches pending, including the reloader
+  // chart 2.2.14 (created 2026-07-01, 33 days old), gatus v5.36.0 (76 days) and
+  // tautulli v2.17.2 (48 days). That made branch status yellow everywhere, which
+  // with ignoreTests:false gave mergeStatus="no automerge" on all 30 PRs. It was
+  // an unconditional block dressed up as a 3 day delay.
+  //
+  // What still gates a merge: "Validate Success" is a required check, critical
+  // infrastructure is automerge:false in renovate/autoMerge.json5, and majors
+  // need dependencyDashboardApproval.
+  //
+  // The two settings below are inert without an internal check to act on. They
+  // are kept because they are the correct values if an age gate is ever restored.
   internalChecksFilter: 'none',
-  // A *passing* internal check is not counted toward branch status by default,
-  // so renovate/stability-days sits PENDING forever rather than turning green —
-  // PRs #1302 (2026-06-30) and #1304 (2026-07-02) were still pending weeks after
-  // any window had elapsed. Combined with ignoreTests:false below (Renovate
-  // requires a green branch before automerging) that means automerge could never
-  // fire at all, not merely that it was delayed.
   internalChecksAsSuccess: true,
   prConcurrentLimit: 30,
   prHourlyLimit: 0,
   branchConcurrentLimit: 30,
-  minimumReleaseAge: '3 days',
   rollbackPrs: true,
   ignoreTests: false,
   recreateWhen: 'always',
