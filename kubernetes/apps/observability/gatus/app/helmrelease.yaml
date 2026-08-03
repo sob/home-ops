@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: ghcr.io/twin/gatus
-              tag: v5.21.0@sha256:b45c89b1f8bfd5be456306b2bf1a581cc13ca0d897faf357ef77c35ac9eca1fa
+              tag: v5.36.0@sha256:c5f210d095fa78e6efaa20ffeb14803f2ba4f10615e16a6d12087697149617f0
             env:
               TZ: America/Chicago
               GATUS_CONFIG_PATH: /config
