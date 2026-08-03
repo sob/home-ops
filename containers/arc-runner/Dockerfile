@@ -2,7 +2,7 @@
 # Based on the official GitHub Actions runner image
 
 # renovate: datasource=docker depName=ghcr.io/actions/actions-runner
-ARG RUNNER_VERSION="2.335.1"
+ARG RUNNER_VERSION="2.336.0"
 
 FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION}
 
