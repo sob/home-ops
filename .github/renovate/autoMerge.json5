@@ -28,8 +28,7 @@
       "matchUpdateTypes": ["patch"],
       "automerge": true,
       "automergeType": "pr",
-      "platformAutomerge": true,
-      "minimumReleaseAge": "5 days"
+      "platformAutomerge": true
     },
 
     // Media apps - Fast automerge.
@@ -46,8 +45,7 @@
       ],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true,
-      "automergeType": "branch",
-      "minimumReleaseAge": "1 day"
+      "automergeType": "branch"
     },
 
     // Utility packages - Safe minor updates
@@ -65,8 +63,7 @@
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true,
       "automergeType": "pr",
-      "platformAutomerge": true,
-      "minimumReleaseAge": "3 days"
+      "platformAutomerge": true
     },
 
     // GitHub Actions - Always automerge
@@ -106,8 +103,7 @@
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true,
-      "ignoreTests": false,
-      "minimumReleaseAge": "3 days"
+      "ignoreTests": false
     },
 
     // Major updates need approval
@@ -132,8 +128,7 @@
         "/charts-mirror/external-dns$/",
         "/^docker\\.io/1password/",
       ],
-      "automerge": false,
-      "minimumReleaseAge": "7 days"
+      "automerge": false
     }
   ]
 }
