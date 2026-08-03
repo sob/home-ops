@@ -34,6 +34,13 @@
   // (rook/cilium/cert-manager/external-secrets/flux) is automerge:false anyway,
   // so those still require a human to merge.
   internalChecksFilter: 'none',
+  // A *passing* internal check is not counted toward branch status by default,
+  // so renovate/stability-days sits PENDING forever rather than turning green —
+  // PRs #1302 (2026-06-30) and #1304 (2026-07-02) were still pending weeks after
+  // any window had elapsed. Combined with ignoreTests:false below (Renovate
+  // requires a green branch before automerging) that means automerge could never
+  // fire at all, not merely that it was delayed.
+  internalChecksAsSuccess: true,
   prConcurrentLimit: 30,
   prHourlyLimit: 0,
   branchConcurrentLimit: 30,
