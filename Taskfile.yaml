@@ -27,6 +27,7 @@ includes:
   kube: .taskfiles/kube
   flux: .taskfiles/Flux
   media: .taskfiles/media
+  network: .taskfiles/network
   pds: .taskfiles/pds
   sops: .taskfiles/Sops
   volsync: .taskfiles/volsync

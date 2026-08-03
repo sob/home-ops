@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  NETWORK_SCRIPTS_DIR: "{{.ROOT_DIR}}/.taskfiles/network/scripts"
+
+tasks:
+
+  unifi-prune:
+    desc: Prune stale offline clients from UniFi controller [MODE=days|offline] [DAYS=30] [DRY_RUN=true]
+    summary: |
+      Removes stale clients from the UniFi controller.
+      Credentials are read from 1Password (STONEHEDGES/unifi).
+
+      modes:
+        days: forget clients not seen in DAYS days (default)
+        offline: forget ALL currently disconnected clients
+
+      args:
+        MODE: days or offline (default: days)
+        DAYS: days since last seen threshold, only for MODE=days (default: 30)
+        DRY_RUN: set to false to actually delete (default: true)
+    cmd: bash {{.NETWORK_SCRIPTS_DIR}}/unifi-prune-clients.sh
+    env:
+      MODE: "{{.MODE | default \"days\"}}"
+      DAYS_THRESHOLD: "{{.DAYS | default 30}}"
+      DRY_RUN: "{{.DRY_RUN | default true}}"
+    preconditions:
+      - msg: "op CLI not found — install 1Password CLI"
+        sh: which op
