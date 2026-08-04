@@ -206,8 +206,13 @@ spec:
       enabled: true
     monitoring:
       enabled: true
-    image:
-      tag: v1.16.0-4.g6da8ef89d
+    # NOTE: image.tag was pinned to v1.16.0-4.g6da8ef89d in 15b1b8ea
+    # (2024-12-29), commented "work around until 1.16.1 is released". 1.16.1
+    # shipped long ago but the pin was never removed, so Renovate kept advancing
+    # the chart around a frozen operator image. By the time the chart reached
+    # 1.20.3 a v1.16 operator was managing CSI RBAC for 1.20-era ceph-csi images
+    # and every node plugin died with "failed to get node ... : Unauthorized".
+    # Leave this unset so the operator image always matches its chart.
     tolerations:
       - key: "node-role.kubernetes.io/control-plane"
         operator: "Exists"
