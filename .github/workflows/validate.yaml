@@ -216,7 +216,7 @@ jobs:
 
       - name: Add PR comment
         if: steps.diff.outputs.has_diff == 'true'
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@v3
         with:
           message-id: flux-diff-${{ matrix.resource }}
           message-path: comment.md
