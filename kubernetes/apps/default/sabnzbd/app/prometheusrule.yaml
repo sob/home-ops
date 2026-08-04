@@ -45,3 +45,52 @@ spec:
             summary: "Multiple failed downloads detected"
             description: "SABnzbd has {{ $value }} failed downloads in the last hour"
             runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/FailedDownloads"
+
+        # Incomplete downloads live on node-local disk (hostPath on metal-07),
+        # not NFS, so runaway growth causes node disk pressure rather than just
+        # filling a NAS. sabnzbd_disk_*{folder="download"} tracks whichever
+        # filesystem download_dir is on, so these follow it automatically.
+        #
+        # SAB pauses itself at 100G free (SABNZBD__DOWNLOAD_FREE). These fire
+        # before that (warning), on trend (runaway), and after the guard has
+        # engaged (critical). Raw node disk pressure is already covered by
+        # kube-prometheus-stack's NodeFilesystemAlmostOutOfSpace.
+        - alert: SABnzbdIncompleteDiskLow
+          expr: |
+            (sabnzbd_disk_total_bytes{folder="download"} - sabnzbd_disk_used_bytes{folder="download"}) < 150e9
+          for: 15m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "SABnzbd incomplete disk is running low"
+            description: "Only {{ $value | humanize1024 }}B free on the incomplete volume. SABnzbd pauses downloads at 100G free."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SABnzbdIncompleteDiskLow"
+
+        - alert: SABnzbdIncompleteRunaway
+          expr: |
+            predict_linear(
+              (sabnzbd_disk_total_bytes{folder="download"} - sabnzbd_disk_used_bytes{folder="download"})[2h:5m],
+              6 * 3600
+            ) < 100e9
+          for: 30m
+          labels:
+            severity: warning
+            type: workload
+          annotations:
+            summary: "SABnzbd incomplete disk will fill within 6 hours"
+            description: "At the current growth rate the incomplete volume reaches SABnzbd's 100G pause threshold within 6 hours. Check for a large queue or stuck post-processing."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SABnzbdIncompleteRunaway"
+
+        - alert: SABnzbdPausedDiskFull
+          expr: |
+            sabnzbd_paused == 1
+              and on(url) ((sabnzbd_disk_total_bytes{folder="download"} - sabnzbd_disk_used_bytes{folder="download"}) < 110e9)
+          for: 15m
+          labels:
+            severity: critical
+            type: workload
+          annotations:
+            summary: "SABnzbd has paused itself — incomplete disk full"
+            description: "SABnzbd's free-space guard has engaged and the queue is stalled. Downloads resume automatically once space is freed (fulldisk_autoresume=1)."
+            runbook_url: "https://github.com/sob/home-ops/wiki/Alerts/SABnzbdPausedDiskFull"
