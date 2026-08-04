@@ -82,6 +82,17 @@ spec:
       mon_max_pg_per_osd = 300
 
     cephClusterSpec:
+      # Pin the Ceph daemon version explicitly. Without this it comes from the
+      # chart default, so a Rook chart bump silently carries a Ceph version with
+      # it — chart 1.20.3 defaulted to v20.2.2 and would have started a major
+      # Ceph 19 -> 20 upgrade that nobody chose. Chart v1.18.4 defaults to
+      # v19.2.3, which is what every mon and OSD is already running, so setting
+      # this is a no-op today and purely stops future drift.
+      #
+      # Ceph upgrades are now an explicit edit here, never a side effect of a
+      # Rook bump, and must be done separately from a Rook version change.
+      cephVersion:
+        image: quay.io/ceph/ceph:v19.2.3
       # Resource definitions
       resources:
         osd:
