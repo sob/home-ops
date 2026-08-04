@@ -192,7 +192,12 @@ jobs:
         id: build
         uses: docker/bake-action@v7
         with:
-          workdir: containers/${{ matrix.app }}
+          # `source`, not `workdir`: bake-action v6 dropped `workdir` and #1453
+          # took this from v5 to v7, so the input was silently ignored and bake
+          # ran from the repo root — "lstat ./docker-bake.hcl: no such file or
+          # directory" for every container. Relative paths (the `files:` entry
+          # below) resolve from `source`, so this is a straight rename.
+          source: ./containers/${{ matrix.app }}
           targets: ${{ matrix.app }}
           provenance: false
           set: |
@@ -489,7 +494,7 @@ jobs:
           bake_output=$(docker buildx bake --print)
           target=$(echo "$bake_output" | jq -r '.target | keys[0]')
           has_rolling=$(echo "$bake_output" | jq -r ".target[\"${target}\"].tags[]" | grep -c "rolling" || echo "0")
-          
+
           if [ "$has_rolling" -gt "0" ]; then
             echo "App ${{ matrix.app }} uses rolling tag - triggering Flux reconciliation..."
             if [ -n "$FLUX_WEBHOOK_URL" ]; then
