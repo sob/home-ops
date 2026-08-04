@@ -21,12 +21,28 @@ ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=${ANDROID_HOME}
 ENV PATH="${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools"
 
+# bc and python3 are here for the same reason gh is installed below: every
+# GitHub-hosted ubuntu-* image ships them, the actions-runner base image does
+# not, and jobs that moved onto this pool assume them. Each absence shows up as
+# a bare exit 127 in an unrelated-looking step:
+#   bc      doorgames-io/blockhead's nightly "Update Coverage Badges"
+#   python3 the same repo pins actions/setup-python in five workflows to
+#           work around it; with python3 here those pins become optional
+# Ubuntu noble's python3 is 3.12, which is what those pins ask for.
+#
+# The base already provides curl, jq, git, sed, awk, timeout and (via
+# build-essential -> dpkg-dev -> perl) shasum, so this list is the whole gap
+# for the commands blockhead's arc-linux jobs actually invoke.
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    bc \
     build-essential \
     openjdk-17-jdk-headless \
+    python3 \
     unzip \
     wget \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && bc --version | head -1 \
+    && python3 --version
 
 ARG TARGETARCH
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${TARGETARCH}
