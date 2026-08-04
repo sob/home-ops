@@ -36,7 +36,7 @@ spec:
           app:
             image:
               repository: docker.io/library/node
-              tag: 22-bookworm
+              tag: 24-bookworm
             command:
               - /bin/bash
               - -c
