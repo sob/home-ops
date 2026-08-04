@@ -266,7 +266,7 @@ data:
         source_labels = ["instance"]
         target_label = "node"
         regex = "([^:]+):.*"
-        replacement = "${1}"
+        replacement = "$${1}"
       }
     }
 

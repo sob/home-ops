@@ -30,6 +30,10 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: hass
+      # Used by HOME_ASSISTANT_TRUSTED_PROXIES. Was never defined anywhere, so
+      # under non-strict postBuild it silently rendered as an empty string and
+      # Home Assistant had no trusted proxies configured at all.
+      CLUSTER_POD_CIDR: 10.42.0.0/16
       VOLSYNC_SCHEDULE: "30 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
       VOLSYNC_STORAGECLASS: ceph-block
