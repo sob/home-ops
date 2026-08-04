@@ -32,7 +32,7 @@ spec:
               MQTT_ADDRESS: mosquitto.database.svc.cluster.local
               MQTT_V5_PROTOCOL: false
               PROMETHEUS_PORT: &port 3321
-              TZ: ${TIMEZONE}
+              TZ: America/Chicago
               ZIGBEE2MQTT_AVAILABILITY: true
             envFrom:
               - secretRef:

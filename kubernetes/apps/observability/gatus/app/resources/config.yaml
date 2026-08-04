@@ -12,8 +12,8 @@ ui:
 alerting:
   pushover:
     title: Gatus
-    application-token: ${PUSHOVER_TOKEN}
-    user-key: ${PUSHOVER_USER_KEY}
+    application-token: $${PUSHOVER_TOKEN}
+    user-key: $${PUSHOVER_USER_KEY}
     priority: 1
     default-alert:
       description: health-check failed

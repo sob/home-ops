@@ -42,7 +42,8 @@ spec:
         s3:
           # Credentials are injected via env (loki-secret) and expanded by Loki
           # at runtime (-config.expand-env). The $$ escapes Flux postBuild
-          # substitution so a literal ${VAR} reaches the container.
+          # substitution so a literal dollar-brace reference reaches the
+          # container instead of being substituted at build time.
           endpoint: "$${R2_ENDPOINT}"
           region: auto
           accessKeyId: "$${AWS_ACCESS_KEY_ID}"
