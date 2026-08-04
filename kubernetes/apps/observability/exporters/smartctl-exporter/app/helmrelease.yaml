@@ -9,11 +9,16 @@ spec:
     kind: OCIRepository
     name: prometheus-smartctl-exporter
   interval: 30m
+  # DaemonSet — sits at 9/10 forever because metal-08 is intentionally offline.
+  # See the cilium HelmRelease for the full explanation; without disableWait
+  # Helm blocks on the DaemonSet rollout and fails the release.
   install:
+    disableWait: true
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
+    disableWait: true
     remediation:
       strategy: rollback
       retries: 3
