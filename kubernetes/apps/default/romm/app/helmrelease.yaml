@@ -103,7 +103,7 @@ spec:
           mariadb:
             image:
               repository: mariadb
-              tag: 11.8.8@sha256:d9f7eb2637296652f24b484afd5d246f759f49f5babcadc6a9e344c9acb75fbf
+              tag: 12.3.2@sha256:759869cb6f003234a95c6384cdee245b4bce7de26913fe607a8110362c0c007d
             envFrom:
               - secretRef:
                   name: romm-secret
