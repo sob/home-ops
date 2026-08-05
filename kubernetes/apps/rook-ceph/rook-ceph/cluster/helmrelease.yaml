@@ -92,7 +92,7 @@ spec:
       # Ceph upgrades are now an explicit edit here, never a side effect of a
       # Rook bump, and must be done separately from a Rook version change.
       cephVersion:
-        image: quay.io/ceph/ceph:v19.2.3
+        image: quay.io/ceph/ceph:v19.2.5
       # Resource definitions
       resources:
         osd:
