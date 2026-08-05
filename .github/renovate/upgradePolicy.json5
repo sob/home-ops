@@ -1,0 +1,58 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
+  // Upgrades that CANNOT be applied by changing an image tag alone.
+  //
+  // On 2026-08-04 two of these landed in one batch and both broke production:
+  //
+  //   rook-ceph 1.18.4 -> 1.20.3   Rook supports single-minor upgrades only.
+  //                                Renovate offered two minors as one tidy PR;
+  //                                ceph-csi was down ~8h.
+  //   postgres 17 -> 18            A major PG upgrade needs pg_upgrade or a
+  //                                dump/restore. The image swap alone left
+  //                                authentik-postgresql in CrashLoopBackOff
+  //                                ("database files are incompatible with
+  //                                server") and took SSO down with it.
+  //
+  // automerge:false already forced a human to look at both, and it worked —
+  // neither merged unattended. What was missing is that nothing distinguished
+  // "needs a migration" from an ordinary major. These rules encode that.
+  "packageRules": [
+    // Rook: never offer more than one minor at a time.
+    // separateMultipleMinor makes Renovate raise a PR per minor stream, so a
+    // 1.18 -> 1.20 jump arrives as 1.19 first and then 1.20, which is the only
+    // upgrade path Rook actually supports. Operator and cluster charts are
+    // bumped together by the rook-ceph group in groups.json5.
+    {
+      "description": "rook-ceph: one minor at a time (Rook does not support skipping minors)",
+      "matchPackageNames": [
+        "/^ghcr\\.io/rook/rook-ceph$/",
+        "/^ghcr\\.io/rook/rook-ceph-cluster$/",
+      ],
+      "separateMultipleMinor": true,
+      "separateMinorPatch": true,
+      "automerge": false,
+      "dependencyDashboardApproval": true,
+    },
+
+    // PostgreSQL majors: do not raise PRs at all.
+    // The data directory is written by a specific major and a new server
+    // refuses to open it, so the upgrade is a planned maintenance task
+    // (pg_upgrade, or dump + restore into a fresh data dir) and not something
+    // to accept from a bot. Minor and patch updates are unaffected and still
+    // flow normally.
+    //
+    // To upgrade deliberately: take a verified dump, bump the tag by hand, and
+    // restore. See the 2026-08-05 authentik 17 -> 18.4 upgrade for the runbook.
+    {
+      "description": "postgres majors need pg_upgrade — never propose them automatically",
+      "matchPackageNames": [
+        "/^docker\\.io/library/postgres$/",
+        "/postgres$/",
+        "/postgresql$/",
+      ],
+      "matchUpdateTypes": ["major"],
+      "enabled": false,
+    },
+  ]
+}
