@@ -35,6 +35,25 @@
       "dependencyDashboardApproval": true,
     },
 
+
+    // Ceph daemons: let point releases flow, gate majors.
+    // The version lives at cephImage.tag in the rook-ceph-cluster HelmRelease
+    // and Renovate's helm-values manager already tracks it (it moved
+    // 19.2.3 -> 19.2.5 unattended in #1473, which is the behaviour we want).
+    //
+    // A Ceph MAJOR (e.g. 19 Squid -> 20 Tentacle) rewrites daemon state, rolls
+    // mons/mgrs/OSDs one at a time, and cannot be downgraded. It needs verified
+    // backups and someone watching, so it must never arrive as an ordinary PR.
+    // dependencyDashboardApproval keeps it visible on the dashboard as a
+    // checkbox without ever creating a PR on its own.
+    {
+      "description": "ceph: point releases flow, majors need deliberate approval",
+      "matchPackageNames": ["/^quay\\.io/ceph/ceph$/"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "dependencyDashboardApproval": true,
+    },
+
     // PostgreSQL majors: do not raise PRs at all.
     // The data directory is written by a specific major and a new server
     // refuses to open it, so the upgrade is a planned maintenance task
