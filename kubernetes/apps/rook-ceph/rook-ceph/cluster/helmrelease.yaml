@@ -81,18 +81,29 @@ spec:
       osd_class_update_on_start = false
       mon_max_pg_per_osd = 300
 
+    # Pin the Ceph daemon version explicitly. Without this it comes from the
+    # chart default, so a Rook chart bump silently carries a Ceph version with
+    # it — chart 1.20.3 defaults to v20.2.2 and would start a major Ceph
+    # 19 -> 20 upgrade that nobody chose.
+    #
+    # This lives at the top-level cephImage key, NOT cephClusterSpec.cephVersion.
+    # Chart 1.19 added cephImage and templates cephVersion into the CephCluster
+    # from it, so setting both produces a duplicate key and the release fails
+    # with: yaml: unmarshal errors: mapping key "cephVersion" already defined.
+    # The chart values say plainly: "If specifying these values, do not include
+    # the cephVersion section in the cephClusterSpec."
+    #
+    # Ceph upgrades are an explicit edit to `tag` here, never a side effect of a
+    # Rook bump, and must be done separately from a Rook version change.
+    # allowUnsupported stays false — moving to Ceph v20 (Tentacle) would require
+    # setting it true, which is exactly the kind of decision that should be
+    # deliberate rather than inherited from a chart default.
+    cephImage:
+      repository: quay.io/ceph/ceph
+      tag: v19.2.5
+      allowUnsupported: false
+
     cephClusterSpec:
-      # Pin the Ceph daemon version explicitly. Without this it comes from the
-      # chart default, so a Rook chart bump silently carries a Ceph version with
-      # it — chart 1.20.3 defaulted to v20.2.2 and would have started a major
-      # Ceph 19 -> 20 upgrade that nobody chose. Chart v1.18.4 defaults to
-      # v19.2.3, which is what every mon and OSD is already running, so setting
-      # this is a no-op today and purely stops future drift.
-      #
-      # Ceph upgrades are now an explicit edit here, never a side effect of a
-      # Rook bump, and must be done separately from a Rook version change.
-      cephVersion:
-        image: quay.io/ceph/ceph:v19.2.5
       # Resource definitions
       resources:
         osd:
