@@ -38,3 +38,8 @@ spec:
       VOLSYNC_GID: "65536"
       VOLSYNC_FSGROUP: "65536"
       VOLSYNC_MEMORY_LIMIT: 4Gi
+      # Bumped 2026-08-04 to clear a stale restic lock left by mover pod
+      # volsync-src-plex-r2-tfl2m on 2026-07-20. The backup itself kept
+      # succeeding; only the `forget` retention step failed, so ~15 days of
+      # snapshots accumulated unpruned.
+      VOLSYNC_UNLOCK: "2"

@@ -9,11 +9,23 @@ spec:
     kind: OCIRepository
     name: cilium
   interval: 30m
+  # metal-08 is a control-plane node that is intentionally offline for the
+  # garage-rack buildout and is not returning soon. Its node object still
+  # exists, so every DaemonSet keeps a Pending pod there and never reports
+  # fully available — cilium and cilium-envoy sit at 9/10 permanently. That is
+  # the healthy steady state for this cluster, not a failure.
+  #
+  # Without disableWait, Helm blocks on "DaemonSet/kube-system/cilium status:
+  # 'InProgress'" until it times out, fails the release, and takes
+  # cilium-gateway and node-local-dns down with it via dependsOn — while
+  # cilium itself is running fine (20 pods Ready, networking healthy).
   install:
+    disableWait: true
     remediation:
       retries: -1
   upgrade:
     cleanupOnFail: true
+    disableWait: true
     remediation:
       retries: 3
   values:
