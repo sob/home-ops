@@ -40,7 +40,7 @@ spec:
       image:
         registry: docker.io
         repository: library/postgres
-        tag: 18.4-alpine
+        tag: 17.10-alpine
       auth:
         existingSecret: authentik
         secretKeys:
@@ -76,7 +76,7 @@ spec:
         enabled: false
       initContainers:
         - name: wait-for-postgresql
-          image: docker.io/library/postgres:18-alpine
+          image: docker.io/library/postgres:17-alpine
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
@@ -99,7 +99,7 @@ spec:
         minReplicas: 2
       initContainers:
         - name: wait-for-postgresql
-          image: docker.io/library/postgres:18-alpine
+          image: docker.io/library/postgres:17-alpine
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
