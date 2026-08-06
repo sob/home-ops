@@ -38,13 +38,24 @@ spec:
             args:
               - |
                 mkdir -p /incomplete
-                chown 1031:65536 /incomplete
-                chmod 0775 /incomplete
+                # Tolerate failure when ownership is already correct: chown on a
+                # dir you do not own fails even as root without CAP_CHOWN, and
+                # re-running is a no-op in the normal case.
+                chown 1031:65536 /incomplete 2>/dev/null || true
+                chmod 0775 /incomplete 2>/dev/null || true
+                # Fail loudly only if the app user genuinely cannot write.
+                su -s /bin/sh -c 'touch /incomplete/.wtest && rm -f /incomplete/.wtest' \
+                  1031 2>/dev/null || test -w /incomplete || {
+                    echo "FATAL: /incomplete not writable by uid 1031"; exit 1; }
+                echo "/incomplete ready: $(stat -c '%u:%g %a' /incomplete)"
             securityContext:
               runAsUser: 0
               runAsNonRoot: false
               allowPrivilegeEscalation: false
-              capabilities: { drop: ["ALL"] }
+              # CHOWN/FOWNER are required to set ownership on the hostPath dir,
+              # which kubelet creates as root:root. Without them the chown fails
+              # with "Operation not permitted" even running as uid 0.
+              capabilities: { add: ["CHOWN", "FOWNER", "DAC_OVERRIDE"], drop: ["ALL"] }
           # The sabnzbd image only maps a fixed allowlist of env vars into the
           # ini — api_key, nzb_key, port, address, host_whitelist_entries and
           # local_ranges_entries. There is no generic SABNZBD__* mapping, so
