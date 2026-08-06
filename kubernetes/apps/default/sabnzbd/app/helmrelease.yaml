@@ -45,6 +45,43 @@ spec:
               runAsNonRoot: false
               allowPrivilegeEscalation: false
               capabilities: { drop: ["ALL"] }
+          # The sabnzbd image only maps a fixed allowlist of env vars into the
+          # ini — api_key, nzb_key, port, address, host_whitelist_entries and
+          # local_ranges_entries. There is no generic SABNZBD__* mapping, so
+          # anything else set as an env var is silently ignored: it appears in
+          # the pod spec, never reaches sabnzbd.ini, and nothing warns.
+          #
+          # That is how download_dir stayed on NFS, download_free stayed empty
+          # (no disk-full guard) and script_dir stayed empty (the import-guard
+          # post-processing script never ran) even though all three were set as
+          # env vars.
+          #
+          # These keys already exist in [misc], so this rewrites them in place
+          # rather than appending. Runs as uid 1031 (inherited) which owns
+          # /config. Idempotent, and a no-op on first boot before the ini exists.
+          init-config:
+            image:
+              repository: docker.io/library/busybox
+              tag: 1.38.0
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                INI=/config/sabnzbd.ini
+                [ -f "$INI" ] || { echo "no ini yet, entrypoint will seed it"; exit 0; }
+                set_ini() {
+                  if grep -qE "^$1 = " "$INI"; then
+                    sed -i "s|^$1 = .*|$1 = $2|" "$INI"
+                    echo "set $1 = $2"
+                  else
+                    echo "WARNING: key $1 not found in $INI — not adding it"
+                  fi
+                }
+                set_ini download_dir /incomplete
+                set_ini download_free 100G
+                set_ini script_dir /scripts
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
@@ -53,25 +90,17 @@ spec:
             env:
               TZ: America/Chicago
               SABNZBD__PORT: &port 80
-              # Incomplete downloads live on node-local disk instead of NFS.
-              # Measured on this cluster (800MiB dd, iflag=direct for reads):
+              # NOTE: download_dir, download_free and script_dir are NOT set
+              # here — this image ignores env vars outside its small allowlist.
+              # They are applied to sabnzbd.ini by the init-config initContainer
+              # above. See that comment for the full explanation.
+              #
+              # incomplete/ lives on node-local disk. Measured on this cluster
+              # with an 800MiB dd (iflag=direct on reads), which is what matters
+              # because par2 verify and unpack are read-heavy:
               #   node-local  1.7 GB/s write   1.7 GB/s read
               #   NFS          91 MB/s write    38 MB/s read
               #   ceph-block   48 MB/s write    18 MB/s read
-              # par2 verify and unpack are read-heavy, so the 38 MB/s NFS read
-              # was the bottleneck. ceph-block is network storage too and
-              # measured worse than NFS, so only node-local helps here.
-              SABNZBD__DOWNLOAD_DIR: /incomplete
-              # /incomplete is on the node EPHEMERAL partition, shared with
-              # container storage. Without a guard a large queue can fill it and
-              # trigger disk-pressure eviction on metal-07. SAB pauses below this
-              # and fulldisk_autoresume=1 resumes automatically.
-              SABNZBD__DOWNLOAD_FREE: 100G
-              # Where SABnzbd looks for post-processing scripts. The script
-              # itself still has to be selected per category in Config →
-              # Categories (tv, movies) — SABnzbd stores that in the
-              # [categories] ini section, which has no env-var equivalent.
-              SABNZBD__SCRIPT_DIR: /scripts
               SABNZBD__HOST_WHITELIST_ENTRIES: >-
                 sabnzbd,
                 sabnzbd.default,
