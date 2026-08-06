@@ -8,3 +8,9 @@ resources:
   - ./httproute-outpost.yaml
   - ./securitypolicy.yaml
   - ./prometheusrule.yaml
+configMapGenerator:
+  - name: sabnzbd-scripts
+    files:
+      - import-guard.py=./resources/import-guard.py
+generatorOptions:
+  disableNameSuffixHash: true
