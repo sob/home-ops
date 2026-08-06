@@ -32,3 +32,8 @@ spec:
       VOLSYNC_UID: "1024"
       VOLSYNC_GID: "100"
       VOLSYNC_FSGROUP: "100"
+      # Bumped 2026-08-06 to clear a stale restic lock created 2026-08-03 00:58
+      # when the mover was killed mid-run during the ceph-csi outage. The backup
+      # itself succeeds; only the follow-on forget was failing, so retention has
+      # not run since.
+      VOLSYNC_UNLOCK: "2"
