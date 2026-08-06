@@ -269,7 +269,17 @@ radarr:
       # in the library — min_format_score: 0 simply rejects new releases scoring
       # negative. Replacing what is already there needs upgrades enabled on Any
       # and is a separate decision.
+      #
+      # BR-DISK is the same gap, found the hard way. Zootopia 2 was grabbed as a
+      # full UHD Blu-ray disc structure; Radarr imported a single .m2ts playlist
+      # from it — 00036.m2ts, 4.98GB, 12m48s of a 1h48m film, tagged quality
+      # "Unknown" because .m2ts does not parse. Re-searching immediately grabbed
+      # another 79GB disc rip of the same shape.
+      #
+      # BR-DISK was already defined and scored -10000 on Ultra-HD and
+      # HD - 720p/1080p, just never on Any, which is where that movie lived.
       - trash_ids:
           - 90a6f9a284dff5103f6346090e6280c8  # LQ
+          - ed38b889b31be83fda192888e2286d83  # BR-DISK
         quality_profiles:
           - name: Any
