@@ -122,8 +122,30 @@ spec:
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
+            # SABnzbd serves its API from the same process that runs par2 repair
+            # and unpack, so the HTTP interface stalls under heavy jobs. The old
+            # settings (timeoutSeconds 1, failureThreshold 3, periodSeconds 10)
+            # treated 30s of slow responses as a dead container.
+            #
+            # On 2026-08-06 that fired during a 40-minute par2 repair of a 55 GB
+            # season pack on NFS. kubelet SIGTERMed the container twice; SABnzbd
+            # could not finish flushing its admin files inside the 30s grace
+            # period and was SIGKILLed (exit 137), truncating
+            # /config/admin/postproc2.sab:
+            #
+            #   Loading /config/admin/postproc2.sab failed
+            #   EOFError: Ran out of input
+            #
+            # That lost the post-processing queue and the entire history, which
+            # stranded 41 finished jobs in complete/ as _UNPACK_* folders the
+            # *arr never imported.
+            #
+            # Liveness now tolerates 3 minutes of unresponsiveness before
+            # restarting. Readiness stays tighter so a genuinely wedged instance
+            # still drops out of the Service, but not so tight that a normal
+            # repair takes the web UI offline.
             probes:
-              liveness: &probes
+              liveness:
                 enabled: true
                 custom: true
                 spec:
@@ -131,10 +153,20 @@ spec:
                     path: /api?mode=version
                     port: *port
                   initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 6
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api?mode=version
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 15
+                  timeoutSeconds: 10
+                  failureThreshold: 4
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -146,6 +178,11 @@ spec:
               limits:
                 memory: 8Gi
     defaultPodOptions:
+      # SABnzbd writes its queue, history and post-processing state to
+      # /config/admin on shutdown. The default 30s was not enough while a repair
+      # was in flight — it was SIGKILLed mid-write and postproc2.sab was left
+      # truncated. See the probes comment above for the full incident.
+      terminationGracePeriodSeconds: 120
       securityContext:
         runAsNonRoot: true
         runAsUser: 1031
