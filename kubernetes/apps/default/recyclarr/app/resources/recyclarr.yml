@@ -130,6 +130,34 @@ sonarr:
           - name: Web 720p
           - name: Any
           - name: Ultra-HD
+      # Dolby Vision Profile 5 carries no HDR10 base layer, so a player that
+      # cannot do full P5 passthrough has nothing to fall back to — the picture
+      # comes out magenta/green or refuses to play outright. TRaSH calls this
+      # "DV (w/o HDR fallback)". Profile 8 is the portable flavour: it keeps an
+      # HDR10 base layer, so it plays on the Shield and the Apple TV both.
+      #
+      # Blocked on every profile rather than just the ones watched on the Apple
+      # TV. Scoping an unwanted-release format to only some profiles is exactly
+      # how the LQ and BR-DISK gaps below happened, and P8 releases exist for
+      # essentially anything that ships DV — so rejecting P5 costs no Dolby
+      # Vision anywhere, it only requires the flavour that plays everywhere.
+      - trash_ids:
+          - 9b27ab6498ec0f31a3353992e19434ca  # DV (w/o HDR fallback)
+        assign_scores_to:
+          - name: Web 1080p
+          - name: Web 720p
+          - name: Any
+          - name: Ultra-HD
+      # Ultra-HD is the 4K profile watched on the Shield downstairs, which
+      # handles Dolby Vision natively. Boost DV and HDR there only — the other
+      # profiles are 1080p and below, where these formats are rare and scoring
+      # them would shuffle rankings for no viewing benefit.
+      - trash_ids:
+          - 7c3a61a9c6cb04f52f1544be6d44a026  # DV Boost
+          - 505d871304820ba7106b693be6fe4a9e  # HDR
+          - 0c4b99df9206d2cfac3c05ab897dd62a  # HDR10+ Boost
+        assign_scores_to:
+          - name: Ultra-HD
 
 radarr:
   radarr:
@@ -283,3 +311,48 @@ radarr:
           - ed38b889b31be83fda192888e2286d83  # BR-DISK
         assign_scores_to:
           - name: Any
+      # Dolby Vision Profile 5 carries no HDR10 base layer, so a player that
+      # cannot do full P5 passthrough has nothing to fall back to. TRaSH calls
+      # this "DV (w/o HDR fallback)".
+      #
+      # Found through Chip 'n Dale: Rescue Rangers (2022), which would not play
+      # on the Apple TV. ffprobe on the imported file:
+      #
+      #   dv_profile=5   dv_bl_signal_compatibility_id=0   el_present_flag=0
+      #   color_transfer=unknown   color_primaries=unknown
+      #
+      # compatibility_id=0 is the tell — the base layer is IPT-PQ-C2, not
+      # HDR10, which is also why the colour transfer and primaries come back
+      # unknown. There is no standard HDR signalling in the file at all.
+      #
+      # No HDR or DV custom format existed here before this, so every release
+      # scored 0 and Radarr chose on quality and size alone with nothing to
+      # express that P5 is unplayable on half the house's devices. That movie
+      # lives on Any, which holds ~1141 of ~1166 movies — the same profile the
+      # LQ and BR-DISK gaps above were found in.
+      #
+      # Profile 8 keeps an HDR10 base layer and plays on the Shield and the
+      # Apple TV both, and P8 releases exist for essentially anything shipping
+      # DV. So blocking P5 everywhere costs no Dolby Vision on the Shield; it
+      # only requires the flavour that plays everywhere.
+      - trash_ids:
+          - 923b6abef9b17f937fab56cfcf89e1f1  # DV (w/o HDR fallback)
+        assign_scores_to:
+          - name: Any
+          - name: Ultra-HD
+          - name: HD - 720p/1080p
+      # Ultra-HD is the 4K profile watched on the Shield downstairs, which
+      # handles Dolby Vision and Dolby surround natively. Boost DV and HDR
+      # there only: Any spans ~1141 mostly-1080p movies, and scoring HDR across
+      # all of them is a far larger behaviour change than this needs — the same
+      # scope reasoning as the LQ block above.
+      #
+      # Dolby audio is already covered for this profile. TrueHD Atmos, DD+
+      # ATMOS, TrueHD and DTS X are scored on Ultra-HD by the first
+      # custom_formats block near the top of the radarr section.
+      - trash_ids:
+          - b337d6812e06c200ec9a2d3cfa9d20a7  # DV Boost
+          - 493b6d1dbec3c3364c59d7607f7e3405  # HDR
+          - caa37d0df9c348912df1fb1d88f9273a  # HDR10+ Boost
+        assign_scores_to:
+          - name: Ultra-HD
