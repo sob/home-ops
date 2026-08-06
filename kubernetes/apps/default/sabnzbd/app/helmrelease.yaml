@@ -26,6 +26,25 @@ spec:
       sabnzbd:
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          # hostPath dirs are created 0755 root:root by kubelet and fsGroup does
+          # not apply to hostPath volumes, so the app (uid 1031) cannot write to
+          # the mount without this chown.
+          init-incomplete:
+            image:
+              repository: docker.io/library/busybox
+              tag: 1.38.0
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                mkdir -p /incomplete
+                chown 1031:65536 /incomplete
+                chmod 0775 /incomplete
+            securityContext:
+              runAsUser: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
@@ -34,32 +53,19 @@ spec:
             env:
               TZ: America/Chicago
               SABNZBD__PORT: &port 80
-              # NOTE: incomplete/ is back on NFS. Moving it to a node-local
-              # hostPath is a real win — measured on this cluster with an 800MiB
-              # dd (iflag=direct on reads), since par2 verify and unpack are
-              # read-heavy:
+              # Incomplete downloads live on node-local disk instead of NFS.
+              # Measured on this cluster (800MiB dd, iflag=direct for reads):
               #   node-local  1.7 GB/s write   1.7 GB/s read
               #   NFS          91 MB/s write    38 MB/s read
               #   ceph-block   48 MB/s write    18 MB/s read
-              # (ceph-block is network storage too and measured worse than NFS,
-              # so only node-local helps.)
-              #
-              # But hostPath does not work here as-is. Talos gives kubelet a
-              # restricted mount namespace, so it cannot create directories
-              # under /var/mnt even though the path is writable from a normal
-              # pod:
-              #   MountVolume.SetUp failed for volume "incomplete":
-              #   mkdir /var/mnt/sabnzbd-incomplete: read-only file system
-              # That left sabnzbd stuck in Init:0/1 and the *arr reporting
-              # downloadClientUnavailable.
-              #
-              # Doing this properly needs machine.kubelet.extraMounts in
-              # talos/machineconfig.yaml.j2 binding /var/mnt for kubelet, then a
-              # config apply to metal-07. Worth doing as its own change.
-              SABNZBD__DOWNLOAD_DIR: /media/Downloads/sabnzbd/incomplete
-              # Kept regardless of where incomplete/ lives: without a floor a
-              # large queue can fill the volume. SAB pauses below this and
-              # fulldisk_autoresume=1 resumes automatically.
+              # par2 verify and unpack are read-heavy, so the 38 MB/s NFS read
+              # was the bottleneck. ceph-block is network storage too and
+              # measured worse than NFS, so only node-local helps here.
+              SABNZBD__DOWNLOAD_DIR: /incomplete
+              # /incomplete is on the node EPHEMERAL partition, shared with
+              # container storage. Without a guard a large queue can fill it and
+              # trigger disk-pressure eviction on metal-07. SAB pauses below this
+              # and fulldisk_autoresume=1 resumes automatically.
               SABNZBD__DOWNLOAD_FREE: 100G
               # Where SABnzbd looks for post-processing scripts. The script
               # itself still has to be selected per category in Config →
@@ -163,6 +169,27 @@ spec:
         defaultMode: 493
         globalMounts:
           - path: /scripts
+      # Node-local scratch for in-flight downloads. Safe as a hostPath because
+      # the nodeAffinity below pins this pod to nodes labelled
+      # node-role.kubernetes.io/media=true, and metal-07 is currently the only
+      # one — so the pod always lands on the same disk. If another node is ever
+      # given that label, in-flight downloads on the old node become orphaned
+      # and SAB will re-fetch them.
+      #
+      # MUST be under /var/local-storage. Talos gives kubelet a restricted mount
+      # namespace: /var/local-storage is a built-in writable path, but /var/mnt
+      # is reserved for declared user disks and kubelet cannot create
+      # directories there, so DirectoryOrCreate fails with
+      # "mkdir /var/mnt/...: read-only file system" and the pod hangs in Init.
+      # Confusingly a normal pod CAN write to /var/mnt — only kubelet cannot.
+      # This is the same path the old OpenEBS localpv used (3d83edb6), and it
+      # needs no machine.kubelet.extraMounts and no local CSI provisioner.
+      incomplete:
+        type: hostPath
+        hostPath: /var/local-storage/sabnzbd-incomplete
+        hostPathType: DirectoryOrCreate
+        globalMounts:
+          - path: /incomplete
       media:
         type: custom
         volumeSpec:
