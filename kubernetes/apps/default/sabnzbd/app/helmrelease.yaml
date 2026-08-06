@@ -67,6 +67,11 @@ spec:
               # trigger disk-pressure eviction on metal-07. SAB pauses below this
               # and fulldisk_autoresume=1 resumes automatically.
               SABNZBD__DOWNLOAD_FREE: 100G
+              # Where SABnzbd looks for post-processing scripts. The script
+              # itself still has to be selected per category in Config →
+              # Categories (tv, movies) — SABnzbd stores that in the
+              # [categories] ini section, which has no env-var equivalent.
+              SABNZBD__SCRIPT_DIR: /scripts
               SABNZBD__HOST_WHITELIST_ENTRIES: >-
                 sabnzbd,
                 sabnzbd.default,
@@ -156,6 +161,14 @@ spec:
           - path: /config/logs
       tmp:
         type: emptyDir
+      # Post-processing scripts. defaultMode 0775 so SABnzbd can execute them —
+      # it silently ignores anything in script_dir that is not executable.
+      scripts:
+        type: configMap
+        name: sabnzbd-scripts
+        defaultMode: 493
+        globalMounts:
+          - path: /scripts
       # Node-local scratch for in-flight downloads. Safe as a hostPath because
       # the nodeAffinity below pins this pod to nodes labelled
       # node-role.kubernetes.io/media=true, and metal-07 is currently the only
