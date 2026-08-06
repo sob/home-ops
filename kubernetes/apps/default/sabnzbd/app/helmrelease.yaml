@@ -175,9 +175,18 @@ spec:
       # one — so the pod always lands on the same disk. If another node is ever
       # given that label, in-flight downloads on the old node become orphaned
       # and SAB will re-fetch them.
+      #
+      # MUST be under /var/local-storage. Talos gives kubelet a restricted mount
+      # namespace: /var/local-storage is a built-in writable path, but /var/mnt
+      # is reserved for declared user disks and kubelet cannot create
+      # directories there, so DirectoryOrCreate fails with
+      # "mkdir /var/mnt/...: read-only file system" and the pod hangs in Init.
+      # Confusingly a normal pod CAN write to /var/mnt — only kubelet cannot.
+      # This is the same path the old OpenEBS localpv used (3d83edb6), and it
+      # needs no machine.kubelet.extraMounts and no local CSI provisioner.
       incomplete:
         type: hostPath
-        hostPath: /var/mnt/sabnzbd-incomplete
+        hostPath: /var/local-storage/sabnzbd-incomplete
         hostPathType: DirectoryOrCreate
         globalMounts:
           - path: /incomplete
