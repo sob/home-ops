@@ -106,6 +106,21 @@ spec:
                 # likely origin of the 41 _UNPACK_ orphans recovered earlier
                 # that day — they predate the crash that was first blamed.
                 set_ini history_retention_option all
+                # download_free guards /incomplete (node-local NVMe). Nothing
+                # guarded complete_dir, which is the NFS share — so SABnzbd
+                # would happily fill it to 100% and take down every other
+                # workload writing there.
+                #
+                # Found on 2026-08-06 with the share at 96% (1.5T free of 32T)
+                # while 195 GB of UHD REMUXes were queued, several 40-80 GB
+                # each. complete_free was empty; download_free 100G only ever
+                # protected the local disk, which had 344 GB free and was never
+                # the constraint.
+                #
+                # SABnzbd pauses rather than fills. Note this does not stop
+                # Sonarr/Radarr grabbing — they just queue behind a paused
+                # client, which is the intended failure mode.
+                set_ini complete_free 500G
             securityContext:
               allowPrivilegeEscalation: false
               capabilities: { drop: ["ALL"] }
