@@ -90,6 +90,22 @@ spec:
                 set_ini download_dir /incomplete
                 set_ini download_free 100G
                 set_ini script_dir /scripts
+                # Sonarr and Radarr detect a finished download by polling
+                # SABnzbd's active history. "all-archive" moves every job to the
+                # archive the instant it completes, so the *arr never sees it
+                # finish and never imports it — the job just silently piles up
+                # in complete/. Sonarr flags this itself:
+                #
+                #   Download client SABnzbd is set to remove completed
+                #   downloads. This can result in downloads being removed from
+                #   your client before Sonarr can import them.
+                #
+                # Found on 2026-08-06 with 167 folders stacked up in complete/
+                # and zero imports for hours, while SABnzbd reported every one
+                # of them as completed successfully. This is also the most
+                # likely origin of the 41 _UNPACK_ orphans recovered earlier
+                # that day — they predate the crash that was first blamed.
+                set_ini history_retention_option all
             securityContext:
               allowPrivilegeEscalation: false
               capabilities: { drop: ["ALL"] }
