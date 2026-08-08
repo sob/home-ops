@@ -97,7 +97,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.56kbps.io
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["audiobookshelf.56kbps.io"]
+        hostnames: ["books.56kbps.io"]
         parentRefs:
           - name: external-gateway
             namespace: network
@@ -124,18 +124,20 @@ spec:
       # Read-only: audiobookshelf only ever reads the library. Writes go to
       # /config and /metadata, so mounting the share read-only means a bug or
       # a misconfigured "delete" in the UI cannot touch the media itself.
+      # NOTE: no mountOptions here. It is not a field on a pod's inline NFS
+      # volume source (only on a PersistentVolume), so the API server drops it.
+      # 10 other HelmReleases in this repo declare it and it has never taken
+      # effect — those mounts run on kernel defaults. Newer server-side apply
+      # rejects it outright rather than ignoring it, which is what made this
+      # install fail:
+      #   .spec.template.spec.volumes[name="media"].nfs.mountOptions:
+      #   field not declared in schema
       media:
         type: custom
         volumeSpec:
           nfs:
             server: ${SECRET_NFS_SERVER}
             path: ${SECRET_NFS_PATH_MEDIA}
-            mountOptions:
-              - nfsvers=4.1
-              - hard
-              - noatime
-              - rsize=131072
-              - wsize=131072
         globalMounts:
           - path: /media
             readOnly: true

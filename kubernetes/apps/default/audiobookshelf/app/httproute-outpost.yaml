@@ -16,7 +16,7 @@ spec:
       namespace: network
       sectionName: https-56kbps
   hostnames:
-    - "audiobookshelf.56kbps.io"
+    - "books.56kbps.io"
   rules:
     - matches:
         - path:
