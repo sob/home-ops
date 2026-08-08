@@ -28,6 +28,10 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      # App is "audiobookshelf" but it is served at books.*, so the gatus
+      # endpoint must be told the real subdomain or it probes a host that
+      # does not exist.
+      GATUS_SUBDOMAIN: books
       GATUS_DOMAIN: halfduplex.io
       VOLSYNC_SCHEDULE: "31 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
