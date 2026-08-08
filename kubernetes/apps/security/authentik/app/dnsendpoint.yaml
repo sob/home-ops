@@ -36,11 +36,6 @@ spec:
       recordType: AAAA
       targets:
         - "::1"
-    - dnsName: readarr.halfduplex.io
-      recordTTL: 300
-      recordType: AAAA
-      targets:
-        - "::1"
     - dnsName: prowlarr.halfduplex.io
       recordTTL: 300
       recordType: AAAA

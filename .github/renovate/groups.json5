@@ -13,7 +13,7 @@
       "commitMessageTopic": "coredns"
     },
     {
-      "description": "External Secrets - Bootstrap and Kubernetes Sync", 
+      "description": "External Secrets - Bootstrap and Kubernetes Sync",
       "groupName": "external-secrets-all",
       "matchPackageNames": [
         "external-secrets",
@@ -93,7 +93,7 @@
       },
       "separateMinorPatch": true
     },
-    
+
     // Application Groups
     {
       "description": "Media Apps - Arr Stack",
@@ -102,7 +102,6 @@
         "ghcr.io/home-operations/sonarr",
         "ghcr.io/home-operations/radarr",
         "ghcr.io/home-operations/lidarr",
-        "ghcr.io/home-operations/readarr",
         "ghcr.io/home-operations/bazarr",
         "ghcr.io/home-operations/prowlarr"
       ],
@@ -123,7 +122,7 @@
       },
       "separateMinorPatch": true
     },
-    
+
     // Observability Stack
     {
       "description": "Prometheus Stack",
@@ -150,7 +149,7 @@
         "commitMessageTopic": "Loki logging"
       }
     },
-    
+
     // Security Groups
     {
       "description": "Cert-manager Group",
@@ -173,7 +172,7 @@
       },
       "separateMinorPatch": true
     },
-    
+
     // Infrastructure Groups
     {
       "description": "Storage CSI Drivers",
@@ -189,7 +188,7 @@
       },
       "separateMinorPatch": true
     },
-    
+
     // Keep existing groups
     {
       "description": "1Password Connect Group",
