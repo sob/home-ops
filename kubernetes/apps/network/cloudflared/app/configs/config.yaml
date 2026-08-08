@@ -88,6 +88,10 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "readarr.56kbps.io"
+  - hostname: "books.56kbps.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "books.56kbps.io"
   - hostname: "sonarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
