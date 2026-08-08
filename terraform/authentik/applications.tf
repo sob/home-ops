@@ -67,6 +67,16 @@ locals {
       group         = resource.authentik_group.network
       cookie_domain = "halfduplex.io"
     },
+    audiobookshelf = {
+      external_host = "https://books.56kbps.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/audiobookshelf.png"
+      group         = resource.authentik_group.media
+      cookie_domain = "56kbps.io"
+      # Audiobookshelf's mobile and web clients authenticate against its own
+      # user database over these paths. Forward-auth must not intercept them
+      # or the apps cannot log in or stream.
+      skip_path_regex = "^/(api|login|status|healthcheck|hls|feed|public)([/?].*)?"
+    },
     homeassistant = {
       external_host = "https://hass.56kbps.io"
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
