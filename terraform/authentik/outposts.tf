@@ -14,6 +14,7 @@ locals {
     tonumber(authentik_provider_proxy.main["sabnzbd"].id),
     tonumber(authentik_provider_proxy.main["tautulli"].id),
     tonumber(authentik_provider_proxy.main["qbittorrent"].id),
+    tonumber(authentik_provider_proxy.main["audiobookshelf"].id),
   ]
 
   # halfduplex outpost = BBS only (cookie domain halfduplex.io via authentik_host sso.halfduplex.io)
