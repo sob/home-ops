@@ -1,0 +1,141 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.0.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: audiobookshelf
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/advplyr/audiobookshelf
+              tag: 2.19.0@sha256:46f36b2f533e30347ae6d1e35ede6dc805a8d82211e26c4eee1f8f99cc245d48
+            env:
+              TZ: America/Chicago
+              PORT: &port 80
+              # Audiobookshelf keeps its SQLite DB and server settings in
+              # /config, and cover art plus cached probe data in /metadata.
+              # Both are written constantly, so neither can live on the
+              # read-only root filesystem.
+              CONFIG_PATH: /config
+              METADATA_PATH: /metadata
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthcheck
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 6
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1035
+        runAsGroup: 65536
+        fsGroup: 65536
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [100]
+        seccompProfile: { type: RuntimeDefault }
+      tolerations:
+        - key: "workload-type"
+          operator: "Equal"
+          value: "media"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/media
+                    operator: In
+                    values:
+                      - "true"
+    service:
+      app:
+        controller: main
+        ports:
+          http:
+            port: *port
+    # No serviceMonitor: exportarr has no audiobookshelf module and the app
+    # exposes no Prometheus endpoint. Liveness is covered by the gatus/guarded
+    # component wired in ks.yaml.
+    route:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        hostnames: ["audiobookshelf.56kbps.io"]
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        existingClaim: audiobookshelf
+      # Cover art and cached audio-probe results. Regenerable, so it is a
+      # separate emptyDir rather than something volsync has to back up —
+      # audiobookshelf rebuilds it by rescanning the library.
+      metadata:
+        type: emptyDir
+        globalMounts:
+          - path: /metadata
+      tmp:
+        type: emptyDir
+      # Read-only: audiobookshelf only ever reads the library. Writes go to
+      # /config and /metadata, so mounting the share read-only means a bug or
+      # a misconfigured "delete" in the UI cannot touch the media itself.
+      media:
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${SECRET_NFS_SERVER}
+            path: ${SECRET_NFS_PATH_MEDIA}
+            mountOptions:
+              - nfsvers=4.1
+              - hard
+              - noatime
+              - rsize=131072
+              - wsize=131072
+        globalMounts:
+          - path: /media
+            readOnly: true
