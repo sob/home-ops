@@ -13,5 +13,5 @@ resources:
   - ./snmp-exporter/ks.yaml
   - ./speedtest-exporter/ks.yaml
   - ./tautulli-exporter/ks.yaml
-  # radarr/sonarr/prowlarr/lidarr/readarr exporters now run as exportarr
+  # radarr/sonarr/prowlarr/lidarr exporters now run as exportarr
   # sidecars in their app pods (kubernetes/apps/default/<app>) — see radarr HR.
