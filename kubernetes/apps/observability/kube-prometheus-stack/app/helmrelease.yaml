@@ -205,6 +205,20 @@ spec:
         enabled: true
         storageClassName: ceph-block
         size: 5Gi
+      # ceph-block is RWO, so the volume can only be attached to one node at a
+      # time. The chart defaults to RollingUpdate, which stands up the new pod
+      # before retiring the old one — and if the new pod lands on a different
+      # node it can never mount, while the old pod never terminates because the
+      # new one never becomes ready. That deadlocked a rollout for 12h on
+      # 2026-08-10: grafana-7f44855 Running on metal-02 held the attachment
+      # while grafana-567486b964 sat Pending on metal-04 at Init:0/1
+      # (init-chown-data never started).
+      #
+      # Recreate terminates the old pod, releases the attachment, then starts
+      # the new one. Costs a few seconds of downtime per upgrade, which is the
+      # right trade for a single-replica dashboard.
+      deploymentStrategy:
+        type: Recreate
       resources:
         requests:
           cpu: 50m
