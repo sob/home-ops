@@ -1,0 +1,27 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: required-for-kustomize-but-not-used
+spec:
+  values:
+    controllers:
+      main:
+        initContainers:
+          # Creates this app's role and database on the shared instance if they
+          # do not already exist, then exits. Idempotent, so it runs on every
+          # pod start and is a no-op after the first.
+          #
+          # Image moved namespace: ghcr.io/onedr0p/postgres-init is abandoned
+          # (its last tag is 16), ghcr.io/home-operations/postgres-init is the
+          # maintained continuation. Keep the tag on the same major as the
+          # server in kubernetes/apps/database/postgres.
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: "18"
+            envFrom:
+              - secretRef:
+                  name: ${APP}-db-secret
+              - secretRef:
+                  name: ${APP}-secret

@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: required-for-kustomize-but-not-used
+spec:
+  dependsOn:
+    # The postgres Kustomization sets wait: true, so it only reports Ready once
+    # the server is actually accepting connections. That is what makes this
+    # dependency sufficient on its own — the old CNPG version of this component
+    # additionally needed a healthCheck on the Cluster CR, because Kustomization
+    # readiness there did not imply a usable database.
+    - name: postgres
+      namespace: database
