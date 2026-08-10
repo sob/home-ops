@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+# The Authentik login flow itself is served under /outpost.goauthentik.io on the
+# app's own hostname, so it has to bypass the app backend and go straight to the
+# outpost. Without this the ext-auth redirect lands on Adminer and 404s.
+#
+# Internal gateway only, matching the app route — this host is not published
+# through the Cloudflare tunnel.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: adminer-outpost
+  namespace: database
+spec:
+  parentRefs:
+    - name: internal-gateway
+      namespace: network
+      sectionName: https-56kbps
+  hostnames:
+    - "postgres.${SECRET_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: ak-outpost-56kbps
+          namespace: security
+          port: 9000
