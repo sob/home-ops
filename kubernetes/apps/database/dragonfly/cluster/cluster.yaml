@@ -6,6 +6,23 @@ metadata:
 spec:
   image: ghcr.io/dragonflydb/dragonfly:v1.40.1@sha256:ebf3c6c213e82fb51b4521660cca13f06f3421dc5b1ed14f2f474c50b5e29986
   replicas: 4 # set to the number of nodes in the cluster
+  # Operator v1.6.x added this field, defaulting to TRUE, and it generates a
+  # NetworkPolicy whose only rule for the client port is:
+  #
+  #   ingress: [{from: [{podSelector: {}}], ports: [{port: 6379}]}]
+  #
+  # An empty podSelector with no namespaceSelector means "pods in THIS namespace"
+  # — so it silently blocks every cross-namespace client. authentik (security
+  # namespace) is a consumer here, so the generated policy locks it out. The
+  # policy also admits the admin port 9999 only from pods labelled
+  # control-plane=controller-manager, which our app-template-deployed operator is
+  # not, so the operator locked itself out too and reconciles failed with
+  #   failed to determine dataset load status: dial tcp ...:9999: i/o timeout
+  #
+  # Disabled deliberately. If this is ever re-enabled, the policy needs a
+  # namespaceSelector for each consuming namespace and a selector matching the
+  # operator's actual labels.
+  networkPolicyEnabled: false
   env:
     - name: MAX_MEMORY
       valueFrom:
