@@ -33,12 +33,21 @@ spec:
               tag: v2026.7.1
             env:
               TZ: America/Chicago
+            # Steady-state RSS measured 245Mi on 2026-08-10, against a 286.1Mi
+            # limit — roughly 40Mi of headroom, and the pod was OOMKilled
+            # (exit 137) shortly after start. Raised to 512Mi.
+            #
+            # The fractional 286.1Mi also rendered as "299997593600m", which
+            # made every kubectl operation on this deployment emit
+            #   Warning: spec.template.spec.containers[0].resources.limits[memory]:
+            #   fractional byte value "299997593600m" is invalid, must be an integer
+            # Memory limits should be whole binary units.
             resources:
               requests:
                 cpu: 200m
-                memory: 131Mi
+                memory: 256Mi
               limits:
-                memory: 286.1Mi
+                memory: 512Mi
     service:
       app:
         controller: *app
