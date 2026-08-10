@@ -3,6 +3,19 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: dragonfly-operator
+# This ClusterRole is maintained by hand, so it does not move when the operator
+# image does. Renovate bumped the operator v1.1.11 -> v1.6.1 (#1391) and the new
+# version watches ConfigMaps and NetworkPolicies as well; without those grants
+# their informers never sync and the manager exits:
+#
+#   failed to list *v1.ConfigMap: configmaps is forbidden: User
+#   "system:serviceaccount:database:dragonfly-operator" cannot list resource
+#   "configmaps" in API group "" at the cluster scope
+#
+# controller-runtime treats a cache that cannot sync as fatal, so this presented
+# as a CrashLoopBackOff (182 restarts) rather than as degraded functionality.
+# Keep the resources here in step with the operator's EventSources — they are
+# logged as "Starting EventSource ... kind source: *v1.X" at startup.
 rules:
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
@@ -11,7 +24,17 @@ rules:
     resources: ["events"]
     verbs: ["create", "patch"]
   - apiGroups: [""]
-    resources: ["pods", "services"]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  # PodDisruptionBudget is not a registered EventSource — the operator reads it
+  # through the cached client during reconcile, which lazily starts an informer
+  # on first access. It therefore only surfaced once the ConfigMap/NetworkPolicy
+  # grants above let the manager get far enough to reconcile at all.
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
   - apiGroups: ["apps"]
     resources: ["statefulsets"]

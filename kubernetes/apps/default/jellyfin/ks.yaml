@@ -25,6 +25,25 @@ spec:
       # Bumped to clear a stale restic lock held since 2026-08-10 00:08 by a
       # mover pod that died mid-run. Every subsequent backup failed with
       # "repository is already locked by PID 32 ... lock was created 13h ago".
+      #
+      # This did NOT work, and cannot: VOLSYNC_UNLOCK runs plain `restic
+      # unlock`, which only removes locks it can prove are dead. It cannot
+      # verify a PID belonging to a pod that no longer exists, so an orphaned
+      # lock from a dead mover survives it forever. volsync knows — the fix is
+      # sitting commented out in its own mover script (mover-restic/entry.sh):
+      #
+      #   #if ! "${RESTIC[@]}" unlock --remove-all 2>"$outfile"; then
+      #   if ! "${RESTIC[@]}" unlock 2>"$outfile"; then
+      #
+      # volsync also records status.restic.lastUnlocked, so once a given value
+      # has been consumed it never retries — bumping this again is a no-op
+      # against this class of lock.
+      #
+      # Cleared 2026-08-10 by running `restic unlock --remove-all` in a one-off
+      # pod using this app's volsync R2 secret. Note the backups themselves were
+      # always fine ("snapshot 8c7bac77 saved"); only the follow-on forget was
+      # blocked, so the visible symptom is retention never running and lastSync
+      # never advancing while the data is in fact safe.
       VOLSYNC_UNLOCK: "1"
       VOLSYNC_SCHEDULE: "6 0 * * *"
       VOLSYNC_CAPACITY: 10Gi
