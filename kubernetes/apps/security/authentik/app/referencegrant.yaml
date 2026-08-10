@@ -21,6 +21,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: observability
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: database
     - group: gateway.envoyproxy.io
       kind: SecurityPolicy
       namespace: network
@@ -30,6 +33,9 @@ spec:
     - group: gateway.envoyproxy.io
       kind: SecurityPolicy
       namespace: observability
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: database
   to:
     - group: ""
       kind: Service

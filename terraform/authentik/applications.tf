@@ -35,6 +35,13 @@ locals {
   }
 
   proxy_applications = {
+    adminer = {
+      external_host = "https://postgres.56kbps.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/adminer.png"
+      group         = resource.authentik_group.observability
+      cookie_domain = "56kbps.io"
+      namespace     = "database"
+    },
     bazarr = {
       external_host   = "https://bazarr.56kbps.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"

@@ -1,0 +1,137 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.0.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app adminer
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: postgres
+      namespace: database
+  values:
+    controllers:
+      adminer:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          # Adminer's entrypoint writes into its own docroot: it symlinks the
+          # chosen design to ./adminer.css and generates a loader per plugin
+          # into plugins-enabled/. With readOnlyRootFilesystem those writes fail
+          # and, because the entrypoint runs under `set -e`, the container exits
+          # rather than degrading.
+          #
+          # Seeding the docroot into an emptyDir keeps the root filesystem
+          # read-only while giving the entrypoint somewhere writable. Mounting
+          # the emptyDir straight onto /var/www/html without this would hide
+          # adminer.php and the bundled designs.
+          init-html:
+            image:
+              repository: docker.io/library/adminer
+              tag: 5.5.1-standalone@sha256:890cffec7caa20159fb6f68c1a521b2e5879f7314f4845d4ebca7cc1cf145971
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                cp -a /var/www/html/. /html/
+                echo "seeded docroot: $(ls -1 /html | wc -l) entries"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+        containers:
+          app:
+            image:
+              repository: docker.io/library/adminer
+              tag: 5.5.1-standalone@sha256:890cffec7caa20159fb6f68c1a521b2e5879f7314f4845d4ebca7cc1cf145971
+            env:
+              TZ: America/Chicago
+              # Prefills the Server field so only credentials are typed.
+              ADMINER_DEFAULT_SERVER: postgres.database.svc.cluster.local
+              ADMINER_DESIGN: pepa-linha
+              # Space-separated; the entrypoint turns each into a loader in
+              # plugins-enabled/. login-reverse-proxy is NOT authentication —
+              # it keys brute-force throttling off X-Forwarded-For so failed
+              # attempts are not all attributed to the Envoy gateway's IP.
+              ADMINER_PLUGINS: >-
+                tables-filter
+                edit-textarea
+                pretty-json-column
+                dump-json
+                sql-log
+                highlight-codemirror
+                login-reverse-proxy
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8080
+                  initialDelaySeconds: 5
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 101
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: adminer
+        ports:
+          http:
+            port: 8080
+    route:
+      app:
+        # Internal gateway only, deliberately. This is direct database access;
+        # it has no business being reachable from the Cloudflare tunnel even
+        # with forward-auth in front of it.
+        hostnames: ["postgres.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 8080
+    persistence:
+      html:
+        type: emptyDir
+        advancedMounts:
+          adminer:
+            init-html:
+              - path: /html
+            app:
+              - path: /var/www/html
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
