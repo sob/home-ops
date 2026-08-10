@@ -21,8 +21,8 @@ blocking:
   # Deny lists (formerly blackLists)
   denylists:
     hagezi:
-      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt
-      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.medium.txt
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro.txt
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.medium.txt
     adult:
   # Allow lists (formerly whiteLists)
   allowlists:
