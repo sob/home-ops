@@ -22,7 +22,7 @@ pipx = "latest"
 # Validation toolchain — pinned so local pre-commit/pre-push matches CI exactly.
 task = "3.52.0"
 yamllint = "1.38.0"
-pre-commit = "4.6.1"
+pre-commit = "4.6.2"
 kustomize = "5.8.1"
 kubeconform = "0.8.0"
 flux2 = "2.9.3"  # the `flux` CLI — flux-local shells out to it
