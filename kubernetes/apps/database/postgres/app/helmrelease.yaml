@@ -92,6 +92,10 @@ spec:
       # Logical dumps, for the restore case the physical snapshot handles badly:
       # "put lubelog's database back" without rolling the whole volume — and
       # every other app on this instance — back with it.
+      #
+      # Dumped per-database (plus globals) rather than as one pg_dumpall
+      # archive, because a pg_dumpall restores the entire cluster or nothing —
+      # which would defeat the only reason these dumps exist.
       dump:
         type: cronjob
         cronjob:
@@ -126,20 +130,37 @@ spec:
             args:
               - |
                 set -eu
+                HOST=postgres.database.svc.cluster.local
                 DIR=/var/lib/postgresql/data/dumps
-                mkdir -p "$DIR"
-                STAMP=$(date +%Y%m%d-%H%M%S)
-                OUT="$DIR/pg_dumpall-$STAMP.sql.gz"
-                # Write to .tmp then rename, so a dump interrupted midway never
-                # leaves a truncated file that looks like a usable backup.
-                pg_dumpall -h postgres.database.svc.cluster.local -U postgres \
-                  --clean --if-exists | gzip -9 > "$OUT.tmp"
-                mv "$OUT.tmp" "$OUT"
-                # Retain the 7 newest. volsync keeps 7 daily snapshots of this
-                # volume, so R2 holds roughly a week of dumps either way.
-                ls -1t "$DIR"/pg_dumpall-*.sql.gz | tail -n +8 | xargs -r rm -f
-                echo "wrote $OUT ($(stat -c %s "$OUT") bytes)"
-                echo "retained: $(ls -1 "$DIR"/pg_dumpall-*.sql.gz | wc -l) dump(s)"
+                DEST="$DIR/$(date +%Y%m%d-%H%M%S)"
+                mkdir -p "$DEST"
+
+                # Globals (roles, grants, tablespaces) are NOT included in a
+                # per-database dump, so they are captured separately.
+                pg_dumpall -h "$HOST" -U postgres --globals-only \
+                  | gzip -9 > "$DEST/globals.sql.gz.tmp"
+                mv "$DEST/globals.sql.gz.tmp" "$DEST/globals.sql.gz"
+
+                # One custom-format dump per database. This is the whole point:
+                # a single app can be put back with
+                #   pg_restore -h HOST -U postgres -d <db> --clean <db>.dump
+                # without replaying, and therefore rolling back, every other
+                # app sharing this instance. A pg_dumpall archive cannot do
+                # that — it restores the entire cluster or nothing.
+                for DB in $(psql -h "$HOST" -U postgres -tAc \
+                    "select datname from pg_database where not datistemplate and datallowconn order by 1"); do
+                  # -Fc writes to a file directly, so write to .tmp and rename:
+                  # an interrupted dump must never look like a usable backup.
+                  pg_dump -h "$HOST" -U postgres -Fc -d "$DB" -f "$DEST/$DB.dump.tmp"
+                  mv "$DEST/$DB.dump.tmp" "$DEST/$DB.dump"
+                  echo "  $DB -> $(stat -c %s "$DEST/$DB.dump") bytes"
+                done
+
+                # Retain 7 dated directories. volsync keeps 7 daily snapshots of
+                # this volume, so R2 holds roughly a week either way.
+                ls -1d "$DIR"/*/ 2>/dev/null | sort -r | tail -n +8 | xargs -r rm -rf
+                echo "wrote $DEST"
+                echo "retained: $(ls -1d "$DIR"/*/ 2>/dev/null | wc -l) dump set(s)"
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
