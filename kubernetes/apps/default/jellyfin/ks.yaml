@@ -22,6 +22,10 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      # Bumped to clear a stale restic lock held since 2026-08-10 00:08 by a
+      # mover pod that died mid-run. Every subsequent backup failed with
+      # "repository is already locked by PID 32 ... lock was created 13h ago".
+      VOLSYNC_UNLOCK: "1"
       VOLSYNC_SCHEDULE: "6 0 * * *"
       VOLSYNC_CAPACITY: 10Gi
   prune: true
