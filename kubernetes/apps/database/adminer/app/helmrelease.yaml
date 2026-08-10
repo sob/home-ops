@@ -44,7 +44,14 @@ spec:
             command: ["/bin/sh", "-c"]
             args:
               - |
-                cp -a /var/www/html/. /html/
+                set -eu
+                # cp -r, NOT cp -a. The -a implies -p, and preserving ownership
+                # of root-owned files as uid 100 fails on every single one —
+                # ~150 lines of "cp: can't preserve ownership" per pod start.
+                # The copy itself succeeded, but the log looked like a failure.
+                # Nothing here needs its original uid/gid: PHP only has to read
+                # the files, and the entrypoint writes as the same user.
+                cp -r /var/www/html/. /html/
                 echo "seeded docroot: $(ls -1 /html | wc -l) entries"
             securityContext:
               allowPrivilegeEscalation: false
