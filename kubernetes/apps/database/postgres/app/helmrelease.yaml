@@ -1,0 +1,184 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.0.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app postgres
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      # Shared instance. Every consuming app gets its own database and role
+      # inside it, created idempotently by the init-db initContainer that
+      # components/postgresql injects — not its own postgres.
+      postgres:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/library/postgres
+              tag: 18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+            env:
+              TZ: America/Chicago
+              POSTGRES_USER: postgres
+              POSTGRES_DB: postgres
+              # MUST be a subdirectory of the mount, not the mount root:
+              # initdb refuses to run in a non-empty directory and an
+              # RBD/ext4 volume always has lost+found at its root. Also note
+              # the 18 images changed the default to /var/lib/postgresql/18/
+              # docker, so leaving this unset would put the data somewhere
+              # that is not on the PVC at all.
+              PGDATA: /var/lib/postgresql/data/pgdata
+            envFrom:
+              - secretRef:
+                  name: postgres-secret
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["pg_isready", "-U", "postgres", "-d", "postgres"]
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+                  failureThreshold: 6
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["pg_isready", "-U", "postgres", "-d", "postgres"]
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["pg_isready", "-U", "postgres", "-d", "postgres"]
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  # initdb on first boot, and WAL replay after an unclean stop,
+                  # are slow on ceph-block. 30 x 10s = 5 minutes before the
+                  # liveness probe is allowed to start killing the container.
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 4Gi
+
+      # Logical dumps, for the restore case the physical snapshot handles badly:
+      # "put lubelog's database back" without rolling the whole volume — and
+      # every other app on this instance — back with it.
+      dump:
+        type: cronjob
+        cronjob:
+          schedule: "15 0 * * *"
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+          backoffLimit: 2
+        pod:
+          # Writes into the same RWO PVC postgres is using. RWO permits many
+          # pods on ONE node, so this must land on postgres's node or the mount
+          # fails. (ReadWriteOncePod would forbid this outright; RWO does not.)
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - topologyKey: kubernetes.io/hostname
+                  labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/controller: postgres
+          restartPolicy: OnFailure
+        containers:
+          app:
+            image:
+              repository: docker.io/library/postgres
+              tag: 18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+            env:
+              TZ: America/Chicago
+            envFrom:
+              - secretRef:
+                  name: postgres-secret
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                DIR=/var/lib/postgresql/data/dumps
+                mkdir -p "$DIR"
+                STAMP=$(date +%Y%m%d-%H%M%S)
+                OUT="$DIR/pg_dumpall-$STAMP.sql.gz"
+                # Write to .tmp then rename, so a dump interrupted midway never
+                # leaves a truncated file that looks like a usable backup.
+                pg_dumpall -h postgres.database.svc.cluster.local -U postgres \
+                  --clean --if-exists | gzip -9 > "$OUT.tmp"
+                mv "$OUT.tmp" "$OUT"
+                # Retain the 7 newest. volsync keeps 7 daily snapshots of this
+                # volume, so R2 holds roughly a week of dumps either way.
+                ls -1t "$DIR"/pg_dumpall-*.sql.gz | tail -n +8 | xargs -r rm -f
+                echo "wrote $OUT ($(stat -c %s "$OUT") bytes)"
+                echo "retained: $(ls -1 "$DIR"/pg_dumpall-*.sql.gz | wc -l) dump(s)"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+
+    service:
+      app:
+        controller: postgres
+        ports:
+          postgres:
+            port: 5432
+
+    persistence:
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /var/lib/postgresql/data
+      # readOnlyRootFilesystem means the unix socket directory and scratch
+      # space both have to be writable mounts.
+      run:
+        type: emptyDir
+        globalMounts:
+          - path: /var/run/postgresql
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

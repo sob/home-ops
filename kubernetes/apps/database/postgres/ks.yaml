@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app postgres
+  namespace: flux-system
+spec:
+  targetNamespace: database
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/volsync
+  dependsOn:
+    - name: external-secrets-stores
+      namespace: external-secrets
+  path: ./kubernetes/apps/database/postgres/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  # Deliberately wait: true. Apps consuming this run an init-db initContainer
+  # that connects on startup, so they must not reconcile until postgres is
+  # actually serving. The postgresql component makes them dependsOn this.
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 10m
+  postBuild:
+    substitute:
+      APP: *app
+      # The official postgres images run as uid/gid 70, so the volsync mover
+      # has to match or it cannot read the data directory it is backing up.
+      VOLSYNC_UID: "70"
+      VOLSYNC_GID: "70"
+      VOLSYNC_FSGROUP: "70"
+      VOLSYNC_CAPACITY: 20Gi
+      # Runs after the 00:15 pg_dumpall so every snapshot carries a fresh
+      # logical dump alongside the physical data directory. copyMethod defaults
+      # to Snapshot, so the restic backup is taken from an atomic CSI snapshot
+      # rather than from files being written underneath it — which is what
+      # makes a physical postgres backup safe to restore.
+      VOLSYNC_SCHEDULE: "40 0 * * *"
