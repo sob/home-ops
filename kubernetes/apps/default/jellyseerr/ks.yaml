@@ -25,7 +25,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: jelly
       GATUS_PATH: /api/v1/status
       VOLSYNC_SCHEDULE: "39 0 * * *"
       VOLSYNC_CAPACITY: 5Gi

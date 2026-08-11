@@ -37,4 +37,5 @@ spec:
       VOLSYNC_GID: "1000"
       VOLSYNC_FSGROUP: "1000"
       GATUS_SUBDOMAIN: enigma
+      GATUS_DOMAIN: halfduplex.io # the BBS genuinely still lives on halfduplex.io
       GATUS_PATH: /
