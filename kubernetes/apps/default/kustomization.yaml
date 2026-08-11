@@ -16,7 +16,7 @@ resources:
   - ./kometa/ks.yaml
   - ./jellyseerr/ks.yaml
   - ./lidarr/ks.yaml
-# - ./lubelog/ks.yaml
+  - ./lubelog/ks.yaml
   - ./enigma-bbs/ks.yaml
 # - ./mystic-bbs/ks.yaml
 # - ./node-red/ks.yaml

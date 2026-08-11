@@ -15,7 +15,13 @@ spec:
     - ../../../../components/volsync
     - ../../../../components/postgresql
   dependsOn:
+    # namespace is required. dependsOn defaults to the referring Kustomization's
+    # own namespace, and this one lands in default (apps/default/kustomization
+    # .yaml sets namespace: default for everything it collects), while
+    # external-secrets-stores lives in external-secrets. Without this the
+    # dependency never resolves and the Kustomization blocks indefinitely.
     - name: external-secrets-stores
+      namespace: external-secrets
   path: ./kubernetes/apps/default/lubelog/app
   prune: true
   sourceRef:
