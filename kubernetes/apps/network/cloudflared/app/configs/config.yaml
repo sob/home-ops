@@ -76,6 +76,10 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "lidarr.56kbps.io"
+  - hostname: "lubelog.56kbps.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "lubelog.56kbps.io"
   - hostname: "prowlarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
