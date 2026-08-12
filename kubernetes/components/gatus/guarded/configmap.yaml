@@ -8,16 +8,36 @@ metadata:
 data:
   config.yaml: |
     endpoints:
+      # Is the app itself alive? Probed in-cluster over the ClusterIP, which
+      # bypasses the gateway and Authentik entirely. The path is the app's own
+      # liveness-probe path, so it is guaranteed unauthenticated.
       - name: "${APP}"
         group: guarded
-        url: "https://${GATUS_SUBDOMAIN:-${APP}}.${GATUS_DOMAIN:-${SECRET_DOMAIN}}${GATUS_PATH:-/}"
+        url: "http://${GATUS_SVC:-${APP}}.${GATUS_SVC_NS:-default}.svc.cluster.local:${GATUS_SVC_PORT:-80}${GATUS_SVC_PATH:-/}"
         interval: 1m
+        ui:
+          hide-hostname: false
+          hide-url: false
+        conditions:
+          - "[STATUS] == ${GATUS_STATUS:-200}"
+        alerts:
+          - type: pushover
+      # Is the public path still fronted by Authentik? follow-redirects is off
+      # deliberately: with it on, gatus walks the redirect chain all the way to
+      # the Authentik login page and grades *that* 200 -- which is green whether
+      # or not the app behind it is alive. Asserting the 302 challenge instead
+      # proves gateway + ext-auth + outpost without pretending to prove the app.
+      - name: "${APP}-edge"
+        group: edge
+        url: "https://${GATUS_SUBDOMAIN:-${APP}}.${GATUS_DOMAIN:-${SECRET_DOMAIN}}${GATUS_PATH:-/}"
+        interval: 5m
         ui:
           hide-hostname: false
           hide-url: false
         client:
           dns-resolver: tcp://10.1.0.1:53
+          follow-redirects: false
         conditions:
-          - "[STATUS] == ${GATUS_STATUS:-200}"
+          - "[STATUS] == ${GATUS_EDGE_STATUS:-302}"
         alerts:
           - type: pushover

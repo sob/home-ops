@@ -60,6 +60,10 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "bbs.${SECRET_DOMAIN}"
+  - hostname: "lubelog.${SECRET_DOMAIN}"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "lubelog.${SECRET_DOMAIN}"
   - hostname: "sso.halfduplex.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:

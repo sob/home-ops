@@ -28,6 +28,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      GATUS_SVC_PORT: "6767"
+      GATUS_SVC_PATH: /health
       VOLSYNC_SCHEDULE: "33 0 * * *"
       VOLSYNC_CAPACITY: 5Gi
       VOLSYNC_UID: "1034"
