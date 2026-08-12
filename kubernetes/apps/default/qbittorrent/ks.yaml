@@ -28,6 +28,9 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      # qbittorrent's only probe is a tcpSocket and its API needs auth, so the
+      # in-cluster check falls back to the WebUI root serving a 200.
+      GATUS_SVC_PATH: /
       GATUS_SUBDOMAIN: qbittorrent
       VOLSYNC_SCHEDULE: "15 0 * * *"
       VOLSYNC_CAPACITY: 10Gi
