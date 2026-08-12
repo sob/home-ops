@@ -28,6 +28,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      GATUS_SVC_PATH: "/api?mode=version"
       GATUS_SUBDOMAIN: sab
       VOLSYNC_SCHEDULE: "0 1 * * *"
       VOLSYNC_CAPACITY: 1Gi

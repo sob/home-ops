@@ -34,6 +34,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_STATUS: "302" # unauthenticated / redirects to /Login
       VOLSYNC_SCHEDULE: "18 1 * * *"
       VOLSYNC_CAPACITY: 1Gi
