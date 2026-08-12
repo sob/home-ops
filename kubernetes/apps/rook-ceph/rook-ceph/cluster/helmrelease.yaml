@@ -95,12 +95,19 @@ spec:
     #
     # Ceph upgrades are an explicit edit to `tag` here, never a side effect of a
     # Rook bump, and must be done separately from a Rook version change.
-    # allowUnsupported stays false — moving to Ceph v20 (Tentacle) would require
-    # setting it true, which is exactly the kind of decision that should be
-    # deliberate rather than inherited from a chart default.
+    #
+    # allowUnsupported stays false: chart 1.20.3 states "Currently Squid and
+    # Tentacle are supported", so v20 (Tentacle) needs no override. If a future
+    # tag ever requires setting this true, that is a signal to stop and read the
+    # release notes, not to flip the flag.
+    #
+    # Point releases (19.2.5 -> 19.2.6) flow automatically via Renovate.
+    # Majors are gated behind dependencyDashboardApproval in
+    # .github/renovate/upgradePolicy.json5 — they roll mons, mgrs and OSDs one
+    # at a time and cannot be downgraded.
     cephImage:
       repository: quay.io/ceph/ceph
-      tag: v19.2.5
+      tag: v20.2.2
       allowUnsupported: false
 
     cephClusterSpec:
