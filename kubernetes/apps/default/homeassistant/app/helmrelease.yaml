@@ -40,7 +40,7 @@ spec:
             # first, confirm the restore is healthy, then upgrade in steps.
             image:
               repository: ghcr.io/home-operations/home-assistant
-              tag: 2025.3.3@sha256:911d89f0c6dfa54c3cc0d79bc538796259e3374fe561f2cfdbc728822bf016d7
+              tag: 2025.12.5@sha256:6be0843b06ad82233639e56f261b2377f78df140e3d16d2d08b2c29c8889b697
             env:
               TZ: America/Chicago
               HOME_ASSISTANT_EXTERNAL_URL: https://hass.${SECRET_DOMAIN}
