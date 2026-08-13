@@ -35,6 +35,27 @@
       "dependencyDashboardApproval": true,
     },
 
+    // cloudflared: hold below 2026.8.0.
+    // 2026.8.0 broke every app published through the Cloudflare tunnel.
+    // Authentik returned 404 for requests arriving via cloudflared while the
+    // identical URL served 302 through the internal gateway and direct to the
+    // Service, so nothing looked wrong from inside the cluster — only the
+    // external Gatus checks went red. Likely SNI/Host handling against
+    // originServerName when forwarding to an https origin.
+    //
+    // This is a version gate rather than a comment in the HelmRelease because a
+    // comment does not stop a bot: #1557 reverted to 2026.7.3 and Renovate
+    // re-raised the identical bump as #1558 minutes later, restoring the outage.
+    //
+    // To move past it: deploy the new version, then verify the EXTERNAL path
+    // end to end (curl -L https://sab.56kbps.io/ should finish 200 on the
+    // Authentik login, not 404). Raise or drop this bound once that passes.
+    {
+      "description": "cloudflared 2026.8.0 breaks Authentik through the tunnel — verify externally before moving",
+      "matchPackageNames": ["/^docker\\.io/cloudflare/cloudflared$/"],
+      "allowedVersions": "<2026.8.0",
+    },
+
     // PostgreSQL majors: do not raise PRs at all.
     // The data directory is written by a specific major and a new server
     // refuses to open it, so the upgrade is a planned maintenance task
