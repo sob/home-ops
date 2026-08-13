@@ -27,7 +27,14 @@ spec:
           app:
             image:
               repository: docker.io/cloudflare/cloudflared
-              tag: 2026.8.0
+              # PINNED — do not let Renovate move this without testing the
+              # external path end to end. 2026.8.0 (#1555, rolled out 10:29Z on
+              # 2026-08-13) broke every SSO app published through the tunnel:
+              # Authentik returned 404 for requests arriving via cloudflared
+              # while the identical URL served 302 through the internal gateway
+              # and direct to the Service. cloudflared's own log showed it
+              # relaying those 404s from the origin.
+              tag: 2026.7.3
             env:
               NO_AUTOUPDATE: true
               TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
