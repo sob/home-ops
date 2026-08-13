@@ -89,6 +89,20 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
       group         = resource.authentik_group.home
       cookie_domain = "56kbps.io"
+      # The companion app is an OAuth client, not a browser session: it
+      # authenticates against /auth/* and then talks over /api/* (REST,
+      # /api/websocket, /api/webhook/<id>). Forward-auth on those paths breaks
+      # login and every push notification. The frontend/static paths are here
+      # because the app renders the login page in a webview and needs its
+      # assets to load.
+      #
+      # Consequence worth being explicit about: /auth is the login surface, so
+      # skipping it means Authentik can be bypassed by going straight there and
+      # using Home Assistant's own login. There is no path set that keeps a UI
+      # client working AND forces every login through Authentik. Home
+      # Assistant's own auth is the control on these paths — keep ip_ban on and
+      # TOTP enabled.
+      skip_path_regex = "^/(api|auth|static|frontend_latest|frontend_es5|local|media|service_worker\\.js|manifest\\.json)([/?].*)?"
     },
     lidarr = {
       external_host   = "https://lidarr.56kbps.io"
