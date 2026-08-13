@@ -4,18 +4,21 @@
 # x-forwarded-proto is forwarded so the login redirect comes back as https
 # (goauthentik/authentik#19653).
 #
-# Scope, stated plainly: this protects the browser UI. It does NOT make
-# Authentik mandatory for every path. The companion app authenticates against
-# /auth/* and talks over /api/*, so those are skipped on the Authentik provider
-# (terraform/authentik/applications.tf, skip_path_regex) — and /auth is itself
-# the login surface, so anyone reaching it directly still gets Home Assistant's
-# own login form with Authentik bypassed.
+# This is load-bearing for authentication, not just an access gate.
 #
-# That tension is inherent, not an oversight: the companion app is a UI client,
-# so there is no path set that both keeps it working and forces every login
-# through Authentik. What this buys is Authentik in front of ordinary browser
-# access; Home Assistant's own auth remains the control on the skipped paths,
-# which is why ip_ban and TOTP matter more now than they did on the LAN.
+# configuration.yaml trusts the pod CIDR via the trusted_networks auth provider
+# with allow_bypass_login, so Home Assistant logs in — as the owner, with no
+# password — anything that reaches its login flow from this gateway. That is
+# only safe because /auth/login_flow is NOT in the Authentik provider's
+# skip_path_regex, so it cannot be reached without passing Authentik first.
+#
+# Two things must therefore stay true:
+#   - failOpen stays false. Failing open here would not degrade to "ask for a
+#     password", it would hand owner access to anyone who can reach the
+#     gateway.
+#   - the skip regex in terraform/authentik/applications.tf keeps /auth/token
+#     and /api open (the companion app needs them) while keeping
+#     /auth/login_flow, /auth/authorize and /auth/providers closed.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

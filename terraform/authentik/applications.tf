@@ -89,20 +89,31 @@ locals {
       icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
       group         = resource.authentik_group.home
       cookie_domain = "56kbps.io"
-      # The companion app is an OAuth client, not a browser session: it
-      # authenticates against /auth/* and then talks over /api/* (REST,
-      # /api/websocket, /api/webhook/<id>). Forward-auth on those paths breaks
-      # login and every push notification. The frontend/static paths are here
-      # because the app renders the login page in a webview and needs its
-      # assets to load.
+      # Split by whether the endpoint is interactive, not by prefix.
       #
-      # Consequence worth being explicit about: /auth is the login surface, so
-      # skipping it means Authentik can be bypassed by going straight there and
-      # using Home Assistant's own login. There is no path set that keeps a UI
-      # client working AND forces every login through Authentik. Home
-      # Assistant's own auth is the control on these paths — keep ip_ban on and
-      # TOTP enabled.
-      skip_path_regex = "^/(api|auth|static|frontend_latest|frontend_es5|local|media|service_worker\\.js|manifest\\.json)([/?].*)?"
+      # SKIPPED — the companion app calls these without a browser and cannot
+      # satisfy a redirect to Authentik:
+      #   /api/*        REST, /api/websocket, /api/webhook/<id>
+      #   /auth/token   access-token refresh (HomeAssistantView, requires_auth
+      #                 False) — the app hits this on a timer, so blocking it
+      #                 breaks the app hours later rather than immediately
+      #   /auth/revoke  logout
+      #   /.well-known/oauth-*   OAuth discovery
+      #
+      # PROTECTED — deliberately NOT skipped, because this is where Home
+      # Assistant decides who you are:
+      #   /auth/login_flow[/{id}]  the login flow, and where the
+      #                            trusted_networks provider grants a session
+      #   /auth/authorize          the login page
+      #   /auth/providers          provider list
+      #
+      # That split is what makes auto-login safe. configuration.yaml trusts the
+      # pod CIDR via trusted_networks with allow_bypass_login, so anything that
+      # reaches the login flow is logged straight in as the owner — which is
+      # only acceptable while the login flow itself is unreachable without
+      # Authentik. Widening this regex back to a bare "auth" would hand owner
+      # access to anyone on the internet.
+      skip_path_regex = "^/(api|auth/token|auth/revoke|\\.well-known|static|frontend_latest|frontend_es5|local|media|service_worker\\.js|manifest\\.json)([/?].*)?"
     },
     lidarr = {
       external_host   = "https://lidarr.56kbps.io"
