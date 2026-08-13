@@ -99,6 +99,13 @@ locals {
       #                 breaks the app hours later rather than immediately
       #   /auth/revoke  logout
       #   /.well-known/oauth-*   OAuth discovery
+      #   /sw-*.js      the frontend's service worker (sw-modern.js and
+      #                 sw-legacy.js). This one caused a redirect loop: a
+      #                 service worker that gets 302'd to Authentik intercepts
+      #                 subsequent navigations, so the browser bounces forever.
+      #                 An earlier version of this regex listed service_worker
+      #                 .js, which Home Assistant does serve but is not what
+      #                 the frontend actually registers.
       #
       # PROTECTED — deliberately NOT skipped, because this is where Home
       # Assistant decides who you are:
@@ -113,7 +120,7 @@ locals {
       # only acceptable while the login flow itself is unreachable without
       # Authentik. Widening this regex back to a bare "auth" would hand owner
       # access to anyone on the internet.
-      skip_path_regex = "^/(api|auth/token|auth/revoke|\\.well-known|static|frontend_latest|frontend_es5|local|media|service_worker\\.js|manifest\\.json)([/?].*)?"
+      skip_path_regex = "^/(api|auth/token|auth/revoke|\\.well-known|static|frontend_latest|frontend_es5|local|media|sw-[a-z0-9-]+\\.js|service_worker\\.js|manifest\\.json)([/?].*)?"
     },
     lidarr = {
       external_host   = "https://lidarr.56kbps.io"
