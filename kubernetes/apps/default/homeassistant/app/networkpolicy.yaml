@@ -1,0 +1,58 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/networking.k8s.io/networkpolicy_v1.json
+# Closes the hole opened by trusted_networks auto-login.
+#
+# configuration.yaml trusts 10.42.0.0/16 — the whole pod CIDR, not just the two
+# gateway pods, because their addresses change on every restart. Without this
+# policy any pod in the cluster can POST to homeassistant.default.svc:8123
+# /auth/login_flow and be handed an owner session, bypassing Authentik
+# completely. That is not theoretical; it is exactly how the auto-login was
+# verified.
+#
+# Ingress only. Egress is deliberately NOT restricted: Home Assistant has to
+# reach MQTT, the LAN devices it controls, and assorted cloud APIs, and
+# enumerating that is a good way to break automations in ways nobody connects
+# back to a network policy months later.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: homeassistant
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: homeassistant
+  policyTypes:
+    - Ingress
+  ingress:
+    # The Envoy gateways. Traffic arriving this way on the app route has already
+    # passed the Authentik SecurityPolicy, which is what makes trusting the pod
+    # CIDR acceptable at all.
+    #
+    # 12321 is the code-server sidecar (hass-code.${SECRET_DOMAIN}, internal
+    # gateway only). Note it is NOT behind forward-auth and serves /config with
+    # --auth none, so it remains a way to read .storage/auth and bypass all of
+    # this. Allowed here only so the existing route keeps working; it wants
+    # closing separately.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: envoy-gateway
+      ports:
+        - port: 8123
+          protocol: TCP
+        - port: 12321
+          protocol: TCP
+    # homarr renders Home Assistant entities on the dashboard and holds an API
+    # token for it (HOMEPAGE_VAR_HOMEASSISTANT_TOKEN in homarr-secret). Same
+    # namespace, so a bare podSelector is the right scope.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: homarr
+      ports:
+        - port: 8123
+          protocol: TCP
