@@ -25,9 +25,22 @@ spec:
           reloader.stakater.com/auto: "true"
         containers:
           app:
+            # Deliberately still 2025.3.3, only the namespace changes.
+            # ghcr.io/onedr0p is abandoned — 2025.3.3 is literally its last tag,
+            # which is why Renovate has not moved this in over a year.
+            # ghcr.io/home-operations is the maintained continuation and its
+            # oldest published tag happens to be exactly 2025.3.3.
+            #
+            # Matching the version is the point: the restored config in the
+            # volsync snapshot has .HA_VERSION = 2025.3.3, and Home Assistant
+            # migrates .storage forward irreversibly on first boot. Booting
+            # straight into 2026.8.1 would migrate 28 integrations, 153 devices
+            # and 1239 entities across ~17 months of releases with no verified
+            # good state to fall back to. Come up on the matching version
+            # first, confirm the restore is healthy, then upgrade in steps.
             image:
-              repository: ghcr.io/onedr0p/home-assistant
-              tag: 2025.3.3@sha256:9e2a7177b4600653d6cb46dff01b1598189a5ae93be0b99242fbc039d32d79f1
+              repository: ghcr.io/home-operations/home-assistant
+              tag: 2025.3.3@sha256:911d89f0c6dfa54c3cc0d79bc538796259e3374fe561f2cfdbc728822bf016d7
             env:
               TZ: America/Chicago
               HOME_ASSISTANT_EXTERNAL_URL: https://hass.${SECRET_DOMAIN}

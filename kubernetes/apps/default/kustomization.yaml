@@ -10,7 +10,7 @@ resources:
   - ./bazarr/ks.yaml
 # - ./bsky-pds/ks.yaml
 # - ./cert-exporter/ks.yaml
-# - ./homeassistant/ks.yaml
+  - ./homeassistant/ks.yaml
   - ./homarr/ks.yaml
   - ./jellyfin/ks.yaml
   - ./kometa/ks.yaml
