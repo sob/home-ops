@@ -25,7 +25,16 @@ spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      name: homeassistant
+      # homeassistant-app, NOT homeassistant. app-template names a route after
+      # the release only when there is a single route key (adminer, sabnzbd,
+      # lubelog); with more than one it suffixes the key. This app defines both
+      # app and code-server, so the routes are homeassistant-app and
+      # homeassistant-code-server.
+      #
+      # A targetRef that matches nothing is silently accepted — the policy just
+      # never attaches and every request sails through unauthenticated, looking
+      # exactly like forward-auth is "not working" rather than misconfigured.
+      name: homeassistant-app
   extAuth:
     failOpen: false
     recomputeRoute: true
