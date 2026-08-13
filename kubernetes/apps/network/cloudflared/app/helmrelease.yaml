@@ -34,7 +34,7 @@ spec:
               # while the identical URL served 302 through the internal gateway
               # and direct to the Service. cloudflared's own log showed it
               # relaying those 404s from the origin.
-              tag: 2026.7.3
+              tag: 2026.8.0
             env:
               NO_AUTOUPDATE: true
               TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
