@@ -20,6 +20,10 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "plex.${SECRET_DOMAIN}"
+  - hostname: "hass.${SECRET_DOMAIN}"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "hass.${SECRET_DOMAIN}"
   - hostname: "flux-webhook.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:

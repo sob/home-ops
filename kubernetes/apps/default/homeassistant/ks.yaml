@@ -15,8 +15,18 @@ spec:
     - ../../../../components/volsync
     - ../../../../components/postgresql
   dependsOn:
+    # namespace is required — dependsOn defaults to this Kustomization's own
+    # namespace (default, set by apps/default/kustomization.yaml) while the
+    # stores live in external-secrets. Without it the dependency never resolves
+    # and the Kustomization blocks forever with no obvious error.
     - name: external-secrets-stores
-    - name: emqx-cluster
+      namespace: external-secrets
+    # Was emqx-cluster, which does not exist — only a stale HelmRepository at
+    # kubernetes/flux/meta/repositories/helm/emqx.yaml survives, and it is not
+    # even referenced by that directory's kustomization. This cluster's MQTT
+    # broker is mosquitto, in the database namespace.
+    - name: mosquitto
+      namespace: database
   path: ./kubernetes/apps/default/homeassistant/app
   prune: true
   sourceRef:
