@@ -50,7 +50,7 @@ spec:
           app:
             image:
               repository: kometateam/kometa
-              tag: v2.4.7
+              tag: v2.4.8
             env:
               TZ: America/Chicago
               KOMETA_RUN: "true"
