@@ -100,7 +100,7 @@ spec:
     # deliberate rather than inherited from a chart default.
     cephImage:
       repository: quay.io/ceph/ceph
-      tag: v19.2.5
+      tag: v19.2.6
       allowUnsupported: false
 
     cephClusterSpec:
