@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/wizarrrr/wizarr
-              tag: v2026.7.1
+              tag: v2026.9.0
             env:
               TZ: America/Chicago
             # Steady-state RSS measured 245Mi on 2026-08-10, against a 286.1Mi
