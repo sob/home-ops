@@ -17,5 +17,13 @@ machine:
         vip:
           ip: 10.1.100.100
   install:
+    # Boot disk replaced 2026-09 (Micron 1100 256GB M.2 SATA -> Samsung 990 PRO 1TB
+    # NVMe). The old drive hit 100% rated life with ~3.4x write amplification under
+    # etcd and started reallocating NAND blocks.
+    #
+    # Selecting on type rather than model/serial: the NUC7i3BNB has exactly one M.2
+    # slot, so 'nvme' can only ever match the new drive, and it stays correct without
+    # knowing the serial ahead of time (the old Micron is SATA, so it cannot match
+    # even if left installed).
     diskSelector:
-      model: 'Micron_1100_MTFD*'
+      type: nvme
