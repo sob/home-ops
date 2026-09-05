@@ -37,6 +37,15 @@ spec:
               REDIS_HOST: "127.0.0.1"
               REDIS_PORT: "6379"
               REDIS_DB: "0"
+              # MUST be 127.0.0.1, not localhost. The MariaDB client treats
+              # "localhost" as "use the unix socket at /run/mysqld/mysqld.sock",
+              # and nothing shares that path between the app and mariadb
+              # containers — only /var/lib/mysql (the data dir) is mounted. With
+              # DB_HOST unset romm defaulted to localhost and crash-looped on
+              # "Can't connect to local server through socket". 127.0.0.1 forces
+              # TCP over the shared pod network, same as REDIS_HOST above.
+              DB_HOST: "127.0.0.1"
+              DB_PORT: "3306"
               # Metadata provider settings
               HASHEOUS_API_ENABLED: "true"
               PLAYMATCH_API_ENABLED: "true"
