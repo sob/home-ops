@@ -20,6 +20,10 @@ spec:
   values:
     controllers:
       cloudflared:
+        # Two connectors for the same tunnel. Cloudflare load-balances across
+        # them, so this survives losing either rack. Previously a single replica
+        # on metal-02, which made all external access depend on one node.
+        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -78,6 +82,18 @@ spec:
               limits:
                 memory: 256Mi
     defaultPodOptions:
+      # Split the replicas across failure domains (basement / garage racks).
+      # DoNotSchedule rather than ScheduleAnyway: the point is to guarantee the
+      # split, not prefer it. If one zone is down the second replica stays
+      # Pending, which is the intended degraded state — the surviving zone
+      # keeps serving.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudflared
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
