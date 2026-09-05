@@ -21,9 +21,9 @@ machine:
     # NVMe). The old drive hit 100% rated life with ~3.4x write amplification under
     # etcd and started reallocating NAND blocks.
     #
-    # Selecting on type rather than model/serial: the NUC7i3BNB has exactly one M.2
-    # slot, so 'nvme' can only ever match the new drive, and it stays correct without
-    # knowing the serial ahead of time (the old Micron is SATA, so it cannot match
-    # even if left installed).
+    # Matched on serial like metal-08/metal-09 — unambiguous, stable across Talos
+    # versions, and it can never select a USB installer stick left in the front
+    # port. This was 'type: nvme' while the replacement drive was still on order
+    # and its serial unknown.
     diskSelector:
-      type: nvme
+      serial: 'S7LANS0L541969R'
