@@ -20,7 +20,9 @@ machine:
         vip:
           ip: 10.1.100.100
   install:
-    # ADATA SU800 leaves the ATA serial field empty; its serial (2I3320041424)
-    # is only exposed via the T10 wwid, so we match on that.
+    # Boot disk is a Samsung 970 EVO 500GB NVMe (was an ADATA SU800 M.2 SATA,
+    # which is no longer present). Matched on serial like metal-09 — unambiguous
+    # and stable across Talos versions, and it can never select a USB stick left
+    # in the front port.
     diskSelector:
-      wwid: '*2I3320041424*'
+      serial: 'S5H7NS1NA05462W'
