@@ -34,7 +34,7 @@ just talos download-bios "<direct-url-to/BN0093.bio>"
 diskutil list external physical
 
 # 3. write it (destructive; prompts to confirm; refuses internal disks)
-just burn bios talos/bios/BN0093.bio disk4
+just burn nuc talos/bios/BN0093.bio disk4
 ```
 
 Flash: insert USB → power on → press **F7** repeatedly at POST → pick the `.bio`.
