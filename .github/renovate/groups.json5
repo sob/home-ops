@@ -219,6 +219,22 @@
         "commitMessageTopic": "Talos"
       },
       "separateMinorPatch": true
+    },
+    {
+      // ARC requires the controller chart and every gha-runner-scale-set chart to
+      // be on the same version; there are now three chart refs (controller,
+      // arc-linux, arc-linux-slim) that would otherwise bump as separate PRs and
+      // drift. Group them so they always move together.
+      "description": "Actions Runner Controller - controller and all scale sets",
+      "groupName": "actions-runner-controller",
+      "matchPackageNames": [
+        "ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set",
+        "ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller"
+      ],
+      "matchDatasources": ["docker"],
+      "group": {
+        "commitMessageTopic": "Actions Runner Controller"
+      }
     }
   ]
 }

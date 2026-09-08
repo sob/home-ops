@@ -1,0 +1,64 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: arc-linux-slim
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: arc-linux-slim
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Second org-level scale set for github.com/doorgames-io, alongside `arc-linux`.
+    # Same org, same GitHub App installation — this exists purely so non-Android
+    # jobs stop landing on the ~1.4GB Android image with its 1500m/3Gi request.
+    # Workflows target it with:
+    #   runs-on: arc-linux-slim
+    githubConfigUrl: https://github.com/doorgames-io
+    githubConfigSecret: arc-github-app-slim
+    # MUST be unique across the namespace, not just across GitHub scopes: the chart
+    # names the AutoscalingRunnerSet and the `<name>-gha-rs-manager` Role/RoleBinding
+    # after runnerScaleSetName (NOT the Helm release name), so reusing `arc-linux`
+    # here would collide head-on with the existing scale set.
+    runnerScaleSetName: arc-linux-slim
+    runnerGroup: default
+    # See ../../runners/app for why this is spelled out rather than discovered:
+    # the chart otherwise looks up the live controller Deployment at template time
+    # (fails under `helm template` in flux-local CI), and a wrong name binds the
+    # namespace manager Role to a phantom SA — jobs then silently stop dispatching.
+    #   kubectl -n actions-runner-system get sa | grep controller
+    controllerServiceAccount:
+      namespace: actions-runner-system
+      name: gha-runner-scale-set-controller-gha-rs-controller
+    # No warm runner: these jobs are cheap and infrequent, and a ~30s cold start
+    # beats parking a pod on a node all day. maxRunners is deliberately lower than
+    # arc-linux's 10 — both scale sets draw from the same nodes.
+    minRunners: 0
+    maxRunners: 6
+    # dind, matching arc-linux: in kubernetes container mode every job MUST declare
+    # a `container:`, and jobs that run steps directly on the runner are rejected.
+    template:
+      spec:
+        containers:
+          - name: runner
+            image: ghcr.io/actions/actions-runner:2.337.0
+            command: ["/home/runner/run.sh"]
+            # Stock runner, no Android SDK — roughly a tenth of arc-linux's floor,
+            # so these can pack alongside Android builds instead of displacing them.
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+    containerMode:
+      type: dind
