@@ -52,11 +52,19 @@ spec:
           - name: runner
             image: ghcr.io/actions/actions-runner:2.337.0
             command: ["/home/runner/run.sh"]
-            # Stock runner, no Android SDK — roughly a tenth of arc-linux's floor,
-            # so these can pack alongside Android builds instead of displacing them.
+            # Stock runner, no Android SDK, so the floor is well under arc-linux's
+            # 1500m/3Gi — but NOT a token request. Measured on the cluster: the
+            # request is what sets cgroup v2 `cpu.weight`, and nothing here caps
+            # CPU at all (`cpu.max = max`, no LimitRange). At 250m the runner got
+            # weight 10 against arc-linux's 59, so a test job co-scheduled with an
+            # Android build was starved ~6:1 — fast on an idle node, slow on a busy
+            # one, which reads as flaky tests rather than as a slow machine.
+            # 1000m gives weight ~40 and still fits ~3 runners on a 4-core node.
+            # Deliberately no CPU limit: a ceiling would throttle bursty compile
+            # phases, which is the opposite of what these jobs need.
             resources:
               requests:
-                cpu: 250m
+                cpu: 1000m
                 memory: 512Mi
               limits:
                 memory: 2Gi
