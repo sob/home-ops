@@ -57,7 +57,7 @@ releases:
     namespace: external-secrets
     atomic: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: 5.2.0
+    version: 5.2.1
     values: ['../kubernetes/apps/external-secrets/onepassword-connect/app/helm-values.yaml']
     needs: ['cert-manager/cert-manager']
 
