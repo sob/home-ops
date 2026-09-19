@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: neilpang/acme.sh
-              tag: 3.1.4@sha256:08bad323dd6537ea2caba64260ef6e70e96057c4d9214afb9c07861db26653d9
+              tag: 3.1.5@sha256:05a6a9e0276e148b3671c9f599bab098559a2d2a09e5811d44db9fe1da87d416
             command: ['/bin/sh', '/scripts/export.sh']
             envFrom:
               - secretRef:
