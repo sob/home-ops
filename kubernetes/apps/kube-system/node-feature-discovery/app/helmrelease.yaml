@@ -23,7 +23,10 @@ spec:
     worker:
       config:
         core:
-          sources: ["pci", "system", "usb"]
+          # cpu: publishes feature.node.kubernetes.io/cpu-cpuid.VMX on every node
+          # whose CPU exposes VT-x, so a pod that needs /dev/kvm (Android emulator
+          # runners) can nodeSelector on it instead of trusting the pool is uniform.
+          sources: ["cpu", "pci", "system", "usb"]
       tolerations:
         - key: "workload-type"
           operator: "Equal"
