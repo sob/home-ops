@@ -40,7 +40,7 @@ spec:
           init-html:
             image:
               repository: docker.io/library/adminer
-              tag: 5.5.1-standalone@sha256:429e6984e022dd90e37f076a69106efe2c49697687b5b315122cec05f2c4653a
+              tag: 5.5.1-standalone@sha256:d31f1f84c230c3553e2616cadaf085bd72e8c68298b14c954d639e930ec89185
             command: ["/bin/sh", "-c"]
             args:
               - |
@@ -60,7 +60,7 @@ spec:
           app:
             image:
               repository: docker.io/library/adminer
-              tag: 5.5.1-standalone@sha256:429e6984e022dd90e37f076a69106efe2c49697687b5b315122cec05f2c4653a
+              tag: 5.5.1-standalone@sha256:d31f1f84c230c3553e2616cadaf085bd72e8c68298b14c954d639e930ec89185
             env:
               TZ: America/Chicago
               # Prefills the Server field so only credentials are typed.
