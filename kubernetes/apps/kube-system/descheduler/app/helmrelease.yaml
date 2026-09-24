@@ -29,7 +29,7 @@ spec:
               args:
                 evictFailedBarePods: true
                 evictLocalStoragePods: true
-                evictSystemCriticalPods: true
+                evictSystemCriticalPods: false
                 nodeFit: true
             - name: RemovePodsViolatingInterPodAntiAffinity
             - name: RemovePodsViolatingNodeAffinity
@@ -42,9 +42,26 @@ spec:
                 constraints:
                   - DoNotSchedule
                   - ScheduleAnyway
+            # Only reap pods stuck starting up, never healthy ones. A bare 24h
+            # lifetime evicted every pod in the cluster daily (controllers,
+            # listeners, stateful apps). Age is pod age, so a pod >1h old that
+            # wedges in one of these states is moved on the next pass.
+            # CrashLoopBackOff is deliberately excluded: rescheduling rarely
+            # fixes an app crash and would reset the backoff and hide it.
             - name: PodLifeTime
               args:
-                maxPodLifeTimeSeconds: 86400  # 24 hours
+                maxPodLifeTimeSeconds: 3600
+                states:
+                  - Pending
+                  - PodInitializing
+                  - ContainerCreating
+                  - ImagePullBackOff
+                  - ErrImagePull
+                  - CreateContainerConfigError
+                  - CreateContainerError
+                  - NodeLost
+                  - Shutdown
+                  - UnexpectedAdmissionError
           plugins:
             balance:
               enabled:
