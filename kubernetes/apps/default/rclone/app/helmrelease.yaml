@@ -1,0 +1,100 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.1.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rclone
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Interactive workbench: `kubectl exec -it deploy/rclone -- sh`, then run
+    # rclone by hand. No service/route — nothing listens.
+    controllers:
+      rclone:
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: rclone/rclone
+              tag: 1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+            command: ["sleep", "infinity"]
+            env:
+              TZ: America/Chicago
+              HOME: /config
+              # PVC-backed so OAuth token refreshes persist (a Secret mount is
+              # read-only and rclone rewrites the token on refresh).
+              RCLONE_CONFIG: /config/rclone.conf
+              RCLONE_CACHE_DIR: /tmp/rclone
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      # Same uid/gid as the other media apps so files land on the NAS with
+      # ownership manyfold (and friends) can read.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1039
+        runAsGroup: 65536
+        fsGroup: 65536
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+      tolerations:
+        - key: "workload-type"
+          operator: "Equal"
+          value: "media"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/media
+                    operator: In
+                    values:
+                      - "true"
+    persistence:
+      config:
+        type: persistentVolumeClaim
+        storageClass: ceph-block
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        retain: true
+        globalMounts:
+          - path: /config
+      media:
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${SECRET_NFS_SERVER}
+            path: ${SECRET_NFS_PATH_MEDIA}
+            mountOptions:
+              - nfsvers=4.1
+              - hard
+              - noatime
+              - rsize=131072
+              - wsize=131072
+        globalMounts:
+          - path: /media
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

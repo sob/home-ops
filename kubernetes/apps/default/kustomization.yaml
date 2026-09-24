@@ -26,6 +26,7 @@ resources:
   - ./qbittorrent/ks.yaml
   - ./qui/ks.yaml
   - ./radarr/ks.yaml
+  - ./rclone/ks.yaml
   - ./recyclarr/ks.yaml
   - ./romm/ks.yaml
 # - ./rtlamr2mqtt/ks.yaml
