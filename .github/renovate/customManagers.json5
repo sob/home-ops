@@ -26,6 +26,17 @@
       "versioningTemplate": "redhat"
     },
     {
+      // docker-bake.hcl version variables:
+      //   // renovate: datasource=docker depName=ghcr.io/actions/actions-runner
+      //   default = "2.337.0"
+      "customType": "regex",
+      "description": ["Process docker-bake.hcl version variables"],
+      "managerFilePatterns": ["/(^|/)containers/.+/docker-bake\\.hcl$/"],
+      "matchStrings": [
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s*default\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ]
+    },
+    {
       // Keep the bjw-s app-template `# yaml-language-server` schema modeline
       // pinned to the chart version. Uses the same OCI datasource as the
       // OCIRepository, so the schema tag bumps in lockstep with the chart.

@@ -1,8 +1,8 @@
 # Custom ARC runner with Android SDK and the GitHub CLI
 # Based on the official GitHub Actions runner image
 
-# renovate: datasource=docker depName=ghcr.io/actions/actions-runner
-ARG RUNNER_VERSION="2.337.0"
+# Set from VERSION in docker-bake.hcl (the single, Renovate-tracked source).
+ARG RUNNER_VERSION
 
 FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION}
 
