@@ -129,6 +129,12 @@ locals {
       cookie_domain   = "56kbps.io"
       skip_path_regex = "^/api([/?].*)?"
     },
+    manyfold = {
+      external_host = "https://manyfold.56kbps.io"
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/manyfold.png"
+      group         = resource.authentik_group.media
+      cookie_domain = "56kbps.io"
+    },
     prowlarr = {
       external_host   = "https://prowlarr.56kbps.io"
       icon_url        = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"

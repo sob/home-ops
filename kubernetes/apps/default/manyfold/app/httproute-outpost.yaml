@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+# Serves the Authentik login/callback flow (/outpost.goauthentik.io/*) on the
+# app hostname, outside the SecurityPolicy so the redirect/callback is reachable
+# unauthenticated. More-specific path wins over the app route.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: manyfold-outpost
+  namespace: default
+spec:
+  parentRefs:
+    - name: internal-gateway
+      namespace: network
+      sectionName: https-56kbps
+  hostnames:
+    - "manyfold.${SECRET_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: ak-outpost-56kbps
+          namespace: security
+          port: 9000

@@ -1,0 +1,118 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.2.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: manyfold
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      main:
+        labels:
+          postgres: "true"
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/manyfold3d/manyfold
+              tag: 0.150.0@sha256:b6ab9c6008dbb70a6316792585421dd31b688bef4404c41f83fb54f54a99b728
+            env:
+              TZ: America/Chicago
+              # The image starts as root under s6 and drops to PUID/PGID: the
+              # same uid/gid as the other media apps, so anything Manyfold
+              # writes into the library (datapackage.json, uploads) matches.
+              PUID: "1039"
+              PGID: "65536"
+              PUBLIC_HOSTNAME: "manyfold.${SECRET_DOMAIN}"
+              HTTPS_ONLY: enabled
+              REDIS_URL: redis://dragonfly.database.svc.cluster.local:6379/4
+              # Single-user: access control is Authentik forward-auth at the
+              # gateway (securitypolicy.yaml), not Manyfold's own accounts.
+              MULTIUSER: disabled
+            envFrom:
+              - secretRef:
+                  name: manyfold-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 3214
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  periodSeconds: 10
+                  failureThreshold: 60  # first boot runs migrations
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
+    defaultPodOptions:
+      tolerations:
+        - key: "workload-type"
+          operator: "Equal"
+          value: "media"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/media
+                    operator: In
+                    values:
+                      - "true"
+    service:
+      app:
+        controller: main
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+    persistence:
+      models:
+        # No mountOptions: inline NFS volumes don't support them (SSA rejects).
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${SECRET_NFS_SERVER}
+            path: ${SECRET_NFS_PATH_MEDIA}/Library/3d/models
+        globalMounts:
+          - path: /libraries/models
+      cache:
+        type: emptyDir
+        sizeLimit: 20Gi
+        globalMounts:
+          - path: /usr/src/app/tmp

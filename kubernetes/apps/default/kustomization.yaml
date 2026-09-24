@@ -17,6 +17,7 @@ resources:
   - ./jellyseerr/ks.yaml
   - ./lidarr/ks.yaml
   - ./lubelog/ks.yaml
+  - ./manyfold/ks.yaml
   - ./enigma-bbs/ks.yaml
 # - ./mystic-bbs/ks.yaml
 # - ./node-red/ks.yaml
