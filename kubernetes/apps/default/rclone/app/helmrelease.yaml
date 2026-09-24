@@ -81,17 +81,13 @@ spec:
         globalMounts:
           - path: /config
       media:
+        # No mountOptions: inline pod NFS volumes don't support them, and
+        # helm-controller's server-side apply rejects the unknown field.
         type: custom
         volumeSpec:
           nfs:
             server: ${SECRET_NFS_SERVER}
             path: ${SECRET_NFS_PATH_MEDIA}
-            mountOptions:
-              - nfsvers=4.1
-              - hard
-              - noatime
-              - rsize=131072
-              - wsize=131072
         globalMounts:
           - path: /media
       tmp:
