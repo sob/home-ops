@@ -27,7 +27,7 @@ spec:
           app:
             image:
               repository: docker.io/library/varnish
-              tag: 9.0.4
+              tag: 9.1.0
             command:
               - varnishd
               - -F
