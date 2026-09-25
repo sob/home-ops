@@ -76,7 +76,9 @@ spec:
                 cpu: 250m
                 memory: 1Gi
               limits:
-                memory: 4Gi
+                # Server-side renders: sidekiq runs 4 jobs at once and f3d
+                # loads whole meshes (some STLs are 1M+ triangles, 50+ MB).
+                memory: 8Gi
     defaultPodOptions:
       tolerations:
         - key: "workload-type"
