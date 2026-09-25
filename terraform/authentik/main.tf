@@ -41,3 +41,11 @@ module "onepassword_authentik" {
   vault  = "STONEHEDGES"
   item   = "authentik"
 }
+
+# Manyfold's OIDC client lives in its own item (the ExternalSecret reads it
+# too); the "authentik" item is a Password-type item the op CLI can't edit.
+module "onepassword_manyfold" {
+  source = "github.com/bjw-s/terraform-1password-item?ref=main"
+  vault  = "STONEHEDGES"
+  item   = "manyfold"
+}

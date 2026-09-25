@@ -16,6 +16,14 @@ locals {
       launch_url    = "https://lubelog.${local.cluster_domain}/Login/RemoteAuth"
       group         = resource.authentik_group.home
     },
+    manyfold = {
+      client_id     = module.onepassword_manyfold.fields.MANYFOLD_CLIENT_ID
+      client_secret = module.onepassword_manyfold.fields.MANYFOLD_CLIENT_SECRET
+      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/manyfold.png"
+      redirect_uri  = "https://manyfold.${local.cluster_domain}/users/auth/openid_connect/callback"
+      launch_url    = "https://manyfold.${local.cluster_domain}"
+      group         = resource.authentik_group.media
+    },
     gatus = {
       client_id     = module.onepassword_authentik.fields.GATUS_CLIENT_ID
       client_secret = module.onepassword_authentik.fields.GATUS_CLIENT_SECRET
@@ -128,12 +136,6 @@ locals {
       group           = resource.authentik_group.media
       cookie_domain   = "56kbps.io"
       skip_path_regex = "^/api([/?].*)?"
-    },
-    manyfold = {
-      external_host = "https://manyfold.56kbps.io"
-      icon_url      = "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/manyfold.png"
-      group         = resource.authentik_group.media
-      cookie_domain = "56kbps.io"
     },
     prowlarr = {
       external_host   = "https://prowlarr.56kbps.io"
