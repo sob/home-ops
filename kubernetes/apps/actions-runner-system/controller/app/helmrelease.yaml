@@ -9,10 +9,15 @@ spec:
     kind: OCIRepository
     name: gha-runner-scale-set-controller
   interval: 30m
+  # Flux defaults upgrade.crds to Skip, which left the CRDs on 0.14 when the chart
+  # went to 0.15 — the 0.15 scale-set chart always renders spec.listenerConfig, so
+  # creating an AutoscalingRunnerSet then fails "field not declared in schema".
   install:
+    crds: CreateReplace
     remediation:
       retries: 3
   upgrade:
+    crds: CreateReplace
     cleanupOnFail: true
     remediation:
       strategy: rollback
