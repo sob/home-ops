@@ -40,14 +40,36 @@ spec:
       namespace: actions-runner-system
       name: gha-runner-scale-set-controller-gha-rs-controller
     # No warm runner: these jobs are cheap and infrequent, and a ~30s cold start
-    # beats parking a pod on a node all day. maxRunners is deliberately lower than
-    # arc-linux's 10 — both scale sets draw from the same nodes.
+    # beats parking a pod on a node all day. maxRunners is capped at 3 because
+    # every runner now prefers the same node (see affinity below), at up to 6Gi each.
     minRunners: 0
-    maxRunners: 6
+    maxRunners: 3
     # dind, matching arc-linux: in kubernetes container mode every job MUST declare
     # a `container:`, and jobs that run steps directly on the runner are rejected.
     template:
       spec:
+        # CI is single-core-bound and every other node is an i3-7100U (2C/4T,
+        # 2.4GHz, no turbo) — measured ~2x slower than ubuntu-latest per core.
+        # metal-07 (Raptor Lake, 16 threads) roughly doubles that. Tolerate its
+        # media taint rather than removing it, so only CI follows it there.
+        # Preferred, not required: if metal-07 is down or full, jobs still run
+        # on an i3 node, slowly, instead of sitting Pending.
+        # Note jest/vitest size worker pools from host cores (16 here), not from
+        # the cgroup — homeboy caps maxWorkers on CI to stay inside the limit.
+        tolerations:
+          - key: workload-type
+            operator: Equal
+            value: media
+            effect: NoSchedule
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                preference:
+                  matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: In
+                      values: ["metal-07"]
         containers:
           - name: runner
             image: ghcr.io/actions/actions-runner:2.337.0
@@ -59,14 +81,18 @@ spec:
             # weight 10 against arc-linux's 59, so a test job co-scheduled with an
             # Android build was starved ~6:1 — fast on an idle node, slow on a busy
             # one, which reads as flaky tests rather than as a slow machine.
-            # 1000m gives weight ~40 and still fits ~3 runners on a 4-core node.
+            # 2000m holds its own against Plex/Jellyfin on metal-07 and 3 runners
+            # still fit its 16 cores.
             # Deliberately no CPU limit: a ceiling would throttle bursty compile
             # phases, which is the opposite of what these jobs need.
+            # 6Gi: at 2Gi the pod sat at memory.max (6432 `max` events in one run)
+            # with integration shards running serially; homeboy now runs 4 shards
+            # in parallel (~650MB each) and 4 jsdom/jest-expo workers.
             resources:
               requests:
-                cpu: 1000m
-                memory: 512Mi
-              limits:
+                cpu: 2000m
                 memory: 2Gi
+              limits:
+                memory: 6Gi
     containerMode:
       type: dind
