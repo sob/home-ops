@@ -72,7 +72,7 @@ spec:
                       values: ["metal-07"]
         containers:
           - name: runner
-            image: ghcr.io/actions/actions-runner:2.337.0
+            image: ghcr.io/actions/actions-runner:2.338.0
             command: ["/home/runner/run.sh"]
             # Stock runner, no Android SDK, so the floor is well under arc-linux's
             # 1500m/3Gi — but NOT a token request. Measured on the cluster: the
