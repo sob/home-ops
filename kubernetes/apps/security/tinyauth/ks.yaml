@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app tinyauth
+  namespace: flux-system
+spec:
+  targetNamespace: security
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    # Sessions live in SQLite on node-local disk, streamed to R2, so 7-day
+    # sessions survive restarts and node moves.
+    - ../../../../components/litestream
+  dependsOn:
+    - name: external-secrets-stores
+      namespace: external-secrets
+    - name: tinyauth-bridge
+      namespace: security
+  path: ./kubernetes/apps/security/tinyauth/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      APP: *app
+      LITESTREAM_DB_PATH: /data/tinyauth.db
