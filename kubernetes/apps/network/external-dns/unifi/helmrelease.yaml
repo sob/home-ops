@@ -54,6 +54,11 @@ spec:
           initialDelaySeconds: 10
           timeoutSeconds: 5
     extraArgs:
+      # v0.22 switched the default annotation prefix to external-dns.kubernetes.io/
+      # with no fallback; every route, Gateway and Service here still uses
+      # external-dns.alpha.kubernetes.io/. Without this, target/hostname
+      # annotations were ignored and sync deleted the records (2026-10-09).
+      - --enable-legacy-annotation-prefix
       - --ignore-ingress-tls-spec
       - --ingress-class=internal
       - --gateway-namespace=network
