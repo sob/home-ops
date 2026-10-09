@@ -48,6 +48,15 @@ spec:
           usernameKey: AUTHENTIK_POSTGRESQL__USER
           databaseKey: AUTHENTIK_POSTGRESQL__NAME
       primary:
+        # Interim until #1846 moves this DB off Ceph: fdatasync on this volume
+        # measures ~440ms (2.3 ops/s), and every commit waits for one, so the
+        # health probe times out and server/worker restart constantly. With
+        # async commit a crash can lose the last few hundred ms of transactions
+        # (sessions/events) but never corrupts the DB. Revert after #1846.
+        # Replaces the chart default, so max_connections is restated.
+        extendedConfiguration: |
+          max_connections = 500
+          synchronous_commit = off
         persistence:
           enabled: true
           storageClass: ceph-block
