@@ -1,0 +1,55 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: required-for-kustomize-but-not-used
+spec:
+  values:
+    controllers:
+      main:
+        initContainers:
+          litestream-restore:
+            image: &image
+              repository: docker.io/litestream/litestream
+              tag: 0.5.17@sha256:4b02b9859a6b6b4087d8b8944e15f7e984bd7957cba322bbeee38b0e27b9656a
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                DB=${LITESTREAM_DB_PATH}
+                litestream restore -config /etc/litestream.yml -if-db-not-exists -if-replica-exists "$DB"
+                # Only with the litestream-seed component mounted: first run, no
+                # replica in R2 yet, so copy the DB from the app's old PVC.
+                # .backup reads through the WAL, unlike a file copy.
+                SEED="/seed/$(basename "$DB")"
+                if [ ! -f "$DB" ] && [ -f "$SEED" ]; then
+                  echo "no replica found; seeding from $SEED"
+                  sqlite3 "$SEED" ".backup '$DB'"
+                fi
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+          litestream:
+            dependsOn: litestream-restore
+            image: *image
+            args: ["replicate", "-config", "/etc/litestream.yml"]
+            restartPolicy: Always
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 512Mi
+    persistence:
+      litestream-config:
+        type: secret
+        name: ${APP}-litestream-secret
+        advancedMounts:
+          main:
+            litestream-restore: &config
+              - path: /etc/litestream.yml
+                subPath: litestream.yml
+                readOnly: true
+            litestream: *config

@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Migration-only companion to the litestream component: mounts the app's old
+# PVC (named ${APP}, the volsync convention) at /seed in litestream-restore, so
+# the first start can copy the DB from it when R2 has no replica yet.
+# Remove once the replica exists: afterwards the PVC holds a frozen copy, and
+# seeding from it after a lost replica would silently restore stale data.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - target:
+      kind: HelmRelease
+    path: patches/helm-seed.yaml
