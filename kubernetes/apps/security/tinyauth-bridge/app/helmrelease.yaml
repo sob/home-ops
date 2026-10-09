@@ -32,7 +32,7 @@ spec:
             image:
               # sob/tinyauth-bridge, built by its CI on push to main.
               repository: ghcr.io/sob/tinyauth-bridge
-              tag: sha-98c998c
+              tag: sha-d406c0d
             args: ["-config", "/config/config.yaml"]
             probes:
               liveness: &probe
