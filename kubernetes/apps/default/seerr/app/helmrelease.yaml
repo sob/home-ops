@@ -36,18 +36,16 @@ spec:
             image: &litestream
               repository: docker.io/litestream/litestream
               tag: 0.5.17@sha256:4b02b9859a6b6b4087d8b8944e15f7e984bd7957cba322bbeee38b0e27b9656a
-            command: ["/bin/sh", "-c"]
+            # No fallback seed: the pre-migration DB left on the Ceph PVC is frozen,
+            # and silently restoring it would lose everything since. With no
+            # replica in R2 this starts Seerr empty, which is obvious.
             args:
-              - |
-                set -eu
-                DB=/app/config/db/db.sqlite3
-                litestream restore -config /etc/litestream.yml -if-db-not-exists -if-replica-exists "$DB"
-                # First run only (no replica in R2 yet): seed from the old DB on
-                # the Ceph PVC. .backup reads through the WAL, unlike a file copy.
-                if [ ! -f "$DB" ] && [ -f /seed/db.sqlite3 ]; then
-                  echo "no replica found; seeding from Ceph PVC"
-                  sqlite3 /seed/db.sqlite3 ".backup '$DB'"
-                fi
+              - restore
+              - -config
+              - /etc/litestream.yml
+              - -if-db-not-exists
+              - -if-replica-exists
+              - /app/config/db/db.sqlite3
             securityContext: &litestreamSecurityContext
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -179,17 +177,14 @@ spec:
               - port: *port
                 identifier: app
     persistence:
-      # Still on Ceph (and volsync): settings.json is rarely written. Its old
-      # db/ directory is only read as the first-run seed for restore.
+      # Still on Ceph (and volsync): settings.json is rarely written. Its db/
+      # directory is shadowed by the emptyDir below and no longer used.
       config:
         existingClaim: overseerr
         advancedMounts:
           seerr:
             app:
               - path: /app/config
-            restore:
-              - path: /seed
-                subPath: db
       db:
         type: emptyDir
         sizeLimit: 1Gi
