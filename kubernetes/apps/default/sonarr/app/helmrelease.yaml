@@ -32,6 +32,11 @@ spec:
             env:
               SONARR__APP__INSTANCENAME: Sonarr
               SONARR__APP__THEME: dark
+              # /config is ephemeral, so config.xml is regenerated on every
+              # start: anything not set here reverts to its default.
+              SONARR__AUTH__METHOD: External
+              SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              SONARR__LOG__ANALYTICSENABLED: "False"
               SONARR__LOG__DBENABLED: "False"
               SONARR__LOG__LEVEL: debug
               SONARR__SERVER__PORT: &port 80
@@ -165,8 +170,12 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: the DB is restored from R2 and replicated by the
+      # litestream component (see ks.yaml). The rest is regenerable: config.xml
+      # from env, logs, Backups and MediaCover (~65MB of covers).
       config:
-        existingClaim: *app
+        type: emptyDir
+        sizeLimit: 2Gi
       tmp:
         type: emptyDir
       media:

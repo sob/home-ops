@@ -31,8 +31,11 @@ spec:
             env:
               RADARR__APP__INSTANCENAME: Radarr
               RADARR__APP__THEME: dark
+              # /config is ephemeral, so config.xml is regenerated on every
+              # start: anything not set here reverts to its default.
               RADARR__AUTH__METHOD: External
               RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              RADARR__LOG__ANALYTICSENABLED: "False"
               RADARR__LOG__DBENABLED: "False"
               RADARR__LOG__LEVEL: info
               RADARR__SERVER__PORT: &port 80
@@ -171,8 +174,12 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: the DB is restored from R2 and replicated by the
+      # litestream component (see ks.yaml). The rest is regenerable: config.xml
+      # from env, logs, Backups and MediaCover (~1.9GB of covers, refetched after a restart; Varnish fronts /MediaCover).
       config:
-        existingClaim: radarr
+        type: emptyDir
+        sizeLimit: 6Gi
       tmp:
         type: emptyDir
       media:

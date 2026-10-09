@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# SQLite on node-local disk, replicated to R2 by Litestream instead of living on
+# a Ceph PVC. Adds to the `main` controller:
+#   - litestream-restore: restores ${LITESTREAM_DB_PATH} from R2 before the app
+#     starts (and, with the litestream-seed component, seeds it once from the
+#     app's old PVC when no replica exists yet)
+#   - litestream: native sidecar that streams every change to R2 and stops only
+#     after the app exits, so final writes are flushed
+# The app must put the DB's directory on an emptyDir that is mounted into all
+# containers (globalMounts), and must use controller name `main`: kustomize
+# merges this patch before Flux substitutes variables, so the key can't be one.
+#
+# Required postBuild vars: APP, LITESTREAM_DB_PATH (absolute path to the DB).
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./externalsecret.yaml
+patches:
+  - target:
+      kind: HelmRelease
+    path: patches/helm-litestream.yaml
