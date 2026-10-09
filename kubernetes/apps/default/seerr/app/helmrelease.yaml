@@ -26,6 +26,46 @@ spec:
       seerr:
         annotations:
           reloader.stakater.com/auto: "true"
+        # The SQLite DB lives on node-local emptyDir, not Ceph: on the QVO-backed
+        # OSDs every fsync took 300-600ms, which filled Node's libuv threadpool and
+        # stalled the whole app (and its DNS lookups) until the liveness probe
+        # killed it. Litestream streams it to R2 continuously and restores it on
+        # start, so the pod can still move nodes without losing data.
+        initContainers:
+          restore:
+            image: &litestream
+              repository: docker.io/litestream/litestream
+              tag: 0.5.17@sha256:4b02b9859a6b6b4087d8b8944e15f7e984bd7957cba322bbeee38b0e27b9656a
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                DB=/app/config/db/db.sqlite3
+                litestream restore -config /etc/litestream.yml -if-db-not-exists -if-replica-exists "$DB"
+                # First run only (no replica in R2 yet): seed from the old DB on
+                # the Ceph PVC. .backup reads through the WAL, unlike a file copy.
+                if [ ! -f "$DB" ] && [ -f /seed/db.sqlite3 ]; then
+                  echo "no replica found; seeding from Ceph PVC"
+                  sqlite3 /seed/db.sqlite3 ".backup '$DB'"
+                fi
+            securityContext: &litestreamSecurityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+          litestream:
+            dependsOn: restore
+            image: *litestream
+            args: ["replicate", "-config", "/etc/litestream.yml"]
+            # Native sidecar: starts after restore, and stops only after the app
+            # exits, so the final writes are flushed to R2 on shutdown.
+            restartPolicy: Always
+            securityContext: *litestreamSecurityContext
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
         containers:
           app:
             image:
@@ -139,14 +179,41 @@ spec:
               - port: *port
                 identifier: app
     persistence:
+      # Still on Ceph (and volsync): settings.json is rarely written. Its old
+      # db/ directory is only read as the first-run seed for restore.
       config:
         existingClaim: overseerr
+        advancedMounts:
+          seerr:
+            app:
+              - path: /app/config
+            restore:
+              - path: /seed
+                subPath: db
+      db:
+        type: emptyDir
+        sizeLimit: 1Gi
         globalMounts:
-          - path: /app/config
+          - path: /app/config/db
+      litestream-config:
+        type: secret
+        name: seerr-litestream-secret
+        advancedMounts:
+          seerr:
+            restore: &litestreamConfig
+              - path: /etc/litestream.yml
+                subPath: litestream.yml
+                readOnly: true
+            litestream: *litestreamConfig
+      # Image-proxy cache: disposable, and written on every artwork load, so
+      # keep it off Ceph. ~250MB in practice; Varnish fronts it anyway.
       cache:
-        existingClaim: seerr-cache
-        globalMounts:
-          - path: /app/config/cache
+        type: emptyDir
+        sizeLimit: 2Gi
+        advancedMounts:
+          seerr:
+            app:
+              - path: /app/config/cache
       logs:
         type: emptyDir
         globalMounts:
