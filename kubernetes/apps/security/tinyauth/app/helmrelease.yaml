@@ -56,6 +56,37 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 256Mi
+          # Branding only: proxies the browser-facing route to Tinyauth and
+          # injects /_brand/brand.js, which puts Plex and Apple logos on the
+          # login buttons (Tinyauth hard-codes its icon map). Forward-auth
+          # traffic uses the authz port and never passes through here.
+          brand:
+            image:
+              repository: docker.io/nginxinc/nginx-unprivileged
+              tag: 1.31-alpine@sha256:b9241c6e7b8e9a862f129d8d4199ab64b10390949a78bdd5603379b32c844083
+            args: ["nginx", "-c", "/etc/nginx/brand/nginx.conf", "-g", "daemon off;"]
+            probes:
+              liveness: &brandProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /_brand/brand.js
+                    port: 8080
+                  periodSeconds: 10
+                  timeoutSeconds: 2
+                  failureThreshold: 3
+              readiness: *brandProbe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -68,7 +99,11 @@ spec:
       app:
         controller: main
         ports:
+          # Browser-facing: through the branding sidecar.
           http:
+            port: 8080
+          # Direct to Tinyauth, for Envoy ext-auth checks (no sidecar hop).
+          authz:
             port: *port
     route:
       app:
@@ -86,7 +121,7 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: *port
+                port: 8080
     persistence:
       config:
         type: secret
@@ -110,5 +145,17 @@ spec:
         sizeLimit: 1Gi
         globalMounts:
           - path: /data
+      brand:
+        type: configMap
+        name: tinyauth-brand
+        advancedMounts:
+          main:
+            brand:
+              - path: /etc/nginx/brand/nginx.conf
+                subPath: nginx.conf
+                readOnly: true
+              - path: /brand/brand.js
+                subPath: brand.js
+                readOnly: true
       tmp:
         type: emptyDir
