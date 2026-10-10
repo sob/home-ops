@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./externalsecret-idp.yaml
+  - ./referencegrant.yaml
   - ./helmrelease.yaml
 configMapGenerator:
   - name: tinyauth-brand

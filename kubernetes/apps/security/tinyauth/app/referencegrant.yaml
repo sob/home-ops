@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/referencegrant_v1beta1.json
+# Lets app SecurityPolicies in other namespaces use Tinyauth (security/tinyauth,
+# port 3000 "authz") as their Envoy ext-auth backend. Cross-namespace backendRefs
+# need this for Envoy Gateway to honor them.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: securitypolicies-to-tinyauth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: default
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: observability
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: database
+  to:
+    - group: ""
+      kind: Service
+      name: tinyauth
