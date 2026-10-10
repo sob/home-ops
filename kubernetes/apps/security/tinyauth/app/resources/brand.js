@@ -102,7 +102,7 @@
   function buildLauncher(apps) {
     var wrap = document.createElement("nav");
     wrap.className = "ta-launcher";
-    wrap.setAttribute("aria-label", "Your apps");
+    wrap.setAttribute("aria-label", "Available Applications");
     for (var i = 0; i < apps.length; i++) {
       var a = document.createElement("a");
       a.className = "ta-app";
@@ -140,7 +140,7 @@
       var n = nodes[i];
       if (n.children.length === 0 && !n.closest("button") &&
           /^log\s?out$/i.test((n.textContent || "").trim())) {
-        n.textContent = "Your apps";
+        n.textContent = "Available Applications";
       }
     }
     if (document.title !== "56kbps.io") document.title = "56kbps.io";
