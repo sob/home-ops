@@ -12,12 +12,8 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/external
-    - ../../../../components/volsync
     - ../../../../components/litestream
     - ../../../../components/file-sync
-    # Migration only: seeds the DB from the old PVC on first start. Remove
-    # (with volsync and the PVC) once litestream/wizarr exists in R2.
-    - ../../../../components/litestream-seed
   dependsOn:
     - name: plex
     - name: seerr
@@ -36,6 +32,4 @@ spec:
       LITESTREAM_DB_PATH: /data/database/database.db
       FILESYNC_DIR: /data/database
       FILESYNC_FILES: "secret.key secrets.json"
-      VOLSYNC_SCHEDULE: "21 1 * * *"
-      VOLSYNC_CAPACITY: 2Gi
       GATUS_SUBDOMAIN: join

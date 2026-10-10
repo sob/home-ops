@@ -12,12 +12,8 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/guarded
-    - ../../../../components/volsync
     - ../../../../components/litestream
     - ../../../../components/file-sync
-    # Migration only: seeds the DB from the old PVC on first start. Remove
-    # (with volsync and the PVC) once litestream/tautulli exists in R2.
-    - ../../../../components/litestream-seed
   path: ./kubernetes/apps/default/tautulli/app
   prune: true
   sourceRef:
@@ -34,5 +30,3 @@ spec:
       FILESYNC_DIR: /config
       FILESYNC_FILES: "config.ini"
       GATUS_SVC_PATH: /status
-      VOLSYNC_SCHEDULE: "45 0 * * *"
-      VOLSYNC_CAPACITY: 5Gi
