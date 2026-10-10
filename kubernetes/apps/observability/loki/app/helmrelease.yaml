@@ -32,6 +32,10 @@ spec:
         replication_factor: 1
       ingester:
         chunk_encoding: snappy
+        # With the WAL on an emptyDir, flush it to R2 on every graceful
+        # shutdown instead of relying on replay after restart.
+        wal:
+          flush_on_shutdown: true
       # Cheap storage: chunks + ruler live in Cloudflare R2, not on replicated Ceph.
       storage:
         type: s3
@@ -124,11 +128,13 @@ spec:
       extraVolumeMounts:
         - name: loki-alerting-rules
           mountPath: /etc/loki/rules/fake
+      # No PVC: chunks, index and ruler data live in R2. Locally there is only
+      # the WAL (~25 MB), the TSDB index cache (re-fetched from R2) and
+      # compactor scratch, so the chart's emptyDir is enough. The WAL is
+      # flushed on graceful shutdown (ingester.wal.flush_on_shutdown below);
+      # only a crash loses the not-yet-flushed logs.
       persistence:
-        enabled: true
-        storageClass: ceph-block
-        # Much smaller now: only index cache, WAL and compactor working set.
-        size: 20Gi
+        enabled: false
       resources:
         requests:
           cpu: 50m
