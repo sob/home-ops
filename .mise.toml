@@ -14,7 +14,6 @@ TALOSCONFIG = '{{config_root}}/.talosconfig'
 # says so. To skip `op` for this entirely, pin it in a git-ignored
 # .mise.local.toml:  [env] TF_VAR_onepassword_account = "<account url>"
 TF_VAR_onepassword_account = "{{ exec(command='bash -c \"T=$(command -v gtimeout || command -v timeout || echo false); $T 5 op account list --format json 2>/dev/null | jq -r .[0].url 2>/dev/null || true\"') }}"
-TF_VAR_authentik_url = "https://10.1.100.207"
 TFE_PARALLELISM = 5
 
 [tools]

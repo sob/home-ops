@@ -117,7 +117,7 @@ expect temporary duplicate pages.
 Added/migrated in-cluster (reusing the exact PromQL from Terraform):
 - **Media/*arr**: Plex, Jellyfin, Sonarr, Radarr, Prowlarr, Readarr, Lidarr, Bazarr,
   SABnzbd, Seerr (down/health/queue/indexers/storage).
-- **Infra**: Authentik, Blocky, Gatus, Cloudflared.
+- **Infra**: Blocky, Gatus, Cloudflared.
 - **Ceph** (was Cloud-only — now in-cluster under `rook-ceph`), **UPS/PDU** (under
   `snmp-exporter`), **IoT/Sonos/Chamberlain** (under blackbox/unifi-poller).
 - **New gap alerts**: Dragonfly (down + memory), Mosquitto/MQTT telemetry,

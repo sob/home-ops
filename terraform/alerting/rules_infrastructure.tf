@@ -3,38 +3,6 @@ resource "grafana_rule_group" "infrastructure" {
   folder_uid       = grafana_folder.monitoring.uid
   interval_seconds = 60
 
-  # Authentik - Critical SSO service
-  rule {
-    name = "AuthentikDown"
-    annotations = {
-      summary     = "Authentik SSO is down"
-      description = "Authentik has been unreachable for 3 minutes. Authentication services are offline!"
-    }
-    labels = {
-      severity = "critical"
-      service  = "authentik"
-      category = "infrastructure"
-    }
-    for       = "3m"
-    no_data_state = "OK"
-    condition = "A"
-
-    data {
-      ref_id = "A"
-      
-      relative_time_range {
-        from = 600
-        to   = 0
-      }
-      
-      datasource_uid = local.prometheus_cloud_uid
-      model = jsonencode({
-        expr  = "min(up{job=\"authentik\",namespace=\"security\"}) < 1"
-        refId = "A"
-        instant = true      })
-    }
-  }
-
   # Ingress Controllers
   rule {
     name = "IngressControllerDown"

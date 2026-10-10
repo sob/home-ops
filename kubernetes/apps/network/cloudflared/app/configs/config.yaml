@@ -1,9 +1,5 @@
 ---
 ingress:
-  - hostname: "sso.${SECRET_DOMAIN}"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "sso.${SECRET_DOMAIN}"
   - hostname: "jellyfin.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
@@ -64,10 +60,6 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "bbs.${SECRET_DOMAIN}"
-  - hostname: "sso.halfduplex.io"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "sso.halfduplex.io"
   - hostname: "echo-server.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:

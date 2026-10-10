@@ -91,7 +91,6 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-        # Authentik forward-auth is enforced by the SecurityPolicy targeting
-        # this HTTPRoute (securitypolicy.yaml). The /outpost.goauthentik.io/*
-        # login-flow paths are served by httproute-outpost.yaml, which is NOT
-        # behind the SecurityPolicy so the redirect/callback can complete.
+        # Tinyauth forward-auth is enforced by the SecurityPolicy targeting
+        # this HTTPRoute (securitypolicy.yaml); sign-in happens on the login
+        # host, so no extra routes are needed here.
