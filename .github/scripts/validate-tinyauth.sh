@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Guard rails for Tinyauth forward-auth. Fails when:
-#   1. a Tinyauth `apps` entry is missing config.domain, users.allow or
-#      oauth.groups. Under acls.policy deny, an entry without oauth.groups
-#      admits ANY OAuth user, so a missing field quietly opens the app.
+#   1. a Tinyauth `apps` entry is missing config.domain, users.allow,
+#      oauth.whitelist or oauth.groups. Without oauth.whitelist every OAuth
+#      user is denied (acls.policy deny); without oauth.groups any OAuth user
+#      is admitted. Either way a missing field silently changes access.
 #   2. a SecurityPolicy that calls Tinyauth fails open or skips the nginx
 #      adapter (port 8082). Calling Tinyauth's Envoy mode directly (:3000)
 #      reintroduces the path-rule bypass fixed in #1874.
@@ -25,7 +26,7 @@ apps="$(yq -o json '.apps // {}' <<<"$config")"
 
 # 1. every entry is complete
 while IFS= read -r name; do
-  for field in config.domain users.allow oauth.groups; do
+  for field in config.domain users.allow oauth.whitelist oauth.groups; do
     v="$(jq -r --arg n "$name" --arg f "$field" '.[$n] | getpath($f | split(".")) // "" | tostring' <<<"$apps")"
     [[ -n "$v" && "$v" != "null" ]] || err "tinyauth app '$name' has no $field"
   done
