@@ -33,6 +33,9 @@ spec:
               LIDARR__APP__THEME: dark
               LIDARR__AUTH__METHOD: External
               LIDARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              # /config is ephemeral, so config.xml is regenerated on every
+              # start: anything not set here reverts to its default.
+              LIDARR__LOG__ANALYTICSENABLED: "False"
               LIDARR__LOG__DBENABLED: "False"
               LIDARR__LOG__LEVEL: info
               LIDARR__SERVER__PORT: &port 80
@@ -155,8 +158,12 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: the DB is restored from R2 and replicated by the
+      # litestream component (see ks.yaml). The rest is regenerable: config.xml
+      # from env, logs, logs.db (DB logging is off), Backups and MediaCover.
       config:
-        existingClaim: *app
+        type: emptyDir
+        sizeLimit: 4Gi
       tmp:
         type: emptyDir
       media:
