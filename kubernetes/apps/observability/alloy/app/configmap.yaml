@@ -415,7 +415,6 @@ data:
     prometheus.scrape "critical_apps" {
       targets = [
         {"__address__" = "gatus.observability.svc.cluster.local:80", "app" = "gatus", "namespace" = "observability"},
-        {"__address__" = "home-assistant.home.svc.cluster.local:8123", "app" = "home-assistant", "namespace" = "home"},
       ]
 
       forward_to = [prometheus.relabel.critical.receiver]
