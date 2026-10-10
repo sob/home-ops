@@ -183,6 +183,9 @@ spec:
               - path: /secrets/bridge-client-secret
                 subPath: bridge-client-secret
                 readOnly: true
+              - path: /secrets/oidc-key.pem
+                subPath: oidc-key.pem
+                readOnly: true
       # Node-local; restored from and streamed to R2 by the litestream
       # component (mounted into the app and both litestream containers).
       data:

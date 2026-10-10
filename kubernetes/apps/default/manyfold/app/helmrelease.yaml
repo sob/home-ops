@@ -40,12 +40,13 @@ spec:
               PUBLIC_HOSTNAME: "manyfold.${SECRET_DOMAIN}"
               HTTPS_ONLY: enabled
               REDIS_URL: redis://dragonfly.database.svc.cluster.local:6379/4
-              # Accounts come from Authentik over OIDC; the first user to sign
+              # Accounts come from Tinyauth over OIDC; the first user to sign
               # in becomes Manyfold's administrator. FORCE_OIDC hides the local
-              # password form. Manyfold can't use forward-auth headers.
+              # password form. Manyfold can't use forward-auth headers for
+              # identity, but securitypolicy.yaml gates access (media group).
               MULTIUSER: enabled
-              OIDC_ISSUER: "https://sso.${SECRET_DOMAIN}/application/o/manyfold/"
-              OIDC_NAME: Authentik
+              OIDC_ISSUER: "https://login.${SECRET_DOMAIN}"
+              OIDC_NAME: 56kbps.io
               FORCE_OIDC: enabled
             envFrom:
               - secretRef:

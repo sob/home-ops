@@ -201,6 +201,8 @@ spec:
         existingSecret: grafana-admin-secret
         userKey: admin-user
         passwordKey: admin-password
+      # GF_AUTH_GENERIC_OAUTH_CLIENT_ID / _SECRET (grafana-oauth.yaml).
+      envFromSecret: grafana-oauth-secret
       persistence:
         enabled: true
         storageClassName: ceph-block
@@ -235,6 +237,26 @@ spec:
           check_for_updates: false
         auth.anonymous:
           enabled: false
+        # Sign in with Tinyauth (OIDC). Tinyauth has no per-client access
+        # rules, so Grafana enforces them: admins -> Admin, observability ->
+        # Viewer, anyone else is refused (role_attribute_strict). That
+        # includes Tinyauth's break-glass user, which has no groups; the
+        # local admin login (grafana-admin-secret) is Grafana's break-glass.
+        auth.generic_oauth:
+          enabled: true
+          name: 56kbps.io
+          scopes: openid email profile groups
+          auth_url: "https://login.${SECRET_DOMAIN}/authorize"
+          token_url: "https://login.${SECRET_DOMAIN}/api/oidc/token"
+          api_url: "https://login.${SECRET_DOMAIN}/api/oidc/userinfo"
+          use_pkce: true
+          allow_sign_up: true
+          login_attribute_path: preferred_username
+          name_attribute_path: name
+          email_attribute_path: email
+          groups_attribute_path: groups
+          role_attribute_path: "contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'observability') && 'Viewer'"
+          role_attribute_strict: true
         database:
           # ceph-block (consumer-SSD OSDs, no PLP) has slow per-commit fsync, which made
           # the ~665 first-boot sqlite migrations take 30+ min and tripped every probe /
