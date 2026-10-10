@@ -64,6 +64,79 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 256Mi
+          # settings.json isn't SQLite, so Litestream can't carry it. These two
+          # keep a copy in R2 (stone-volsync/files/seerr): restore it when the
+          # file is missing, and push it back whenever it changes. Seerr's UI
+          # stays the source of truth.
+          #
+          # Restore fails the pod (rather than letting Seerr start with
+          # defaults) if the file is missing and R2 can't supply it; otherwise
+          # an R2 outage would let the sync push blank settings over the good
+          # copy.
+          settings-restore:
+            image: &rclone
+              repository: rclone/rclone
+              tag: 1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                f=/app/config/settings.json
+                if [ -f "$f" ]; then echo "settings.json present; not restoring"; exit 0; fi
+                rclone copyto r2:stone-volsync/files/seerr/settings.json "$f"
+                echo "restored settings.json from R2"
+            env: &rcloneEnv
+              HOME: /tmp
+              RCLONE_CONFIG: /dev/null
+              RCLONE_CONFIG_R2_TYPE:
+                valueFrom:
+                  secretKeyRef: { name: seerr-litestream-secret, key: RCLONE_CONFIG_R2_TYPE }
+              RCLONE_CONFIG_R2_PROVIDER:
+                valueFrom:
+                  secretKeyRef: { name: seerr-litestream-secret, key: RCLONE_CONFIG_R2_PROVIDER }
+              RCLONE_CONFIG_R2_ENDPOINT:
+                valueFrom:
+                  secretKeyRef: { name: seerr-litestream-secret, key: RCLONE_CONFIG_R2_ENDPOINT }
+              RCLONE_CONFIG_R2_ACCESS_KEY_ID:
+                valueFrom:
+                  secretKeyRef: { name: seerr-litestream-secret, key: RCLONE_CONFIG_R2_ACCESS_KEY_ID }
+              RCLONE_CONFIG_R2_SECRET_ACCESS_KEY:
+                valueFrom:
+                  secretKeyRef: { name: seerr-litestream-secret, key: RCLONE_CONFIG_R2_SECRET_ACCESS_KEY }
+            securityContext: *litestreamSecurityContext
+          # Native sidecar. Pushes only after the file has been unchanged for a
+          # few seconds (never a half-written file), keeps the previous copy as
+          # settings.prev.json, and pushes once more when the pod stops.
+          settings-sync:
+            dependsOn: settings-restore
+            image: *rclone
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                f=/app/config/settings.json
+                dst=r2:stone-volsync/files/seerr
+                last=$(rclone cat "$dst/settings.json" 2>/dev/null | sha256sum | cut -d" " -f1)
+                push() {
+                  [ -f "$f" ] || return 0
+                  a=$(sha256sum "$f" | cut -d" " -f1)
+                  [ "$a" = "$last" ] && return 0
+                  sleep 3
+                  b=$(sha256sum "$f" | cut -d" " -f1)
+                  [ "$a" = "$b" ] || return 0
+                  rclone copyto "$dst/settings.json" "$dst/settings.prev.json" 2>/dev/null || true
+                  rclone copyto "$f" "$dst/settings.json" && last=$a && echo "pushed settings.json $a"
+                }
+                trap 'push; exit 0' TERM INT
+                while true; do push; sleep 60 & wait $!; done
+            env: *rcloneEnv
+            restartPolicy: Always
+            securityContext: *litestreamSecurityContext
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
         containers:
           app:
             image:
@@ -184,6 +257,10 @@ spec:
         advancedMounts:
           seerr:
             app:
+              - path: /app/config
+            settings-restore:
+              - path: /app/config
+            settings-sync:
               - path: /app/config
       db:
         type: emptyDir
