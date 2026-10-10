@@ -15,17 +15,21 @@ travelling. `halfduplex.io` is a separate zone and isn't touched.
 - State: R2 (`stone-terraform-state/cloudflare/terraform.tfstate`), with the
   `AWS_*` credentials from `terraform/.mise.toml`
 
-## First apply
-A zone has one custom-rules entrypoint ruleset. If one already exists (for
-example from the dashboard), import it before the first apply, or the apply
-fails. Copy any rules it contains into `firewall.tf` first, because Terraform
-replaces the ruleset's whole rule list:
+## Apply
+The zone's custom-rules entrypoint already existed (made in the dashboard), so
+`firewall.tf` has an `import` block for it, and the first plan shows an import
+rather than a create. Terraform owns that ruleset's **whole** rule list.
 
 ```sh
 terraform init
-# Find an existing entrypoint (404 means none, so skip the import):
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.cloudflare.com/client/v4/zones/<zone_id>/rulesets/phases/http_request_firewall_custom/entrypoint" | jq '.result | {id, rules: [.rules[]? | {description, expression, action}]}'
-terraform import cloudflare_ruleset.custom_firewall 'zones/<zone_id>/<ruleset_id>'
-terraform plan -var onepassword_account=<account>
+terraform plan -var onepassword_account=<account>    # expect: 1 to import, 1 to change
+terraform apply -var onepassword_account=<account>
 ```
+
+The first plan replaces the old disabled dashboard rule "Block all non-US
+requests". Its expression, `(country ne "US") or (country ne "PL")`, matched
+every request, so it could never be enabled. It's replaced by the login-host
+allowlist.
+
+After the first successful apply, the `import` block can stay (it's a no-op
+once the resource is in state) or be deleted.
