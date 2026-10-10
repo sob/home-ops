@@ -18,9 +18,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn:
-    - name: volsync
-      namespace: storage
   values:
     controllers:
       seerr:
@@ -253,10 +250,12 @@ spec:
               - port: *port
                 identifier: app
     persistence:
-      # Still on Ceph (and volsync): settings.json is rarely written. Its db/
-      # directory is shadowed by the emptyDir below and no longer used.
+      # Node-local: settings.json is restored from and synced to R2 by the
+      # settings-restore/settings-sync containers, the DB by Litestream, and
+      # db/, cache/ and logs/ are their own emptyDirs below.
       config:
-        existingClaim: overseerr
+        type: emptyDir
+        sizeLimit: 64Mi
         advancedMounts:
           seerr:
             app:
