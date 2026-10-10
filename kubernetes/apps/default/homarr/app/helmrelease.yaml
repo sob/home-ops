@@ -54,7 +54,7 @@ spec:
                 memory: 1.86Gi
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: 3000

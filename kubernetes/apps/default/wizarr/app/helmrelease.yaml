@@ -50,7 +50,7 @@ spec:
                 memory: 512Mi
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: 5690
