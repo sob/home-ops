@@ -12,12 +12,10 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/guarded
-    - ../../../../components/volsync
+    # DB on Litestream, config.yaml on file-sync, both in R2; no PVC or
+    # volsync backup.
     - ../../../../components/litestream
     - ../../../../components/file-sync
-    # Migration only: seeds the DB from the old PVC on first start. Remove
-    # (with volsync and the PVC) once litestream/bazarr exists in R2.
-    - ../../../../components/litestream-seed
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -34,15 +32,9 @@ spec:
     substitute:
       APP: *app
       LITESTREAM_DB_PATH: /config/db/bazarr.db
-      LITESTREAM_SEED: db/bazarr.db
       FILESYNC_DIR: /config
       # API key and provider credentials. The rest of /config (backups,
       # announcements, release notes) is regenerable.
       FILESYNC_FILES: config/config.yaml
       GATUS_SVC_PORT: "6767"
       GATUS_SVC_PATH: /health
-      VOLSYNC_SCHEDULE: "33 0 * * *"
-      VOLSYNC_CAPACITY: 5Gi
-      VOLSYNC_UID: "1034"
-      VOLSYNC_GID: "65536"
-      VOLSYNC_FSGROUP: "65536"
