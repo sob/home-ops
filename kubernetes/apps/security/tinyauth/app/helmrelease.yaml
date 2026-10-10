@@ -87,6 +87,37 @@ spec:
                 memory: 16Mi
               limits:
                 memory: 64Mi
+          # sob/tinyauth-bridge: Plex / Apple / Google sign-in for Tinyauth's
+          # generic OAuth providers. Public /idp/{authorize,login,callback}
+          # come straight from the HTTPRoute; Tinyauth reaches /idp/token and
+          # /idp/userinfo on localhost.
+          bridge:
+            image:
+              repository: ghcr.io/sob/tinyauth-bridge
+              tag: sha-ecc336a
+            args: ["-config", "/bridge/config.yaml"]
+            probes:
+              liveness: &bridgeProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8081
+                  periodSeconds: 10
+                  timeoutSeconds: 2
+                  failureThreshold: 3
+              readiness: *bridgeProbe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -105,6 +136,9 @@ spec:
           # Direct to Tinyauth, for Envoy ext-auth checks (no sidecar hop).
           authz:
             port: *port
+          # The bridge's public endpoints (/idp/...).
+          idp:
+            port: 8081
     route:
       app:
         annotations:
@@ -119,6 +153,16 @@ spec:
             namespace: network
             sectionName: https-56kbps
         rules:
+          # Only the bridge's browser-facing endpoints; /idp/token and
+          # /idp/userinfo stay on localhost and are never routed.
+          - matches:
+              - path: { type: Exact, value: /idp/authorize }
+              - path: { type: PathPrefix, value: /idp/login }
+              - path: { type: PathPrefix, value: /idp/callback }
+            backendRefs:
+              - identifier: app
+                port: 8081
+          # Everything else: Tinyauth through the branding sidecar.
           - backendRefs:
               - identifier: app
                 port: 8080
@@ -145,6 +189,15 @@ spec:
         sizeLimit: 1Gi
         globalMounts:
           - path: /data
+      idp:
+        type: secret
+        name: tinyauth-idp-secret
+        advancedMounts:
+          main:
+            bridge:
+              - path: /bridge/config.yaml
+                subPath: config.yaml
+                readOnly: true
       brand:
         type: configMap
         name: tinyauth-brand
