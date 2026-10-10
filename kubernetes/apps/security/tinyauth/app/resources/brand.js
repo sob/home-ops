@@ -102,7 +102,7 @@
   function buildLauncher(apps) {
     var wrap = document.createElement("nav");
     wrap.className = "ta-launcher";
-    wrap.setAttribute("aria-label", "Your apps");
+    wrap.setAttribute("aria-label", "Available Applications");
     for (var i = 0; i < apps.length; i++) {
       var a = document.createElement("a");
       a.className = "ta-app";
@@ -129,9 +129,28 @@
     btn.parentNode.insertBefore(buildLauncher(launcher.data), btn);
   }
 
+  // The signed-in page lives at /logout and is titled "Logout". Present it
+  // as the app launcher instead: heading, tab title and address bar. The
+  // URL change is cosmetic (replaceState): reloading "/" while signed in
+  // lands here again, and the Logout button works as before.
+  function retitle() {
+    if (!logoutButton()) return;
+    var nodes = document.querySelectorAll("h1, h2, h3, div, p");
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.children.length === 0 && !n.closest("button") &&
+          /^log\s?out$/i.test((n.textContent || "").trim())) {
+        n.textContent = "Available Applications";
+      }
+    }
+    if (document.title !== "56kbps.io") document.title = "56kbps.io";
+    if (location.pathname === "/logout") history.replaceState(history.state, "", "/");
+  }
+
   function tick() {
     apply();
     placeLauncher();
+    retitle();
   }
 
   // React re-renders the buttons (loading states, navigation); re-apply.
