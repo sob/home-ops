@@ -14,7 +14,6 @@ resources:
   - ./homarr/ks.yaml
   - ./jellyfin/ks.yaml
   - ./kometa/ks.yaml
-  - ./jellyseerr/ks.yaml
   - ./lidarr/ks.yaml
   - ./manyfold/ks.yaml
   - ./enigma-bbs/ks.yaml
