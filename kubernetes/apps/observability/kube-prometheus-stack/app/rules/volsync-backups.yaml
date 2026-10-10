@@ -10,11 +10,14 @@ spec:
     - name: volsync.rules
       interval: 1m
       rules:
-        # Safety net for the cron-less unlock design: the periodic restic-unlock
-        # CronJob was removed in favour of spec.restic.unlock (unlock once, in the
-        # mover). A stale lock left by a killed mover would then silently block
-        # that source's backups until VOLSYNC_UNLOCK is bumped in its ks.yaml, so
-        # alert when a backup source stays out of sync. role="source" only —
+        # Safety net for stale restic locks. A mover killed mid-run (node
+        # restart, power loss) leaves its lock in R2; the backup itself still
+        # saves a snapshot, but the follow-on `forget` needs an exclusive lock
+        # and fails, so the source never completes a sync and retries forever.
+        # Bumping VOLSYNC_UNLOCK does NOT clear these: it runs plain
+        # `restic unlock`, which can't clear a dead pod's lock (see
+        # apps/default/jellyfin/ks.yaml). `task volsync:unlock` can.
+        # role="source" only —
         # ReplicationDestinations use manual restore-once triggers and are
         # permanently "out of sync" by design.
         - alert: VolsyncBackupOutOfSync
@@ -28,6 +31,8 @@ spec:
             summary: "Volsync backup out of sync: {{ $labels.obj_namespace }}/{{ $labels.obj_name }}"
             description: >-
               {{ $labels.obj_namespace }}/{{ $labels.obj_name }} has not completed a
-              scheduled restic backup for 6h. Often a stale repository lock from a
-              mover killed mid-backup — bump VOLSYNC_UNLOCK in that app's ks.yaml to
-              re-run `restic unlock` on the next sync.
+              scheduled restic backup for 6h. Usually a stale repository lock from a
+              mover killed mid-backup (check the mover logs for "repository is
+              already locked"). Clear it with
+              `task volsync:unlock NS={{ $labels.obj_namespace }} APP=<app>`
+              (the ReplicationSource name without "-r2").
