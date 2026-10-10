@@ -44,6 +44,13 @@ tasks:
           failed_checks="${failed_checks}kustomize "
         fi
 
+        if task validate:tinyauth; then
+          echo "✓ Tinyauth access rules passed"
+        else
+          echo "✗ Tinyauth access rules failed"
+          failed_checks="${failed_checks}tinyauth "
+        fi
+
         if task validate:kubeconform; then
           echo "✓ Kubeconform validation passed"
         else
@@ -83,6 +90,15 @@ tasks:
     preconditions:
       - sh: command -v yamllint
         msg: "yamllint not installed. Run: mise install"
+
+  tinyauth:
+    desc: Check Tinyauth app entries, its SecurityPolicies and the launcher agree
+    cmds:
+      - "{{.ROOT_DIR}}/.github/scripts/validate-tinyauth.sh"
+    silent: true
+    preconditions:
+      - sh: command -v yq && command -v jq
+        msg: "yq/jq not installed. Run: mise install"
 
   schema:
     desc: Validate files against their declared JSON schemas (app-template spec.values, Flux)
