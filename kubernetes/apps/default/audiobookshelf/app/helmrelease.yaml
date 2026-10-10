@@ -110,8 +110,12 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: the DB is restored from R2 and replicated by the
+      # litestream component (see ks.yaml). The rest is regenerable: migrations/
+      # (rewritten on start); /metadata was already an emptyDir.
       config:
-        existingClaim: audiobookshelf
+        type: emptyDir
+        sizeLimit: 1Gi
       # Cover art and cached audio-probe results. Regenerable, so it is a
       # separate emptyDir rather than something volsync has to back up —
       # audiobookshelf rebuilds it by rescanning the library.

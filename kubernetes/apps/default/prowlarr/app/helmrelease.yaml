@@ -33,6 +33,9 @@ spec:
               PROWLARR__APP__THEME: dark
               PROWLARR__AUTH__METHOD: External
               PROWLARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              # /config is ephemeral, so config.xml is regenerated on every
+              # start: anything not set here reverts to its default.
+              PROWLARR__LOG__ANALYTICSENABLED: "False"
               PROWLARR__LOG__DBENABLED: "False"
               PROWLARR__LOG__LEVEL: info
               PROWLARR__SERVER__PORT: &port 80
@@ -153,7 +156,11 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: the DB is restored from R2 and replicated by the
+      # litestream component (see ks.yaml). The rest is regenerable: config.xml
+      # from env, logs, Backups and Definitions (indexer definitions, re-downloaded).
       config:
-        existingClaim: prowlarr
+        type: emptyDir
+        sizeLimit: 2Gi
       tmp:
         type: emptyDir
