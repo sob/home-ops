@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Small config files kept in R2 instead of on a PVC: the non-SQLite half of an
+# app whose database is on Litestream (settings.json, config.ini, ...). Adds to
+# the `main` controller:
+#   - file-sync-restore: restores each missing file from R2 before the app
+#     starts. If R2 can't supply a required file the pod fails rather than
+#     starting with defaults, which the sync would then push over the good copy.
+#   - file-sync: native sidecar that pushes each file when it changes (only once
+#     it has been stable for a few seconds), keeps the previous copy as
+#     <file>.prev, and pushes once more when the pod stops.
+# The app must put FILESYNC_DIR on an emptyDir mounted into all containers
+# (globalMounts), and must use controller name `main` (see components/litestream).
+#
+# Required postBuild vars:
+#   APP            R2 path: stone-volsync/files/${APP}/<file>
+#   FILESYNC_DIR   directory the files live in, e.g. /config
+#   FILESYNC_FILES space-separated paths relative to FILESYNC_DIR; suffix "?"
+#                  marks a file as optional (skipped if neither side has it)
+#
+# First run: R2 must already hold the files (seed it from the old PVC once).
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./externalsecret.yaml
+patches:
+  - target:
+      kind: HelmRelease
+    path: patches/helm-file-sync.yaml
