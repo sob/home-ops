@@ -100,7 +100,10 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /mosquitto-init
+      # Persistence only holds retained messages and sessions (47 bytes when
+      # this moved off Ceph); publishers re-announce, so an emptyDir is enough.
       data:
-        existingClaim: *app
+        type: emptyDir
+        sizeLimit: 256Mi
         globalMounts:
           - path: /mosquitto/data

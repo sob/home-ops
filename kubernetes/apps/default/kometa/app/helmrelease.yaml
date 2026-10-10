@@ -74,8 +74,11 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     persistence:
+      # Config comes from the secret/configmap below; /config only holds
+      # config.cache, logs and a UUID, all regenerated.
       config:
-        existingClaim: kometa
+        type: emptyDir
+        sizeLimit: 1Gi
       secret:
         type: secret
         name: kometa-secret
