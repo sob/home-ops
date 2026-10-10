@@ -144,8 +144,19 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /config/cache
+      # Node-local, not Ceph: db/bazarr.db is restored from and streamed to R2
+      # by the litestream component, config/config.yaml by file-sync (see
+      # ks.yaml). The rest is regenerable.
       config:
-        existingClaim: *app
+        type: emptyDir
+        sizeLimit: 1Gi
+      # Its own mount so /config/db exists before litestream-restore seeds or
+      # restores the DB into it (a fresh emptyDir has no subdirectories).
+      db:
+        type: emptyDir
+        sizeLimit: 1Gi
+        globalMounts:
+          - path: /config/db
       log:
         type: emptyDir
         globalMounts:
