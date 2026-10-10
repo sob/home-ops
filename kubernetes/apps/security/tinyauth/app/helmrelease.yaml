@@ -157,5 +157,8 @@ spec:
               - path: /brand/brand.js
                 subPath: brand.js
                 readOnly: true
+              - path: /brand/brand.css
+                subPath: brand.css
+                readOnly: true
       tmp:
         type: emptyDir
