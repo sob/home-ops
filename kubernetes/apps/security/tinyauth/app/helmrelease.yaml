@@ -94,7 +94,7 @@ spec:
           bridge:
             image:
               repository: ghcr.io/sob/tinyauth-bridge
-              tag: sha-ecc336a
+              tag: sha-128d326
             args: ["-config", "/bridge/config.yaml"]
             probes:
               liveness: &bridgeProbe
