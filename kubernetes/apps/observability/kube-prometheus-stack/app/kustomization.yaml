@@ -9,6 +9,7 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./securitypolicy-grafana.yaml
   - ./dashboards/logs-overview.yaml
   - ./dashboards/network-syslog.yaml
   - ./alertmanager-secret.yaml

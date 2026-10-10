@@ -59,31 +59,36 @@
 
   // --- App launcher -----------------------------------------------------
   // On the signed-in page (the one with a Logout button), list the apps this
-  // user's groups can open. Groups come from /_brand/me, which nginx fills
-  // from Tinyauth's own forward-auth response; the catalogue is apps.json.
-  // The local break-glass user has no groups and sees every app. Each app
-  // still enforces its own access; this is a convenience, not a gate.
+  // user can open. For each app in apps.json, /_brand/can asks Tinyauth
+  // whether this session would be let in to its host, so the launcher
+  // follows Tinyauth's access rules exactly (break-glass included). Apps
+  // marked "everyone" aren't behind Tinyauth and do their own sign-in. This
+  // is a convenience, not a gate: each app still enforces its own access.
   var launcher = { state: "idle", data: null };
 
   function loadLauncher() {
     launcher.state = "loading";
-    Promise.all([
-      fetch("/_brand/me", { credentials: "same-origin", cache: "no-store" }).then(function (r) {
-        if (!r.ok) throw new Error("not signed in");
-        return r.json();
-      }),
-      fetch("/_brand/apps.json", { credentials: "same-origin" }).then(function (r) { return r.json(); })
-    ]).then(function (res) {
-      var groups = (res[0].groups || "").split(",").map(function (g) { return g.trim(); }).filter(Boolean);
-      var apps = res[1].apps.filter(function (a) {
-        if (groups.length === 0) return true;
-        for (var i = 0; i < a.groups.length; i++) if (groups.indexOf(a.groups[i]) !== -1) return true;
-        return false;
+    fetch("/_brand/apps.json", { credentials: "same-origin" }).then(function (r) {
+      return r.json();
+    }).then(function (catalogue) {
+      return Promise.all(catalogue.apps.map(canOpen)).then(function (allowed) {
+        return catalogue.apps.filter(function (a, i) { return allowed[i]; });
       });
+    }).then(function (apps) {
       launcher.data = apps;
       launcher.state = "ready";
       placeLauncher();
     }).catch(function () { launcher.state = "failed"; });
+  }
+
+  function canOpen(app) {
+    if (app.everyone) return Promise.resolve(true);
+    var host;
+    try { host = new URL(app.url).hostname; } catch (e) { return Promise.resolve(false); }
+    return fetch("/_brand/can?host=" + encodeURIComponent(host), {
+      credentials: "same-origin",
+      cache: "no-store"
+    }).then(function (r) { return r.ok; }, function () { return false; });
   }
 
   function logoutButton() {

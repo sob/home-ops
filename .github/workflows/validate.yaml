@@ -68,6 +68,9 @@ jobs:
       - name: Kubeconform
         run: task validate:kubeconform
 
+      - name: Tinyauth access rules
+        run: task validate:tinyauth
+
   # Advisory (non-blocking): flux-local `test` renders every HelmRelease, but
   # Renders every HelmRelease and validates the substituted output. The committed
   # cluster-settings ConfigMap supplies dummy ${SECRET_*} values (cluster-secrets
