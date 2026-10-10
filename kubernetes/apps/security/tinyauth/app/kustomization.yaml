@@ -5,3 +5,10 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+configMapGenerator:
+  - name: tinyauth-brand
+    files:
+      - ./resources/nginx.conf
+      - ./resources/brand.js
+generatorOptions:
+  disableNameSuffixHash: true
