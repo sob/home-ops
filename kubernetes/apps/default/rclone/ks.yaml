@@ -19,6 +19,10 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
+  components:
+    - ../../../../components/file-sync
   postBuild:
     substitute:
       APP: *app
+      FILESYNC_DIR: /config
+      FILESYNC_FILES: "rclone.conf pull.sh"

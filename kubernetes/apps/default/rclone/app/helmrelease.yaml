@@ -22,7 +22,7 @@ spec:
     # Interactive workbench: `kubectl exec -it deploy/rclone -- sh`, then run
     # rclone by hand. No service/route — nothing listens.
     controllers:
-      rclone:
+      main:
         strategy: Recreate
         containers:
           app:
@@ -33,8 +33,9 @@ spec:
             env:
               TZ: America/Chicago
               HOME: /config
-              # PVC-backed so OAuth token refreshes persist (a Secret mount is
-              # read-only and rclone rewrites the token on refresh).
+              # Writable and synced to R2 by file-sync (see ks.yaml), so OAuth
+              # token refreshes persist; a Secret mount would be read-only and
+              # rclone rewrites the token on refresh.
               RCLONE_CONFIG: /config/rclone.conf
               RCLONE_CACHE_DIR: /tmp/rclone
             securityContext:
@@ -72,12 +73,11 @@ spec:
                     values:
                       - "true"
     persistence:
+      # rclone.conf and pull.sh are kept in R2 by the file-sync component;
+      # inventory/ and logs/ from past runs are scratch.
       config:
-        type: persistentVolumeClaim
-        storageClass: ceph-block
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        retain: true
+        type: emptyDir
+        sizeLimit: 512Mi
         globalMounts:
           - path: /config
       media:
