@@ -60,8 +60,12 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     persistence:
+      # recyclarr.yml comes from the configmap below; /config only holds
+      # cloned guide repositories, resources, logs and a matching cache,
+      # all re-fetched (recyclarr matches by name when the cache is gone).
       config:
-        existingClaim: recyclarr
+        type: emptyDir
+        sizeLimit: 1Gi
       config-file:
         type: configMap
         name: recyclarr-configmap

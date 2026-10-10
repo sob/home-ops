@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/volsync
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -27,8 +25,3 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_SCHEDULE: "0 2 * * *"
-      VOLSYNC_CAPACITY: 1Gi
-      VOLSYNC_UID: "1024"
-      VOLSYNC_GID: "100"
-      VOLSYNC_FSGROUP: "100"

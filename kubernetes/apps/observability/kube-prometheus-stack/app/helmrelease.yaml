@@ -48,12 +48,8 @@ spec:
           - alertmanager-secret
         configMaps:
           - alertmanager-templates
-        storage:
-          volumeClaimTemplate:
-            spec:
-              resources:
-                requests:
-                  storage: 1Gi
+        # No storage: silences and notification log live in an emptyDir (there
+        # were no active silences when this moved off Ceph).
         resources:
           requests:
             cpu: 10m
@@ -203,10 +199,11 @@ spec:
         passwordKey: admin-password
       # GF_AUTH_GENERIC_OAUTH_CLIENT_ID / _SECRET (grafana-oauth.yaml).
       envFromSecret: grafana-oauth-secret
+      # Stateless: all dashboards are provisioned from git, there are no
+      # Grafana-managed alert rules or service accounts, users come from
+      # Tinyauth OIDC and the local admin from grafana-admin-secret.
       persistence:
-        enabled: true
-        storageClassName: ceph-block
-        size: 5Gi
+        enabled: false
       # ceph-block is RWO, so the volume can only be attached to one node at a
       # time. The chart defaults to RollingUpdate, which stands up the new pod
       # before retiring the old one — and if the new pod lands on a different

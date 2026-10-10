@@ -99,11 +99,10 @@ spec:
           http:
             port: 5071
     persistence:
+      # A build cache: losing it on restart only costs a warm-up.
       data:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 30Gi
-        storageClass: ceph-block
+        type: emptyDir
+        sizeLimit: 30Gi
         advancedMounts:
           main:
             copy-config:
