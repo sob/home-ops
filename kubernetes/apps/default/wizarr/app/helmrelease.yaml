@@ -24,6 +24,23 @@ spec:
   values:
     controllers:
       main:
+        # Wizarr's entrypoint starts as root and runs the app as PUID/PGID
+        # (default 1000), chowning /data to it. The litestream and file-sync
+        # sidecars (from the components) otherwise run as root with every
+        # capability dropped, which can't write the 1000-owned DB: litestream
+        # failed with "attempt to write a readonly database". Run them as the
+        # app's user.
+        initContainers:
+          litestream-restore:
+            securityContext: &appUser
+              runAsUser: 1000
+              runAsGroup: 1000
+          litestream:
+            securityContext: *appUser
+          file-sync-restore:
+            securityContext: *appUser
+          file-sync:
+            securityContext: *appUser
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
