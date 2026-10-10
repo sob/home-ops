@@ -10,6 +10,8 @@ spec:
     name: app-template
     namespace: flux-system
   interval: 30m
+  # Longer than the startup probe's 10 minutes (migrations on first start).
+  timeout: 15m
   install:
     remediation:
       retries: 3
@@ -49,6 +51,20 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
+              # Startup runs DB migrations, which took longer than liveness's
+              # 30s budget: liveness killed every 1.6.x start, Helm timed out
+              # and rolled back to 1.5.1, which can't read the migrated DB.
+              # Down since 2026-08-05. Allow up to 10 minutes to start.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 2
+                  failureThreshold: 60
             securityContext: &securityContext
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
