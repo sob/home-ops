@@ -23,7 +23,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      tautulli:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -86,7 +86,7 @@ spec:
                       - "true"
     service:
       app:
-        controller: tautulli
+        controller: main
         ports:
           http:
             port: *port
@@ -109,8 +109,12 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: tautulli.db on Litestream, config.ini (Plex token, API key) on file-sync.
+      # Backups, cache and logs are regenerable.
+      # (see ks.yaml).
       config:
-        existingClaim: tautulli
+        type: emptyDir
+        sizeLimit: 1Gi
       cache:
         type: emptyDir
         globalMounts:

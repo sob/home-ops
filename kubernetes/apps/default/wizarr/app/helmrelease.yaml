@@ -23,7 +23,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      wizarr:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -74,7 +74,11 @@ spec:
               - identifier: app
                 port: 5690
     persistence:
+      # Node-local, not Ceph: database.db on Litestream, secret.key and secrets.json on file-sync.
+      # sessions/ is regenerable (users sign in again).
+      # (see ks.yaml).
       config:
-        existingClaim: *app
+        type: emptyDir
+        sizeLimit: 512Mi
         globalMounts:
           - path: /data/database

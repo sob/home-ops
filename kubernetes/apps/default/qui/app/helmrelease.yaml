@@ -23,7 +23,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      qui:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -72,7 +72,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: qui
+        controller: main
         ports:
           http:
             port: *port
@@ -89,8 +89,12 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: qui.db on Litestream, config.toml on file-sync. backups/,
+      # themes/ and tracker-icons/ are regenerable.
+      # (see ks.yaml).
       config:
-        existingClaim: qui
+        type: emptyDir
+        sizeLimit: 512Mi
       logs:
         type: emptyDir
         globalMounts:
