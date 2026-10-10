@@ -5,6 +5,5 @@ kind: Kustomization
 namespace: observability
 resources:
   - ./helmrelease.yaml
-  - ./httproute-outpost.yaml
   - ./securitypolicy.yaml
   - ./rbac.yaml
