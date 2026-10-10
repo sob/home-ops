@@ -17,6 +17,11 @@ spec:
   upgrade:
     cleanupOnFail: true
     crds: Skip
+    # TEMPORARY: the 6.x -> 7.x chart upgrade (and dropping the PVC) changes
+    # immutable StatefulSet fields, so every plain upgrade since August failed
+    # and was rolled back. force lets Helm delete and recreate the StatefulSet.
+    # Remove once loki 7.3.0 is deployed.
+    force: true
     remediation:
       strategy: rollback
       retries: 3
