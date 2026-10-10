@@ -9,7 +9,7 @@ data:
   config.yaml: |
     endpoints:
       # Is the app itself alive? Probed in-cluster over the ClusterIP, which
-      # bypasses the gateway and Authentik entirely. The path is the app's own
+      # bypasses the gateway and Tinyauth entirely. The path is the app's own
       # liveness-probe path, so it is guaranteed unauthenticated.
       - name: "${APP}"
         group: guarded
@@ -22,11 +22,11 @@ data:
           - "[STATUS] == ${GATUS_STATUS:-200}"
         alerts:
           - type: pushover
-      # Is the public path still fronted by Authentik? follow-redirects is off
-      # deliberately: with it on, gatus walks the redirect chain all the way to
-      # the Authentik login page and grades *that* 200 -- which is green whether
-      # or not the app behind it is alive. Asserting the 302 challenge instead
-      # proves gateway + ext-auth + outpost without pretending to prove the app.
+      # Is the public path still fronted by Tinyauth? Tinyauth answers
+      # non-browser clients (gatus included) with 401 rather than a 302 to the
+      # login page, so 401 here proves gateway + ext-auth + Tinyauth without
+      # pretending to prove the app. follow-redirects stays off so a 302 to
+      # some login page can never pass as healthy.
       - name: "${APP}-edge"
         group: edge
         url: "https://${GATUS_SUBDOMAIN:-${APP}}.${GATUS_DOMAIN:-${SECRET_DOMAIN}}${GATUS_PATH:-/}"
@@ -38,6 +38,6 @@ data:
           dns-resolver: tcp://10.1.0.1:53
           follow-redirects: false
         conditions:
-          - "[STATUS] == ${GATUS_EDGE_STATUS:-302}"
+          - "[STATUS] == ${GATUS_EDGE_STATUS:-401}"
         alerts:
           - type: pushover
