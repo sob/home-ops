@@ -65,12 +65,20 @@ tasks:
   unlock:
     desc: Unlock a Restic repository for an application
     summary: |
+      Clears stale restic locks left by a mover that died mid-run (node
+      restart, power loss). Runs `restic unlock --remove-all`: plain
+      `restic unlock` (what VOLSYNC_UNLOCK triggers) can't clear a lock whose
+      pod no longer exists. The ReplicationSource is paused first so no live
+      mover's lock is removed, and unpaused afterwards even on failure.
+
       NS: Namespace the PVC is in (default: default)
       APP: Application to unlock (required)
     cmds:
+      - kubectl --namespace {{.NS}} patch replicationsource {{.APP}}-r2 --type merge -p '{"spec":{"paused":true}}'
+      - defer: kubectl --namespace {{.NS}} patch replicationsource {{.APP}}-r2 --type merge -p '{"spec":{"paused":false}}'
       - echo "Cleaning up any stuck volsync jobs for {{.APP}}..."
       - kubectl --namespace {{.NS}} delete job --field-selector status.successful==0 -l app.kubernetes.io/name={{.APP}} --ignore-not-found=true
-      - kubectl --namespace {{.NS}} delete job volsync-src-{{.APP}}-r2 --ignore-not-found=true
+      - kubectl --namespace {{.NS}} delete job volsync-src-{{.APP}}-r2 --ignore-not-found=true --wait=true
       - kubectl --namespace {{.NS}} delete job {{.JOB}} --ignore-not-found=true
       - echo "Creating unlock job..."
       - envsubst < {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml | kubectl apply -f -
