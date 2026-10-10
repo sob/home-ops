@@ -5,7 +5,7 @@
 - **Cluster**: Single cluster running Talos Linux on bare metal Intel NUC devices
 - **Nodes**: 3 control plane nodes, 4 worker nodes (10.1.1.x subnet)
 - **Storage**: Rook-Ceph for persistent storage — storage classes `ceph-block` (default) and `ceph-filesystem` (OpenEBS has been removed)
-- **Networking**: Cilium CNI. Production L7 is **Envoy Gateway** — internal gateway `10.1.100.200`, external `10.1.100.201`. External path is Cloudflare Tunnel → cloudflared → gateway service. Authentik forward-auth runs as an Envoy `SecurityPolicy` ext-auth (ingress-nginx has been removed).
+- **Networking**: Cilium CNI. Production L7 is **Envoy Gateway** — internal gateway `10.1.100.200`, external `10.1.100.201`. External path is Cloudflare Tunnel → cloudflared → gateway service. Tinyauth forward-auth runs as an Envoy `SecurityPolicy` ext-auth (via the tinyauth sidecar's adapter on :8082); Tinyauth is also the OIDC provider (login.56kbps.io) (ingress-nginx has been removed).
 - **DNS**: Blocky for internal DNS, external-dns for managing records
 - **Secrets**: External-secrets with OnePassword, SOPS for sensitive data
 - **Domain**: 56kbps.io (using Cloudflare for external access)

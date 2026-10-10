@@ -414,7 +414,6 @@ data:
     // Scrape critical app endpoints directly
     prometheus.scrape "critical_apps" {
       targets = [
-        {"__address__" = "authentik-metrics.security.svc.cluster.local:9300", "app" = "authentik", "namespace" = "security"},
         {"__address__" = "gatus.observability.svc.cluster.local:80", "app" = "gatus", "namespace" = "observability"},
         {"__address__" = "home-assistant.home.svc.cluster.local:8123", "app" = "home-assistant", "namespace" = "home"},
       ]

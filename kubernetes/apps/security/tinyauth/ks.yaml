@@ -14,6 +14,9 @@ spec:
     # Sessions live in SQLite on node-local disk, streamed to R2, so 7-day
     # sessions survive restarts and node moves.
     - ../../../../components/litestream
+    # The login page through Cloudflare, so an outage pages like Authentik's
+    # alert used to.
+    - ../../../../components/gatus/external
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -29,4 +32,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      GATUS_SUBDOMAIN: login
       LITESTREAM_DB_PATH: /data/tinyauth.db
