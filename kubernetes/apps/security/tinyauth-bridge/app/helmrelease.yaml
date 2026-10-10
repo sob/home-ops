@@ -32,7 +32,7 @@ spec:
             image:
               # sob/tinyauth-bridge, built by its CI on push to main.
               repository: ghcr.io/sob/tinyauth-bridge
-              tag: sha-d406c0d
+              tag: sha-ecc336a
             args: ["-config", "/config/config.yaml"]
             probes:
               liveness: &probe
@@ -82,13 +82,15 @@ spec:
             namespace: network
             sectionName: https-56kbps
         rules:
-          # Only the browser-facing endpoints are public. /token and /userinfo
+          # Shares login.56kbps.io with Tinyauth under /idp (Tinyauth's route
+          # takes everything else; the longer prefix wins). Only the
+          # browser-facing endpoints are public: /idp/token and /idp/userinfo
           # are reached by Tinyauth over the in-cluster Service and are never
           # routed through a gateway; /healthz is for the kubelet.
           - matches:
-              - path: { type: Exact, value: /authorize }
-              - path: { type: PathPrefix, value: /login }
-              - path: { type: PathPrefix, value: /callback }
+              - path: { type: Exact, value: /idp/authorize }
+              - path: { type: PathPrefix, value: /idp/login }
+              - path: { type: PathPrefix, value: /idp/callback }
             backendRefs:
               - identifier: app
                 port: *port

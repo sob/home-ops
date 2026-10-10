@@ -110,7 +110,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.56kbps.io
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["auth.56kbps.io"]
+        hostnames: ["login.56kbps.io"]
         parentRefs:
           - name: external-gateway
             namespace: network

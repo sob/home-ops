@@ -136,13 +136,8 @@ ingress:
     service: http://enigma-bbs.default.svc.cluster.local:8811
   - hostname: "mailer.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:24554
-  # tinyauth: SSO replacing authentik (#1846).
-  - hostname: "auth.${SECRET_DOMAIN}"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "auth.${SECRET_DOMAIN}"
-  # tinyauth-bridge: Plex / Sign in with Apple for Tinyauth. Only /authorize,
-  # /login* and /callback* are routed by its HTTPRoute.
+  # SSO: Tinyauth (login page, sessions) and tinyauth-bridge under /idp
+  # (Plex / Apple / Google). Routing between them is done by their HTTPRoutes.
   - hostname: "login.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
