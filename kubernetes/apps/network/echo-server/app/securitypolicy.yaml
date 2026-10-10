@@ -1,9 +1,9 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Tinyauth forward-auth (Envoy ext_authz) on the echo-server route. Tinyauth's
-# Envoy mode reads the host from the check request's Host (Envoy keeps the
-# original) and the path from ?path=; Envoy appends the original path to
-# `path`, so the check URL is /api/auth/envoy?path=/original/path. Signed-out
+# Tinyauth forward-auth (Envoy ext_authz) on the echo-server route. Envoy
+# appends the original path to `path`, so the check URL is
+# /api/auth/envoy?path=/original/path; the tinyauth sidecar on :8082 turns
+# that into a forward-auth check (see tinyauth's nginx.conf). Signed-out
 # browsers get a 302 to login.56kbps.io; access is the "echo" entry in
 # Tinyauth's config.
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -32,7 +32,7 @@ spec:
         - kind: Service
           name: tinyauth
           namespace: security
-          port: 3000
+          port: 8082
       path: /api/auth/envoy?path=
       headersToBackend:
         - Remote-User
