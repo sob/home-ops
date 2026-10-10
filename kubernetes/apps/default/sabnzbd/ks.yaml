@@ -36,7 +36,9 @@ spec:
       LITESTREAM_DB_PATH: /config/admin/history1.db
       LITESTREAM_SEED: admin/history1.db
       FILESYNC_DIR: /config
-      FILESYNC_FILES: "sabnzbd.ini admin/queue10.sab? admin/totals10.sab? admin/postproc2.sab? admin/rss_data.sab? admin/watched_data2.sab?"
+      # admin/ (queue, totals) lives on a node-local hostPath with incomplete/,
+      # so only the ini needs R2.
+      FILESYNC_FILES: sabnzbd.ini
       GATUS_SVC_PATH: "/api?mode=version"
       GATUS_SUBDOMAIN: sab
       VOLSYNC_SCHEDULE: "0 1 * * *"
