@@ -58,8 +58,8 @@ spec:
                 memory: 256Mi
           # Branding only: proxies the browser-facing route to Tinyauth and
           # injects /_brand/brand.js, which puts Plex and Apple logos on the
-          # login buttons (Tinyauth hard-codes its icon map). Forward-auth
-          # traffic uses the authz port and never passes through here.
+          # login buttons (Tinyauth hard-codes its icon map), and adapts Envoy
+          # ext-auth checks to forward-auth mode on :8082.
           brand:
             image:
               repository: docker.io/nginxinc/nginx-unprivileged
@@ -133,9 +133,10 @@ spec:
           # Browser-facing: through the branding sidecar.
           http:
             port: 8080
-          # Direct to Tinyauth, for Envoy ext-auth checks (no sidecar hop).
+          # Envoy ext-auth checks, through the sidecar's adapter (see
+          # resources/nginx.conf for why they don't call Tinyauth directly).
           authz:
-            port: *port
+            port: 8082
           # The bridge's public endpoints (/idp/...).
           idp:
             port: 8081
