@@ -12,11 +12,9 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/guarded
-    - ../../../../components/volsync
+    # The DB is restored from and streamed to R2 (litestream); everything
+    # else in /config is regenerable, so there is no PVC or volsync backup.
     - ../../../../components/litestream
-    # Migration only: seeds the DB from the old PVC on first start. Remove
-    # (with volsync and the PVC) once litestream/radarr exists in R2.
-    - ../../../../components/litestream-seed
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -34,9 +32,3 @@ spec:
       APP: *app
       LITESTREAM_DB_PATH: /config/radarr.db
       GATUS_SVC_PATH: /ping
-      VOLSYNC_SCHEDULE: "18 0 * * *"
-      VOLSYNC_CAPACITY: 5Gi
-      VOLSYNC_CACHE_CAPACITY: 10Gi
-      VOLSYNC_UID: "1028"
-      VOLSYNC_GID: "65536"
-      VOLSYNC_FSGROUP: "65536"
