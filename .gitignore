@@ -46,3 +46,7 @@ terraform.plan
 # Claude Code: share project config + hook, keep machine-local approvals out
 .claude/settings.local.json
 .claude/*.bak
+
+# mise per-machine overrides (e.g. a pinned TF_VAR_onepassword_account)
+.mise.local.toml
+mise.local.toml
