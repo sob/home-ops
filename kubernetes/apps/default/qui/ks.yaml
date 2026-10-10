@@ -12,12 +12,8 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/internal
-    - ../../../../components/volsync
     - ../../../../components/litestream
     - ../../../../components/file-sync
-    # Migration only: seeds the DB from the old PVC on first start. Remove
-    # (with volsync and the PVC) once litestream/qui exists in R2.
-    - ../../../../components/litestream-seed
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -37,10 +33,3 @@ spec:
       FILESYNC_DIR: /config
       FILESYNC_FILES: "config.toml"
       GATUS_SUBDOMAIN: qui
-      VOLSYNC_SCHEDULE: "3 1 * * *"
-      VOLSYNC_CAPACITY: 1Gi
-      VOLSYNC_STORAGECLASS: ceph-block
-      VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
-      VOLSYNC_UID: "1000"
-      VOLSYNC_GID: "1000"
-      VOLSYNC_FSGROUP: "1000"
