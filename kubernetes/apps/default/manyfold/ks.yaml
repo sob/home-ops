@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/postgresql
+    - ../../../../components/litestream
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -27,3 +27,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      LITESTREAM_DB_PATH: /data/manyfold.sqlite3

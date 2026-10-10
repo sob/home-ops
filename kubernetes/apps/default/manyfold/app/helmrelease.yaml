@@ -21,6 +21,16 @@ spec:
   values:
     controllers:
       main:
+        # The image starts as root and runs Manyfold as PUID/PGID (below). The
+        # litestream sidecars (from the component) otherwise run as root with
+        # every capability dropped, which can't write the app-owned DB.
+        initContainers:
+          litestream-restore:
+            securityContext: &appUser
+              runAsUser: 1039
+              runAsGroup: 65536
+          litestream:
+            securityContext: *appUser
         labels:
           postgres: "true"
         annotations:
@@ -123,3 +133,10 @@ spec:
         sizeLimit: 20Gi
         globalMounts:
           - path: /usr/src/app/tmp
+      # The SQLite DB (DATABASE_NAME in the secret), on node-local disk; the
+      # litestream component restores it from R2 and streams it back.
+      data:
+        type: emptyDir
+        sizeLimit: 1Gi
+        globalMounts:
+          - path: /data
