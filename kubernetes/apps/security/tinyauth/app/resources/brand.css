@@ -1,0 +1,9 @@
+/* Login page font. Tinyauth's own stylesheet sets the font on <body>; this
+   overrides it everywhere except code and usernames, which stay monospace. */
+html, body, button, input, select, textarea, label, h1, h2, h3, p, a, span, div {
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  font-feature-settings: "cv11", "ss01";
+}
+code, kbd, pre, samp {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace !important;
+}
