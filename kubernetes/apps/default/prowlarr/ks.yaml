@@ -12,11 +12,9 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/guarded
-    - ../../../../components/volsync
+    # The DB is restored from and streamed to R2 (litestream); everything
+    # else in /config is regenerable, so there is no PVC or volsync backup.
     - ../../../../components/litestream
-    # Migration only: seeds the DB from the old PVC on first start. Remove
-    # (with volsync and the PVC) once litestream/prowlarr exists in R2.
-    - ../../../../components/litestream-seed
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -34,5 +32,3 @@ spec:
       APP: *app
       LITESTREAM_DB_PATH: /config/prowlarr.db
       GATUS_SVC_PATH: /ping
-      VOLSYNC_SCHEDULE: "51 0 * * *"
-      VOLSYNC_CAPACITY: 5Gi
