@@ -6,7 +6,5 @@ namespace: database
 components:
   - ../../components/common
 resources:
-  - ./adminer/ks.yaml
   - ./dragonfly/ks.yaml
   - ./mosquitto/ks.yaml
-  - ./postgres/ks.yaml
