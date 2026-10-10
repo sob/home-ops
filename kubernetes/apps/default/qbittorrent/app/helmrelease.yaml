@@ -23,7 +23,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      qbittorrent:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -90,12 +90,12 @@ spec:
                       - "true"
     service:
       app:
-        controller: qbittorrent
+        controller: main
         ports:
           http:
             port: *port
       bittorrent:
-        controller: qbittorrent
+        controller: main
         type: LoadBalancer
         ports:
           bittorrent-tcp:
@@ -119,8 +119,19 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: qBittorrent/torrents.db (resume data) on Litestream,
+      # qBittorrent.conf and its small JSON files on file-sync. GeoDB is re-downloaded.
+      # (see ks.yaml).
       config:
-        existingClaim: qbittorrent
+        type: emptyDir
+        sizeLimit: 1Gi
+      # Its own mount so the DB's directory exists before litestream-restore
+      # seeds or restores into it (a fresh emptyDir has no subdirectories).
+      qbittorrent-data:
+        type: emptyDir
+        sizeLimit: 1Gi
+        globalMounts:
+          - path: /config/qBittorrent
       logs:
         type: emptyDir
         globalMounts:

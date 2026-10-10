@@ -23,7 +23,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      sabnzbd:
+      main:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -238,7 +238,7 @@ spec:
                       - "true"
     service:
       app:
-        controller: sabnzbd
+        controller: main
         ports:
           http:
             port: *port
@@ -261,8 +261,19 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # Node-local, not Ceph: admin/history1.db on Litestream, sabnzbd.ini (API keys,
+      # servers) and the admin/*.sab queue/totals state on file-sync.
+      # (see ks.yaml).
       config:
-        existingClaim: sabnzbd
+        type: emptyDir
+        sizeLimit: 512Mi
+      # Its own mount so the DB's directory exists before litestream-restore
+      # seeds or restores into it (a fresh emptyDir has no subdirectories).
+      admin:
+        type: emptyDir
+        sizeLimit: 512Mi
+        globalMounts:
+          - path: /config/admin
       logs:
         type: emptyDir
         globalMounts:

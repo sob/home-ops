@@ -13,6 +13,10 @@ spec:
   components:
     - ../../../../components/gatus/internal
     - ../../../../components/volsync
+    - ../../../../components/litestream
+    # Migration only: seeds the DB from the old PVC on first start. Remove
+    # (with volsync and the PVC) once litestream/homarr exists in R2.
+    - ../../../../components/litestream-seed
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
@@ -28,5 +32,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      LITESTREAM_DB_PATH: /appdata/db/db.sqlite
+      LITESTREAM_SEED: db/db.sqlite
       VOLSYNC_SCHEDULE: "54 0 * * *"
       VOLSYNC_CAPACITY: 5Gi

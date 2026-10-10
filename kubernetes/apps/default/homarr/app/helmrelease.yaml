@@ -25,7 +25,7 @@ spec:
     keepHistory: false
   values:
     controllers:
-      homarr:
+      main:
         replicas: 1
         strategy: Recreate
         annotations:
@@ -54,7 +54,7 @@ spec:
                 memory: 1.86Gi
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: 3000
@@ -71,5 +71,15 @@ spec:
               - identifier: app
                 port: 3000
     persistence:
+      # Node-local, not Ceph: db/db.sqlite on Litestream. redis/ is a cache.
+      # (see ks.yaml).
       appdata:
-        existingClaim: homarr
+        type: emptyDir
+        sizeLimit: 512Mi
+      # Its own mount so the DB's directory exists before litestream-restore
+      # seeds or restores into it (a fresh emptyDir has no subdirectories).
+      db:
+        type: emptyDir
+        sizeLimit: 512Mi
+        globalMounts:
+          - path: /appdata/db
