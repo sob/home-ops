@@ -88,6 +88,9 @@ spec:
             env: &rcloneEnv
               HOME: /tmp
               RCLONE_CONFIG: /dev/null
+              # The bucket exists, and the R2 key may not create buckets (403
+              # on rclone's CreateBucket check before every upload).
+              RCLONE_S3_NO_CHECK_BUCKET: "true"
               RCLONE_CONFIG_R2_TYPE:
                 valueFrom:
                   secretKeyRef: { name: seerr-litestream-secret, key: RCLONE_CONFIG_R2_TYPE }
