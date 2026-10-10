@@ -12,6 +12,8 @@
 # merges this patch before Flux substitutes variables, so the key can't be one.
 #
 # Required postBuild vars: APP, LITESTREAM_DB_PATH (absolute path to the DB).
+# Optional: LITESTREAM_SEED, the DB's path inside the old PVC for litestream-seed
+# when it isn't at the PVC's root (default: the DB's file name).
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 resources:

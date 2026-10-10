@@ -1,0 +1,83 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: required-for-kustomize-but-not-used
+spec:
+  values:
+    controllers:
+      main:
+        initContainers:
+          file-sync-restore:
+            image: &image
+              repository: rclone/rclone
+              tag: 1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                cd "${FILESYNC_DIR}"
+                for spec in ${FILESYNC_FILES}; do
+                  f=$(echo "$spec" | sed 's/?$//')
+                  [ -e "$f" ] && continue
+                  mkdir -p "$(dirname "$f")"
+                  if rclone copyto "r2:stone-volsync/files/${APP}/$f" "$f" 2>/dev/null; then
+                    echo "restored $f from R2"
+                  elif [ "$f" != "$spec" ] && ! rclone lsf "r2:stone-volsync/files/${APP}/$f" >/dev/null 2>&1; then
+                    echo "optional $f not in R2; skipping"
+                  else
+                    echo "required $f is not available from R2; not starting with defaults" >&2
+                    exit 1
+                  fi
+                done
+            envFrom: &envFrom
+              - secretRef:
+                  name: ${APP}-file-sync-secret
+            env: &env
+              HOME: /tmp
+              RCLONE_CONFIG: /dev/null
+              # The bucket exists, and the R2 key may not create buckets.
+              RCLONE_S3_NO_CHECK_BUCKET: "true"
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+          file-sync:
+            dependsOn: file-sync-restore
+            image: *image
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                dir="${FILESYNC_DIR}"
+                dst="r2:stone-volsync/files/${APP}"
+                state=/tmp/file-sync
+                mkdir -p "$state"
+                files=$(for spec in ${FILESYNC_FILES}; do echo "$spec" | sed 's/?$//'; done)
+                key() { echo "$1" | tr '/' '_'; }
+                for f in $files; do
+                  rclone cat "$dst/$f" 2>/dev/null | sha256sum | cut -d" " -f1 > "$state/$(key "$f")"
+                done
+                push() {
+                  f=$1
+                  [ -f "$dir/$f" ] || return 0
+                  a=$(sha256sum "$dir/$f" | cut -d" " -f1)
+                  [ "$a" = "$(cat "$state/$(key "$f")" 2>/dev/null)" ] && return 0
+                  sleep 3
+                  b=$(sha256sum "$dir/$f" | cut -d" " -f1)
+                  [ "$a" = "$b" ] || return 0
+                  rclone copyto "$dst/$f" "$dst/$f.prev" 2>/dev/null || true
+                  rclone copyto "$dir/$f" "$dst/$f" && echo "$a" > "$state/$(key "$f")" && echo "pushed $f"
+                }
+                pushall() { for f in $files; do push "$f"; done; }
+                trap 'pushall; exit 0' TERM INT
+                while true; do pushall; sleep 60 & wait $!; done
+            envFrom: *envFrom
+            env: *env
+            restartPolicy: Always
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
