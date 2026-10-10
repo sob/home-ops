@@ -9,14 +9,6 @@
       ]
     },
     {
-      "name": "Bazarr",
-      "url": "https://bazarr.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png",
-      "groups": [
-        "media"
-      ]
-    },
-    {
       "name": "Invites",
       "url": "https://join.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png",
@@ -28,14 +20,6 @@
       "name": "Jellyfin",
       "url": "https://jellyfin.56kbps.io/",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/jellyfin.png",
-      "groups": [
-        "media"
-      ]
-    },
-    {
-      "name": "Lidarr",
-      "url": "https://lidarr.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png",
       "groups": [
         "media"
       ]
@@ -57,30 +41,6 @@
       ]
     },
     {
-      "name": "Prowlarr",
-      "url": "https://prowlarr.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png",
-      "groups": [
-        "media"
-      ]
-    },
-    {
-      "name": "qBittorrent",
-      "url": "https://qbittorrent.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/qbittorrent.png",
-      "groups": [
-        "media"
-      ]
-    },
-    {
-      "name": "Radarr",
-      "url": "https://radarr.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png",
-      "groups": [
-        "media"
-      ]
-    },
-    {
       "name": "Requests",
       "url": "https://requests.56kbps.io/",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/overseerr.png",
@@ -89,11 +49,51 @@
       ]
     },
     {
+      "name": "Bazarr",
+      "url": "https://bazarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Lidarr",
+      "url": "https://lidarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Prowlarr",
+      "url": "https://prowlarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "qBittorrent",
+      "url": "https://qbittorrent.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/qbittorrent.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Radarr",
+      "url": "https://radarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
       "name": "SABnzbd",
       "url": "https://sab.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sabnzbd.png",
       "groups": [
-        "media"
+        "media-download"
       ]
     },
     {
@@ -101,7 +101,7 @@
       "url": "https://sonarr.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png",
       "groups": [
-        "media"
+        "media-download"
       ]
     },
     {
@@ -109,7 +109,7 @@
       "url": "https://tautulli.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png",
       "groups": [
-        "media"
+        "media-download"
       ]
     },
     {
@@ -169,11 +169,19 @@
       ]
     },
     {
+      "name": "Echo",
+      "url": "https://echo-server.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png",
+      "groups": [
+        "network"
+      ]
+    },
+    {
       "name": "BBS Draw",
       "url": "https://draw.halfduplex.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/draw.png",
       "groups": [
-        "network"
+        "bbs-sysop"
       ]
     },
     {
@@ -181,15 +189,7 @@
       "url": "https://edit.halfduplex.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png",
       "groups": [
-        "network"
-      ]
-    },
-    {
-      "name": "Echo",
-      "url": "https://echo-server.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png",
-      "groups": [
-        "network"
+        "bbs-sysop"
       ]
     }
   ]
