@@ -16,15 +16,57 @@ code, kbd, pre, samp {
   flex-wrap: wrap;
 }
 .ta-launcher {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   flex: 0 0 100%;
   min-width: 0;
   width: 100%;
-  margin: 4px 0 16px;
-  max-height: 60vh;
-  overflow-y: auto;
+  margin: 4px 0 8px;
+}
+.ta-group-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  opacity: .6;
+}
+.ta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+/* The card's container is capped at max-w-sm (24rem); on the launcher
+   page only, let it use up to 56rem of the screen. */
+.max-w-sm:has(.ta-launcher) {
+  max-width: min(56rem, calc(100vw - 2rem));
+  width: 56rem;
+}
+
+/* Logout moves to the top bar (brand.js); hide Tinyauth's card button. */
+.ta-hidden {
+  display: none !important;
+}
+:has(> .ta-logout) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ta-logout {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+  background: var(--background, #fff);
+  color: var(--destructive, #dc2626);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.ta-logout:hover {
+  background: color-mix(in oklab, var(--destructive, #dc2626) 8%, var(--background, #fff));
 }
 .ta-app {
   display: flex;

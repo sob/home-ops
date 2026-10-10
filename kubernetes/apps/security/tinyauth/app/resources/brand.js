@@ -91,19 +91,37 @@
     }).then(function (r) { return r.ok; }, function () { return false; });
   }
 
+  // Tinyauth's own Logout button (in the card), never ours (.ta-logout).
   function logoutButton() {
-    var buttons = document.querySelectorAll("button");
+    var buttons = document.querySelectorAll("button:not(.ta-logout)");
     for (var i = 0; i < buttons.length; i++) {
       if (/^log\s?out$/i.test((buttons[i].textContent || "").trim())) return buttons[i];
     }
     return null;
   }
 
+  // Tiles are grouped under headings by each app's "group" in apps.json
+  // (display only; access is Tinyauth's). Groups keep catalogue order, and
+  // a group with nothing this user can open isn't shown.
   function buildLauncher(apps) {
     var wrap = document.createElement("nav");
     wrap.className = "ta-launcher";
     wrap.setAttribute("aria-label", "Available Applications");
+    var grids = {};
     for (var i = 0; i < apps.length; i++) {
+      var name = apps[i].group || "Other";
+      if (!grids[name]) {
+        var section = document.createElement("section");
+        section.className = "ta-group";
+        var heading = document.createElement("h3");
+        heading.className = "ta-group-title";
+        heading.textContent = name;
+        grids[name] = document.createElement("div");
+        grids[name].className = "ta-grid";
+        section.appendChild(heading);
+        section.appendChild(grids[name]);
+        wrap.appendChild(section);
+      }
       var a = document.createElement("a");
       a.className = "ta-app";
       a.href = apps[i].url;
@@ -115,14 +133,35 @@
       label.textContent = apps[i].name;
       a.appendChild(img);
       a.appendChild(label);
-      wrap.appendChild(a);
+      grids[name].appendChild(a);
     }
     return wrap;
+  }
+
+  // On the launcher page, Logout sits in the top bar beside Tinyauth's
+  // account menu. It clicks Tinyauth's own (hidden) button, so the sign-out
+  // request, toast and redirect are unchanged; the original isn't moved,
+  // because React owns it.
+  function placeTopLogout(btn) {
+    btn.classList.add("ta-hidden");
+    if (document.querySelector(".ta-logout")) return;
+    var bar = document.querySelector("div.absolute.top-4.right-4");
+    if (!bar) return;
+    var top = document.createElement("button");
+    top.type = "button";
+    top.className = "ta-logout";
+    top.textContent = "Logout";
+    top.addEventListener("click", function () {
+      var original = logoutButton();
+      if (original) original.click();
+    });
+    bar.insertBefore(top, bar.firstChild);
   }
 
   function placeLauncher() {
     var btn = logoutButton();
     if (!btn) return;
+    placeTopLogout(btn);
     if (document.querySelector(".ta-launcher")) return;
     if (launcher.state === "idle") return loadLauncher();
     if (launcher.state !== "ready" || !launcher.data.length) return;
