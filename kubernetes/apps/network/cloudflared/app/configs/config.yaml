@@ -96,6 +96,14 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "books.56kbps.io"
+  - hostname: "bbs-edit.56kbps.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "bbs-edit.56kbps.io"
+  - hostname: "bbs-draw.56kbps.io"
+    service: https://external-gateway.network.svc.cluster.local:443
+    originRequest:
+      originServerName: "bbs-draw.56kbps.io"
   - hostname: "sonarr.56kbps.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
@@ -120,14 +128,6 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "enigma.halfduplex.io"
-  - hostname: "edit.halfduplex.io"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "edit.halfduplex.io"
-  - hostname: "draw.halfduplex.io"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "draw.halfduplex.io"
   - hostname: "telnet.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:23
   - hostname: "ssh.halfduplex.io"

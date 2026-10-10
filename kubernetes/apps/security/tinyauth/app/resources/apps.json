@@ -178,7 +178,7 @@
     },
     {
       "name": "BBS Draw",
-      "url": "https://draw.halfduplex.io",
+      "url": "https://bbs-draw.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/draw.png",
       "groups": [
         "bbs-sysop"
@@ -186,7 +186,7 @@
     },
     {
       "name": "BBS Editor",
-      "url": "https://edit.halfduplex.io",
+      "url": "https://bbs-edit.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png",
       "groups": [
         "bbs-sysop"

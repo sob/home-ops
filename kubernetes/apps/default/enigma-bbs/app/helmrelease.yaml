@@ -252,24 +252,26 @@ spec:
             protocol: TCP
             targetPort: 3000
     route:
-      # code-server editor (edit.halfduplex.io) — Authentik forward-auth enforced by
-      # securitypolicy.yaml; login flow served by httproute-outpost.yaml.
+      # Sysop tools on 56kbps.io names so Tinyauth's session cookie covers them;
+      # securitypolicy.yaml puts both behind Tinyauth (bbs-sysop group).
+      # code-server editor.
       code:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.halfduplex.io
+          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/is-public: "true"
         hostnames:
-          - edit.halfduplex.io
+          - bbs-edit.56kbps.io
         parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: external-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: internal-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
         rules:
           - backendRefs:
               - name: enigma-bbs
@@ -278,23 +280,24 @@ spec:
               - path:
                   type: PathPrefix
                   value: /
-      # draw app (draw.halfduplex.io) — public, no auth (no SecurityPolicy targets it).
+      # Draw app.
       draw:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.halfduplex.io
+          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/is-public: "true"
         hostnames:
-          - draw.halfduplex.io
+          - bbs-draw.56kbps.io
         parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: external-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
           - group: gateway.networking.k8s.io
             kind: Gateway
             name: internal-gateway
             namespace: network
-            sectionName: https-halfduplex
+            sectionName: https-56kbps
         rules:
           - backendRefs:
               - name: enigma-bbs
