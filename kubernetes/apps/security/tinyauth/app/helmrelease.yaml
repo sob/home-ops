@@ -220,5 +220,8 @@ spec:
               - path: /brand/apps.json
                 subPath: apps.json
                 readOnly: true
+              - path: /brand/launcher.html
+                subPath: launcher.html
+                readOnly: true
       tmp:
         type: emptyDir
