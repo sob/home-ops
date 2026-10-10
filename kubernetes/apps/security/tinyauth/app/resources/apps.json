@@ -1,0 +1,196 @@
+{
+  "apps": [
+    {
+      "name": "Audiobooks",
+      "url": "https://books.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/audiobookshelf.png",
+      "groups": [
+        "media"
+      ]
+    },
+    {
+      "name": "Invites",
+      "url": "https://join.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png",
+      "groups": [
+        "media"
+      ]
+    },
+    {
+      "name": "Jellyfin",
+      "url": "https://jellyfin.56kbps.io/",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/jellyfin.png",
+      "groups": [
+        "media"
+      ]
+    },
+    {
+      "name": "Manyfold",
+      "url": "https://manyfold.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/manyfold.png",
+      "groups": [
+        "media"
+      ]
+    },
+    {
+      "name": "Plex",
+      "url": "https://app.plex.tv/",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/plex.png",
+      "groups": [
+        "media"
+      ]
+    },
+    {
+      "name": "Requests",
+      "url": "https://requests.56kbps.io/",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/overseerr.png",
+      "groups": [
+        "media"
+      ]
+    },
+    {
+      "name": "Bazarr",
+      "url": "https://bazarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Lidarr",
+      "url": "https://lidarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Prowlarr",
+      "url": "https://prowlarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "qBittorrent",
+      "url": "https://qbittorrent.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/qbittorrent.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Radarr",
+      "url": "https://radarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "SABnzbd",
+      "url": "https://sab.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sabnzbd.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Sonarr",
+      "url": "https://sonarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Tautulli",
+      "url": "https://tautulli.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png",
+      "groups": [
+        "media-download"
+      ]
+    },
+    {
+      "name": "Homarr",
+      "url": "https://homarr.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homarr.png",
+      "groups": [
+        "home"
+      ]
+    },
+    {
+      "name": "Home Assistant",
+      "url": "https://hass.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png",
+      "groups": [
+        "home"
+      ]
+    },
+    {
+      "name": "LubeLogger",
+      "url": "https://lubelog.56kbps.io",
+      "icon": "https://demo.lubelogger.com/defaults/lubelogger_icon_72.png",
+      "groups": [
+        "home"
+      ]
+    },
+    {
+      "name": "Adminer",
+      "url": "https://postgres.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/adminer.png",
+      "groups": [
+        "observability"
+      ]
+    },
+    {
+      "name": "Grafana",
+      "url": "https://grafana.56kbps.io",
+      "icon": "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/grafana.png",
+      "groups": [
+        "observability"
+      ]
+    },
+    {
+      "name": "Logs",
+      "url": "https://logs.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/dozzle.png",
+      "groups": [
+        "observability"
+      ]
+    },
+    {
+      "name": "Status",
+      "url": "https://status.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/gatus.png",
+      "groups": [
+        "observability"
+      ]
+    },
+    {
+      "name": "Echo",
+      "url": "https://echo-server.56kbps.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png",
+      "groups": [
+        "network"
+      ]
+    },
+    {
+      "name": "BBS Draw",
+      "url": "https://draw.halfduplex.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/draw.png",
+      "groups": [
+        "bbs-sysop"
+      ]
+    },
+    {
+      "name": "BBS Editor",
+      "url": "https://edit.halfduplex.io",
+      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png",
+      "groups": [
+        "bbs-sysop"
+      ]
+    }
+  ]
+}

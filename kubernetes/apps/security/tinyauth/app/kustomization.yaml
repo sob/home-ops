@@ -12,5 +12,6 @@ configMapGenerator:
       - ./resources/nginx.conf
       - ./resources/brand.js
       - ./resources/brand.css
+      - ./resources/apps.json
 generatorOptions:
   disableNameSuffixHash: true

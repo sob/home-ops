@@ -213,5 +213,8 @@ spec:
               - path: /brand/brand.css
                 subPath: brand.css
                 readOnly: true
+              - path: /brand/apps.json
+                subPath: apps.json
+                readOnly: true
       tmp:
         type: emptyDir
