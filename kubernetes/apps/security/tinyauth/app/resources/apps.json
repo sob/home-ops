@@ -95,12 +95,6 @@
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homarr.png"
     },
     {
-      "name": "Home Assistant",
-      "group": "Home",
-      "url": "https://hass.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
-    },
-    {
       "name": "Adminer",
       "group": "Monitoring",
       "url": "https://postgres.56kbps.io",
