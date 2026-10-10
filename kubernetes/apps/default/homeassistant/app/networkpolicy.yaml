@@ -5,7 +5,7 @@
 # configuration.yaml trusts 10.42.0.0/16 — the whole pod CIDR, not just the two
 # gateway pods, because their addresses change on every restart. Without this
 # policy any pod in the cluster can POST to homeassistant.default.svc:8123
-# /auth/login_flow and be handed an owner session, bypassing Authentik
+# /auth/login_flow and be handed an owner session, bypassing forward-auth
 # completely. That is not theoretical; it is exactly how the auto-login was
 # verified.
 #
@@ -26,7 +26,7 @@ spec:
     - Ingress
   ingress:
     # The Envoy gateways. Traffic arriving this way on the app route has already
-    # passed the Authentik SecurityPolicy, which is what makes trusting the pod
+    # passed the Tinyauth SecurityPolicy, which is what makes trusting the pod
     # CIDR acceptable at all.
     #
     # 12321 is the code-server sidecar (hass-code.${SECRET_DOMAIN}, internal
