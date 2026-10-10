@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# Grafana's Tinyauth OIDC client credentials (the "grafana" client in
+# security/tinyauth reads the same two fields). Exposed to Grafana as env.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: grafana-oauth
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-connect
+  target:
+    name: grafana-oauth-secret
+    template:
+      engineVersion: v2
+      data:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "{{ .GRAFANA_CLIENT_ID }}"
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "{{ .GRAFANA_CLIENT_SECRET }}"
+  data:
+    - secretKey: GRAFANA_CLIENT_ID
+      remoteRef:
+        key: authentik
+        property: GRAFANA_CLIENT_ID
+    - secretKey: GRAFANA_CLIENT_SECRET
+      remoteRef:
+        key: authentik
+        property: GRAFANA_CLIENT_SECRET

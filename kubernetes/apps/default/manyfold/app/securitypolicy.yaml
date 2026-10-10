@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Tinyauth forward-auth (Envoy ext-auth); access is the "manyfold" entry in
+# Tinyauth's config. Manyfold signs users in over Tinyauth OIDC, which has
+# no per-client access rules, so this is what limits who can use it.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: manyfold
+  namespace: default
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: manyfold
+  extAuth:
+    failOpen: false
+    recomputeRoute: true
+    headersToExtAuth:
+      - cookie
+      - accept
+      - user-agent
+      - authorization
+      - x-forwarded-for
+      - x-forwarded-proto
+      - x-real-ip
+    http:
+      backendRefs:
+        - kind: Service
+          name: tinyauth
+          namespace: security
+          port: 8082
+      path: /api/auth/envoy?path=
+      headersToBackend:
+        - Remote-User
+        - Remote-Name
+        - Remote-Email
+        - Remote-Groups
+        - Remote-Sub
