@@ -57,7 +57,79 @@
     }
   }
 
+  // --- App launcher -----------------------------------------------------
+  // On the signed-in page (the one with a Logout button), list the apps this
+  // user's groups can open. Groups come from /_brand/me, which nginx fills
+  // from Tinyauth's own forward-auth response; the catalogue is apps.json.
+  // The local break-glass user has no groups and sees every app. Each app
+  // still enforces its own access; this is a convenience, not a gate.
+  var launcher = { state: "idle", data: null };
+
+  function loadLauncher() {
+    launcher.state = "loading";
+    Promise.all([
+      fetch("/_brand/me", { credentials: "same-origin", cache: "no-store" }).then(function (r) {
+        if (!r.ok) throw new Error("not signed in");
+        return r.json();
+      }),
+      fetch("/_brand/apps.json", { credentials: "same-origin" }).then(function (r) { return r.json(); })
+    ]).then(function (res) {
+      var groups = (res[0].groups || "").split(",").map(function (g) { return g.trim(); }).filter(Boolean);
+      var apps = res[1].apps.filter(function (a) {
+        if (groups.length === 0) return true;
+        for (var i = 0; i < a.groups.length; i++) if (groups.indexOf(a.groups[i]) !== -1) return true;
+        return false;
+      });
+      launcher.data = apps;
+      launcher.state = "ready";
+      placeLauncher();
+    }).catch(function () { launcher.state = "failed"; });
+  }
+
+  function logoutButton() {
+    var buttons = document.querySelectorAll("button");
+    for (var i = 0; i < buttons.length; i++) {
+      if (/^log\s?out$/i.test((buttons[i].textContent || "").trim())) return buttons[i];
+    }
+    return null;
+  }
+
+  function buildLauncher(apps) {
+    var wrap = document.createElement("nav");
+    wrap.className = "ta-launcher";
+    wrap.setAttribute("aria-label", "Your apps");
+    for (var i = 0; i < apps.length; i++) {
+      var a = document.createElement("a");
+      a.className = "ta-app";
+      a.href = apps[i].url;
+      var img = document.createElement("img");
+      img.src = apps[i].icon;
+      img.alt = "";
+      img.loading = "lazy";
+      var label = document.createElement("span");
+      label.textContent = apps[i].name;
+      a.appendChild(img);
+      a.appendChild(label);
+      wrap.appendChild(a);
+    }
+    return wrap;
+  }
+
+  function placeLauncher() {
+    var btn = logoutButton();
+    if (!btn) return;
+    if (document.querySelector(".ta-launcher")) return;
+    if (launcher.state === "idle") return loadLauncher();
+    if (launcher.state !== "ready" || !launcher.data.length) return;
+    btn.parentNode.insertBefore(buildLauncher(launcher.data), btn);
+  }
+
+  function tick() {
+    apply();
+    placeLauncher();
+  }
+
   // React re-renders the buttons (loading states, navigation); re-apply.
-  new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
-  apply();
+  new MutationObserver(tick).observe(document.documentElement, { childList: true, subtree: true });
+  tick();
 })();
