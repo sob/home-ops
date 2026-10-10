@@ -37,17 +37,20 @@ spec:
             command: ["/bin/sh", "-c"]
             args:
               - |
-                mkdir -p /incomplete
-                # Tolerate failure when ownership is already correct: chown on a
-                # dir you do not own fails even as root without CAP_CHOWN, and
-                # re-running is a no-op in the normal case.
-                chown 1031:65536 /incomplete 2>/dev/null || true
-                chmod 0775 /incomplete 2>/dev/null || true
-                # Fail loudly only if the app user genuinely cannot write.
-                su -s /bin/sh -c 'touch /incomplete/.wtest && rm -f /incomplete/.wtest' \
-                  1031 2>/dev/null || test -w /incomplete || {
-                    echo "FATAL: /incomplete not writable by uid 1031"; exit 1; }
-                echo "/incomplete ready: $(stat -c '%u:%g %a' /incomplete)"
+                # Both hostPath dirs: in-flight downloads and the queue (admin/).
+                for d in /incomplete /config/admin; do
+                  mkdir -p "$d"
+                  # Tolerate failure when ownership is already correct: chown on a
+                  # dir you do not own fails even as root without CAP_CHOWN, and
+                  # re-running is a no-op in the normal case.
+                  chown 1031:65536 "$d" 2>/dev/null || true
+                  chmod 0775 "$d" 2>/dev/null || true
+                  # Fail loudly only if the app user genuinely cannot write.
+                  su -s /bin/sh -c "touch $d/.wtest && rm -f $d/.wtest" \
+                    1031 2>/dev/null || test -w "$d" || {
+                      echo "FATAL: $d not writable by uid 1031"; exit 1; }
+                  echo "$d ready: $(stat -c '%u:%g %a' "$d")"
+                done
             securityContext:
               runAsUser: 0
               runAsNonRoot: false
@@ -267,11 +270,17 @@ spec:
       config:
         type: emptyDir
         sizeLimit: 512Mi
-      # Its own mount so the DB's directory exists before litestream-restore
-      # seeds or restores into it (a fresh emptyDir has no subdirectories).
+      # The queue (queue10.sab, future/), totals and the history DB. Node-local
+      # on the same disk as incomplete/ (below), because a queue entry is only
+      # usable together with its job folder there: this keeps both across every
+      # restart and redeploy, at local-disk speed. Losing metal-07 would lose
+      # in-flight jobs either way. history1.db is also streamed to R2 by
+      # Litestream as an off-node copy (restored only if the file is missing).
+      # init-incomplete creates and chowns it like /incomplete.
       admin:
-        type: emptyDir
-        sizeLimit: 512Mi
+        type: hostPath
+        hostPath: /var/local-storage/sabnzbd-admin
+        hostPathType: DirectoryOrCreate
         globalMounts:
           - path: /config/admin
       logs:
