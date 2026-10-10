@@ -8,7 +8,7 @@ metadata:
 data:
   config.yaml: |
     endpoints:
-      # Reachable on the internal gateway only, and not behind Authentik, so a
+      # Reachable on the internal gateway only, and not behind Tinyauth, so a
       # plain 200 through the front door is honest signal on its own.
       - name: "${APP}"
         group: internal
