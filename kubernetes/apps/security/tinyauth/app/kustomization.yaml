@@ -14,5 +14,6 @@ configMapGenerator:
       - ./resources/brand.js
       - ./resources/brand.css
       - ./resources/apps.json
+      - ./resources/launcher.html
 generatorOptions:
   disableNameSuffixHash: true

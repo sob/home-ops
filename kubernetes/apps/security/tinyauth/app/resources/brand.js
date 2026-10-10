@@ -1,4 +1,5 @@
-// Swaps Tinyauth's generic OAuth icon for provider logos on the login page.
+// Swaps Tinyauth's generic OAuth icon for provider logos on the login page,
+// and sends the signed-in /logout page to the launcher (launcher.html).
 // Tinyauth picks icons from a hard-coded map by provider id; until upstream
 // has plex/apple, this matches buttons by their visible name instead.
 // Purely cosmetic: if the markup changes, the buttons keep the generic icon.
@@ -57,100 +58,14 @@
     }
   }
 
-  // --- App launcher -----------------------------------------------------
-  // On the signed-in page (the one with a Logout button), list the apps this
-  // user can open. For each app in apps.json, /_brand/can asks Tinyauth
-  // whether this session would be let in to its host, so the launcher
-  // follows Tinyauth's access rules exactly (break-glass included). Apps
-  // marked "everyone" aren't behind Tinyauth and do their own sign-in. This
-  // is a convenience, not a gate: each app still enforces its own access.
-  var launcher = { state: "idle", data: null };
-
-  function loadLauncher() {
-    launcher.state = "loading";
-    fetch("/_brand/apps.json", { credentials: "same-origin" }).then(function (r) {
-      return r.json();
-    }).then(function (catalogue) {
-      return Promise.all(catalogue.apps.map(canOpen)).then(function (allowed) {
-        return catalogue.apps.filter(function (a, i) { return allowed[i]; });
-      });
-    }).then(function (apps) {
-      launcher.data = apps;
-      launcher.state = "ready";
-      placeLauncher();
-    }).catch(function () { launcher.state = "failed"; });
-  }
-
-  function canOpen(app) {
-    if (app.everyone) return Promise.resolve(true);
-    var host;
-    try { host = new URL(app.url).hostname; } catch (e) { return Promise.resolve(false); }
-    return fetch("/_brand/can?host=" + encodeURIComponent(host), {
-      credentials: "same-origin",
-      cache: "no-store"
-    }).then(function (r) { return r.ok; }, function () { return false; });
-  }
-
-  function logoutButton() {
-    var buttons = document.querySelectorAll("button");
-    for (var i = 0; i < buttons.length; i++) {
-      if (/^log\s?out$/i.test((buttons[i].textContent || "").trim())) return buttons[i];
-    }
-    return null;
-  }
-
-  function buildLauncher(apps) {
-    var wrap = document.createElement("nav");
-    wrap.className = "ta-launcher";
-    wrap.setAttribute("aria-label", "Available Applications");
-    for (var i = 0; i < apps.length; i++) {
-      var a = document.createElement("a");
-      a.className = "ta-app";
-      a.href = apps[i].url;
-      var img = document.createElement("img");
-      img.src = apps[i].icon;
-      img.alt = "";
-      img.loading = "lazy";
-      var label = document.createElement("span");
-      label.textContent = apps[i].name;
-      a.appendChild(img);
-      a.appendChild(label);
-      wrap.appendChild(a);
-    }
-    return wrap;
-  }
-
-  function placeLauncher() {
-    var btn = logoutButton();
-    if (!btn) return;
-    if (document.querySelector(".ta-launcher")) return;
-    if (launcher.state === "idle") return loadLauncher();
-    if (launcher.state !== "ready" || !launcher.data.length) return;
-    btn.parentNode.insertBefore(buildLauncher(launcher.data), btn);
-  }
-
-  // The signed-in page lives at /logout and is titled "Logout". Present it
-  // as the app launcher instead: heading, tab title and address bar. The
-  // URL change is cosmetic (replaceState): reloading "/" while signed in
-  // lands here again, and the Logout button works as before.
-  function retitle() {
-    if (!logoutButton()) return;
-    var nodes = document.querySelectorAll("h1, h2, h3, div, p");
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      if (n.children.length === 0 && !n.closest("button") &&
-          /^log\s?out$/i.test((n.textContent || "").trim())) {
-        n.textContent = "Available Applications";
-      }
-    }
-    if (document.title !== "56kbps.io") document.title = "56kbps.io";
-    if (location.pathname === "/logout") history.replaceState(history.state, "", "/");
-  }
-
+  // Signed in with nowhere else to go, Tinyauth's app navigates to its
+  // /logout page. The launcher at "/" (launcher.html) replaces that page.
   function tick() {
+    if (location.pathname === "/logout") {
+      location.replace("/");
+      return;
+    }
     apply();
-    placeLauncher();
-    retitle();
   }
 
   // React re-renders the buttons (loading states, navigation); re-apply.

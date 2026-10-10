@@ -1,0 +1,248 @@
+<!doctype html>
+<!--
+  App launcher, served by the tinyauth pod's nginx at "/" on the login host.
+  Same-origin with Tinyauth, so it uses Tinyauth's own API:
+    /api/context/user  who is signed in (signed out -> /login)
+    /api/user/logout   sign out (what Tinyauth's button calls)
+  The catalogue is /_brand/apps.json; /_brand/can?host= asks Tinyauth whether
+  this session would be let in to an app, so the tiles follow Tinyauth's
+  access rules exactly. Apps marked "everyone" do their own sign-in.
+  "group" in apps.json is display only.
+  Note: no dollar-brace sequences in this file (Flux postBuild substitution).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>56kbps.io</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg: #f4f4f5;
+      --card: rgba(255, 255, 255, .94);
+      --text: #18181b;
+      --muted: #71717a;
+      --line: rgba(24, 24, 27, .12);
+      --hover: rgba(24, 24, 27, .06);
+      --danger: #dc2626;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #09090b;
+        --card: rgba(24, 24, 27, .92);
+        --text: #fafafa;
+        --muted: #a1a1aa;
+        --line: rgba(250, 250, 250, .12);
+        --hover: rgba(250, 250, 250, .07);
+        --danger: #f87171;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-feature-settings: "cv11", "ss01";
+      color: var(--text);
+      background: var(--bg) center / cover fixed no-repeat;
+      min-height: 100svh;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 15px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--card);
+      backdrop-filter: blur(8px);
+    }
+    .account {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 4px 4px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 0;
+    }
+    .account .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .logout {
+      flex-shrink: 0;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--danger);
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .logout:hover { background: var(--hover); }
+    .logout:disabled { opacity: .6; cursor: default; }
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin: 4vh auto 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .12);
+    }
+    h1 { margin: 0 0 24px; font-size: 22px; font-weight: 700; }
+    section + section { margin-top: 24px; }
+    h2 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+      gap: 6px;
+    }
+    .app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 6px 12px;
+      border-radius: 12px;
+      color: inherit;
+      text-decoration: none;
+      font-size: 13px;
+      text-align: center;
+      transition: background-color .15s ease;
+    }
+    .app:hover, .app:focus-visible { background: var(--hover); outline: none; }
+    .app img { width: 44px; height: 44px; object-fit: contain; }
+    .app span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status { color: var(--muted); font-size: 14px; }
+    @media (max-width: 520px) {
+      main { padding: 20px 16px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">56kbps.io</div>
+    <div class="account" hidden>
+      <span class="who"></span>
+      <button class="logout" type="button">Logout</button>
+    </div>
+  </header>
+  <main>
+    <h1>Available Applications</h1>
+    <div id="apps"><p class="status">Loading…</p></div>
+  </main>
+  <script>
+  (function () {
+    "use strict";
+    var appsEl = document.getElementById("apps");
+    var account = document.querySelector(".account");
+    var logoutBtn = document.querySelector(".logout");
+
+    function getJSON(url) {
+      return fetch(url, { credentials: "same-origin", cache: "no-store" }).then(function (r) {
+        return r.json();
+      });
+    }
+
+    function status(text) {
+      appsEl.textContent = "";
+      var p = document.createElement("p");
+      p.className = "status";
+      p.textContent = text;
+      appsEl.appendChild(p);
+    }
+
+    function canOpen(app) {
+      if (app.everyone) return Promise.resolve(true);
+      var host;
+      try { host = new URL(app.url).hostname; } catch (e) { return Promise.resolve(false); }
+      return fetch("/_brand/can?host=" + encodeURIComponent(host), {
+        credentials: "same-origin",
+        cache: "no-store"
+      }).then(function (r) { return r.ok; }, function () { return false; });
+    }
+
+    function render(apps) {
+      appsEl.textContent = "";
+      if (!apps.length) return status("No applications are available to this account.");
+      var grids = {};
+      apps.forEach(function (app) {
+        var group = app.group || "Other";
+        if (!grids[group]) {
+          var section = document.createElement("section");
+          var h2 = document.createElement("h2");
+          h2.textContent = group;
+          grids[group] = document.createElement("div");
+          grids[group].className = "grid";
+          section.appendChild(h2);
+          section.appendChild(grids[group]);
+          appsEl.appendChild(section);
+        }
+        var a = document.createElement("a");
+        a.className = "app";
+        a.href = app.url;
+        var img = document.createElement("img");
+        img.src = app.icon;
+        img.alt = "";
+        img.loading = "lazy";
+        var label = document.createElement("span");
+        label.textContent = app.name;
+        a.appendChild(img);
+        a.appendChild(label);
+        grids[group].appendChild(a);
+      });
+    }
+
+    logoutBtn.addEventListener("click", function () {
+      logoutBtn.disabled = true;
+      fetch("/api/user/logout", { method: "POST", credentials: "same-origin" }).then(function (r) {
+        if (!r.ok) throw new Error("logout failed");
+        location.replace("/login");
+      }).catch(function () {
+        logoutBtn.disabled = false;
+        status("Logout failed. Try again.");
+      });
+    });
+
+    // Same background as Tinyauth's pages.
+    getJSON("/api/context/app").then(function (ctx) {
+      if (ctx && ctx.ui && ctx.ui.backgroundImage) {
+        document.body.style.backgroundImage = "url(\"" + ctx.ui.backgroundImage.replace(/"/g, "") + "\")";
+      }
+    }).catch(function () {});
+
+    getJSON("/api/context/user").then(function (ctx) {
+      if (ctx.totp && ctx.totp.pending) return location.replace("/totp");
+      if (!ctx.auth || !ctx.auth.authenticated) return location.replace("/login");
+      account.querySelector(".who").textContent = ctx.auth.name || ctx.auth.email || ctx.auth.username;
+      account.hidden = false;
+      return getJSON("/_brand/apps.json").then(function (catalogue) {
+        return Promise.all(catalogue.apps.map(canOpen)).then(function (allowed) {
+          render(catalogue.apps.filter(function (app, i) { return allowed[i]; }));
+        });
+      });
+    }).catch(function () {
+      status("Couldn't load your applications. Reload to try again.");
+    });
+  })();
+  </script>
+</body>
+</html>

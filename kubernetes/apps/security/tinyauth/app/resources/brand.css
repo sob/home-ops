@@ -7,39 +7,3 @@ html, body, button, input, select, textarea, label, h1, h2, h3, p, a, span, div 
 code, kbd, pre, samp {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace !important;
 }
-
-/* App launcher on the signed-in page (brand.js). It is inserted next to
-   the Logout button, whose container is a single-row flexbox: without
-   wrapping, the launcher shrinks to zero width and clips every tile. Let
-   that row wrap and give the launcher a full line of its own. */
-:has(> .ta-launcher) {
-  flex-wrap: wrap;
-}
-.ta-launcher {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: 8px;
-  flex: 0 0 100%;
-  min-width: 0;
-  width: 100%;
-  margin: 4px 0 16px;
-  max-height: 60vh;
-  overflow-y: auto;
-}
-.ta-app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 4px;
-  border-radius: 10px;
-  text-decoration: none;
-  color: inherit;
-  font-size: 12px;
-  line-height: 1.2;
-  text-align: center;
-  transition: background-color .15s ease;
-}
-.ta-app:hover, .ta-app:focus-visible { background: color-mix(in oklab, currentColor 8%, transparent); outline: none; }
-.ta-app img { width: 36px; height: 36px; object-fit: contain; }
-.ta-app span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

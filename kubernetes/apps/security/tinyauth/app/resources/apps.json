@@ -2,121 +2,144 @@
   "apps": [
     {
       "name": "Audiobooks",
+      "group": "Media",
       "url": "https://books.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/audiobookshelf.png"
     },
     {
       "name": "Invites",
+      "group": "Media",
       "url": "https://join.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wizarr.png",
       "everyone": true
     },
     {
       "name": "Jellyfin",
+      "group": "Media",
       "url": "https://jellyfin.56kbps.io/",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/jellyfin.png",
       "everyone": true
     },
     {
       "name": "Manyfold",
+      "group": "Media",
       "url": "https://manyfold.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/manyfold.png"
     },
     {
       "name": "Plex",
+      "group": "Media",
       "url": "https://app.plex.tv/",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/plex.png",
       "everyone": true
     },
     {
       "name": "Requests",
+      "group": "Media",
       "url": "https://requests.56kbps.io/",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/overseerr.png",
       "everyone": true
     },
     {
       "name": "Bazarr",
+      "group": "Downloads",
       "url": "https://bazarr.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"
     },
     {
       "name": "Lidarr",
+      "group": "Downloads",
       "url": "https://lidarr.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
     },
     {
       "name": "Prowlarr",
+      "group": "Downloads",
       "url": "https://prowlarr.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
     },
     {
       "name": "qBittorrent",
+      "group": "Downloads",
       "url": "https://qbittorrent.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/qbittorrent.png"
     },
     {
       "name": "Radarr",
+      "group": "Downloads",
       "url": "https://radarr.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
     },
     {
       "name": "SABnzbd",
+      "group": "Downloads",
       "url": "https://sab.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sabnzbd.png"
     },
     {
       "name": "Sonarr",
+      "group": "Downloads",
       "url": "https://sonarr.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
     },
     {
       "name": "Tautulli",
+      "group": "Downloads",
       "url": "https://tautulli.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png"
     },
     {
       "name": "Homarr",
+      "group": "Home",
       "url": "https://homarr.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homarr.png"
     },
     {
       "name": "Home Assistant",
+      "group": "Home",
       "url": "https://hass.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/home-assistant-alt.png"
     },
     {
       "name": "Adminer",
+      "group": "Monitoring",
       "url": "https://postgres.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/adminer.png"
     },
     {
       "name": "Grafana",
+      "group": "Monitoring",
       "url": "https://grafana.56kbps.io",
       "icon": "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/grafana.png"
     },
     {
       "name": "Logs",
+      "group": "Monitoring",
       "url": "https://logs.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/dozzle.png"
     },
     {
       "name": "Status",
+      "group": "Monitoring",
       "url": "https://status.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/gatus.png",
       "everyone": true
     },
     {
       "name": "Echo",
+      "group": "Network",
       "url": "https://echo-server.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/web-check.png"
     },
     {
       "name": "BBS Draw",
+      "group": "BBS",
       "url": "https://bbs-draw.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/draw.png"
     },
     {
       "name": "BBS Editor",
+      "group": "BBS",
       "url": "https://bbs-edit.56kbps.io",
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/code-server.png"
     }
