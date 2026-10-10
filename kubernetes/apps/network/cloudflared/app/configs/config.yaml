@@ -136,7 +136,7 @@ ingress:
     service: http://enigma-bbs.default.svc.cluster.local:8811
   - hostname: "mailer.halfduplex.io"
     service: tcp://enigma-bbs.default.svc.cluster.local:24554
-  # SSO: Tinyauth (login page, sessions) and tinyauth-bridge under /idp
+  # SSO: Tinyauth (login page, sessions) with its bridge sidecar under /idp
   # (Plex / Apple / Google). Routing between them is done by their HTTPRoutes.
   - hostname: "login.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443

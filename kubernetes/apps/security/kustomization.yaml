@@ -8,4 +8,3 @@ components:
 resources:
   - ./authentik/ks.yaml
   - ./tinyauth/ks.yaml
-  - ./tinyauth-bridge/ks.yaml
