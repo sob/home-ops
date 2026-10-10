@@ -31,8 +31,6 @@ spec:
               runAsGroup: 65536
           litestream:
             securityContext: *appUser
-        labels:
-          postgres: "true"
         annotations:
           reloader.stakater.com/auto: "true"
         containers:

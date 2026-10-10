@@ -95,12 +95,6 @@
       "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homarr.png"
     },
     {
-      "name": "Adminer",
-      "group": "Monitoring",
-      "url": "https://postgres.56kbps.io",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/adminer.png"
-    },
-    {
       "name": "Grafana",
       "group": "Monitoring",
       "url": "https://grafana.56kbps.io",
