@@ -20,15 +20,14 @@ spec:
   values:
     controllers:
       enigma-bbs:
-        # The hostPath only exists on one node, and the seed PVC is RWO.
+        # The hostPath only exists on one node.
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
           # Data is on node-local disk (hostPath on metal-04), not Ceph. When that
           # directory is empty (new node, wiped disk), restore the newest backup
-          # from R2; on the first run, before any backup exists, copy the old Ceph
-          # PVC mounted at /seed. With neither, fail rather than start a blank BBS.
+          # from R2, and fail rather than start a blank BBS when there is none.
           restore:
             image:
               repository: rclone/rclone
@@ -42,17 +41,11 @@ spec:
                   echo "local data present; not restoring"
                 else
                   latest=$(rclone lsf "$src" --include "*.tar.gz" | sort | tail -n 1)
-                  if [ -n "$latest" ]; then
-                    rclone copyto "$src/$latest" /data/.restore.tar.gz
-                    tar xzf /data/.restore.tar.gz -C /data
-                    rm /data/.restore.tar.gz
-                    echo "restored $latest from R2"
-                  elif [ -e /seed/config/config.hjson ]; then
-                    cp -a /seed/. /data/
-                    echo "no backup in R2; seeded from the old PVC"
-                  else
-                    echo "FATAL: no local data, no backup in R2 and no seed"; exit 1
-                  fi
+                  [ -n "$latest" ] || { echo "FATAL: no local data and no backup in R2"; exit 1; }
+                  rclone copyto "$src/$latest" /data/.restore.tar.gz
+                  tar xzf /data/.restore.tar.gz -C /data
+                  rm /data/.restore.tar.gz
+                  echo "restored $latest from R2"
                   chown -R 1000:1000 /data
                 fi
                 # Each directory is its own hostPath volume and must exist
@@ -192,6 +185,10 @@ spec:
                 # Update any 56kbps menu references inside menu files
                 sed -i 's|56kbps-|halfduplex-|g' /enigma-bbs/menus/*.hjson 2>/dev/null || true
             securityContext:
+              # As the app's user: sed -i replaces the files, and as root they
+              # came back root-owned, which the code-server editor can't save.
+              runAsUser: 1000
+              runAsGroup: 1000
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
               capabilities:
@@ -585,15 +582,6 @@ spec:
               - path: /vtx
             nginx:
               - path: /usr/share/nginx/html
-      # The old Ceph PVC, only as the restore's first-run seed. Removed with
-      # volsync once the first backup is in R2.
-      seed:
-        existingClaim: "{{ .Release.Name }}"
-        advancedMounts:
-          enigma-bbs:
-            restore:
-              - path: /seed
-                readOnly: true
       logs:
         type: emptyDir
         globalMounts:
