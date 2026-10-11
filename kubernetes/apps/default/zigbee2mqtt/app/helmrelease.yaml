@@ -20,7 +20,10 @@ spec:
       retries: 3
   values:
     controllers:
-      zigbee2mqtt:
+      # `main`: the file-sync component patches this controller name.
+      main:
+        # The coordinator takes one TCP client at a time.
+        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -31,31 +34,26 @@ spec:
             env:
               TZ: America/Chicago
               ZIGBEE2MQTT_DATA: /config
-              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_DISCOVERY_TOPIC: homeassistant
-              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES: "false"
-              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_TRIGGERS: "false"
-              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_STATUS_TOPIC: homeassistant/status
+              # No configuration.yaml on first start: write defaults and apply
+              # these envs instead of serving the onboarding page.
+              Z2M_ONBOARD_NO_SERVER: "1"
               ZIGBEE2MQTT_CONFIG_ADVANCED_LAST_SEEN: ISO_8601
-              ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_API: "false"
-              ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_AVAILABILITY_PAYLOAD: "false"
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info # debug
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
-              ZIGBEE2MQTT_CONFIG_AVAILABILITY_ACTIVE_TIMEOUT: 60
-              ZIGBEE2MQTT_CONFIG_AVAILABILITY_PASSIVE_TIMEOUT: 2000
-              ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_LEGACY: "false"
+              ZIGBEE2MQTT_CONFIG_AVAILABILITY_ENABLED: "true"
               ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_RETAIN: "true"
-              ZIGBEE2MQTT_CONFIG_EXPERIMENTAL_NEW_API: "true"
-              ZIGBEE2MQTT_CONFIG_FRONTEND: false
-              ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: &port 80
+              ZIGBEE2MQTT_CONFIG_FRONTEND_ENABLED: "true"
+              ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: &port 8080
               ZIGBEE2MQTT_CONFIG_FRONTEND_URL: https://zigbee.${SECRET_DOMAIN}
-              ZIGBEE2MQTT_CONFIG_HOMEASSISTANT: "true"
+              # No Home Assistant; Node-RED reads zigbee2mqtt/<device> directly.
+              ZIGBEE2MQTT_CONFIG_HOMEASSISTANT_ENABLED: "false"
+              ZIGBEE2MQTT_CONFIG_MQTT_BASE_TOPIC: zigbee2mqtt
               ZIGBEE2MQTT_CONFIG_MQTT_INCLUDE_DEVICE_INFORMATION: "true"
               ZIGBEE2MQTT_CONFIG_MQTT_KEEPALIVE: 60
-              ZIGBEE2MQTT_CONFIG_MQTT_REJECT_UNAUTHORIZED: "true"
-              ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://emqx-listeners.database.svc.cluster.local:1883
+              ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://mosquitto.database.svc.cluster.local:1883
               ZIGBEE2MQTT_CONFIG_MQTT_VERSION: 5
-              ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: "false"
-              ZIGBEE2MQTT_CONFIG_SERIAL_BAUDRATE: 115200
+              # Tube's ZB Gateway (CC2652P2, Z-Stack) over the network.
+              ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: zstack
               ZIGBEE2MQTT_CONFIG_SERIAL_DISABLE_LED: "false"
               ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://${SECRET_VIP_ZIGBEE}:6638
               # DEBUG: "zigbee-herdsman*"
@@ -83,7 +81,7 @@ spec:
                 memory: 512Mi
     service:
       app:
-        controller: *app
+        controller: main
         ports:
           http:
             port: *port
@@ -99,5 +97,8 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      # configuration.yaml, database.db, coordinator_backup.json and state.json
+      # are restored from and pushed to R2 by file-sync (see ks.yaml).
       config:
-        existingClaim: *app
+        type: emptyDir
+        sizeLimit: 256Mi

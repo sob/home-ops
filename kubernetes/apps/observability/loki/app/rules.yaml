@@ -152,3 +152,17 @@ data:
             annotations:
               summary: "Plex is retrying a busy database"
               description: "Plex Media Server logged `retry busy DB` in the last 2m: its SQLite library is contended, and playback or scans may stall."
+      - name: zigbee2mqtt
+        rules:
+          # Moved from default/zigbee2mqtt's zigbee2mqtt-loki-rules ConfigMap,
+          # which the ruler never loaded (only this ConfigMap is mounted).
+          - alert: Zigbee2MQTTBrokerUnreachable
+            expr: |
+              sum by (app) (count_over_time({app="zigbee2mqtt"} |~ "(?i)not connected to mqtt server" [2m])) > 0
+            for: 2m
+            labels:
+              severity: critical
+              type: workload
+            annotations:
+              summary: "Zigbee2MQTT can't reach Mosquitto"
+              description: "Zigbee2MQTT logged `Not connected to MQTT server` in the last 2m: Zigbee devices still talk to the coordinator, but no state reaches MQTT and Node-RED automations can't act on them."
