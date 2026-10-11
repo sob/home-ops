@@ -167,8 +167,15 @@ configFiles:
 apiVersion: v1alpha1
 kind: ExtensionServiceConfig
 name: nut-client
+# The NUT server is the Synology (doom, 10.1.100.254): DSM polls the rack
+# UPS's RMCARD205 over SNMP and re-serves it as UPS "ups" on tcp/3493 with
+# DSM's fixed credentials (monuser / secret). DSM decides when to shut down
+# and sends FSD, so every node powers off together. Literal IP, not a name:
+# node DNS is 1.1.1.1 and can't resolve internal names, and must not depend on
+# the cluster during a power event. No POWERDOWNFLAG: only the primary (DSM)
+# ever cuts UPS power. See #1671.
 configFiles:
   - content: |
-      MONITOR ups@rack-ups.stonehedges.net 1 remote monuser pass
+      MONITOR ups@10.1.100.254 1 monuser secret secondary
       SHUTDOWNCMD "/sbin/poweroff"
     mountPath: /usr/local/etc/nut/upsmon.conf

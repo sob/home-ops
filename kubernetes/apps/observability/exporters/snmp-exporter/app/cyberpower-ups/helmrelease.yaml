@@ -32,12 +32,14 @@ spec:
         - name: ups
           module: ["cyberpower"]
           auth: ["public_v1"]
-          target: rack-ups.${SECRET_INTERNAL_DOMAIN}
+          # RMCARD205 on the rack UPS. Literal IP: rack-ups doesn't resolve anywhere.
+          target: 10.1.100.74
       path: /snmp
       scrapeTimeout: 20s
       relabelings:
-        - sourceLabels: [__param_target]
-          targetLabel: instance
+        # Keep the old instance name so alerts and dashboards read "rack-ups".
+        - targetLabel: instance
+          replacement: rack-ups
     resources:
       requests:
         cpu: 10m
