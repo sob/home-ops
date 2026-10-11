@@ -70,8 +70,13 @@ spec:
               prefix: loki_index_
               period: 24h
       # Compactor enforces retention and prunes objects from R2.
+      # TEMPORARILY OFF: the R2 key in loki-secret (the shared `cloudflare`
+      # item) is scoped to stone-volsync and can't access loki-logs, so every
+      # R2 call returns 403. Loki 3.6's compactor reads R2 at startup and
+      # refuses to run; with retention off it doesn't. Re-enable once Loki
+      # has a key with Object Read & Write on loki-logs.
       compactor:
-        retention_enabled: true
+        retention_enabled: false
         delete_request_store: s3
         compaction_interval: 10m
         retention_delete_delay: 2h
