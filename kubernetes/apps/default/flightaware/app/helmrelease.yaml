@@ -99,9 +99,8 @@ spec:
               RECEIVER_TYPE: relay
               BEASTHOST: flightaware-app.default.svc.cluster.local
               BEASTPORT: "30005"
-              # No FEEDER_ID yet: the first start registers a new feeder. Its ID
-              # is then stored in the `flightaware` item and set here, so
-              # restarts keep the same (claimed) site.
+              # FEEDER_ID comes from the `flightaware` item (flightaware-secret),
+              # so the site stays the same across restarts and node moves.
             envFrom:
               - secretRef:
                   name: flightaware-secret
