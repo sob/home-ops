@@ -1,0 +1,489 @@
+---
+# Water meters (rtlamr2mqtt → mqtt-exporter). One row per meter, repeated from
+# the topics, so no meter IDs are in git. Units are the meter's raw register
+# units until calibrated against the bill or the meter face.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-water-meters
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Home"
+data:
+  water-meters.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "schemaVersion": 39,
+      "tags": [
+        "water",
+        "rtlamr"
+      ],
+      "title": "Water \u2014 Meters",
+      "uid": "water-meters",
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "refresh": "1m",
+      "templating": {
+        "list": [
+          {
+            "name": "meter",
+            "label": "Meter",
+            "type": "query",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "query": {
+              "query": "label_values(mqtt_reading{topic=~\"rtlamr_.+_state\"}, topic)",
+              "refId": "meter"
+            },
+            "regex": "/rtlamr_(.+)_state/",
+            "multi": true,
+            "includeAll": true,
+            "current": {
+              "selected": true,
+              "text": [
+                "All"
+              ],
+              "value": [
+                "$__all"
+              ]
+            },
+            "refresh": 2,
+            "sort": 1
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "row",
+          "title": "Meter ${meter}",
+          "repeat": "meter",
+          "collapsed": false,
+          "panels": [],
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Reading",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "mqtt_reading{topic=\"rtlamr_${meter}_state\"}",
+              "legendFormat": "",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 0,
+            "y": 1
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Leak now",
+          "description": "Meter's own flag: 0 = no leak; non-zero = water flowed continuously in the last ~24h.",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(mqtt_LeakNow{topic=\"rtlamr_${meter}_attributes\"})",
+              "legendFormat": "",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "No leak",
+                      "color": "green"
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 9,
+                    "result": {
+                      "text": "LEAK",
+                      "color": "red"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "background",
+            "graphMode": "none"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 5,
+            "y": 1
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Usage today",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max_over_time(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[$__range]) - min_over_time(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[$__range])",
+              "legendFormat": "",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "timeFrom": "now/d",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "graphMode": "none"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 9,
+            "y": 1
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Readings / 10 min",
+          "description": "Radio messages received; 0 means the meter has gone silent.",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(increase(mqtt_message_total{topic=\"rtlamr_${meter}_state\"}[10m]))",
+              "legendFormat": "",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "area"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 14,
+            "y": 1
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Backflow",
+          "description": "Meter's backflow flag (0 = none).",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(mqtt_BackFlow{topic=\"rtlamr_${meter}_attributes\"})",
+              "legendFormat": "",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 19,
+            "y": 1
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Usage per hour (meter units)",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "increase(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[1h])",
+              "legendFormat": "per hour",
+              "refId": "A",
+              "interval": "1h"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "custom": {
+                "drawStyle": "bars",
+                "fillOpacity": 60,
+                "lineWidth": 1
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single"
+            }
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 16,
+            "x": 0,
+            "y": 6
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "barchart",
+          "title": "Usage per day (meter units)",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "increase(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[1d])",
+              "legendFormat": "",
+              "refId": "A",
+              "interval": "1d"
+            }
+          ],
+          "timeFrom": "14d",
+          "interval": "1d",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "xTickLabelRotation": -45,
+            "legend": {
+              "showLegend": false
+            }
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 6
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Overnight baseline (2\u20135 AM): steady flow here means a leak",
+          "description": "Usage per 15 min. Overnight, nobody uses water; a floor above zero is a leak (e.g. a toilet flapper).",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "increase(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[15m])",
+              "legendFormat": "per 15 min",
+              "refId": "A",
+              "interval": "15m"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 20
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": false
+            }
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    }
