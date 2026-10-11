@@ -20,10 +20,118 @@ spec:
   values:
     controllers:
       enigma-bbs:
+        # The hostPath only exists on one node, and the seed PVC is RWO.
+        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
+          # Data is on node-local disk (hostPath on metal-04), not Ceph. When that
+          # directory is empty (new node, wiped disk), restore the newest backup
+          # from R2; on the first run, before any backup exists, copy the old Ceph
+          # PVC mounted at /seed. With neither, fail rather than start a blank BBS.
+          restore:
+            image:
+              repository: rclone/rclone
+              tag: 1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                src=r2:stone-volsync/files/enigma-bbs/backups
+                if [ -e /data/config/config.hjson ]; then
+                  echo "local data present; not restoring"
+                else
+                  latest=$(rclone lsf "$src" --include "*.tar.gz" | sort | tail -n 1)
+                  if [ -n "$latest" ]; then
+                    rclone copyto "$src/$latest" /data/.restore.tar.gz
+                    tar xzf /data/.restore.tar.gz -C /data
+                    rm /data/.restore.tar.gz
+                    echo "restored $latest from R2"
+                  elif [ -e /seed/config/config.hjson ]; then
+                    cp -a /seed/. /data/
+                    echo "no backup in R2; seeded from the old PVC"
+                  else
+                    echo "FATAL: no local data, no backup in R2 and no seed"; exit 1
+                  fi
+                  chown -R 1000:1000 /data
+                fi
+                # hostPath dirs are created root:root, and fsGroup doesn't apply
+                # to hostPath volumes.
+                chown 1000:1000 /data
+                chmod 2775 /data
+            env: &rcloneEnv
+              HOME: /tmp
+              RCLONE_CONFIG: /dev/null
+              # The bucket exists, and the R2 key may not create buckets.
+              RCLONE_S3_NO_CHECK_BUCKET: "true"
+            envFrom: &rcloneEnvFrom
+              - secretRef:
+                  name: enigma-bbs-backup-secret
+            securityContext:
+              runAsUser: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+                add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
+          # Native sidecar: a tarball of the whole tree to R2 once a day and once
+          # more when the pod stops, keeping 30 days. The SQLite DBs are in WAL
+          # mode, so each goes in as a `.backup` copy rather than the live files.
+          backup:
+            dependsOn: [init-config, init-vtx]
+            image:
+              repository: docker.io/alpine
+              tag: 3.24
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                until apk add --no-cache -q rclone sqlite tar; do
+                  echo "apk add failed; retrying in 60s"; sleep 60
+                done
+                dst=r2:stone-volsync/files/enigma-bbs/backups
+                backup() {
+                  t=/tmp/snap
+                  mkdir "$t" && cp -a /data/. "$t/"
+                  find "$t" \( -name "*.sqlite3-wal" -o -name "*.sqlite3-shm" -o -name ".restore.tar.gz" \) -delete
+                  ok=1
+                  for db in $(cd /data && find . -name "*.sqlite3"); do
+                    sqlite3 "/data/$db" ".backup '$t/$db'" || { echo "backup of $db failed"; ok=0; }
+                  done
+                  f=/tmp/enigma-bbs-$(date -u +%Y%m%dT%H%M%SZ).tar.gz
+                  [ "$ok" = 1 ] && tar czf "$f" -C "$t" . && rclone copyto "$f" "$dst/$(basename "$f")" \
+                    && echo "uploaded $(basename "$f") ($(du -h "$f" | cut -f1))"
+                  rm -r "$t"; rm -f "$f"
+                  rclone delete "$dst" --min-age 30d
+                }
+                trap 'backup; exit 0' TERM INT
+                while true; do
+                  # Only when the newest backup is a day old, so restarts don't
+                  # pile up extra tarballs.
+                  [ -n "$(rclone lsf "$dst" --max-age 23h)" ] || backup
+                  sleep 3600 & wait $!
+                done
+            env: *rcloneEnv
+            envFrom: *rcloneEnvFrom
+            restartPolicy: Always
+            securityContext:
+              # Root for apk; DAC_OVERRIDE so sqlite can open the app's WAL
+              # index files.
+              runAsUser: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+                add: ["DAC_OVERRIDE"]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 256Mi
           init-vtx:
+            dependsOn: restore
             image:
               repository: docker.io/alpine
               tag: 3.24
@@ -51,6 +159,7 @@ spec:
               capabilities:
                 drop: ["ALL"]
           init-config:
+            dependsOn: restore
             image:
               repository: docker.io/alpine
               tag: 3.24
@@ -220,6 +329,9 @@ spec:
                     path: /
                     port: 3000
     defaultPodOptions:
+      # The data is a hostPath on this node; see the restore init container.
+      nodeSelector:
+        kubernetes.io/hostname: metal-04
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -365,9 +477,15 @@ spec:
                   value: /
     persistence:
       data:
-        existingClaim: "{{ .Release.Name }}"
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs
+        hostPathType: DirectoryOrCreate
         advancedMounts:
           enigma-bbs:
+            restore:
+              - path: /data
+            backup:
+              - path: /data
             app:
               - path: /enigma-bbs/config
                 subPath: config
@@ -418,6 +536,15 @@ spec:
             nginx:
               - path: /usr/share/nginx/html
                 subPath: vtx
+      # The old Ceph PVC, only as the restore's first-run seed. Removed with
+      # volsync once the first backup is in R2.
+      seed:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          enigma-bbs:
+            restore:
+              - path: /seed
+                readOnly: true
       logs:
         type: emptyDir
         globalMounts:
