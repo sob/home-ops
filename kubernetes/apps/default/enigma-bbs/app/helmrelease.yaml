@@ -55,9 +55,14 @@ spec:
                   fi
                   chown -R 1000:1000 /data
                 fi
+                # Each directory is its own hostPath volume and must exist
+                # before the other containers start.
+                for d in config db filebase art mods menus mail doors vtx; do
+                  mkdir -p "/data/$d"
+                done
                 # hostPath dirs are created root:root, and fsGroup doesn't apply
                 # to hostPath volumes.
-                chown 1000:1000 /data
+                chown 1000:1000 /data /data/*
                 chmod 2775 /data
             env: &rcloneEnv
               HOME: /tmp
@@ -476,6 +481,11 @@ spec:
                   type: PathPrefix
                   value: /
     persistence:
+      # Node-local on metal-04. The whole tree is mounted only into restore and
+      # backup; everything else gets one hostPath per directory, because on
+      # Talos the kubelet can't see /var/local-storage, so subPath mounts of it
+      # come out as empty directories. No hostPathType for the same reason: the
+      # kubelet's check would look in its own filesystem. restore creates them.
       data:
         type: hostPath
         hostPath: /var/local-storage/enigma-bbs
@@ -486,56 +496,95 @@ spec:
               - path: /data
             backup:
               - path: /data
+      bbs-config:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/config
+        advancedMounts:
+          enigma-bbs:
             app:
               - path: /enigma-bbs/config
-                subPath: config
-              - path: /enigma-bbs/db
-                subPath: db
-              - path: /enigma-bbs/filebase
-                subPath: filebase
-              - path: /enigma-bbs/art
-                subPath: art
-              - path: /enigma-bbs/mods
-                subPath: mods
-              - path: /enigma-bbs/menus
-                subPath: menus
-              - path: /enigma-bbs/mail
-                subPath: mail
-              - path: /enigma-bbs/doors
-                subPath: doors
             code-server:
               - path: /enigma-bbs/config
-                subPath: config
-              - path: /enigma-bbs/db
-                subPath: db
-              - path: /enigma-bbs/filebase
-                subPath: filebase
-              - path: /enigma-bbs/art
-                subPath: art
-              - path: /enigma-bbs/mods
-                subPath: mods
-              - path: /enigma-bbs/menus
-                subPath: menus
-              - path: /enigma-bbs/mail
-                subPath: mail
-              - path: /enigma-bbs/vtx
-                subPath: vtx
-              - path: /enigma-bbs/doors
-                subPath: doors
-            text0wnz:
-              - path: /art
-                subPath: art
-            init-vtx:
-              - path: /vtx
-                subPath: vtx
             init-config:
               - path: /enigma-bbs/config
-                subPath: config
+      bbs-db:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/db
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/db
+            code-server:
+              - path: /enigma-bbs/db
+      bbs-filebase:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/filebase
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/filebase
+            code-server:
+              - path: /enigma-bbs/filebase
+      bbs-art:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/art
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/art
+            code-server:
+              - path: /enigma-bbs/art
+            text0wnz:
+              - path: /art
+      bbs-mods:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/mods
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/mods
+            code-server:
+              - path: /enigma-bbs/mods
+      bbs-menus:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/menus
+        advancedMounts:
+          enigma-bbs:
+            app:
               - path: /enigma-bbs/menus
-                subPath: menus
+            code-server:
+              - path: /enigma-bbs/menus
+            init-config:
+              - path: /enigma-bbs/menus
+      bbs-mail:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/mail
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/mail
+            code-server:
+              - path: /enigma-bbs/mail
+      bbs-doors:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/doors
+        advancedMounts:
+          enigma-bbs:
+            app:
+              - path: /enigma-bbs/doors
+            code-server:
+              - path: /enigma-bbs/doors
+      bbs-vtx:
+        type: hostPath
+        hostPath: /var/local-storage/enigma-bbs/vtx
+        advancedMounts:
+          enigma-bbs:
+            code-server:
+              - path: /enigma-bbs/vtx
+            init-vtx:
+              - path: /vtx
             nginx:
               - path: /usr/share/nginx/html
-                subPath: vtx
       # The old Ceph PVC, only as the restore's first-run seed. Removed with
       # volsync once the first backup is in R2.
       seed:
