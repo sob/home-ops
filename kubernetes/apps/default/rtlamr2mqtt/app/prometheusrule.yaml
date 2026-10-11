@@ -1,43 +1,62 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
 # Water meters (Neptune R900, via rtlamr2mqtt → Mosquitto → mqtt-exporter).
-# Topics are rtlamr_<meter id>_{state,attributes}; the rules match every meter
-# so no meter IDs live in git. The meters do their own leak detection: R900
-# LeakNow is non-zero when water flowed continuously over the last day.
+# mqtt-exporter names series by topic (rtlamr_<meter id>_…). The recording
+# rules below give them a `meter` label (House, Sprinkler); the IDs come from
+# cluster-secrets (the rtlamr2mqtt 1Password item) at deploy time, so they
+# stay out of git. The `:=none` defaults keep renders working without them.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: water
 spec:
   groups:
+    - name: water-meters
+      rules:
+        - record: water:reading
+          expr: label_replace(mqtt_reading{topic="rtlamr_${SECRET_WATER_METER_HOUSE:=none}_state"}, "meter", "House", "", "")
+        - record: water:reading
+          expr: label_replace(mqtt_reading{topic="rtlamr_${SECRET_WATER_METER_SPRINKLER:=none}_state"}, "meter", "Sprinkler", "", "")
+        - record: water:messages_total
+          expr: label_replace(mqtt_message_total{topic="rtlamr_${SECRET_WATER_METER_HOUSE:=none}_state"}, "meter", "House", "", "")
+        - record: water:messages_total
+          expr: label_replace(mqtt_message_total{topic="rtlamr_${SECRET_WATER_METER_SPRINKLER:=none}_state"}, "meter", "Sprinkler", "", "")
+        - record: water:leak_now
+          expr: label_replace(max(mqtt_LeakNow{topic="rtlamr_${SECRET_WATER_METER_HOUSE:=none}_attributes"}), "meter", "House", "", "")
+        - record: water:leak_now
+          expr: label_replace(max(mqtt_LeakNow{topic="rtlamr_${SECRET_WATER_METER_SPRINKLER:=none}_attributes"}), "meter", "Sprinkler", "", "")
+        - record: water:backflow
+          expr: label_replace(max(mqtt_BackFlow{topic="rtlamr_${SECRET_WATER_METER_HOUSE:=none}_attributes"}), "meter", "House", "", "")
+        - record: water:backflow
+          expr: label_replace(max(mqtt_BackFlow{topic="rtlamr_${SECRET_WATER_METER_SPRINKLER:=none}_attributes"}), "meter", "Sprinkler", "", "")
     - name: water
       rules:
         - alert: WaterLeakDetected
           expr: |
-            max by (topic) (mqtt_LeakNow{topic=~"rtlamr_.+_attributes"}) > 0
+            max by (meter) (water:leak_now) > 0
           # The meter flags a day of continuous flow; one more day of it rules
           # out a long irrigation run or a slow fill.
           for: 24h
           labels:
             severity: critical
           annotations:
-            summary: "Water meter {{ $labels.topic }} reports continuous flow (possible leak)"
-            description: "The meter's own leak flag (LeakNow = {{ $value }}) has been set for over a day. Usual causes: a running toilet flapper, a dripping fixture, or a break on the line."
+            summary: "{{ $labels.meter }} water meter reports continuous flow (possible leak)"
+            description: "The meter's own leak flag (LeakNow = {{ $value }}) has been set for over a day. House: check toilet flappers (dye test), dripping taps, the softener. Sprinkler: a stuck valve or broken line."
         - alert: WaterMeterSilent
           expr: |
-            sum by (topic) (increase(mqtt_message_total{topic=~"rtlamr_.+_state"}[2h])) == 0
+            sum by (meter) (increase(water:messages_total[2h])) == 0
           for: 30m
           labels:
             severity: warning
           annotations:
-            summary: "No readings from water meter {{ $labels.topic }} for 2h"
+            summary: "No readings from the {{ $labels.meter }} water meter for 2h"
             description: "Check rtlamr2mqtt (`kubectl -n default logs deploy/rtlamr2mqtt`) and the NESDR on the node labelled nesdr.feature.node.kubernetes.io/rtlamr."
         - alert: WaterMetersAbsent
           expr: |
-            absent(mqtt_message_total{topic=~"rtlamr_.+_state"})
+            absent(water:reading)
           for: 2h
           labels:
             severity: warning
           annotations:
             summary: "No water meter data in Prometheus"
-            description: "rtlamr2mqtt isn't publishing, or mqtt-exporter isn't scraping its topics."
+            description: "rtlamr2mqtt isn't publishing, mqtt-exporter isn't scraping its topics, or the meter IDs in cluster-secrets are missing."

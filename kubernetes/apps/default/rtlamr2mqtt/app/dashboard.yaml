@@ -1,7 +1,8 @@
 ---
-# Water meters (rtlamr2mqtt → mqtt-exporter). One row per meter, repeated from
-# the topics, so no meter IDs are in git. Units are the meter's raw register
-# units until calibrated against the bill or the meter face.
+# Water meters (rtlamr2mqtt → mqtt-exporter → water:* recording rules). One row
+# per meter, House first. Meter names come from the recording rules, so no
+# meter IDs are in git. Units are the meter's raw register counts until
+# calibrated against the bill or the meter face.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -32,41 +33,46 @@ data:
         "to": "now"
       },
       "refresh": "1m",
+      "description": "Neptune R900 water meters read by radio (rtlamr2mqtt). House meter first, then the sprinkler meter.",
       "templating": {
         "list": [
           {
             "name": "meter",
             "label": "Meter",
-            "type": "query",
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "query": {
-              "query": "label_values(mqtt_reading{topic=~\"rtlamr_.+_state\"}, topic)",
-              "refId": "meter"
-            },
-            "regex": "/rtlamr_(.+)_state/",
+            "type": "custom",
+            "query": "House,Sprinkler",
+            "options": [
+              {
+                "selected": true,
+                "text": "House",
+                "value": "House"
+              },
+              {
+                "selected": true,
+                "text": "Sprinkler",
+                "value": "Sprinkler"
+              }
+            ],
             "multi": true,
-            "includeAll": true,
+            "includeAll": false,
             "current": {
               "selected": true,
               "text": [
-                "All"
+                "House",
+                "Sprinkler"
               ],
               "value": [
-                "$__all"
+                "House",
+                "Sprinkler"
               ]
-            },
-            "refresh": 2,
-            "sort": 1
+            }
           }
         ]
       },
       "panels": [
         {
           "type": "row",
-          "title": "Meter ${meter}",
+          "title": "$meter water meter",
           "repeat": "meter",
           "collapsed": false,
           "panels": [],
@@ -84,13 +90,14 @@ data:
         {
           "type": "stat",
           "title": "Reading",
+          "description": "The meter's cumulative register: it only ever goes up, like an odometer. Units are the meter's raw counts (about 0.1 gallon each, pending calibration against the bill or the meter face). A reading that jumps backwards means the meter or its radio was replaced.",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "mqtt_reading{topic=\"rtlamr_${meter}_state\"}",
+              "expr": "water:reading{meter=\"$meter\"}",
               "legendFormat": "",
               "refId": "A",
               "instant": true,
@@ -131,14 +138,14 @@ data:
         {
           "type": "stat",
           "title": "Leak now",
-          "description": "Meter's own flag: 0 = no leak; non-zero = water flowed continuously in the last ~24h.",
+          "description": "The meter's own leak detection (Neptune R900 'LeakNow'): non-zero means water never stopped flowing for a long stretch in the last ~24 h. House: usually a toilet flapper (put food colouring in the tank, wait 15 min without flushing, look for colour in the bowl), a dripping tap or a softener stuck in regeneration. Sprinkler: a valve that didn't close or a broken line. WaterLeakDetected alerts after a further 24 h.",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(mqtt_LeakNow{topic=\"rtlamr_${meter}_attributes\"})",
+              "expr": "max(water:leak_now{meter=\"$meter\"})",
               "legendFormat": "",
               "refId": "A",
               "instant": true,
@@ -208,13 +215,14 @@ data:
         {
           "type": "stat",
           "title": "Usage today",
+          "description": "Counts used since midnight (raw units, ~0.1 gal each). A typical US household uses roughly 80\u2013100 gallons per person per day indoors. The sprinkler meter should read 0 on days with no scheduled watering (Rachio: Flower Beds at 10:00 and at sunset).",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max_over_time(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[$__range]) - min_over_time(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[$__range])",
+              "expr": "max_over_time(water:reading{meter=\"$meter\"}[$__range]) - min_over_time(water:reading{meter=\"$meter\"}[$__range])",
               "legendFormat": "",
               "refId": "A",
               "instant": true,
@@ -251,14 +259,14 @@ data:
         {
           "type": "stat",
           "title": "Readings / 10 min",
-          "description": "Radio messages received; 0 means the meter has gone silent.",
+          "description": "Radio messages heard from this meter in the last 10 minutes. R900 meters transmit every few seconds, but the basement antenna only catches some. Anything above 0 is healthy; 0 for 2 h raises WaterMeterSilent (check rtlamr2mqtt and the NESDR on the node labelled nesdr.feature.node.kubernetes.io/rtlamr).",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(increase(mqtt_message_total{topic=\"rtlamr_${meter}_state\"}[10m]))",
+              "expr": "sum(increase(water:messages_total{meter=\"$meter\"}[10m]))",
               "legendFormat": "",
               "refId": "A",
               "instant": true,
@@ -307,14 +315,14 @@ data:
         {
           "type": "stat",
           "title": "Backflow",
-          "description": "Meter's backflow flag (0 = none).",
+          "description": "The meter's backflow flag (0 = none). Water flowed backwards through the meter, e.g. a pressure drop on the street side (main break, hydrant flushing) or a failing backflow preventer. One-off small events are common; a persistent flag on the sprinkler meter is worth having the backflow device tested.",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(mqtt_BackFlow{topic=\"rtlamr_${meter}_attributes\"})",
+              "expr": "max(water:backflow{meter=\"$meter\"})",
               "legendFormat": "",
               "refId": "A",
               "instant": true,
@@ -361,14 +369,15 @@ data:
         },
         {
           "type": "timeseries",
-          "title": "Usage per hour (meter units)",
+          "title": "Usage per hour",
+          "description": "Raw units used in each hour. House: showers, laundry and dishwasher show as tall bars in the morning and evening; flat non-zero bars all night point to a leak. Sprinkler: should only rise during Rachio's schedule windows; usage at any other time means a stuck valve or manual watering.",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "increase(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[1h])",
+              "expr": "increase(water:reading{meter=\"$meter\"}[1h])",
               "legendFormat": "per hour",
               "refId": "A",
               "interval": "1h"
@@ -406,14 +415,15 @@ data:
         },
         {
           "type": "barchart",
-          "title": "Usage per day (meter units)",
+          "title": "Usage per day (14 days)",
+          "description": "Raw units used per day. Compare weekdays with weekends and look for a rising trend; a sudden permanent step up usually means a new leak (house) or a schedule change (sprinkler).",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "increase(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[1d])",
+              "expr": "increase(water:reading{meter=\"$meter\"}[1d])",
               "legendFormat": "",
               "refId": "A",
               "interval": "1d"
@@ -447,15 +457,15 @@ data:
         },
         {
           "type": "timeseries",
-          "title": "Overnight baseline (2\u20135 AM): steady flow here means a leak",
-          "description": "Usage per 15 min. Overnight, nobody uses water; a floor above zero is a leak (e.g. a toilet flapper).",
+          "title": "Overnight baseline: a floor above zero means a leak",
+          "description": "Usage per 15 minutes. Between about 2 and 5 AM nobody uses water, so the line should touch zero. If it never does, that floor is the leak rate: roughly 1\u20133 units per 15 min is a slowly leaking toilet flapper, 10+ is a running toilet or a broken pipe. After fixing a leak the overnight floor should drop to zero the next night.",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "increase(mqtt_reading{topic=\"rtlamr_${meter}_state\"}[15m])",
+              "expr": "increase(water:reading{meter=\"$meter\"}[15m])",
               "legendFormat": "per 15 min",
               "refId": "A",
               "interval": "15m"
