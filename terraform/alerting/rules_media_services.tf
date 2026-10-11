@@ -27,9 +27,9 @@ resource "grafana_rule_group" "media_apps" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "min(up{job=\"plex\",namespace=\"default\"}) < 1"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"plex\"}) < 1"
         refId = "A"
         instant = true      })
     }
@@ -37,14 +37,14 @@ resource "grafana_rule_group" "media_apps" {
 
   # Request management
   rule {
-    name = "OverseerrDown"
+    name = "SeerrDown"
     annotations = {
-      summary     = "Overseerr request system is down"
-      description = "Overseerr has been unreachable for 5 minutes. Users cannot request media."
+      summary     = "Seerr request system is down"
+      description = "Seerr has been unreachable for 5 minutes. Users cannot request media."
     }
     labels = {
       severity = "warning"
-      service  = "overseerr"
+      service  = "seerr"
       category = "media"
     }
     for       = "5m"
@@ -59,9 +59,9 @@ resource "grafana_rule_group" "media_apps" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "(min(up{job=\"overseerr\",namespace=\"default\"}) < 1) or (min(up{job=\"overseerr-exporter\",namespace=\"observability\"}) < 1)"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"seerr\"}) < 1"
         refId = "A"
         instant = true      })
     }
@@ -91,9 +91,9 @@ resource "grafana_rule_group" "media_apps" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "(min(up{job=\"sabnzbd\",namespace=\"default\"}) < 1) or (min(up{job=\"sabnzbd-exporter\",namespace=\"observability\"}) < 1)"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"sabnzbd\"}) < 1"
         refId = "A"
         instant = true      })
     }
@@ -129,9 +129,9 @@ resource "grafana_rule_group" "arr_stack" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "(min(up{job=\"sonarr\",namespace=\"default\"}) < 1) or (min(up{job=\"sonarr-exporter\",namespace=\"observability\"}) < 1)"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"sonarr\"}) < 1"
         refId = "A"
         instant = true      })
     }
@@ -161,9 +161,9 @@ resource "grafana_rule_group" "arr_stack" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "(min(up{job=\"radarr\",namespace=\"default\"}) < 1) or (min(up{job=\"radarr-exporter\",namespace=\"observability\"}) < 1)"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"radarr\"}) < 1"
         refId = "A"
         instant = true      })
     }
@@ -193,9 +193,9 @@ resource "grafana_rule_group" "arr_stack" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "(min(up{job=\"prowlarr\",namespace=\"default\"}) < 1) or (min(up{job=\"prowlarr-exporter\",namespace=\"observability\"}) < 1)"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"prowlarr\"}) < 1"
         refId = "A"
         instant = true      })
     }
@@ -225,9 +225,9 @@ resource "grafana_rule_group" "arr_stack" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "(min(up{job=\"bazarr\",namespace=\"default\"}) < 1) or (min(up{job=\"bazarr-exporter\",namespace=\"observability\"}) < 1)"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"bazarr\"}) < 1"
         refId = "A"
         instant = true      })
     }
@@ -257,45 +257,14 @@ resource "grafana_rule_group" "arr_stack" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "(min(up{job=\"lidarr\",namespace=\"default\"}) < 1) or (min(up{job=\"lidarr-exporter\",namespace=\"observability\"}) < 1)"
+        expr  = "min(kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"lidarr\"}) < 1"
         refId = "A"
         instant = true      })
     }
   }
 
-  # Readarr - Book management
-  rule {
-    name = "ReadarrDown"
-    annotations = {
-      summary     = "Readarr book manager is down"
-      description = "Readarr has been unreachable for 15 minutes. Book automation is halted."
-    }
-    labels = {
-      severity = "info"
-      service  = "readarr"
-      category = "arr-stack"
-    }
-    for       = "15m"
-    no_data_state = "OK"
-    condition = "A"
-
-    data {
-      ref_id = "A"
-      
-      relative_time_range {
-        from = 900
-        to   = 0
-      }
-      
-      datasource_uid = local.prometheus_cloud_uid
-      model = jsonencode({
-        expr  = "(min(up{job=\"readarr\",namespace=\"default\"}) < 1) or (min(up{job=\"readarr-exporter\",namespace=\"observability\"}) < 1)"
-        refId = "A"
-        instant = true      })
-    }
-  }
 
   # Multiple arr services down
   rule {
@@ -320,9 +289,9 @@ resource "grafana_rule_group" "arr_stack" {
         to   = 0
       }
       
-      datasource_uid = local.prometheus_cloud_uid
+      datasource_uid = local.prometheus_pdc_uid
       model = jsonencode({
-        expr  = "count(up{job=~\"(sonarr|radarr|prowlarr|bazarr|lidarr|readarr)\",namespace=\"default\"} < 1) > 2"
+        expr  = "count(kube_deployment_status_replicas_available{namespace=\"default\",deployment=~\"sonarr|radarr|prowlarr|bazarr|lidarr\"} < 1) > 2"
         refId = "A"
         instant = true      })
     }

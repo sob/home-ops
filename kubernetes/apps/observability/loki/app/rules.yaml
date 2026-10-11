@@ -138,3 +138,17 @@ data:
             annotations:
               summary: "{{ $labels.namespace }}/{{ $labels.app }} {{ $labels.container }} can't back up to R2"
               description: "{{ $labels.container }} has logged upload errors for over 90 minutes, so {{ $labels.app }}'s copy in R2 is falling behind. Check `kubectl -n {{ $labels.namespace }} logs deploy/{{ $labels.app }} -c {{ $labels.container }}`."
+      - name: plex
+        rules:
+          # Moved from default/plex's plex-loki-rules ConfigMap, which the ruler
+          # never loaded (only this ConfigMap is mounted).
+          - alert: PlexDatabaseBusy
+            expr: |
+              sum by (app) (count_over_time({app="plex"} |~ "(?i)retry busy DB" [2m])) > 0
+            for: 2m
+            labels:
+              severity: critical
+              type: workload
+            annotations:
+              summary: "Plex is retrying a busy database"
+              description: "Plex Media Server logged `retry busy DB` in the last 2m: its SQLite library is contended, and playback or scans may stall."
