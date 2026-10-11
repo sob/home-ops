@@ -14,13 +14,6 @@
       "everyone": true
     },
     {
-      "name": "Jellyfin",
-      "group": "Media",
-      "url": "https://jellyfin.56kbps.io/",
-      "icon": "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/jellyfin.png",
-      "everyone": true
-    },
-    {
       "name": "Manyfold",
       "group": "Media",
       "url": "https://manyfold.56kbps.io",

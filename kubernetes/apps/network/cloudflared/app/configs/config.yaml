@@ -1,13 +1,5 @@
 ---
 ingress:
-  - hostname: "jellyfin.${SECRET_DOMAIN}"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "jellyfin.${SECRET_DOMAIN}"
-  - hostname: "jelly.${SECRET_DOMAIN}"
-    service: https://external-gateway.network.svc.cluster.local:443
-    originRequest:
-      originServerName: "jelly.${SECRET_DOMAIN}"
   - hostname: "plex.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:

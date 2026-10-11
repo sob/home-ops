@@ -81,7 +81,7 @@ spec:
             # weight 10 against arc-linux's 59, so a test job co-scheduled with an
             # Android build was starved ~6:1 — fast on an idle node, slow on a busy
             # one, which reads as flaky tests rather than as a slow machine.
-            # 2000m holds its own against Plex/Jellyfin on metal-07 and 3 runners
+            # 2000m holds its own against Plex on metal-07 and 3 runners
             # still fit its 16 cores.
             # Deliberately no CPU limit: a ceiling would throttle bursty compile
             # phases, which is the opposite of what these jobs need.
