@@ -83,16 +83,6 @@
       },
       "separateMinorPatch": true
     },
-    {
-      "description": "Rook-Ceph Group",
-      "groupName": "rook-ceph",
-      "matchPackagePatterns": ["rook/rook", "rook/ceph", "quay.io/ceph/.*"],
-      "matchDatasources": ["docker", "helm"],
-      "group": {
-        "commitMessageTopic": "Rook-Ceph storage"
-      },
-      "separateMinorPatch": true
-    },
 
     // Application Groups
     {

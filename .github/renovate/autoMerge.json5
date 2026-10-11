@@ -118,7 +118,6 @@
     {
       "description": "Critical infrastructure - manual approval required",
       "matchPackageNames": [
-        "/^ghcr\\.io/rook/",
         "/charts-mirror/cilium$/",
         "/cert-manager$/",
         "/external-secrets$/",
