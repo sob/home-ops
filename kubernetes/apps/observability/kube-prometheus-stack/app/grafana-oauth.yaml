@@ -21,9 +21,9 @@ spec:
   data:
     - secretKey: GRAFANA_CLIENT_ID
       remoteRef:
-        key: authentik
+        key: grafana-oidc
         property: GRAFANA_CLIENT_ID
     - secretKey: GRAFANA_CLIENT_SECRET
       remoteRef:
-        key: authentik
+        key: grafana-oidc
         property: GRAFANA_CLIENT_SECRET
