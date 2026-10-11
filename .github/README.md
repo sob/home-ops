@@ -48,7 +48,6 @@ All pull requests that modify files in the `kubernetes/` directory will trigger 
   - Security contexts mandatory
   - No :latest tags
   - Media workloads need node affinity
-  - Volsync apps need UID/GID configuration
 
 ### 9. **Dependency Check** 🔗
 - Validates all Flux dependencies exist
@@ -113,17 +112,6 @@ spec:
 
 ### "File may contain unencrypted secrets"
 Use SOPS encryption or ExternalSecrets instead of plain text secrets.
-
-### "Kustomization uses volsync but doesn't set VOLSYNC_UID"
-Add UID/GID to postBuild substitutions:
-```yaml
-postBuild:
-  substitute:
-    APP: *app
-    VOLSYNC_UID: "1000"
-    VOLSYNC_GID: "1000"
-    VOLSYNC_FSGROUP: "1000"
-```
 
 ## Workflow Configuration
 

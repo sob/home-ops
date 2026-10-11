@@ -112,15 +112,6 @@ deny contains msg if {
     msg := sprintf("Media workload %s '%s' does not have node affinity configured", [input.kind, input.metadata.name])
 }
 
-# Ensure volsync-enabled apps have proper UIDs set
-warn contains msg if {
-    input.kind == "Kustomization"
-    input.apiVersion == "kustomize.toolkit.fluxcd.io/v1"
-    "volsync" in input.spec.components[_]
-    not input.spec.postBuild.substitute.VOLSYNC_UID
-    msg := sprintf("Kustomization '%s' uses volsync but doesn't set VOLSYNC_UID", [input.metadata.name])
-}
-
 # HelmRelease validations
 
 # Ensure HelmRelease has interval set

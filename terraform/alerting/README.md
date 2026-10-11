@@ -45,7 +45,7 @@ This Terraform configuration manages alert rules and notification channels for G
 Alerts are organized by domain:
 - **Kubernetes** - OOM kills, Docker Hub rate limits
 - **Cert Manager** - Certificate expiry, rate limits
-- **Storage** - SMART monitoring, VolSync backups
+- **Storage** - SMART monitoring
 - **Flux** - GitOps reconciliation failures
 
 ## Adding New Alerts

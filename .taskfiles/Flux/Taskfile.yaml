@@ -90,7 +90,7 @@ tasks:
     cmd: flux reconcile kustomization cluster-apps --with-source
 
   wipe:
-    desc: Completely wipe an application including HelmRelease, PVCs, and Volsync backups
+    desc: Completely wipe an application including HelmRelease and PVCs
     silent: true
     summary: |
       args:
@@ -110,7 +110,6 @@ tasks:
       This includes:
       - HelmRelease and all managed resources
       - Persistent Volume Claims (PVCs)
-      - Restic backup snapshots from repository
       - All pods, jobs, secrets, and configs
 
       Are you sure you want to continue?
@@ -127,29 +126,11 @@ tasks:
           LABEL: "app.kubernetes.io/name={{.APP}},app.kubernetes.io/instance={{.APP}},app.kubernetes.io/component={{.APP}},app.kubernetes.io/part-of={{.APP}},app={{.APP}}"
           NS: "{{.NS}}"
 
-      # Delete Volsync resources
-      - task: .delete
-        vars:
-          TYPE: "replicationsource,replicationdestination"
-          LABEL: "app.kubernetes.io/name={{.APP}},app.kubernetes.io/instance={{.APP}}"
-          NS: "{{.NS}}"
-
-      # Delete resources by name (catches things without proper labels)
-      - task: .delete
-        vars:
-          TYPE: "replicationsource,replicationdestination"
-          APP: "{{.APP}}"
-          NS: "{{.NS}}"
-
-      # Delete restic snapshots from repository
-      - task: .delete-restic-snapshots
-        vars: {APP: "{{.APP}}", NS: "{{.NS}}"}
-
       # Delete PVCs and StatefulSets by name pattern
       - |
         echo
         echo "Deleting PVCs and StatefulSets by name pattern..."
-        resources=$(kubectl get pvc,statefulset -n {{.NS}} -o name 2>/dev/null | grep -E "{{.APP}}|data-.*{{.APP}}|volsync-.*{{.APP}}" || true)
+        resources=$(kubectl get pvc,statefulset -n {{.NS}} -o name 2>/dev/null | grep -E "{{.APP}}|data-.*{{.APP}}" || true)
         if [ -n "$resources" ]; then
           echo "$resources" | xargs kubectl delete -n {{.NS}} --ignore-not-found=true --grace-period=0 --force=true 2>&1 | grep -v "Warning: Immediate deletion does not wait" || true
         else
@@ -157,10 +138,10 @@ tasks:
         fi
         echo
 
-      # Delete secrets by name pattern (volsync, etc)
+      # Delete secrets by name pattern
       - |
         echo "Deleting related secrets..."
-        secrets=$(kubectl get secrets -n {{.NS}} -o name 2>/dev/null | grep -E "{{.APP}}|volsync-{{.APP}}" || true)
+        secrets=$(kubectl get secrets -n {{.NS}} -o name 2>/dev/null | grep -E "{{.APP}}" || true)
         if [ -n "$secrets" ]; then
           echo "$secrets" | xargs kubectl delete -n {{.NS}} --ignore-not-found=true --grace-period=0 --force=true 2>&1 | grep -v "Warning: Immediate deletion does not wait" || true
         else
@@ -258,9 +239,3 @@ tasks:
       - msg: Must provide either APP or LABEL
         sh: '[ -n "{{.APP}}" ] || [ -n "{{.LABEL}}" ]'
 
-  .delete-restic-snapshots:
-    internal: true
-    silent: true
-    cmd: bash {{.ROOT_DIR}}/.taskfiles/flux/scripts/delete-restic-snapshots.sh {{.APP}} {{.NS}}
-    requires:
-      vars: ["APP", "NS"]

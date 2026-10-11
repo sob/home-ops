@@ -9,7 +9,7 @@
 - **DNS**: Blocky for internal DNS, external-dns for managing records
 - **Secrets**: External-secrets with OnePassword, SOPS for sensitive data
 - **Domain**: 56kbps.io (using Cloudflare for external access)
-- **Backup**: Volsync with Restic to Cloudflare R2
+- **Backup**: no volsync. SQLite apps use Litestream (`components/litestream`) and small config files use rclone (`components/file-sync`), both to R2 `stone-volsync`; Plex (hostPath on metal-07) backs up with a restic CronJob, enigma-bbs (hostPath on metal-04) with a tarball sidecar
 
 ## Working Guidelines
 
@@ -35,10 +35,9 @@
 
 1. **App-template 4.2.0 PVC naming bug**: When using multiple persistence entries with existingClaim, add `suffix: name` to force correct PVC naming
 2. **HTTPRoute for internal/external access**: Attach to both gateways for split-horizon DNS
-3. **Volsync components**: Create PVCs that may conflict with app-template generated PVCs
-4. **Renovate**: Should group bootstrap/helmfile.yaml updates with kubernetes/apps/ manifests
-5. **Cilium LoadBalancer IP conflicts**: Avoid hardcoding IPs with `io.cilium/lb-ipam-ips` annotation unless necessary - let Cilium manage IP allocation
-6. **SNMP metric unit conversions**: CyberPower devices report voltage in decivolts (e.g., 1130 = 113.0V) - divide by 10 for correct display
+3. **Renovate**: Should group bootstrap/helmfile.yaml updates with kubernetes/apps/ manifests
+4. **Cilium LoadBalancer IP conflicts**: Avoid hardcoding IPs with `io.cilium/lb-ipam-ips` annotation unless necessary - let Cilium manage IP allocation
+5. **SNMP metric unit conversions**: CyberPower devices report voltage in decivolts (e.g., 1130 = 113.0V) - divide by 10 for correct display
 
 ### Validation & Testing
 

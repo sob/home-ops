@@ -1,4 +1,7 @@
 ---
+# DISABLED (not in default/kustomization.yaml). Its storage was a volsync PVC
+# on Ceph, which is gone: the HelmRelease's existingClaim has nothing to bind
+# to. Give it node-local or Litestream storage before re-enabling.
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -12,7 +15,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/gatus/internal
-    - ../../../../components/volsync
   dependsOn:
     - name: emqx-cluster
     - name: external-secrets-stores
@@ -29,5 +31,3 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: node-red
-      VOLSYNC_SCHEDULE: "9 1 * * *"
-      VOLSYNC_CAPACITY: 1Gi

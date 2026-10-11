@@ -9,13 +9,11 @@ resources:
   - ./audiobookshelf/ks.yaml
   - ./bazarr/ks.yaml
 # - ./bsky-pds/ks.yaml
-# - ./cert-exporter/ks.yaml
   - ./homarr/ks.yaml
   - ./kometa/ks.yaml
   - ./lidarr/ks.yaml
   - ./manyfold/ks.yaml
   - ./enigma-bbs/ks.yaml
-# - ./mystic-bbs/ks.yaml
 # - ./node-red/ks.yaml
   - ./seerr/ks.yaml
   - ./plex/ks.yaml
@@ -30,6 +28,5 @@ resources:
 # - ./smtp-relay/ks.yaml
   - ./sonarr/ks.yaml
   - ./tautulli/ks.yaml
-# - ./ultrafeeder/ks.yaml
   - ./varnish/ks.yaml
   - ./wizarr/ks.yaml

@@ -30,7 +30,6 @@ includes:
   network: .taskfiles/network
   pds: .taskfiles/pds
   sops: .taskfiles/Sops
-  volsync: .taskfiles/volsync
   workstation: .taskfiles/Workstation
   validate: .taskfiles/validation
 
