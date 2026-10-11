@@ -117,3 +117,24 @@ data:
             annotations:
               summary: "Synology {{ $labels.host }} logged volume/disk errors"
               description: "Volume-degraded, disk-failure, SMART or scrub errors in the last 15m on {{ $labels.host }}."
+      - name: backups
+        rules:
+          # Upload errors from the backup sidecars: litestream (`level=ERROR`),
+          # rclone in file-sync / settings-sync / enigma-bbs's backup
+          # (`ERROR :`, `Failed to copy`) and enigma's own `backup of … failed`.
+          # They retry (litestream every second, file-sync every minute, enigma
+          # hourly), so a real outage keeps every 1h window non-empty; `for: 90m`
+          # skips one-off blips. Sidecars that stop are covered by the
+          # BackupSidecar* PrometheusRules.
+          - alert: BackupUploadErrors
+            expr: |
+              sum by (namespace, app, container) (
+                count_over_time({container=~"litestream|file-sync|settings-sync|backup"} |~ `level=ERROR|ERROR :|Failed to copy|backup of .* failed` [1h])
+              ) > 0
+            for: 90m
+            labels:
+              severity: critical
+              type: backup
+            annotations:
+              summary: "{{ $labels.namespace }}/{{ $labels.app }} {{ $labels.container }} can't back up to R2"
+              description: "{{ $labels.container }} has logged upload errors for over 90 minutes, so {{ $labels.app }}'s copy in R2 is falling behind. Check `kubectl -n {{ $labels.namespace }} logs deploy/{{ $labels.app }} -c {{ $labels.container }}`."

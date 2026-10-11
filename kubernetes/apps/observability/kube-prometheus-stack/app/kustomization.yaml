@@ -25,4 +25,5 @@ resources:
   - ./rules/network-health.yaml
   - ./rules/log-pipeline-health.yaml
   - ./rules/switch-port-map.yaml
+  - ./rules/backups.yaml
 #  - ./scrapeconfig.yaml
