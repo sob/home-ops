@@ -31,14 +31,7 @@ spec:
           app:
             image:
               repository: docker.io/cloudflare/cloudflared
-              # Held at 2026.7.3 — 2026.8.0 breaks Authentik for every app
-              # published through the tunnel (404 from Authentik on requests
-              # arriving via cloudflared, while the identical URL serves 302
-              # through the internal gateway). Enforced in
-              # .github/renovate/upgradePolicy.json5 — a comment alone did not
-              # stop it: #1557 reverted this and Renovate re-raised the same
-              # bump as #1558 within minutes.
-              tag: 2026.7.3
+              tag: 2026.10.0@sha256:9b49eed8f62806d5d45ddf59ecefb5710429598ea6d3fcccd2af938f621b2b07
             env:
               NO_AUTOUPDATE: true
               TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
