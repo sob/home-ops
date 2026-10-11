@@ -17,15 +17,9 @@ spec:
   upgrade:
     cleanupOnFail: true
     crds: Skip
-    # TEMPORARY: the 6.x -> 7.x chart upgrade (and dropping the PVC) changes
-    # immutable StatefulSet fields. Every upgrade since August failed and its
-    # rollback recreated the old StatefulSet, so deleting it by hand never
-    # stuck (and force only replaces, which is rejected too). With remediation
-    # off, the StatefulSet is deleted once and the next upgrade creates a new
-    # one. Restore `strategy: rollback, retries: 3` once 7.3.0 is deployed.
     remediation:
-      retries: 0
-      remediateLastFailure: false
+      strategy: rollback
+      retries: 3
   values:
     deploymentMode: SingleBinary
     loki:
@@ -46,9 +40,9 @@ spec:
       storage:
         type: s3
         bucketNames:
-          chunks: loki-logs
-          ruler: loki-logs
-          admin: loki-logs
+          chunks: stone-loki-logs
+          ruler: stone-loki-logs
+          admin: stone-loki-logs
         s3:
           # Credentials are injected via env (loki-secret) and expanded by Loki
           # at runtime (-config.expand-env). The $$ escapes Flux postBuild
@@ -70,13 +64,8 @@ spec:
               prefix: loki_index_
               period: 24h
       # Compactor enforces retention and prunes objects from R2.
-      # TEMPORARILY OFF: the R2 key in loki-secret (the shared `cloudflare`
-      # item) is scoped to stone-volsync and can't access loki-logs, so every
-      # R2 call returns 403. Loki 3.6's compactor reads R2 at startup and
-      # refuses to run; with retention off it doesn't. Re-enable once Loki
-      # has a key with Object Read & Write on loki-logs.
       compactor:
-        retention_enabled: false
+        retention_enabled: true
         delete_request_store: s3
         compaction_interval: 10m
         retention_delete_delay: 2h

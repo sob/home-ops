@@ -30,7 +30,7 @@ logs — with a self-hosted single pane of glass and a daily Claude health diges
 
 | Component | Path | Role |
 |---|---|---|
-| Loki (R2 backend) | `kubernetes/apps/observability/loki` | Log store; chunks/ruler in R2 bucket `loki-logs` |
+| Loki (R2 backend) | `kubernetes/apps/observability/loki` | Log store; chunks/ruler in R2 bucket `stone-loki-logs` |
 | Vector log-edge | `kubernetes/apps/observability/vector-aggregator` | Syslog + Talos json receiver (the `vector-aggregator` syslog LoadBalancer Service) |
 | Talos logging | `talos/machineconfig.yaml.j2` | Ships kernel/service logs to the edge |
 | Grafana (self-hosted) | `kube-prometheus-stack` HelmRelease | Single pane; dashboards `Logs — Overview`, `Network & Syslog` |
@@ -90,12 +90,15 @@ Create these in the `STONEHEDGES` vault (referenced by ExternalSecrets):
 | `cluster-secrets` *(existing)* | add `SECRET_VIP_LOG_EDGE` — the syslog LoadBalancer IP (kept out of git; substituted into the vector-aggregator Service) |
 | `talos` *(existing)* | add `LOG_ENDPOINT` = `udp://<that-same-VIP>:5170` — referenced by the Talos `machine.logging` destination |
 
-Also create the **`loki-logs`** bucket in Cloudflare R2 (same account as the
-existing `kube-prometheus-stack` Thanos bucket).
+Also create the **`stone-loki-logs`** bucket in Cloudflare R2 (same account as the
+existing `kube-prometheus-stack` Thanos bucket), plus an R2 token with Object
+Read & Write on that bucket only, stored in a `loki` 1Password item as
+`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ACCESS_KEY_ID` and
+`CLOUDFLARE_SECRET_ACCESS_KEY`.
 
 ## Apply / rollout
 
-1. Create the 1Password items and the `loki-logs` R2 bucket (above).
+1. Create the 1Password items and the `stone-loki-logs` R2 bucket (above).
 2. Merge the PR; Flux reconciles the observability namespace.
 3. **Apply the Talos change** (host log shipping) — regenerate and apply machine
    config to each node, e.g. `task talos:apply-node IP=<node-ip>` (or your
