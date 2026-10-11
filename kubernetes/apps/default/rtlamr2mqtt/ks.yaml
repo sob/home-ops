@@ -11,9 +11,12 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: emqx-cluster
+    - name: mosquitto
+      namespace: database
     - name: external-secrets-stores
+      namespace: external-secrets
     - name: node-feature-discovery-rules
+      namespace: kube-system
   path: ./kubernetes/apps/default/rtlamr2mqtt/app
   prune: true
   sourceRef:
