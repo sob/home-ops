@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+# Backup health. There are no PVCs: app state is restored from R2 on start
+# and streamed back by native sidecars (litestream, file-sync, Seerr's
+# settings-sync, enigma-bbs's backup), and Plex is backed up by the
+# plex-backup CronJob. A sidecar that stops means the next restore comes
+# back stale. Upload errors that don't stop a sidecar (R2 down, a revoked
+# key) are caught by the `backups` group in the Loki ruler
+# (observability/loki/app/rules.yaml).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backup-rules
+  namespace: observability
+spec:
+  groups:
+    - name: backups
+      rules:
+        - alert: BackupSidecarNotRunning
+          expr: |
+            (
+              kube_pod_init_container_status_running{container=~"litestream|file-sync|settings-sync|backup"} == 0
+            )
+            and on (namespace, pod)
+            (kube_pod_status_phase{phase="Running"} == 1)
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backup sidecar {{ $labels.container }} isn't running in {{ $labels.namespace }}/{{ $labels.pod }}"
+            description: "The pod is running but its {{ $labels.container }} sidecar isn't, so changes aren't reaching R2 and the next restore will be stale."
+        - alert: BackupSidecarRestarting
+          expr: |
+            increase(kube_pod_init_container_status_restarts_total{container=~"litestream|file-sync|settings-sync|backup"}[1h]) > 3
+          labels:
+            severity: warning
+          annotations:
+            summary: "Backup sidecar {{ $labels.container }} in {{ $labels.namespace }}/{{ $labels.pod }} restarted {{ $value | printf \"%.0f\" }} times in 1h"
+            description: "Check `kubectl -n {{ $labels.namespace }} logs {{ $labels.pod }} -c {{ $labels.container }} --previous`."
+        - alert: PlexBackupFailed
+          expr: |
+            kube_job_status_failed{namespace="default", job_name=~"plex-backup-.*"} > 0
+          labels:
+            severity: warning
+          annotations:
+            summary: "Plex's restic backup job {{ $labels.job_name }} failed"
+            description: "Check `kubectl -n default logs job/{{ $labels.job_name }}`. A stale lock clears itself on the next run (`restic unlock`)."
+        - alert: PlexBackupStale
+          # Runs nightly at 03:30 Central; 30h allows one late or retried run.
+          expr: |
+            time() - kube_cronjob_status_last_successful_time{namespace="default", cronjob="plex-backup"} > 30 * 3600
+          labels:
+            severity: critical
+          annotations:
+            summary: "Plex hasn't had a successful backup in {{ $value | humanizeDuration }}"
+            description: "The newest restic snapshot of /var/local-storage/plex is older than 30h. A restore after losing metal-07 would roll Plex back that far."
