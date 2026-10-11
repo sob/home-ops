@@ -14,7 +14,7 @@ data:
     1. A one-line overall status: 🟢 healthy / 🟡 needs attention / 🔴 critical.
     2. "Top issues" — at most 5 bullet points, each: what, where (namespace/host/
        device), severity, and a concrete next step. Prioritise: firing alerts,
-       crashloops/OOM, Ceph health, Flux failures, Talos kernel/hardware errors,
+       crashloops/OOM, Flux failures, Talos kernel/hardware errors,
        UniFi firewall/IDS spikes, UPS/power, Synology disk/volume errors.
     3. "Trends to watch" — at most 3 bullets on slow-moving regressions.
     4. "All clear" — a short list of subsystems that look fine.
@@ -22,7 +22,7 @@ data:
     Rules: be specific and quantitative (cite counts/rates). Do NOT invent data
     not present in the snapshot. If a section is empty, say so in one line. Keep
     the whole digest under ~400 words. If anything is genuinely critical
-    (data-loss risk, node/Ceph/UPS emergency), start that bullet with "CRITICAL:".
+    (data-loss risk, node/UPS emergency), start that bullet with "CRITICAL:".
 
   run.sh: |
     #!/usr/bin/env bash
@@ -53,7 +53,6 @@ data:
     echo "# Homelab snapshot ($(date -u +%FT%TZ))" >> "$CTX"
 
     pq "Firing alerts"            'ALERTS{alertstate="firing"}'
-    pq "Ceph health (0=OK,1=WARN,2=ERR)" 'ceph_health_status'
     pq "Flux not-ready"           'gotk_reconcile_condition{type="Ready",status="False"}'
     pq "Container restarts 24h"   'topk(15, sum by (namespace,pod) (increase(kube_pod_container_status_restarts_total[24h])) > 2)'
     pq "OOMKilled (last term)"    'kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1'

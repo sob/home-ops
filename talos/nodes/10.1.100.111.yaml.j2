@@ -3,7 +3,6 @@ machine:
   nodeLabels:
     # Garage rack / failure domain (existing rack = zone "basement")
     topology.kubernetes.io/zone: garage
-    storage.rook.io/ceph: "true"
   type: worker
   network:
     hostname: metal-11

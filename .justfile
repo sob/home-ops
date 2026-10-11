@@ -6,7 +6,6 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 mod bootstrap "bootstrap"
 mod burn "burn.just"
 mod kube "kubernetes"
-mod rook "kubernetes/apps/rook-ceph"
 mod talos "talos"
 
 [private]

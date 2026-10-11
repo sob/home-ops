@@ -145,7 +145,7 @@ spec:
         # Pod without resource limits (excludes operator-managed system namespaces)
         - alert: PodWithoutResourceLimits
           expr: |
-            kube_pod_container_info{container!="POD",namespace!~"kube-system|rook-ceph|cert-manager|k8s-digester|flux-system"}
+            kube_pod_container_info{container!="POD",namespace!~"kube-system|cert-manager|k8s-digester|flux-system"}
             unless on(namespace,pod,container)
             kube_pod_container_resource_limits{resource="memory"}
           for: 1h

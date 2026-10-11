@@ -362,7 +362,7 @@ data:
       // Drop metrics from non-critical pods
       rule {
         source_labels = ["namespace"]
-        regex = "kube-system|rook-ceph|flux-system|storage|external-secrets"
+        regex = "kube-system|flux-system|external-secrets"
         action = "drop"
       }
 
