@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nut-upsd
+spec:
+  groups:
+    - name: nut-upsd
+      rules:
+        - alert: NutUpsdNotReady
+          expr: |
+            kube_daemonset_status_number_ready{namespace="kube-system", daemonset="nut-upsd"}
+              < kube_daemonset_status_desired_number_scheduled{namespace="kube-system", daemonset="nut-upsd"}
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "nut-upsd isn't ready on {{ $value }} fewer node(s) than scheduled"
+            description: "A node without a ready nut-upsd can't see the UPS and will hard-power-off in a power cut. Check `kubectl -n kube-system get pods -l app.kubernetes.io/name=nut-upsd -o wide`."

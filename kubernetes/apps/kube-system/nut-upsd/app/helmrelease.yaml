@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nut-upsd
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # One NUT server per node (#1671). Each polls the rack UPS's network card
+    # over SNMP and serves it on that node's loopback, where the Talos
+    # nut-client extension (upsmon, secondary) watches it and powers the node
+    # off when the UPS is on battery and low. No central server: nothing to lose
+    # in a power event, and no DSM limit on clients. A node whose upsd is down
+    # when the power fails gets a hard power-off; NutUpsdNotReady alerts on it.
+    controllers:
+      nut-upsd:
+        type: daemonset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
+          priorityClassName: system-node-critical
+          tolerations:
+            - operator: Exists
+        containers:
+          app:
+            image:
+              repository: docker.io/instantlinux/nut-upsd
+              tag: 2.8.5-r1@sha256:28eae8f3c097b409749ed4a50da57668cf8785a9bccf0db83e521bf343c0e97e
+            # Not the image's entrypoint: it appends to /etc/nut and also runs
+            # its own upsmon. Only the driver and upsd are needed here.
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -e
+                cp /config/ups.conf /config/upsd.conf /config/upsd.users /etc/nut/
+                chgrp nut /etc/nut/ups.conf /etc/nut/upsd.conf /etc/nut/upsd.users
+                chmod 640 /etc/nut/ups.conf /etc/nut/upsd.conf /etc/nut/upsd.users
+                mkdir -p -m 2750 /dev/shm/nut
+                chown nut:nut /dev/shm/nut
+                [ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run/nut
+                /usr/sbin/upsdrvctl -u root start
+                exec /usr/sbin/upsd -F -u nut
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["upsc", "ups@127.0.0.1", "ups.status"]
+                  initialDelaySeconds: 15
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 4
+              readiness: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+                add: ["CHOWN", "DAC_OVERRIDE", "FOWNER", "SETUID", "SETGID"]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+    persistence:
+      config:
+        type: secret
+        name: nut-upsd-secret
+        globalMounts:
+          - path: /config
+            readOnly: true

@@ -167,15 +167,18 @@ configFiles:
 apiVersion: v1alpha1
 kind: ExtensionServiceConfig
 name: nut-client
-# The NUT server is the Synology (doom, 10.1.100.254): DSM polls the rack
-# UPS's RMCARD205 over SNMP and re-serves it as UPS "ups" on tcp/3493 with
-# DSM's fixed credentials (monuser / secret). DSM decides when to shut down
-# and sends FSD, so every node powers off together. Literal IP, not a name:
-# node DNS is 1.1.1.1 and can't resolve internal names, and must not depend on
-# the cluster during a power event. No POWERDOWNFLAG: only the primary (DSM)
-# ever cuts UPS power. See #1671.
+# Each node watches its own NUT server: kube-system/nut-upsd is a hostNetwork
+# DaemonSet that polls the rack UPS's RMCARD205 (10.1.100.74) over SNMP and
+# serves it on this node's loopback. upsmon (secondary) powers the node off
+# when the UPS is on battery and low (thresholds in nut-upsd's ups.conf).
+# Loopback, not a name or a central server: node DNS is 1.1.1.1, and nothing
+# off-node has to survive the power event. The password is resolved from
+# 1Password by `op inject` at render time. It uses the delimited reference
+# form (a bare one would swallow the rest of the line), wrapped in a jinja raw
+# block so minijinja passes it through. No POWERDOWNFLAG: no node ever cuts UPS
+# power. See #1671.
 configFiles:
   - content: |
-      MONITOR ups@10.1.100.254 1 monuser secret secondary
+      MONITOR ups@127.0.0.1 1 monuser {% raw %}{{ op://STONEHEDGES/nut/NUT_PASSWORD }}{% endraw %} secondary
       SHUTDOWNCMD "/sbin/poweroff"
     mountPath: /usr/local/etc/nut/upsmon.conf

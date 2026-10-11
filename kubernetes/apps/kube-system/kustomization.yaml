@@ -16,6 +16,7 @@ resources:
   - ./metrics-server/ks.yaml
   - ./node-feature-discovery/ks.yaml
   - ./node-local-dns/ks.yaml
+  - ./nut-upsd/ks.yaml
   - ./priority-classes/ks.yaml
   - ./reflector/ks.yaml
   - ./reloader/ks.yaml
