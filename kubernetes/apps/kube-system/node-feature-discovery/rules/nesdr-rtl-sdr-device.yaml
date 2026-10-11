@@ -5,11 +5,25 @@ metadata:
   name: nesdr-rtlamr-device
 spec:
   rules:
-    - # NESDR Nano 2 Plus
+    - # NESDR Nano 2 Plus (water meters, rtlamr2mqtt). Any RTL2832U (0bda:2838)
+      # except the FlightAware Pro Stick below, which reports the same IDs.
       name: nesdr.rtlamr
       labels:
         nesdr.feature.node.kubernetes.io/rtlamr: "true"
       matchFeatures:
         - feature: usb.device
           matchExpressions:
-            vendor: { op: In, value: ["0bda", "2838"] }
+            vendor: { op: In, value: ["0bda"] }
+            device: { op: In, value: ["2838"] }
+            serial: { op: NotIn, value: ["stx:1090:0"] }
+    - # FlightAware Pro Stick (ADS-B, 1090 MHz filter + LNA). Plug it into any
+      # node and the flightaware pod follows this label there.
+      name: flightaware.prostick
+      labels:
+        flightaware.feature.node.kubernetes.io/prostick: "true"
+      matchFeatures:
+        - feature: usb.device
+          matchExpressions:
+            vendor: { op: In, value: ["0bda"] }
+            device: { op: In, value: ["2838"] }
+            serial: { op: In, value: ["stx:1090:0"] }
