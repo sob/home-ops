@@ -6,6 +6,9 @@ metadata:
   name: &app plex
 spec:
   interval: 30m
+  # The first start on a node copies or restores ~10 GB in the restore init
+  # container; the default 5m timeout rolled that back mid-copy.
+  timeout: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
@@ -40,7 +43,10 @@ spec:
             args:
               - |
                 set -eu
-                if [ -e /data/Preferences.xml ]; then
+                # Written only after a complete copy or restore. Without it,
+                # anything in /data is a partial copy: both paths below
+                # overwrite it in place.
+                if [ -e /data/.restore-complete ]; then
                   echo "local data present; not restoring"
                 elif [ -e /seed/Preferences.xml ]; then
                   cp -a /seed/. /data/
@@ -50,6 +56,7 @@ spec:
                   restic restore latest:/data --host plex --target /data --no-cache
                   echo "restored the latest restic snapshot"
                 fi
+                touch /data/.restore-complete
                 # hostPath dirs are created root:root, and fsGroup doesn't apply
                 # to hostPath volumes.
                 chown 1030:65536 /data
@@ -148,7 +155,8 @@ spec:
                 restic unlock
                 restic backup . --host plex \
                   --exclude ./Cache --exclude ./Logs \
-                  --exclude "./Crash Reports" --exclude ./Diagnostics
+                  --exclude "./Crash Reports" --exclude ./Diagnostics \
+                  --exclude ./.restore-complete
                 if [ "$(date +%u)" = 7 ]; then
                   restic forget --host plex --keep-daily 7 --keep-weekly 4 --prune
                 else
