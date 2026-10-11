@@ -131,9 +131,16 @@ spec:
         - name: loki-alerting-rules
           configMap:
             name: loki-alerting-rules
+        # With persistence disabled, chart 7 mounts nothing at /var/loki and
+        # Loki fails with "mkdir /var/loki: read-only file system".
+        - name: data
+          emptyDir:
+            sizeLimit: 10Gi
       extraVolumeMounts:
         - name: loki-alerting-rules
           mountPath: /etc/loki/rules/fake
+        - name: data
+          mountPath: /var/loki
       # No PVC: chunks, index and ruler data live in R2. Locally there is only
       # the WAL (~25 MB), the TSDB index cache (re-fetched from R2) and
       # compactor scratch, so the chart's emptyDir is enough. The WAL is
