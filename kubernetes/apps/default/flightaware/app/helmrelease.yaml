@@ -19,7 +19,7 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    # ADS-B feeder for the FlightAware Pro Stick. ultrafeeder decodes 1090 MHz
+    # ADS-B feeder on the RTL-SDR labelled sdr.feature.node.kubernetes.io/adsb. ultrafeeder decodes 1090 MHz
     # (readsb) and serves the tar1090 map; piaware feeds FlightAware from
     # ultrafeeder's Beast output and returns MLAT results to it. The pod runs
     # wherever the stick is plugged in (NFD label, see
@@ -39,9 +39,9 @@ spec:
             env:
               TZ: America/Chicago
               READSB_DEVICE_TYPE: rtlsdr
-              READSB_RTLSDR_DEVICE: "stx:1090:0"
+              READSB_RTLSDR_DEVICE: "00000001"
               READSB_GAIN: autogain
-              # The Pro Stick has its own LNA, powered over USB.
+              # A plain RTL-SDR: no LNA to power.
               READSB_ENABLE_BIASTEE: "false"
               # piaware's MLAT results come back in on 30105.
               ULTRAFEEDER_CONFIG: mlathub,flightaware-piaware.default.svc.cluster.local,30105,beast_in
@@ -112,7 +112,7 @@ spec:
                 memory: 256Mi
     defaultPodOptions:
       nodeSelector:
-        flightaware.feature.node.kubernetes.io/prostick: "true"
+        sdr.feature.node.kubernetes.io/adsb: "true"
       # metal-07 (media) is tainted; tolerate it so the stick can go there too.
       tolerations:
         - key: workload-type

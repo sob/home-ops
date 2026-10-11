@@ -4,10 +4,14 @@ kind: NodeFeatureRule
 metadata:
   name: nesdr-rtlamr-device
 spec:
+  # RTL2832U dongles all report 0bda:2838, so they're told apart by the USB
+  # serial in their EEPROM. Labels are named by role, and the pods follow them
+  # to whichever node the dongle is plugged into.
   rules:
-    - # NESDR Nano 2 Plus (water meters, rtlamr2mqtt). Any RTL2832U (0bda:2838)
-      # except the FlightAware Pro Stick below, which reports the same IDs.
-      name: nesdr.rtlamr
+    - # Water meters (rtlamr2mqtt): the Nooelec NESDR Nano 2+ with the 900 MHz
+      # antenna. Its serial reads stx:1090:0 (an old ADS-B setting), but it is
+      # not a FlightAware stick.
+      name: sdr.water-meter
       labels:
         nesdr.feature.node.kubernetes.io/rtlamr: "true"
       matchFeatures:
@@ -15,15 +19,15 @@ spec:
           matchExpressions:
             vendor: { op: In, value: ["0bda"] }
             device: { op: In, value: ["2838"] }
-            serial: { op: NotIn, value: ["stx:1090:0"] }
-    - # FlightAware Pro Stick (ADS-B, 1090 MHz filter + LNA). Plug it into any
-      # node and the flightaware pod follows this label there.
-      name: flightaware.prostick
+            serial: { op: In, value: ["stx:1090:0"] }
+    - # ADS-B (flightaware): the other RTL-SDR, serial 00000001 (the factory
+      # default, so a second unprogrammed dongle would also match).
+      name: sdr.adsb
       labels:
-        flightaware.feature.node.kubernetes.io/prostick: "true"
+        sdr.feature.node.kubernetes.io/adsb: "true"
       matchFeatures:
         - feature: usb.device
           matchExpressions:
             vendor: { op: In, value: ["0bda"] }
             device: { op: In, value: ["2838"] }
-            serial: { op: In, value: ["stx:1090:0"] }
+            serial: { op: In, value: ["00000001"] }
