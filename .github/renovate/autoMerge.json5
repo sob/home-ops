@@ -40,7 +40,6 @@
       "matchPackageNames": [
         "/^ghcr\\.io/home-operations/[^/]+$/",
         "/^ghcr\\.io/onedr0p/[^/]+$/",
-        "/jellyfin/jellyfin$/",
         "/wizarrrr/wizarr$/",
       ],
       "matchUpdateTypes": ["patch", "minor"],

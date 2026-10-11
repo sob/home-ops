@@ -141,18 +141,6 @@ locals {
       }
     }
 
-    jellyfin = {
-      script = file("${path.module}/tests/base-media.js")
-      env_vars = {
-        SERVICE_NAME    = "jellyfin"
-        SERVICE_URL     = "https://jellyfin.${local.test_domain}"
-        API_ENDPOINT    = "/System/Info/Public"
-        HEALTH_ENDPOINT = "/"
-        CHECK_STRING    = "Jellyfin"
-        SLEEP_DURATION  = "10"
-      }
-    }
-
     sabnzbd = {
       script = file("${path.module}/tests/base-media.js")
       env_vars = {

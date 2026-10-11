@@ -35,38 +35,6 @@ resource "grafana_rule_group" "media_apps" {
     }
   }
 
-  # Jellyfin - Alternative media server
-  rule {
-    name = "JellyfinDown"
-    annotations = {
-      summary     = "Jellyfin media server is down"
-      description = "Jellyfin has been unreachable for 5 minutes"
-    }
-    labels = {
-      severity = "critical"
-      service  = "jellyfin"
-      category = "media"
-    }
-    for       = "5m"
-    no_data_state = "OK"
-    condition = "A"
-
-    data {
-      ref_id = "A"
-      
-      relative_time_range {
-        from = 300
-        to   = 0
-      }
-      
-      datasource_uid = local.prometheus_cloud_uid
-      model = jsonencode({
-        expr  = "min(up{job=\"jellyfin\",namespace=\"default\"}) < 1"
-        refId = "A"
-        instant = true      })
-    }
-  }
-
   # Request management
   rule {
     name = "OverseerrDown"

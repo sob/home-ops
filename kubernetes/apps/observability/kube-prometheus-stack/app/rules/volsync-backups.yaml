@@ -15,8 +15,8 @@ spec:
         # saves a snapshot, but the follow-on `forget` needs an exclusive lock
         # and fails, so the source never completes a sync and retries forever.
         # Bumping VOLSYNC_UNLOCK does NOT clear these: it runs plain
-        # `restic unlock`, which can't clear a dead pod's lock (see
-        # apps/default/jellyfin/ks.yaml). `task volsync:unlock` can.
+        # `restic unlock`, which can't clear a dead pod's lock.
+        # `task volsync:unlock` can.
         # role="source" only —
         # ReplicationDestinations use manual restore-once triggers and are
         # permanently "out of sync" by design.
