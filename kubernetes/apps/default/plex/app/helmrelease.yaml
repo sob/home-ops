@@ -48,8 +48,13 @@ spec:
                 if [ -e /data/.restore-complete ]; then
                   echo "local data present; not restoring"
                 else
-                  # Only this job's snapshots (host plex), not volsync's.
-                  restic restore latest:/data --host plex --target /data --no-cache
+                  # Only this job's snapshots (host plex), not volsync's. The
+                  # job runs `restic backup .` from /data, so the files sit at
+                  # the snapshot's root (`latest:/data` doesn't exist).
+                  # With a cache: --no-cache re-fetches repo metadata
+                  # constantly (252 KB in 16 min vs 9.4 GiB in 2 min).
+                  restic restore latest --host plex --target /data \
+                    --cache-dir /tmp/restic-cache
                   echo "restored the latest restic snapshot"
                 fi
                 touch /data/.restore-complete
