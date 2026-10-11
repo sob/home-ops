@@ -18,6 +18,6 @@ resource "grafana_folder" "monitoring" {
 
 # Folder mapping for existing resources:
 # - infrastructure: nodes, power, prometheus connectivity, flux, external-secrets
-# - storage: smartctl, ceph, volsync
+# - storage: smartctl, ceph
 # - applications: all media services, critical services, cert-manager
 # - monitoring: response times, infrastructure metrics

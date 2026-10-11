@@ -54,7 +54,7 @@
         "/reloader$/",
         "/node-feature-discovery$/",
         "/^ghcr\\.io/grafana/helm-charts/",
-        "/charts-mirror/(metrics-server|descheduler|volsync|alloy|intel-device-plugins-.*)$/",
+        "/charts-mirror/(metrics-server|descheduler|alloy|intel-device-plugins-.*)$/",
         "/kured$/",
         "/system-upgrade-controller$/",
         "/mozilla/sops$/",
