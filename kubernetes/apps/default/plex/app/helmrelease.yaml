@@ -6,8 +6,8 @@ metadata:
   name: &app plex
 spec:
   interval: 30m
-  # The first start on a node copies or restores ~10 GB in the restore init
-  # container; the default 5m timeout rolled that back mid-copy.
+  # The first start on a node restores ~10 GB in the restore init container;
+  # the default 5m timeout would roll that back mid-restore.
   timeout: 30m
   chartRef:
     kind: OCIRepository
@@ -31,9 +31,8 @@ spec:
           reloader.stakater.com/auto: "true"
         # Config lives on node-local disk on metal-07 (hostPath), not Ceph. When
         # that directory is empty (new node, wiped disk), restore the newest
-        # backup from the restic repo; on this first run, before the backup job
-        # has written one, copy the old Ceph PVC mounted at /seed. With neither,
-        # fail rather than start Plex unconfigured.
+        # backup from the restic repo, and fail rather than start Plex
+        # unconfigured when there is none.
         initContainers:
           restore:
             image: &restic
@@ -43,14 +42,11 @@ spec:
             args:
               - |
                 set -eu
-                # Written only after a complete copy or restore. Without it,
-                # anything in /data is a partial copy: both paths below
-                # overwrite it in place.
+                # Written only after a complete restore. Without it,
+                # anything in /data is a partial restore, which restic
+                # overwrites in place.
                 if [ -e /data/.restore-complete ]; then
                   echo "local data present; not restoring"
-                elif [ -e /seed/Preferences.xml ]; then
-                  cp -a /seed/. /data/
-                  echo "seeded from the old PVC"
                 else
                   # Only this job's snapshots (host plex), not volsync's.
                   restic restore latest:/data --host plex --target /data --no-cache
@@ -250,15 +246,6 @@ spec:
           backup:
             app:
               - path: /data
-                readOnly: true
-      # The old Ceph PVC, only as the restore's first-run seed. Removed with
-      # volsync once the backup job has written a snapshot.
-      seed:
-        existingClaim: plex
-        advancedMounts:
-          plex:
-            restore:
-              - path: /seed
                 readOnly: true
       # Disposable, so not on the hostPath (and not backed up).
       cache:
