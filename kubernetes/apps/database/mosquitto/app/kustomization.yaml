@@ -8,3 +8,11 @@ resources:
   - ./helmrelease.yaml
   - ./external-ip.yaml
   - ./prometheusrule.yaml
+configMapGenerator:
+  - name: mosquitto-config
+    files:
+      - ./config/mosquitto.conf
+      - ./config/mosquitto.acl
+      - ./config/passwd.sh
+generatorOptions:
+  disableNameSuffixHash: true
