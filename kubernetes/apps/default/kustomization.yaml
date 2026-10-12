@@ -37,6 +37,7 @@ resources:
   - ./sonarr/ks.yaml
   - ./sonos-mqtt/ks.yaml
   - ./tautulli/ks.yaml
+  - ./uinetwork-mqtt/ks.yaml
   - ./uiprotect-mqtt/ks.yaml
   - ./varnish/ks.yaml
   - ./weatherflow-mqtt/ks.yaml
