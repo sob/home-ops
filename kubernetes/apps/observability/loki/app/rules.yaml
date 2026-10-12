@@ -81,18 +81,61 @@ data:
 
       - name: network-syslog
         rules:
-          - alert: UnifiFirewallDropSpike
+          # UniFi activity log: CEF that vector-aggregator parses into .cef
+          # (`| json` exposes it as cef_name, cef_severity (0-10), cef_src, ...).
+          - alert: UnifiThreatDetected
             expr: |
-              sum (
-                rate({source="unifi"} |~ `(?i)(\[wan_.*-default-D\]|firewall.*DROP|IDS|IPS|threat)` [5m])
-              ) > 50
-            for: 10m
+              sum by (cef_src, cef_dst, cef_UNIFIipsSignature) (
+                count_over_time({source="unifi"} |= "|Threat Detected|" | json | cef_severity >= 7 | cef_severity < 9 [15m])
+              ) > 0
             labels:
               severity: warning
               type: network
             annotations:
-              summary: "UniFi firewall/IDS event spike"
-              description: ">50 firewall-drop / IDS-IPS syslog events per second over 10m from UniFi gateway."
+              summary: "UniFi IPS: {{ $labels.cef_UNIFIipsSignature }}"
+              description: "UniFi IPS flagged {{ $labels.cef_src }} -> {{ $labels.cef_dst }} in the last 15m."
+          - alert: UnifiThreatDetectedCritical
+            expr: |
+              sum by (cef_src, cef_dst, cef_UNIFIipsSignature) (
+                count_over_time({source="unifi"} |= "|Threat Detected|" | json | cef_severity >= 9 [15m])
+              ) > 0
+            labels:
+              severity: critical
+              type: network
+            annotations:
+              summary: "UniFi IPS (high severity): {{ $labels.cef_UNIFIipsSignature }}"
+              description: "UniFi IPS flagged {{ $labels.cef_src }} -> {{ $labels.cef_dst }} at CEF severity 9+ in the last 15m."
+          - alert: UnifiFirewallBlockSpike
+            expr: |
+              sum(count_over_time({source="unifi"} |= "|Blocked by Firewall|" [15m])) > 300
+            for: 15m
+            labels:
+              severity: warning
+              type: network
+            annotations:
+              summary: "UniFi firewall block spike"
+              description: ">300 firewall blocks per 15m for 15m (normal is ~10/hour)."
+          - alert: UnifiConfigChanged
+            expr: |
+              sum by (cef_name, cef_UNIFIadmin, cef_UNIFIsettingsSection, cef_UNIFIsettingsEntry) (
+                count_over_time({source="unifi"} |~ `\|Config (Created|Modified|Removed)\|` | json [10m])
+              ) > 0
+            labels:
+              severity: info
+              type: network
+            annotations:
+              summary: "UniFi {{ $labels.cef_name }}: {{ $labels.cef_UNIFIsettingsSection }} {{ $labels.cef_UNIFIsettingsEntry }}"
+              description: "{{ $labels.cef_UNIFIadmin }} changed {{ $labels.cef_UNIFIsettingsSection }} / {{ $labels.cef_UNIFIsettingsEntry }} in UniFi."
+          - alert: UnifiSyslogSilent
+            expr: |
+              absent_over_time({source="unifi"}[1h])
+            for: 15m
+            labels:
+              severity: warning
+              type: network
+            annotations:
+              summary: "No UniFi syslog for over an hour"
+              description: "vector-aggregator has received no UniFi activity log in 1h; check the console's syslog/SIEM setting (10.1.100.210:514)."
           - alert: NetworkAuthFailures
             expr: |
               sum by (host) (
