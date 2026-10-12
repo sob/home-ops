@@ -126,6 +126,13 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /mosquitto-init
+      # mosquitto_passwd writes a temp file; passwd-sync's root filesystem is read-only.
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          mosquitto:
+            passwd-sync:
+              - path: /tmp
       # Persistence only holds retained messages and sessions (47 bytes when
       # this moved off Ceph); publishers re-announce, so an emptyDir is enough.
       data:
