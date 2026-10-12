@@ -10,7 +10,7 @@ resources:
   - ./bazarr/ks.yaml
 # - ./bsky-pds/ks.yaml
   - ./homarr/ks.yaml
-# - ./hue-mqtt/ks.yaml  # enable with its Mosquitto user once the hue-mqtt 1Password item exists
+  - ./hue-mqtt/ks.yaml
   - ./kometa/ks.yaml
   - ./lidarr/ks.yaml
   - ./manyfold/ks.yaml
