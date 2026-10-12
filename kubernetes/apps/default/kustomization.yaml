@@ -9,6 +9,7 @@ resources:
   - ./audiobookshelf/ks.yaml
   - ./bazarr/ks.yaml
 # - ./bsky-pds/ks.yaml
+  - ./ecobee-mqtt/ks.yaml
   - ./homarr/ks.yaml
   - ./hue-mqtt/ks.yaml
   - ./kometa/ks.yaml
