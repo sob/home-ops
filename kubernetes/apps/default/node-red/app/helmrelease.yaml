@@ -52,6 +52,9 @@ spec:
                 if [ ! -d /data/projects/flows/.git ]; then
                   git clone --branch main "$FLOWS_REPO" /data/projects/flows
                 fi
+                # flow-splitter rebuilds flows.json from src/ on start and
+                # crashes if a folder is missing; git doesn't keep empty ones.
+                mkdir -p /data/projects/flows/src/tabs /data/projects/flows/src/subflows /data/projects/flows/src/config-nodes
                 cp /config/settings.js /data/settings.js
                 cp /config/package.json /data/package.json
                 cd /data && npm install --omit=dev --no-audit --no-fund --loglevel=warn
