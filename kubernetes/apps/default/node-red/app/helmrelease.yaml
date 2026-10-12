@@ -9,72 +9,153 @@ spec:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
-  releaseName: node-red
-  interval: 15m
-  maxHistory: 3
+  interval: 30m
   install:
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
     remediation:
+      strategy: rollback
       retries: 3
-  uninstall:
-    keepHistory: false
-  dependsOn:
-    - name: homeassistant
-      namespace: default
   values:
+    defaultPodOptions:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
     controllers:
-      main:
+      node-red:
+        # /data is an emptyDir rebuilt from sob/flows on every start; one
+        # replica so there's one working copy pushing to the repo.
+        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
-        pod:
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            runAsNonRoot: true
-            fsGroup: 1000
-            fsGroupChangePolicy: "OnRootMismatch"
-        containers:
-          main:
-            image:
+        initContainers:
+          # Clone the project, install the palette, and point Node-RED at the
+          # project with its credentialSecret. A failed clone fails the pod
+          # rather than starting with empty flows.
+          setup:
+            image: &image
               repository: docker.io/nodered/node-red
               tag: 5.0.8@sha256:b5adb6c9dd29ab80c852d82bc87daed84e729dcff9b00ca1bf958e6de470f2c1
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                mkdir -p /data/.ssh /data/projects
+                echo "$FLOWS_DEPLOY_KEY_B64" | base64 -d > /data/.ssh/flows
+                chmod 600 /data/.ssh/flows
+                cp /config/known_hosts /data/.ssh/known_hosts
+                if [ ! -d /data/projects/flows/.git ]; then
+                  git clone --branch main "$FLOWS_REPO" /data/projects/flows
+                fi
+                cp /config/settings.js /data/settings.js
+                cp /config/package.json /data/package.json
+                cd /data && npm install --omit=dev --no-audit --no-fund --loglevel=warn
+                printf '{"activeProject":"flows","projects":{"flows":{"credentialSecret":"%s"}}}\n' \
+                  "$NODE_RED_CREDENTIAL_SECRET" > /data/.config.projects.json
+            env: &gitEnv
+              FLOWS_REPO: git@github.com:sob/flows.git
+              GIT_SSH_COMMAND: ssh -i /data/.ssh/flows -o IdentitiesOnly=yes -o UserKnownHostsFile=/data/.ssh/known_hosts -o StrictHostKeyChecking=yes
+              GIT_AUTHOR_NAME: Node-RED
+              GIT_AUTHOR_EMAIL: node-red@56kbps.io
+              GIT_COMMITTER_NAME: Node-RED
+              GIT_COMMITTER_EMAIL: node-red@56kbps.io
+              HOME: /tmp
+              npm_config_cache: /tmp/npm
+            envFrom: &envFrom
+              - secretRef:
+                  name: node-red-secret
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+          # Commits and pushes anything Deployed but not committed, every 15
+          # minutes and when the pod stops, so a forgotten push loses nothing.
+          # Commit from the editor (Projects → history) for meaningful messages.
+          git-autosave:
+            dependsOn: setup
+            image: *image
+            restartPolicy: Always
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                cd /data/projects/flows
+                save() {
+                  if [ -n "$(git status --porcelain)" ]; then
+                    git add -A && git commit -q -m "autosave: uncommitted changes from the editor" && echo "committed"
+                  fi
+                  if [ -n "$(git log --oneline @{u}..HEAD 2>/dev/null)" ]; then
+                    git push -q && echo "pushed" || echo "push failed" >&2
+                  fi
+                }
+                trap 'save; exit 0' TERM INT
+                while true; do sleep 900 & wait $!; save; done
+            env: *gitEnv
+            envFrom: *envFrom
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+        containers:
+          app:
+            image: *image
             env:
-              TZ: "America/Chicago"
-              NODE_RED_ENABLE_PROJECTS: "true"
-              NODE_RED_ENABLE_SAFE_MODE: "false"
+              <<: *gitEnv
+              TZ: America/Chicago
+            envFrom: *envFrom
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            securityContext: *securityContext
             resources:
               requests:
                 cpu: 10m
-                memory: 62Mi
+                memory: 128Mi
               limits:
-                memory: 500Mi
+                memory: 512Mi
     service:
-      main:
-        controller: main
-        type: ClusterIP
+      app:
+        controller: node-red
         ports:
           http:
-            port: 1880
+            port: &port 1880
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["node-red.${SECRET_DOMAIN}"]
         parentRefs:
           - name: internal-gateway
             namespace: network
             sectionName: https-56kbps
         rules:
           - backendRefs:
-              - identifier: main
-                port: 1880
+              - identifier: app
+                port: *port
     persistence:
+      data:
+        type: emptyDir
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir
       config:
-        existingClaim: *app
-        enabled: true
+        type: configMap
+        name: node-red-config
         advancedMounts:
-          main:
-            main:
-              - path: /data
-                readOnly: false
+          node-red:
+            setup:
+              - path: /config
+                readOnly: true
