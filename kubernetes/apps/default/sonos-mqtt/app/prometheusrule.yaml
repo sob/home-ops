@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sonos-mqtt
+spec:
+  groups:
+    - name: sonos-mqtt
+      rules:
+        - alert: SonosMqttNotReady
+          # /readyz fails while MQTT or the upstream side is down.
+          expr: |
+            kube_deployment_status_replicas_available{namespace="default", deployment="sonos-mqtt"} < 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "sonos-mqtt can't reach its upstream or Mosquitto"
+            description: "Sonos playback state and commands on MQTT is stale, so Node-RED automations using it are blind. `kubectl -n default logs deploy/sonos-mqtt` says which side is down."

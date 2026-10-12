@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: denon-mqtt
+spec:
+  groups:
+    - name: denon-mqtt
+      rules:
+        - alert: DenonMqttNotReady
+          # /readyz fails while MQTT or the upstream side is down.
+          expr: |
+            kube_deployment_status_replicas_available{namespace="default", deployment="denon-mqtt"} < 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "denon-mqtt can't reach its upstream or Mosquitto"
+            description: "Receiver state and commands on MQTT is stale, so Node-RED automations using it are blind. `kubectl -n default logs deploy/denon-mqtt` says which side is down."

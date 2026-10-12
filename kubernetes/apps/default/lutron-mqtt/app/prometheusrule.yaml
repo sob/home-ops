@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lutron-mqtt
+spec:
+  groups:
+    - name: lutron-mqtt
+      rules:
+        - alert: LutronMqttNotReady
+          # /readyz fails while MQTT or the upstream side is down.
+          expr: |
+            kube_deployment_status_replicas_available{namespace="default", deployment="lutron-mqtt"} < 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "lutron-mqtt can't reach its upstream or Mosquitto"
+            description: "Caseta lights, shades, fans and pico buttons on MQTT is stale, so Node-RED automations using it are blind. `kubectl -n default logs deploy/lutron-mqtt` says which side is down."

@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rachio-mqtt
+spec:
+  groups:
+    - name: rachio-mqtt
+      rules:
+        - alert: RachioMqttNotReady
+          # /readyz fails while MQTT or the upstream side is down.
+          expr: |
+            kube_deployment_status_replicas_available{namespace="default", deployment="rachio-mqtt"} < 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "rachio-mqtt can't reach its upstream or Mosquitto"
+            description: "Sprinkler controller and zone state on MQTT is stale, so Node-RED automations using it are blind. `kubectl -n default logs deploy/rachio-mqtt` says which side is down."

@@ -1,0 +1,13 @@
+---
+# Fixed IP for the speakers' UPnP event callbacks (SONOS_CALLBACK_HOST).
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: sonos-pool
+spec:
+  blocks:
+    - start: 10.1.100.207
+      stop: 10.1.100.207
+  serviceSelector:
+    matchLabels:
+      app.kubernetes.io/name: sonos-mqtt

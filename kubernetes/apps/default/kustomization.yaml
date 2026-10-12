@@ -9,7 +9,9 @@ resources:
   - ./audiobookshelf/ks.yaml
   - ./bazarr/ks.yaml
 # - ./bsky-pds/ks.yaml
+  - ./denon-mqtt/ks.yaml
   - ./ecobee-mqtt/ks.yaml
+  - ./epson-mqtt/ks.yaml
   - ./homarr/ks.yaml
   - ./hue-mqtt/ks.yaml
   - ./kometa/ks.yaml
@@ -17,7 +19,9 @@ resources:
   - ./manyfold/ks.yaml
   - ./enigma-bbs/ks.yaml
   - ./flightaware/ks.yaml
+  - ./media-mqtt/ks.yaml
   - ./node-red/ks.yaml
+  - ./rachio-mqtt/ks.yaml
   - ./seerr/ks.yaml
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml
@@ -28,10 +32,12 @@ resources:
   - ./recyclarr/ks.yaml
   - ./rtlamr2mqtt/ks.yaml
   - ./sabnzbd/ks.yaml
+  - ./smarttub-mqtt/ks.yaml
 # - ./smtp-relay/ks.yaml
   - ./sonarr/ks.yaml
   - ./tautulli/ks.yaml
   - ./uiprotect-mqtt/ks.yaml
   - ./varnish/ks.yaml
+  - ./weatherflow-mqtt/ks.yaml
   - ./wizarr/ks.yaml
   - ./zigbee2mqtt/ks.yaml
