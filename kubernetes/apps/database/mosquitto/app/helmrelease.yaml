@@ -21,9 +21,14 @@ spec:
   values:
     controllers:
       mosquitto:
+        # Restart only for mosquitto.conf/acl changes. New or changed users in
+        # mosquitto-secret are picked up by the passwd-sync sidecar with a SIGHUP,
+        # so adding a bridge doesn't disconnect every client or drop retained state.
         annotations:
-          reloader.stakater.com/auto: "true"
+          configmap.reloader.stakater.com/reload: mosquitto-config
         pod:
+          # passwd-sync signals the broker process
+          shareProcessNamespace: true
           securityContext:
             runAsUser: 1883
             runAsGroup: 1883
@@ -35,38 +40,39 @@ spec:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
               tag: 2.0.22
-            envFrom:
-              - secretRef:
-                  name: mosquitto-secret
-            command:
-              - /bin/sh
-              - -c
-              - |
-                # Create password file with hashes
-                rm -f /mosquitto-init/mosquitto.passwd
-                mosquitto_passwd -b -c /mosquitto-init/mosquitto.passwd "$HASS_USER" "$HASS_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$RATGDO_USER" "$RATGDO_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$ZIGBEE_USER" "$ZIGBEE_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$EXPORTER_USER" "$EXPORTER_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$RTLAMR_USER" "$RTLAMR_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$N8N_USER" "$N8N_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$NODERED_USER" "$NODERED_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$BATOCERA_USER" "$BATOCERA_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$HUE_USER" "$HUE_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$UINETWORK_USER" "$UINETWORK_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$UIPROTECT_USER" "$UIPROTECT_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$ECOBEE_USER" "$ECOBEE_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$DENON_USER" "$DENON_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$EPSON_USER" "$EPSON_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$MEDIA_USER" "$MEDIA_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$RACHIO_USER" "$RACHIO_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$SMARTTUB_USER" "$SMARTTUB_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$WEATHERFLOW_USER" "$WEATHERFLOW_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$SONOS_USER" "$SONOS_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$LUTRON_USER" "$LUTRON_PASS"
-                chmod 0600 /mosquitto-init/mosquitto.passwd
-                echo "Password file created successfully"
+            command: ["/bin/sh", "/scripts/passwd.sh"]
         containers:
+          passwd-sync:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.22
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                # The kubelet refreshes /secret within a minute or two of the
+                # ExternalSecret changing; rebuild the password file and SIGHUP the
+                # broker, which reloads password_file without dropping clients.
+                last=$(cat /secret/*_USER /secret/*_PASS | sha256sum)
+                while true; do
+                  sleep 30
+                  sum=$(cat /secret/*_USER /secret/*_PASS | sha256sum)
+                  [ "$sum" = "$last" ] && continue
+                  if sh /scripts/passwd.sh && pkill -HUP -x mosquitto; then
+                    echo "reloaded mosquitto users"
+                    last=$sum
+                  fi
+                done
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 1m
+                memory: 8Mi
+              limits:
+                memory: 32Mi
           app:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
@@ -76,11 +82,7 @@ spec:
                 enabled: true
               readiness:
                 enabled: true
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop: ["ALL"]
+            securityContext: *securityContext
             resources:
               requests:
                 cpu: 10m
@@ -99,15 +101,27 @@ spec:
             protocol: TCP
     persistence:
       config:
+        type: configMap
+        name: mosquitto-config
+        advancedMounts:
+          mosquitto:
+            app:
+              - path: /mosquitto/config
+                readOnly: true
+            init-passwords: &scripts
+              - path: /scripts
+                readOnly: true
+            passwd-sync: *scripts
+      # Mounted as files (not env) so passwd-sync sees updates without a restart.
+      secret:
         type: secret
         name: mosquitto-secret
-        globalMounts:
-          - path: /mosquitto/config/mosquitto.conf
-            subPath: mosquitto.conf
-            readOnly: true
-          - path: /mosquitto/config/mosquitto.acl
-            subPath: mosquitto.acl
-            readOnly: true
+        advancedMounts:
+          mosquitto:
+            init-passwords: &secret
+              - path: /secret
+                readOnly: true
+            passwd-sync: *secret
       passwd:
         type: emptyDir
         globalMounts:
