@@ -20,6 +20,7 @@ resources:
   - ./manyfold/ks.yaml
   - ./enigma-bbs/ks.yaml
   - ./flightaware/ks.yaml
+  - ./lutron-mqtt/ks.yaml
   - ./media-mqtt/ks.yaml
   - ./node-red/ks.yaml
   - ./rachio-mqtt/ks.yaml
@@ -31,6 +32,7 @@ resources:
   - ./radarr/ks.yaml
   - ./rclone/ks.yaml
   - ./recyclarr/ks.yaml
+  - ./ring-mqtt/ks.yaml
   - ./rtlamr2mqtt/ks.yaml
   - ./sabnzbd/ks.yaml
   - ./smarttub-mqtt/ks.yaml
@@ -38,6 +40,7 @@ resources:
   - ./sonarr/ks.yaml
   - ./sonos-mqtt/ks.yaml
   - ./tautulli/ks.yaml
+  - ./uinetwork-mqtt/ks.yaml
   - ./uiprotect-mqtt/ks.yaml
   - ./varnish/ks.yaml
   - ./weatherflow-mqtt/ks.yaml

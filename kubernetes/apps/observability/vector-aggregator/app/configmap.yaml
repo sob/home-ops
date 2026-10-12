@@ -57,6 +57,22 @@ data:
           }
           .severity = to_string(.severity) ?? "info"
           .facility = to_string(.facility) ?? "user"
+          # UniFi OS sends its activity log as CEF under the console's hostname
+          # (the syslog parser splits "CEF:0|Ubiquiti|…" into appname "CEF" and
+          # the rest). Its syslog header is local time with no zone, which reads
+          # as UTC (hours off), so take the time from UNIFIutcTime instead. Loki
+          # rules match on cef.name and cef.severity (CEF 0-10, also the label).
+          if .appname == "CEF" && starts_with(string(.message) ?? "", "0|Ubiquiti|") {
+            .source = "unifi"
+            cef, err = parse_cef("CEF:" + string!(.message))
+            if err == null {
+              .cef = cef
+              .severity = cef.severity
+              .timestamp = parse_timestamp(cef.UNIFIutcTime, "%+") ?? now()
+            } else {
+              .timestamp = now()
+            }
+          }
 
       classify_talos:
         type: remap
@@ -65,6 +81,8 @@ data:
           .source = "talos"
           .host = to_string(."talos-node") ?? to_string(.host) ?? to_string(.hostname) ?? "unknown"
           .severity = to_string(.severity) ?? "info"
+          # the Loki sink labels every event with facility; Talos has none
+          .facility = to_string(.facility) ?? ""
           if exists(.msg) { .message = to_string(.msg) ?? .message }
 
       # Drop health-check / probe spam before it ever hits storage.
