@@ -102,3 +102,6 @@ spec:
       config:
         type: emptyDir
         sizeLimit: 256Mi
+      # file-sync keeps its checksums in /tmp; the root filesystem is read-only.
+      tmp:
+        type: emptyDir
