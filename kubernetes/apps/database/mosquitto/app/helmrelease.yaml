@@ -59,6 +59,7 @@ spec:
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$EPSON_USER" "$EPSON_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$MEDIA_USER" "$MEDIA_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$RACHIO_USER" "$RACHIO_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$FLAIR_USER" "$FLAIR_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$SMARTTUB_USER" "$SMARTTUB_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$WEATHERFLOW_USER" "$WEATHERFLOW_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$SONOS_USER" "$SONOS_PASS"
