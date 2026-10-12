@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ecobee-mqtt
+spec:
+  groups:
+    - name: ecobee-mqtt
+      rules:
+        - alert: EcobeeMqttNotReady
+          # /readyz fails while MQTT is down or the last ecobee poll failed.
+          expr: |
+            kube_deployment_status_replicas_available{namespace="default", deployment="ecobee-mqtt"} < 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ecobee-mqtt can't reach the ecobee API or Mosquitto"
+            description: "Thermostat and room sensor state on MQTT is stale. `kubectl -n default logs deploy/ecobee-mqtt` says which side is down; \"rejected the credentials\" means re-pairing with `ecobee-mqtt pair`."
