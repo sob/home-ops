@@ -66,6 +66,11 @@ spec:
       app:
         controller: *app
         type: LoadBalancer
+        annotations:
+          # Must be the IP in SONOS_CALLBACK_HOST: the speakers are told to send
+          # events there. Pinned because sonos-pool can lose the race to the
+          # default cilium-pool when both are created together.
+          lbipam.cilium.io/ips: "10.1.100.207"
         # speakers must reach this port unchanged: soco advertises the port it binds
         ports:
           callback:
