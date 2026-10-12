@@ -35,6 +35,7 @@ resources:
   - ./smarttub-mqtt/ks.yaml
 # - ./smtp-relay/ks.yaml
   - ./sonarr/ks.yaml
+  - ./sonos-mqtt/ks.yaml
   - ./tautulli/ks.yaml
   - ./uiprotect-mqtt/ks.yaml
   - ./varnish/ks.yaml
