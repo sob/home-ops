@@ -63,6 +63,7 @@ spec:
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$SMARTTUB_USER" "$SMARTTUB_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$WEATHERFLOW_USER" "$WEATHERFLOW_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$SONOS_USER" "$SONOS_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$LUTRON_USER" "$LUTRON_PASS"
                 chmod 0600 /mosquitto-init/mosquitto.passwd
                 echo "Password file created successfully"
         containers:

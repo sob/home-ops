@@ -19,6 +19,7 @@ resources:
   - ./manyfold/ks.yaml
   - ./enigma-bbs/ks.yaml
   - ./flightaware/ks.yaml
+  - ./lutron-mqtt/ks.yaml
   - ./media-mqtt/ks.yaml
   - ./node-red/ks.yaml
   - ./rachio-mqtt/ks.yaml
