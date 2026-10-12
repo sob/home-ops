@@ -57,7 +57,7 @@ spec:
                   sleep 30
                   sum=$(cat /secret/*_USER /secret/*_PASS | sha256sum)
                   [ "$sum" = "$last" ] && continue
-                  if sh /scripts/passwd.sh && pkill -HUP -x mosquitto; then
+                  if sh /scripts/passwd.sh && kill -HUP "$(pidof mosquitto)"; then
                     echo "reloaded mosquitto users"
                     last=$sum
                   fi
