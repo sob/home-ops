@@ -55,6 +55,7 @@ spec:
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$HUE_USER" "$HUE_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$UIPROTECT_USER" "$UIPROTECT_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$ECOBEE_USER" "$ECOBEE_PASS"
+                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$AUGUST_USER" "$AUGUST_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$DENON_USER" "$DENON_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$EPSON_USER" "$EPSON_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$MEDIA_USER" "$MEDIA_PASS"
