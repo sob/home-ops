@@ -52,7 +52,6 @@ spec:
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$N8N_USER" "$N8N_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$NODERED_USER" "$NODERED_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$BATOCERA_USER" "$BATOCERA_PASS"
-                mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$HUE_USER" "$HUE_PASS"
                 mosquitto_passwd -b /mosquitto-init/mosquitto.passwd "$UIPROTECT_USER" "$UIPROTECT_PASS"
                 chmod 0600 /mosquitto-init/mosquitto.passwd
                 echo "Password file created successfully"
