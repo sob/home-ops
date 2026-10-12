@@ -8,3 +8,14 @@ resources:
   - ./helmrelease.yaml
   - ./external-ip.yaml
   - ./prometheusrule.yaml
+configMapGenerator:
+  - name: mosquitto-config
+    files:
+      - ./config/mosquitto.conf
+      - ./config/mosquitto.acl
+      - ./config/passwd.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    # passwd.sh uses ${var%suffix}; keep Flux postBuild from substituting it
+    kustomize.toolkit.fluxcd.io/substitute: disabled
