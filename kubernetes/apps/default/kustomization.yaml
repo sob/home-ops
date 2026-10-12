@@ -31,6 +31,7 @@ resources:
   - ./radarr/ks.yaml
   - ./rclone/ks.yaml
   - ./recyclarr/ks.yaml
+  - ./ring-mqtt/ks.yaml
   - ./rtlamr2mqtt/ks.yaml
   - ./sabnzbd/ks.yaml
   - ./smarttub-mqtt/ks.yaml
