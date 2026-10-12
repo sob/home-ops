@@ -4,6 +4,7 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
-        "@vdwpsmt/node-red-contrib-flow-splitter-extended": "1.0.3"
+        "@vdwpsmt/node-red-contrib-flow-splitter-extended": "1.0.3",
+        "node-red-contrib-home-sun": "file:projects/flows/nodes/node-red-contrib-home-sun"
     }
 }
