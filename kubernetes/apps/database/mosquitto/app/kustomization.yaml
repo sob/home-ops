@@ -16,3 +16,6 @@ configMapGenerator:
       - ./config/passwd.sh
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    # passwd.sh uses ${var%suffix}; keep Flux postBuild from substituting it
+    kustomize.toolkit.fluxcd.io/substitute: disabled
