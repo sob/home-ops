@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: uiprotect-mqtt
+spec:
+  groups:
+    - name: uiprotect-mqtt
+      rules:
+        - alert: UiprotectMqttNotReady
+          # /readyz fails while MQTT or either Protect websocket is disconnected.
+          expr: |
+            kube_deployment_status_replicas_available{namespace="default", deployment="uiprotect-mqtt"} < 1
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "uiprotect-mqtt can't reach UniFi Protect or Mosquitto"
+            description: "Doorbell rings and camera detections aren't reaching MQTT. `kubectl -n default logs deploy/uiprotect-mqtt` says which side is down; \"rejected the API key\" means the key needs replacing."

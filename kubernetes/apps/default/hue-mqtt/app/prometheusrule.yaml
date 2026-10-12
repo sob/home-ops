@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: hue-mqtt
+spec:
+  groups:
+    - name: hue-mqtt
+      rules:
+        - alert: HueMqttNotReady
+          # /readyz fails while either MQTT or the Hue bridge is disconnected.
+          expr: |
+            kube_deployment_status_replicas_available{namespace="default", deployment="hue-mqtt"} < 1
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "hue-mqtt can't reach the Hue bridge or Mosquitto"
+            description: "Hue lights, sensors and buttons aren't on MQTT, so Node-RED automations using them are blind. `kubectl -n default logs deploy/hue-mqtt` says which side is down."
