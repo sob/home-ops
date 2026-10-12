@@ -30,6 +30,9 @@ spec:
               tag: 1.12.1@sha256:dca3255f35310f6ceb80ed1de94eebd1fe9def7aacaec4107fe37cdaa9eb3be0
             env:
               MQTT_ADDRESS: mosquitto.database.svc.cluster.local
+              # zigbee2mqtt/bridge/* is device definitions and config, not readings;
+              # flattened, it fills MAX_METRICS (2000) and new topics get dropped.
+              MQTT_IGNORED_TOPICS: zigbee2mqtt/bridge/*
               MQTT_V5_PROTOCOL: false
               PROMETHEUS_PORT: &port 3321
               TZ: America/Chicago
