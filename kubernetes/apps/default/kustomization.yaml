@@ -30,6 +30,7 @@ resources:
 # - ./smtp-relay/ks.yaml
   - ./sonarr/ks.yaml
   - ./tautulli/ks.yaml
+  - ./uiprotect-mqtt/ks.yaml
   - ./varnish/ks.yaml
   - ./wizarr/ks.yaml
   - ./zigbee2mqtt/ks.yaml
