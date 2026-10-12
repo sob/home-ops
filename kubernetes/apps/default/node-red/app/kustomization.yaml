@@ -3,4 +3,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - helmrelease.yaml
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ./securitypolicy.yaml
+configMapGenerator:
+  - name: node-red-config
+    files:
+      - ./resources/settings.js
+      - ./resources/package.json
+      # github.com's SSH host keys (api.github.com/meta), for the deploy key.
+      - ./resources/known_hosts
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled

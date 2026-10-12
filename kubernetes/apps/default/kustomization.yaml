@@ -15,7 +15,7 @@ resources:
   - ./manyfold/ks.yaml
   - ./enigma-bbs/ks.yaml
   - ./flightaware/ks.yaml
-# - ./node-red/ks.yaml
+  - ./node-red/ks.yaml
   - ./seerr/ks.yaml
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml

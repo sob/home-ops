@@ -1,0 +1,9 @@
+{
+    "name": "node-red-palette",
+    "description": "Node-RED palette, installed into /data by the setup init container",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "@vdwpsmt/node-red-contrib-flow-splitter-extended": "1.0.3"
+    }
+}
