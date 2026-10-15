@@ -5,6 +5,7 @@
     "private": true,
     "dependencies": {
         "@vdwpsmt/node-red-contrib-flow-splitter-extended": "1.0.3",
+        "node-red-contrib-home-dates": "file:projects/flows/nodes/node-red-contrib-home-dates",
         "node-red-contrib-home-devices": "file:projects/flows/nodes/node-red-contrib-home-devices",
         "node-red-contrib-home-sun": "file:projects/flows/nodes/node-red-contrib-home-sun"
     }
