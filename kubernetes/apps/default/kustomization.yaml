@@ -7,6 +7,7 @@ components:
   - ../../components/common
 resources:
   - ./audiobookshelf/ks.yaml
+  - ./august-mqtt/ks.yaml
   - ./bazarr/ks.yaml
 # - ./bsky-pds/ks.yaml
   - ./denon-mqtt/ks.yaml
