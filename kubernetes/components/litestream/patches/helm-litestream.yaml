@@ -37,7 +37,31 @@ spec:
           litestream:
             dependsOn: litestream-restore
             image: *image
-            args: ["replicate", "-config", "/etc/litestream.yml"]
+            # Litestream holds a read transaction for as long as it runs, so an
+            # app that forces a TRUNCATE checkpoint at startup (qui) times out
+            # and crash-loops. With LITESTREAM_WAIT_PORT set, start replicating
+            # only once the app listens on that port, and stop when it goes
+            # away so a restarted app can checkpoint again. Script variables
+            # are $var, not ${var}, so Flux postBuild leaves them alone.
+            command: ["/bin/bash", "-c"]
+            args:
+              - |
+                port=${LITESTREAM_WAIT_PORT:=}
+                [ -n "$port" ] || exec litestream replicate -config /etc/litestream.yml
+                up() { timeout 2 bash -c "</dev/tcp/127.0.0.1/$port" 2>/dev/null; }
+                until up; do sleep 2; done
+                litestream replicate -config /etc/litestream.yml &
+                pid=$!
+                trap 'kill -TERM $pid; wait $pid; exit' TERM INT
+                while sleep 5; do
+                  kill -0 $pid 2>/dev/null || break
+                  if ! up; then
+                    echo "app stopped listening on $port; releasing the database"
+                    kill -TERM $pid
+                    break
+                  fi
+                done
+                wait $pid
             restartPolicy: Always
             securityContext: *securityContext
             resources:
