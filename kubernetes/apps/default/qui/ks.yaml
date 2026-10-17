@@ -30,6 +30,8 @@ spec:
     substitute:
       APP: *app
       LITESTREAM_DB_PATH: /config/qui.db
+      # qui checkpoints with TRUNCATE at startup; see components/litestream
+      LITESTREAM_WAIT_PORT: "80"
       FILESYNC_DIR: /config
       FILESYNC_FILES: "config.toml"
       GATUS_SUBDOMAIN: qui
