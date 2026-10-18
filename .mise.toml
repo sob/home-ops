@@ -13,7 +13,10 @@ TALOSCONFIG = '{{config_root}}/.talosconfig'
 # If it comes out empty, the terraform modules' onepassword_account validation
 # says so. To skip `op` for this entirely, pin it in a git-ignored
 # .mise.local.toml:  [env] TF_VAR_onepassword_account = "<account url>"
-TF_VAR_onepassword_account = "{{ exec(command='bash -c \"T=$(command -v gtimeout || command -v timeout || echo false); $T 5 op account list --format json 2>/dev/null | jq -r .[0].url 2>/dev/null || true\"') }}"
+# No shell variables in the command: mise expands $NAME in env values itself
+# (to empty here), though $(...) passes through. --foreground keeps `op` in
+# the caller's process group; without it `op` returns nothing under mise.
+TF_VAR_onepassword_account = "{{ exec(command='bash -c \"$(command -v gtimeout || command -v timeout || echo false) --foreground 5 op account list --format json 2>/dev/null | jq -r .[0].url 2>/dev/null || true\"') }}"
 TFE_PARALLELISM = 5
 
 [tools]
