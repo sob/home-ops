@@ -85,7 +85,7 @@ spec:
               capabilities: { drop: ["ALL"] }
         containers:
           app:
-            image:
+            image: &appImage
               repository: ghcr.io/metatool-ai/metamcp
               tag: 2.4.22@sha256:6d5e0cba4ffc4976069a980723c11042f993a978fe0f3071ba2ec8a91ebc3d41
             env:
@@ -137,6 +137,47 @@ spec:
               limits:
                 # MCP servers run as child processes (npx/uvx) of this container.
                 memory: 2Gi
+          # MetaMCP's management API as an MCP server at /admin/mcp, behind its
+          # own bearer token (config/admin-mcp.mjs).
+          admin-mcp:
+            image: *appImage
+            command: ["node", "/config/admin-mcp.mjs"]
+            env:
+              ADMIN_MCP_PORT: "12010"
+              ADMIN_MCP_TOKEN:
+                valueFrom:
+                  secretKeyRef: { name: metamcp-secret, key: ADMIN_MCP_TOKEN }
+              BETTER_AUTH_SECRET:
+                valueFrom:
+                  secretKeyRef: { name: metamcp-secret, key: BETTER_AUTH_SECRET }
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef: { name: metamcp-secret, key: DATABASE_URL }
+            probes:
+              liveness: &adminProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: &adminPort 12010
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *adminProbes
+            securityContext:
+              runAsUser: 1001
+              runAsGroup: 1001
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
           postgres:
             image: *pgImage
             command: ["/bin/bash", "-c"]
@@ -201,6 +242,8 @@ spec:
         ports:
           http:
             port: *port
+          admin:
+            port: *adminPort
     route:
       app:
         annotations:
@@ -215,13 +258,27 @@ spec:
             namespace: network
             sectionName: https-56kbps
         rules:
+          - matches:
+              - path: { type: Exact, value: /admin/mcp }
+            backendRefs:
+              - identifier: app
+                port: *adminPort
           - backendRefs:
               - identifier: app
                 port: *port
         # Tinyauth forward-auth (securitypolicy.yaml) covers every path except
         # the MCP endpoints and OAuth plumbing that agents call directly; those
-        # require an API key or OAuth token in MetaMCP itself.
+        # require an API key or OAuth token in MetaMCP itself, and /admin/mcp
+        # the admin-mcp sidecar's own bearer token.
     persistence:
+      admin-mcp:
+        type: configMap
+        name: metamcp-admin-mcp
+        advancedMounts:
+          main:
+            admin-mcp:
+              - path: /config
+                readOnly: true
       # The dump, shared with the file-sync containers (FILESYNC_DIR).
       backup:
         type: emptyDir
