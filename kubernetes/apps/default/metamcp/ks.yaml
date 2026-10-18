@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app metamcp
+  namespace: flux-system
+spec:
+  targetNamespace: default
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/gatus/guarded
+    # Backs up the Postgres dump (see helmrelease.yaml), not the live database.
+    - ../../../../components/file-sync
+  dependsOn:
+    - name: external-secrets-stores
+      namespace: external-secrets
+  path: ./kubernetes/apps/default/metamcp/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      APP: *app
+      FILESYNC_DIR: /backup
+      FILESYNC_FILES: "metamcp.sql"
+      GATUS_SUBDOMAIN: mcp
+      GATUS_SVC_PORT: "12008"
+      GATUS_SVC_PATH: /health
