@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/backendtrafficpolicy_v1alpha1.json
+# Replaces the gateways' default-backend-policy for this route. MCP clients
+# hold SSE and streamable-HTTP GET streams open, and tool calls can run for
+# minutes, so the default 30s requestTimeout would cut them off. No retries:
+# MCP POSTs (tool calls) aren't idempotent.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: metamcp
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: metamcp
+  timeout:
+    tcp:
+      connectTimeout: 10s
+    http:
+      requestTimeout: 1h

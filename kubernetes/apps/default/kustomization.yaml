@@ -18,6 +18,7 @@ resources:
   - ./kometa/ks.yaml
   - ./lidarr/ks.yaml
   - ./manyfold/ks.yaml
+  - ./metamcp/ks.yaml
   - ./enigma-bbs/ks.yaml
   - ./flightaware/ks.yaml
   - ./lutron-mqtt/ks.yaml

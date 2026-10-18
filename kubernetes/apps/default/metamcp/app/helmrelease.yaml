@@ -1,0 +1,248 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: metamcp
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # MetaMCP only supports Postgres, so it runs in this pod on an emptyDir,
+        # kept in R2 the way the Litestream apps are: file-sync-restore (from
+        # components/file-sync) fetches the last dump, postgres-restore loads it
+        # into a fresh data dir, the postgres container re-dumps every minute
+        # and on shutdown, and the file-sync sidecar pushes the dump whenever it
+        # changes. A crash or node loss loses at most a minute of changes; a
+        # rollout loses nothing, because file-sync (a sidecar) only stops after
+        # postgres has written its final dump.
+        #
+        # First run: R2 must hold files/metamcp/metamcp.sql; seed it with an
+        # empty file, which postgres-restore treats as a new database.
+        initContainers:
+          postgres-restore:
+            dependsOn: file-sync-restore
+            image: &pgImage
+              repository: docker.io/library/postgres
+              tag: 18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+            command: ["/bin/bash", "-c"]
+            # Script variables are $var, not ${var}, so Flux postBuild leaves
+            # them alone.
+            args:
+              - |
+                set -euo pipefail
+                done=/var/lib/postgresql/restored
+                [ -f "$done" ] && exit 0
+                # A failed earlier attempt may have left a half-loaded data dir.
+                find /var/lib/postgresql -mindepth 1 -delete
+                pw=/var/run/postgresql/pwfile
+                printf '%s' "$POSTGRES_PASSWORD" > "$pw"
+                initdb -U metamcp --pwfile="$pw" --auth-local=trust \
+                  --auth-host=scram-sha-256 --locale-provider=builtin \
+                  --locale=C.UTF-8 --encoding=UTF8
+                rm -f "$pw"
+                pg_ctl -w -o "-c listen_addresses=''" start
+                createdb metamcp
+                if [ -s /backup/metamcp.sql ]; then
+                  psql -qX -v ON_ERROR_STOP=1 --single-transaction -d metamcp \
+                    -f /backup/metamcp.sql >/dev/null
+                  echo "restored metamcp.sql"
+                else
+                  echo "metamcp.sql is empty; starting with a new database"
+                fi
+                pg_ctl -w stop
+                touch "$done"
+            env: &pgEnv
+              PGDATA: /var/lib/postgresql/data
+              PGHOST: /var/run/postgresql
+              PGUSER: metamcp
+              POSTGRES_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: metamcp-secret
+                    key: POSTGRES_PASSWORD
+            securityContext: &pgSecurityContext
+              runAsUser: 999
+              runAsGroup: 999
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+        containers:
+          app:
+            image:
+              repository: ghcr.io/metatool-ai/metamcp
+              tag: 2.4.22@sha256:6d5e0cba4ffc4976069a980723c11042f993a978fe0f3071ba2ec8a91ebc3d41
+            env:
+              TZ: America/Chicago
+              NODE_ENV: production
+              APP_URL: &url "https://mcp.${SECRET_DOMAIN}"
+              NEXT_PUBLIC_APP_URL: *url
+              POSTGRES_HOST: 127.0.0.1
+              POSTGRES_PORT: "5432"
+              POSTGRES_USER: metamcp
+              POSTGRES_DB: metamcp
+              # Sign-in is Tinyauth OIDC only: the postgres container turns off
+              # email/password sign-in and sign-up in MetaMCP's config table.
+              # better-auth needs the authorization URL as well as discovery
+              # (better-auth#3278). Tinyauth doesn't advertise PKCE.
+              OIDC_PROVIDER_ID: oidc
+              OIDC_DISCOVERY_URL: "https://login.${SECRET_DOMAIN}/.well-known/openid-configuration"
+              OIDC_AUTHORIZATION_URL: "https://login.${SECRET_DOMAIN}/authorize"
+              OIDC_SCOPES: openid email profile
+              OIDC_PKCE: "false"
+            envFrom:
+              - secretRef:
+                  name: metamcp-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 12008
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  periodSeconds: 5
+                  failureThreshold: 60  # waits for Postgres, then migrates
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                # MCP servers run as child processes (npx/uvx) of this container.
+                memory: 2Gi
+          postgres:
+            image: *pgImage
+            command: ["/bin/bash", "-c"]
+            # Every minute, and once more on shutdown, re-apply the auth policy
+            # and dump. The policy is re-applied rather than set once because
+            # MetaMCP's settings page and migrations can change it:
+            #   - no email/password sign-in or sign-up (OIDC only)
+            #   - every endpoint needs an API key or OAuth, and never takes the
+            #     key in the query string (it would end up in access logs)
+            # Statements fail harmlessly until MetaMCP has run its migrations.
+            # --restrict-key is fixed so an unchanged database dumps
+            # byte-identically and file-sync doesn't push it every minute.
+            args:
+              - |
+                [ -f /var/lib/postgresql/restored ] || { echo "data dir was not restored" >&2; exit 1; }
+                postgres -c listen_addresses=127.0.0.1 &
+                pid=$!
+                policy() {
+                  psql -qX -d metamcp >/dev/null <<'SQL'
+                INSERT INTO config (id, value, description) VALUES
+                  ('DISABLE_SIGNUP', 'true', 'Whether new user signup is disabled'),
+                  ('DISABLE_BASIC_AUTH', 'true', 'Whether basic email/password authentication is disabled')
+                ON CONFLICT (id) DO UPDATE SET value = excluded.value, updated_at = now()
+                  WHERE config.value IS DISTINCT FROM excluded.value;
+                UPDATE endpoints SET enable_api_key_auth = true
+                  WHERE NOT (enable_api_key_auth OR enable_oauth);
+                UPDATE endpoints SET use_query_param_auth = false WHERE use_query_param_auth;
+                SELECT 'ALTER TABLE endpoints ADD CONSTRAINT endpoints_require_auth CHECK ((enable_api_key_auth OR enable_oauth) AND NOT use_query_param_auth)'
+                  WHERE to_regclass('endpoints') IS NOT NULL
+                    AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'endpoints_require_auth')
+                \gexec
+                SQL
+                }
+                dump() {
+                  policy 2>/dev/null
+                  pg_dump --no-owner --no-privileges --restrict-key=metamcp \
+                    -d metamcp -f /backup/.metamcp.sql.tmp &&
+                    mv -f /backup/.metamcp.sql.tmp /backup/metamcp.sql
+                }
+                # SIGINT is Postgres's fast shutdown.
+                trap 'dump; kill -INT $pid; wait $pid; exit' TERM INT
+                until pg_isready -q; do
+                  kill -0 $pid 2>/dev/null || exit 1
+                  sleep 1
+                done
+                while true; do
+                  sleep 60 & wait $!
+                  kill -0 $pid 2>/dev/null || exit 1
+                  dump
+                done
+            env: *pgEnv
+            securityContext: *pgSecurityContext
+            resources:
+              requests:
+                cpu: 25m
+                memory: 64Mi
+              limits:
+                memory: 512Mi
+    service:
+      app:
+        controller: main
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          external-dns.alpha.kubernetes.io/is-public: "true"
+        hostnames: ["mcp.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external-gateway
+            namespace: network
+            sectionName: https-56kbps
+          - name: internal-gateway
+            namespace: network
+            sectionName: https-56kbps
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+        # Tinyauth forward-auth (securitypolicy.yaml) covers every path except
+        # the MCP endpoints and OAuth plumbing that agents call directly; those
+        # require an API key or OAuth token in MetaMCP itself.
+    persistence:
+      # The dump, shared with the file-sync containers (FILESYNC_DIR).
+      backup:
+        type: emptyDir
+        sizeLimit: 1Gi
+        globalMounts:
+          - path: /backup
+      pgdata:
+        type: emptyDir
+        sizeLimit: 2Gi
+        advancedMounts:
+          main:
+            postgres-restore: &pgdata
+              - path: /var/lib/postgresql
+            postgres: *pgdata
+      # Unix socket (and the restore's password file); the root fs is read-only.
+      pgrun:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 1Mi
+        advancedMounts:
+          main:
+            postgres-restore: &pgrun
+              - path: /var/run/postgresql
+            postgres: *pgrun
