@@ -2,7 +2,10 @@
   "mcpServers": {
     "kubernetes": {
       "type": "http",
-      "url": "https://mcp.56kbps.io/mcp"
+      "url": "https://mcp.56kbps.io/metamcp/kubernetes/mcp",
+      "headers": {
+        "Authorization": "Bearer ${METAMCP_API_KEY}"
+      }
     }
   }
 }

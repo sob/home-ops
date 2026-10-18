@@ -236,6 +236,16 @@ spec:
             postgres-restore: &pgdata
               - path: /var/lib/postgresql
             postgres: *pgdata
+      # file-sync keeps the hashes of what it last pushed under /tmp, and its
+      # root fs is read-only (the other apps mount /tmp for every container).
+      file-sync-tmp:
+        type: emptyDir
+        sizeLimit: 16Mi
+        advancedMounts:
+          main:
+            file-sync-restore: &tmp
+              - path: /tmp
+            file-sync: *tmp
       # Unix socket (and the restore's password file); the root fs is read-only.
       pgrun:
         type: emptyDir

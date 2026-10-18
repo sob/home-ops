@@ -6,4 +6,3 @@ namespace: kube-system
 resources:
   - ./rbac.yaml
   - ./helmrelease.yaml
-  - ./httproute.yaml
