@@ -7,3 +7,13 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./securitypolicy.yaml
+configMapGenerator:
+  - name: metamcp-admin-mcp
+    files:
+      - ./config/admin-mcp.mjs
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    # admin-mcp.mjs has ${...} in template literals; keep Flux postBuild from
+    # substituting them
+    kustomize.toolkit.fluxcd.io/substitute: disabled
