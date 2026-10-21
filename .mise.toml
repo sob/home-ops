@@ -20,7 +20,7 @@ TF_VAR_onepassword_account = "{{ exec(command='bash -c \"$(command -v gtimeout |
 TFE_PARALLELISM = 5
 
 [tools]
-"python" = "3.15.0"
+"python" = "3.15.1"
 "pipx:flux-local" = "latest"
 "pipx:check-jsonschema" = "latest"  # validates HelmRelease spec.values against the bjw-s app-template schema
 pipx = "latest"
