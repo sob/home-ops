@@ -27,7 +27,7 @@ spec:
           app:
             image:
               repository: ghcr.io/bluesky-social/pds
-              tag: 0.4.5037@sha256:3a8feb3415e319dbcc13372293b7ef1fb05a318a6ff1d55968cf99ba6633c5d4
+              tag: 0.4.5043@sha256:cc83324bd2b9436aedf875841c212c805aaad9c8e198d690b3925cee15727879
             env:
               TZ: America/Chicago
             envFrom:
