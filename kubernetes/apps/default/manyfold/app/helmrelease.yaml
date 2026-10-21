@@ -37,7 +37,7 @@ spec:
           app:
             image:
               repository: ghcr.io/manyfold3d/manyfold
-              tag: 0.152.0@sha256:bff36afdc55a9274af1739526d6aade44d7bb63e403df9f42933bab6a57aa2fa
+              tag: 0.153.0@sha256:f69029a8f21b76de0b1558f175de19009324f96e4ecd80143997e97174c08fa4
             env:
               TZ: America/Chicago
               # The image starts as root under s6 and drops to PUID/PGID: the
