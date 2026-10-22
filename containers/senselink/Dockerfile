@@ -3,7 +3,7 @@
 # Set from VERSION in docker-bake.hcl (the single, Renovate-tracked source).
 ARG SENSELINK_VERSION
 
-FROM python:3.14-slim AS builder
+FROM python:3.15-slim AS builder
 
 ARG SENSELINK_VERSION
 
@@ -28,7 +28,7 @@ RUN /opt/senselink/bin/pip install \
 COPY selftest.py /tmp/selftest.py
 RUN /opt/senselink/bin/python -I /tmp/selftest.py
 
-FROM python:3.14-slim
+FROM python:3.15-slim
 
 COPY --from=builder /opt/senselink /opt/senselink
 
