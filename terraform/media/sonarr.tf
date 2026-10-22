@@ -26,46 +26,6 @@ resource "sonarr_remote_path_mapping" "sabnzbd" {
   local_path  = "/media/Downloads/sabnzbd/complete/"
 }
 
-resource "sonarr_host" "sonarr" {
-  depends_on = [
-    sonarr_root_folder.series,
-    sonarr_download_client_sabnzbd.sabnzbd,
-    sonarr_remote_path_mapping.sabnzbd
-  ]
-  launch_browser = true
-  port = 80
-  url_base = ""
-  bind_address = "*"
-  application_url = ""
-  instance_name = "Sonarr"
-
-  authentication = {
-    method = "external"
-  }
-  proxy = {
-    enabled = false
-    bypass_local_addresses = true
-  }
-  ssl = {
-    enabled = false
-    certificate_validation = "enabled"
-  }
-  logging = {
-    log_level = "debug"
-    analytics_enabled = false
-    log_size_limit = 1
-  }
-  backup = {
-    folder = "Backups"
-    interval = 7
-    retention = 28
-  }
-  update = {
-    mechanism = "docker"
-    branch = "develop"
-    update_automatically = false
-  }
-}
 
 resource "sonarr_naming" "series" {
   rename_episodes = true
