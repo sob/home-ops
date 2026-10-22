@@ -1,11 +1,11 @@
 resource "grafana_synthetic_monitoring_check" "plex_transaction" {
   job     = "Plex Media Server"
-  target  = "https://plex.56kbps.io"
+  target  = "https://plex.${local.domain}"
   frequency = 300000  # 5 minutes
   timeout   = 30000   # 30 seconds
   enabled   = true
   alert_sensitivity = "medium"
-  
+
   labels = {
     environment = "production"
     service     = "plex"
@@ -20,70 +20,70 @@ resource "grafana_synthetic_monitoring_check" "plex_transaction" {
 
         export default async function() {
           const page = await browser.newPage();
-          
+
           try {
             // Step 1: Navigate to Plex
-            await page.goto('https://plex.56kbps.io', {
+            await page.goto('https://plex.${local.domain}', {
               waitUntil: 'networkidle',
               timeout: 10000
             });
-            
+
             // Step 2: Login (if needed)
             const loginButton = await page.$('button[data-testid="signIn"]');
             if (loginButton) {
               await loginButton.click();
-              
+
               // Wait for login form
               await page.waitForSelector('input[type="email"]', { timeout: 5000 });
-              
+
               // Enter credentials (you'll need to set these as secure variables)
               await page.type('input[type="email"]', __ENV.PLEX_EMAIL);
               await page.type('input[type="password"]', __ENV.PLEX_PASSWORD);
-              
+
               // Submit login
               await page.click('button[type="submit"]');
-              
+
               // Wait for dashboard to load
               await page.waitForSelector('[data-testid="hub-cell"]', { timeout: 10000 });
             }
-            
+
             // Step 3: Browse to Movies library
             await page.click('a[href*="/web/index.html#!/media"]');
             await page.waitForSelector('[data-testid="metadata-poster"]', { timeout: 5000 });
-            
+
             // Step 4: Select a movie
             const moviePosters = await page.$$('[data-testid="metadata-poster"]');
             if (moviePosters.length > 0) {
               // Click on the first available movie
               await moviePosters[0].click();
-              
+
               // Wait for movie details to load
               await page.waitForSelector('button[data-testid="play-button"]', { timeout: 5000 });
-              
+
               // Step 5: Start streaming
               await page.click('button[data-testid="play-button"]');
-              
+
               // Wait for video player to initialize
               await page.waitForSelector('video', { timeout: 10000 });
-              
+
               // Verify video is playing
               const video = await page.$('video');
               const isPlaying = await video.evaluate(vid => !vid.paused);
-              
+
               check(isPlaying, {
                 'video is playing': (playing) => playing === true
               });
-              
+
               // Let it stream for a few seconds to verify
               await page.waitForTimeout(5000);
-              
+
               // Check if video has progressed
               const currentTime = await video.evaluate(vid => vid.currentTime);
               check(currentTime, {
                 'video has progressed': (time) => time > 0
               });
             }
-            
+
           } finally {
             await page.close();
           }
@@ -123,12 +123,12 @@ resource "grafana_rule_group" "plex_synthetic" {
 
     data {
       ref_id = "A"
-      
+
       relative_time_range {
         from = 300
         to   = 0
       }
-      
+
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "probe_success{job=\"Plex Media Server\"} == 0"
@@ -154,12 +154,12 @@ resource "grafana_rule_group" "plex_synthetic" {
 
     data {
       ref_id = "A"
-      
+
       relative_time_range {
         from = 600
         to   = 0
       }
-      
+
       datasource_uid = local.prometheus_cloud_uid
       model = jsonencode({
         expr  = "probe_duration_seconds{job=\"Plex Media Server\"} > 20"

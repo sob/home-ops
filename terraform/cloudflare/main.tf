@@ -29,7 +29,7 @@ provider "onepassword" {
   account = var.onepassword_account
 }
 
-# A dedicated token, scoped to Zone WAF: Edit + Zone: Read on 56kbps.io.
+# A dedicated token, scoped to Zone WAF: Edit + Zone: Read on the zone.
 # external-dns keeps its own DNS-only token.
 provider "cloudflare" {
   api_token = module.onepassword_cloudflare.fields.CLOUDFLARE_WAF_API_TOKEN
@@ -41,8 +41,19 @@ module "onepassword_cloudflare" {
   item   = "cloudflare"
 }
 
+module "onepassword_cluster" {
+  source = "github.com/bjw-s/terraform-1password-item?ref=main"
+  vault  = "STONEHEDGES"
+  item   = "cluster-secrets"
+}
+
+locals {
+  # Public domain, kept out of git
+  domain = nonsensitive(module.onepassword_cluster.fields.SECRET_DOMAIN)
+}
+
 data "cloudflare_zone" "main" {
   filter = {
-    name = "56kbps.io"
+    name = local.domain
   }
 }

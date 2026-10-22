@@ -10,16 +10,16 @@ resource "grafana_dashboard" "media_services" {
     version     = 1
     timezone    = "browser"
     schemaVersion = 39
-    
+
     time = {
       from = "now-6h"
       to   = "now"
     }
-    
+
     timepicker = {
       refresh_intervals = ["10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
     }
-    
+
     templating = {
       list = [
         {
@@ -36,7 +36,7 @@ resource "grafana_dashboard" "media_services" {
         }
       ]
     }
-    
+
     annotations = {
       list = [
         {
@@ -53,7 +53,7 @@ resource "grafana_dashboard" "media_services" {
         }
       ]
     }
-    
+
     panels = [
       # Row: Service Health Overview
       {
@@ -63,14 +63,14 @@ resource "grafana_dashboard" "media_services" {
         id        = 1
         collapsed = false
       },
-      
+
       # Service Availability
       {
         type = "stat"
         title = "Services"
         gridPos = { h = 4, w = 4, x = 0, y = 1 }
         id = 2
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -79,7 +79,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = [
@@ -152,7 +152,7 @@ resource "grafana_dashboard" "media_services" {
           }
           overrides = []
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -165,14 +165,14 @@ resource "grafana_dashboard" "media_services" {
           text = {}
         }
       },
-      
+
       # Movies
       {
         type = "stat"
         title = "Movies"
         gridPos = { h = 4, w = 5, x = 4, y = 1 }
         id = 3
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -180,7 +180,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -195,7 +195,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -207,14 +207,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # TV Shows
       {
         type = "stat"
         title = "TV Shows"
         gridPos = { h = 4, w = 5, x = 9, y = 1 }
         id = 4
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -222,7 +222,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -237,7 +237,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -249,14 +249,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # TV Episodes
       {
         type = "stat"
         title = "TV Episodes"
         gridPos = { h = 4, w = 5, x = 14, y = 1 }
         id = 5
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -264,7 +264,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -279,7 +279,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -291,14 +291,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Music Artists
       {
         type = "stat"
         title = "Music Artists"
         gridPos = { h = 4, w = 5, x = 19, y = 1 }
         id = 6
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -306,7 +306,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -321,7 +321,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -333,14 +333,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
-      # Service Health Table 
+
+      # Service Health Table
       {
         type = "table"
         title = "Service Health Details"
         gridPos = { h = 8, w = 24, x = 0, y = 5 }
         id = 50
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -420,8 +420,8 @@ resource "grafana_dashboard" "media_services" {
               label_join(
                 k6:http_req_duration_seconds:avg{service=~"jellyfin|jellyseerr|lidarr|overseerr|prowlarr|radarr|readarr|sabnzbd|sonarr|tautulli"} * 1000,
                 "workload", "", "service"
-              ) 
-              or 
+              )
+              or
               label_replace(
                 k6:http_req_duration_seconds:avg{service="plex-internal"} * 1000,
                 "workload", "plex", "service", ".*"
@@ -432,7 +432,7 @@ resource "grafana_dashboard" "media_services" {
             instant = true
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             custom = {
@@ -681,7 +681,7 @@ resource "grafana_dashboard" "media_services" {
             }
           ]
         }
-        
+
         options = {
           showHeader = true
           sortBy = [
@@ -691,7 +691,7 @@ resource "grafana_dashboard" "media_services" {
             }
           ]
         }
-        
+
         transformations = [
           {
             id = "joinByField"
@@ -742,7 +742,7 @@ resource "grafana_dashboard" "media_services" {
           }
         ]
       },
-      
+
       # Row: Plex Performance
       {
         type      = "row"
@@ -751,14 +751,14 @@ resource "grafana_dashboard" "media_services" {
         id        = 10
         collapsed = false
       },
-      
+
       # Plex Active Streams
       {
         type = "timeseries"
         title = "Plex Active Streams"
         gridPos = { h = 8, w = 12, x = 0, y = 14 }
         id = 11
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -779,7 +779,7 @@ resource "grafana_dashboard" "media_services" {
             legendFormat = "Transcoding"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             custom = {
@@ -841,7 +841,7 @@ resource "grafana_dashboard" "media_services" {
             }
           ]
         }
-        
+
         options = {
           tooltip = {
             mode = "multi"
@@ -855,14 +855,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Plex Bandwidth Usage
       {
         type = "timeseries"
         title = "Plex Bandwidth Usage"
         gridPos = { h = 8, w = 12, x = 12, y = 14 }
         id = 12
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -877,7 +877,7 @@ resource "grafana_dashboard" "media_services" {
             legendFormat = "WAN Bandwidth"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             custom = {
@@ -910,7 +910,7 @@ resource "grafana_dashboard" "media_services" {
             unit = "Mbits"
           }
         }
-        
+
         options = {
           tooltip = {
             mode = "multi"
@@ -924,7 +924,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Row: Radarr
       {
         type      = "text"
@@ -932,13 +932,13 @@ resource "grafana_dashboard" "media_services" {
         gridPos   = { h = 1, w = 24, x = 0, y = 22 }
         id        = 20
         transparent = true
-        
+
         options = {
           mode = "markdown"
           content = ""
         }
       },
-      
+
       # Radarr Logo
       {
         type = "text"
@@ -946,12 +946,12 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 3, x = 0, y = 23 }
         id = 30
         transparent = true
-        
+
         options = {
           mode = "html"
           content = <<-EOT
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-              <a href="https://radarr.56kbps.io" target="_blank" style="text-decoration: none;">
+              <a href="https://radarr.${local.test_domain}" target="_blank" style="text-decoration: none;">
                 <img src="https://raw.githubusercontent.com/Radarr/Radarr/develop/Logo/128.png" style="width: 64px; height: 64px; margin-bottom: 8px;">
                 <div style="text-align: center; color: #FFC230; font-weight: bold; font-size: 16px;">Radarr</div>
               </a>
@@ -959,14 +959,14 @@ resource "grafana_dashboard" "media_services" {
           EOT
         }
       },
-      
+
       # Radarr Queue
       {
         type = "stat"
         title = "Queue"
         gridPos = { h = 4, w = 4, x = 3, y = 23 }
         id = 21
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -974,7 +974,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -993,12 +993,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Queue"
-                url = "https://radarr.56kbps.io/activity/queue"
+                url = "https://radarr.${local.test_domain}/activity/queue"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1010,14 +1010,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Movies Wanted
       {
         type = "stat"
         title = "Movies Wanted"
         gridPos = { h = 4, w = 4, x = 7, y = 23 }
         id = 22
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1025,7 +1025,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1045,12 +1045,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Wanted"
-                url = "https://radarr.56kbps.io/wanted/missing"
+                url = "https://radarr.${local.test_domain}/wanted/missing"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1062,14 +1062,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Movies Missing
       {
         type = "stat"
         title = "Movies Missing"
         gridPos = { h = 4, w = 5, x = 11, y = 23 }
         id = 23
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1077,7 +1077,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1097,12 +1097,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Missing"
-                url = "https://radarr.56kbps.io/wanted/missing"
+                url = "https://radarr.${local.test_domain}/wanted/missing"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1114,14 +1114,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Total File Size
       {
         type = "stat"
         title = "Total Size"
         gridPos = { h = 4, w = 4, x = 16, y = 23 }
         id = 24
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1129,7 +1129,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1144,7 +1144,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1156,7 +1156,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Health Issues
       {
         type = "stat"
@@ -1164,7 +1164,7 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 4, x = 20, y = 23 }
         id = 25
         description = "Click to view issues in Radarr"
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1172,7 +1172,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1190,13 +1190,13 @@ resource "grafana_dashboard" "media_services" {
             links = [
               {
                 title = "View in Radarr"
-                url = "https://radarr.56kbps.io/system/status"
+                url = "https://radarr.${local.test_domain}/system/status"
                 targetBlank = true
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1208,7 +1208,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Row: TV Library (Sonarr)
       {
         type      = "text"
@@ -1216,13 +1216,13 @@ resource "grafana_dashboard" "media_services" {
         gridPos   = { h = 1, w = 24, x = 0, y = 27 }
         id        = 40
         transparent = true
-        
+
         options = {
           mode = "markdown"
           content = ""
         }
       },
-      
+
       # Sonarr Logo
       {
         type = "text"
@@ -1230,12 +1230,12 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 3, x = 0, y = 28 }
         id = 41
         transparent = true
-        
+
         options = {
           mode = "html"
           content = <<-EOT
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-              <a href="https://sonarr.56kbps.io" target="_blank" style="text-decoration: none;">
+              <a href="https://sonarr.${local.test_domain}" target="_blank" style="text-decoration: none;">
                 <img src="https://raw.githubusercontent.com/Sonarr/Sonarr/develop/Logo/128.png" style="width: 64px; height: 64px; margin-bottom: 8px;">
                 <div style="text-align: center; color: #35C5F4; font-weight: bold; font-size: 16px;">Sonarr</div>
               </a>
@@ -1243,14 +1243,14 @@ resource "grafana_dashboard" "media_services" {
           EOT
         }
       },
-      
+
       # Sonarr Queue
       {
         type = "stat"
         title = "Queue"
         gridPos = { h = 4, w = 4, x = 3, y = 28 }
         id = 42
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1258,7 +1258,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1277,12 +1277,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Queue"
-                url = "https://sonarr.56kbps.io/activity/queue"
+                url = "https://sonarr.${local.test_domain}/activity/queue"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1294,14 +1294,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Series Monitored
       {
         type = "stat"
         title = "Series Monitored"
         gridPos = { h = 4, w = 4, x = 7, y = 28 }
         id = 43
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1309,7 +1309,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1326,12 +1326,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Series"
-                url = "https://sonarr.56kbps.io/series"
+                url = "https://sonarr.${local.test_domain}/series"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1343,14 +1343,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Episodes Missing
       {
         type = "stat"
         title = "Episodes Missing"
         gridPos = { h = 4, w = 5, x = 11, y = 28 }
         id = 44
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1358,7 +1358,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1378,12 +1378,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Missing"
-                url = "https://sonarr.56kbps.io/wanted/missing"
+                url = "https://sonarr.${local.test_domain}/wanted/missing"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1395,14 +1395,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Total File Size
       {
         type = "stat"
         title = "Total Size"
         gridPos = { h = 4, w = 4, x = 16, y = 28 }
         id = 45
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1410,7 +1410,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1425,7 +1425,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1437,7 +1437,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Health Issues
       {
         type = "stat"
@@ -1445,7 +1445,7 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 4, x = 20, y = 28 }
         id = 46
         description = "Click to view issues in Sonarr"
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1453,7 +1453,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1471,13 +1471,13 @@ resource "grafana_dashboard" "media_services" {
             links = [
               {
                 title = "View in Sonarr"
-                url = "https://sonarr.56kbps.io/system/status"
+                url = "https://sonarr.${local.test_domain}/system/status"
                 targetBlank = true
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1489,7 +1489,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Row: Music Library
       {
         type      = "text"
@@ -1497,13 +1497,13 @@ resource "grafana_dashboard" "media_services" {
         gridPos   = { h = 1, w = 24, x = 0, y = 32 }
         id        = 50
         transparent = true
-        
+
         options = {
           mode = "markdown"
           content = ""
         }
       },
-      
+
       # Lidarr Logo
       {
         type = "text"
@@ -1511,12 +1511,12 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 3, x = 0, y = 33 }
         id = 51
         transparent = true
-        
+
         options = {
           mode = "html"
           content = <<-EOT
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-              <a href="https://lidarr.56kbps.io" target="_blank" style="text-decoration: none;">
+              <a href="https://lidarr.${local.test_domain}" target="_blank" style="text-decoration: none;">
                 <img src="https://raw.githubusercontent.com/Lidarr/Lidarr/develop/Logo/128.png" style="width: 64px; height: 64px; margin-bottom: 8px;">
                 <div style="text-align: center; color: #28A745; font-weight: bold; font-size: 16px;">Lidarr</div>
               </a>
@@ -1524,14 +1524,14 @@ resource "grafana_dashboard" "media_services" {
           EOT
         }
       },
-      
+
       # Lidarr Queue
       {
         type = "stat"
         title = "Queue"
         gridPos = { h = 4, w = 4, x = 3, y = 33 }
         id = 52
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1539,7 +1539,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1558,12 +1558,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Queue"
-                url = "https://lidarr.56kbps.io/activity/queue"
+                url = "https://lidarr.${local.test_domain}/activity/queue"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1575,14 +1575,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Lidarr Artists Monitored
       {
         type = "stat"
         title = "Artists Monitored"
         gridPos = { h = 4, w = 4, x = 7, y = 33 }
         id = 53
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1590,7 +1590,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1607,12 +1607,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Artists"
-                url = "https://lidarr.56kbps.io/artist"
+                url = "https://lidarr.${local.test_domain}/artist"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1624,14 +1624,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Lidarr Albums Missing
       {
         type = "stat"
         title = "Albums Missing"
         gridPos = { h = 4, w = 5, x = 11, y = 33 }
         id = 54
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1639,7 +1639,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1658,12 +1658,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Missing"
-                url = "https://lidarr.56kbps.io/wanted/missing"
+                url = "https://lidarr.${local.test_domain}/wanted/missing"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1675,14 +1675,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Lidarr Total Size
       {
         type = "stat"
         title = "Total Size"
         gridPos = { h = 4, w = 4, x = 16, y = 33 }
         id = 55
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1690,7 +1690,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1705,7 +1705,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0.0 GB"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1717,14 +1717,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Lidarr Issues
       {
         type = "stat"
         title = "Issues"
         gridPos = { h = 4, w = 4, x = 20, y = 33 }
         id = 56
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1732,7 +1732,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1750,13 +1750,13 @@ resource "grafana_dashboard" "media_services" {
             links = [
               {
                 title = "View in Lidarr"
-                url = "https://lidarr.56kbps.io/system/status"
+                url = "https://lidarr.${local.test_domain}/system/status"
                 targetBlank = true
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1768,7 +1768,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Row: Book Library
       {
         type      = "text"
@@ -1776,13 +1776,13 @@ resource "grafana_dashboard" "media_services" {
         gridPos   = { h = 1, w = 24, x = 0, y = 37 }
         id        = 60
         transparent = true
-        
+
         options = {
           mode = "markdown"
           content = ""
         }
       },
-      
+
       # Readarr Logo
       {
         type = "text"
@@ -1790,12 +1790,12 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 3, x = 0, y = 38 }
         id = 61
         transparent = true
-        
+
         options = {
           mode = "html"
           content = <<-EOT
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-              <a href="https://readarr.56kbps.io" target="_blank" style="text-decoration: none;">
+              <a href="https://readarr.${local.test_domain}" target="_blank" style="text-decoration: none;">
                 <img src="https://raw.githubusercontent.com/Readarr/Readarr/develop/Logo/128.png" style="width: 64px; height: 64px; margin-bottom: 8px;">
                 <div style="text-align: center; color: #8E2DE2; font-weight: bold; font-size: 16px;">Readarr</div>
               </a>
@@ -1803,14 +1803,14 @@ resource "grafana_dashboard" "media_services" {
           EOT
         }
       },
-      
+
       # Readarr Queue
       {
         type = "stat"
         title = "Queue"
         gridPos = { h = 4, w = 4, x = 3, y = 38 }
         id = 62
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1818,7 +1818,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1837,12 +1837,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Queue"
-                url = "https://readarr.56kbps.io/activity/queue"
+                url = "https://readarr.${local.test_domain}/activity/queue"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1854,14 +1854,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Readarr Authors Monitored
       {
         type = "stat"
         title = "Authors Monitored"
         gridPos = { h = 4, w = 4, x = 7, y = 38 }
         id = 63
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1869,7 +1869,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1886,12 +1886,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Authors"
-                url = "https://readarr.56kbps.io/author"
+                url = "https://readarr.${local.test_domain}/author"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1903,14 +1903,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Readarr Books Missing
       {
         type = "stat"
         title = "Books Missing"
         gridPos = { h = 4, w = 5, x = 11, y = 38 }
         id = 64
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1918,7 +1918,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1937,12 +1937,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Missing"
-                url = "https://readarr.56kbps.io/wanted/missing"
+                url = "https://readarr.${local.test_domain}/wanted/missing"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1954,14 +1954,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Readarr Total Size
       {
         type = "stat"
         title = "Total Size"
         gridPos = { h = 4, w = 4, x = 16, y = 38 }
         id = 65
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -1969,7 +1969,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -1984,7 +1984,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0.0 GB"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -1996,14 +1996,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Readarr Issues
       {
         type = "stat"
         title = "Issues"
         gridPos = { h = 4, w = 4, x = 20, y = 38 }
         id = 66
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2011,7 +2011,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2029,13 +2029,13 @@ resource "grafana_dashboard" "media_services" {
             links = [
               {
                 title = "View in Readarr"
-                url = "https://readarr.56kbps.io/system/status"
+                url = "https://readarr.${local.test_domain}/system/status"
                 targetBlank = true
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -2047,7 +2047,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Row: Indexer Management
       {
         type      = "text"
@@ -2055,13 +2055,13 @@ resource "grafana_dashboard" "media_services" {
         gridPos   = { h = 1, w = 24, x = 0, y = 42 }
         id        = 70
         transparent = true
-        
+
         options = {
           mode = "markdown"
           content = ""
         }
       },
-      
+
       # Prowlarr Logo
       {
         type = "text"
@@ -2069,12 +2069,12 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 3, x = 0, y = 43 }
         id = 71
         transparent = true
-        
+
         options = {
           mode = "html"
           content = <<-EOT
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-              <a href="https://prowlarr.56kbps.io" target="_blank" style="text-decoration: none;">
+              <a href="https://prowlarr.${local.test_domain}" target="_blank" style="text-decoration: none;">
                 <img src="https://raw.githubusercontent.com/Prowlarr/Prowlarr/develop/Logo/128.png" style="width: 64px; height: 64px; margin-bottom: 8px;">
                 <div style="text-align: center; color: #4A90E2; font-weight: bold; font-size: 16px;">Prowlarr</div>
               </a>
@@ -2082,14 +2082,14 @@ resource "grafana_dashboard" "media_services" {
           EOT
         }
       },
-      
+
       # Prowlarr Indexers Enabled
       {
         type = "stat"
         title = "Indexers Enabled"
         gridPos = { h = 4, w = 5, x = 3, y = 43 }
         id = 72
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2097,7 +2097,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2116,12 +2116,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Indexers"
-                url = "https://prowlarr.56kbps.io/indexers"
+                url = "https://prowlarr.${local.test_domain}/indexers"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -2133,14 +2133,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Prowlarr Total Indexers
       {
         type = "stat"
         title = "Total Indexers"
         gridPos = { h = 4, w = 5, x = 8, y = 43 }
         id = 73
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2148,7 +2148,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2165,12 +2165,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Indexers"
-                url = "https://prowlarr.56kbps.io/indexers"
+                url = "https://prowlarr.${local.test_domain}/indexers"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -2182,14 +2182,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Prowlarr Issues
       {
         type = "stat"
         title = "Issues"
         gridPos = { h = 4, w = 11, x = 13, y = 43 }
         id = 74
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2197,7 +2197,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2215,13 +2215,13 @@ resource "grafana_dashboard" "media_services" {
             links = [
               {
                 title = "View in Prowlarr"
-                url = "https://prowlarr.56kbps.io/system/status"
+                url = "https://prowlarr.${local.test_domain}/system/status"
                 targetBlank = true
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -2233,7 +2233,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # Row: Download Activity
       {
         type      = "row"
@@ -2242,14 +2242,14 @@ resource "grafana_dashboard" "media_services" {
         id        = 30
         collapsed = false
       },
-      
+
       # Download Queue Timeline
       {
         type = "timeseries"
         title = "Download Queue Activity"
         gridPos = { h = 8, w = 12, x = 0, y = 56 }
         id = 31
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2276,7 +2276,7 @@ resource "grafana_dashboard" "media_services" {
             legendFormat = "Readarr"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             custom = {
@@ -2308,7 +2308,7 @@ resource "grafana_dashboard" "media_services" {
             decimals = 0
           }
         }
-        
+
         options = {
           tooltip = {
             mode = "multi"
@@ -2322,14 +2322,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # SABnzbd Activity
       {
         type = "timeseries"
         title = "SABnzbd Download Speed"
         gridPos = { h = 8, w = 12, x = 12, y = 56 }
         id = 32
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2344,7 +2344,7 @@ resource "grafana_dashboard" "media_services" {
             legendFormat = "Queue Items"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             custom = {
@@ -2390,7 +2390,7 @@ resource "grafana_dashboard" "media_services" {
             }
           ]
         }
-        
+
         options = {
           tooltip = {
             mode = "multi"
@@ -2404,7 +2404,7 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # SABnzbd Stats Row
       # SABnzbd Logo
       {
@@ -2413,12 +2413,12 @@ resource "grafana_dashboard" "media_services" {
         gridPos = { h = 4, w = 3, x = 0, y = 48 }
         id = 80
         transparent = true
-        
+
         options = {
           mode = "html"
           content = <<-EOT
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-              <a href="https://sabnzbd.56kbps.io" target="_blank" style="text-decoration: none;">
+              <a href="https://sabnzbd.${local.test_domain}" target="_blank" style="text-decoration: none;">
                 <img src="https://raw.githubusercontent.com/sabnzbd/sabnzbd/develop/icons/logo-arrow.svg" style="width: 64px; height: 64px; margin-bottom: 8px;">
                 <div style="text-align: center; color: #FFA500; font-weight: bold; font-size: 16px;">SABnzbd</div>
               </a>
@@ -2426,14 +2426,14 @@ resource "grafana_dashboard" "media_services" {
           EOT
         }
       },
-      
+
       # SABnzbd Queue Length
       {
         type = "stat"
         title = "Queue"
         gridPos = { h = 4, w = 3, x = 3, y = 48 }
         id = 81
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2441,7 +2441,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2460,12 +2460,12 @@ resource "grafana_dashboard" "media_services" {
               {
                 targetBlank = true
                 title = "View Queue"
-                url = "https://sabnzbd.56kbps.io/sabnzbd/"
+                url = "https://sabnzbd.${local.test_domain}/sabnzbd/"
               }
             ]
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -2477,14 +2477,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # SABnzbd Download Speed
       {
         type = "stat"
         title = "Download Speed"
         gridPos = { h = 4, w = 3, x = 6, y = 48 }
         id = 82
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2492,7 +2492,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2509,7 +2509,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0 MB/s"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "area"
@@ -2521,14 +2521,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # SABnzbd Remaining
       {
         type = "stat"
         title = "Remaining"
         gridPos = { h = 4, w = 3, x = 9, y = 48 }
         id = 83
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2536,7 +2536,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2553,7 +2553,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "0 GB"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -2565,14 +2565,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # SABnzbd Disk Usage
       {
         type = "gauge"
         title = "Disk Usage"
         gridPos = { h = 4, w = 4, x = 12, y = 48 }
         id = 84
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2580,7 +2580,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2599,7 +2599,7 @@ resource "grafana_dashboard" "media_services" {
             max = 100
           }
         }
-        
+
         options = {
           orientation = "auto"
           showThresholdLabels = false
@@ -2610,14 +2610,14 @@ resource "grafana_dashboard" "media_services" {
           }
         }
       },
-      
+
       # SABnzbd ETA
       {
         type = "stat"
         title = "ETA"
         gridPos = { h = 4, w = 8, x = 16, y = 48 }
         id = 86
-        
+
         targets = [
           {
             datasource = { type = "prometheus", uid = "$prometheus" }
@@ -2625,7 +2625,7 @@ resource "grafana_dashboard" "media_services" {
             refId = "A"
           }
         ]
-        
+
         fieldConfig = {
           defaults = {
             mappings = []
@@ -2642,7 +2642,7 @@ resource "grafana_dashboard" "media_services" {
             noValue = "-"
           }
         }
-        
+
         options = {
           textMode = "value"
           graphMode = "none"
@@ -2656,6 +2656,6 @@ resource "grafana_dashboard" "media_services" {
       }
     ]
   })
-  
+
   folder = data.grafana_folder.applications.id
 }

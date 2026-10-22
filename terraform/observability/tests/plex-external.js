@@ -22,30 +22,30 @@ export const options = {
 };
 
 export default function () {
-  const domain = __ENV.DOMAIN || '56kbps.io';
+  const domain = __ENV.DOMAIN;
   const tags = {
     service: serviceName,
   };
-  
+
   // Test external access via Cloudflare tunnel
   const externalResponse = http.get(`https://plex.${domain}/web/index.html`, {
     tags: Object.assign({}, tags, { endpoint_type: 'web_interface' })
   });
-  
+
   check(externalResponse, {
     'plex_web_accessible': (r) => r.status === 200,
     'plex_web_has_content': (r) => r.body && r.body.includes('plex'),
   }, tags);
-  
+
   // Test external identity endpoint (public, no auth required)
   const identityResponse = http.get(`https://plex.${domain}/identity`, {
     tags: Object.assign({}, tags, { endpoint_type: 'identity' })
   });
-  
+
   check(identityResponse, {
     'plex_identity_accessible': (r) => r.status === 200,
     'plex_server_identified': (r) => r.body && (r.body.includes('machineIdentifier') || r.body.includes('MediaContainer')),
   }, tags);
-  
+
   sleep(5); // Check every 5 seconds
 }

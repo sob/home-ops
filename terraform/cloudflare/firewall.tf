@@ -4,7 +4,7 @@ locals {
   # Add a country before travelling there.
   login_allowed_countries = ["US", "PL"]
 
-  login_host = "login.56kbps.io"
+  login_host = "login.${local.domain}"
 }
 
 # The zone already has its custom-rules entrypoint (created in the dashboard,
