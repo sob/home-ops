@@ -2,6 +2,7 @@
 # Shelly smart plugs (shelly/<plug>/... -> mqtt-exporter). Plug names come from
 # the MQTT topic prefix set on each plug (shelly/<plug>), so a new plug shows up
 # here once its prefix is set. Rack UPS output is the CyberPower's SNMP reading.
+# Cost panels multiply by the $/kWh box at the top (default 0.14).
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,7 +11,7 @@ metadata:
     grafana_dashboard: "1"
   annotations:
     grafana_folder: "Home"
-    # Grafana variables ($__range) and {{plug}} aren't Flux postBuild variables.
+    # Grafana variables (${rate}, $__range) and {{plug}} aren't Flux postBuild variables.
     kustomize.toolkit.fluxcd.io/substitute: disabled
 data:
   shelly-plugs.json: |
@@ -34,7 +35,26 @@ data:
       },
       "refresh": "1m",
       "templating": {
-        "list": []
+        "list": [
+          {
+            "name": "rate",
+            "label": "$/kWh",
+            "type": "textbox",
+            "query": "0.14",
+            "current": {
+              "text": "0.14",
+              "value": "0.14"
+            },
+            "options": [
+              {
+                "selected": true,
+                "text": "0.14",
+                "value": "0.14"
+              }
+            ],
+            "description": "Electricity rate. 0.14 matches the home EV charging sessions (13.3-14.5 cents/kWh)."
+          }
+        ]
       },
       "panels": [
         {
@@ -575,7 +595,7 @@ data:
         {
           "id": 13,
           "type": "row",
-          "title": "Plug health",
+          "title": "Cost",
           "collapsed": false,
           "gridPos": {
             "x": 0,
@@ -587,6 +607,138 @@ data:
         },
         {
           "id": 14,
+          "type": "stat",
+          "title": "Cost in range",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 34,
+            "w": 8,
+            "h": 6
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(increase(mqtt_aenergy_total{topic=~\"shelly_.*_status_switch:0\"}[$__range]), \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\")) / 1000 * ${rate}",
+              "legendFormat": "{{plug}}",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "justifyMode": "auto",
+            "orientation": "horizontal"
+          },
+          "description": "kWh used over the dashboard range times the rate ($/kWh) at the top."
+        },
+        {
+          "id": 15,
+          "type": "bargauge",
+          "title": "Monthly cost at this range's average draw",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 8,
+            "y": 34,
+            "w": 16,
+            "h": 6
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(avg_over_time(mqtt_apower{topic=~\"shelly_.*_status_switch:0\"}[$__range]), \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\")) * 730 / 1000 * ${rate}",
+              "legendFormat": "{{plug}}",
+              "instant": true
+            },
+            {
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(avg_over_time(upsAdvanceOutputPower{job=\"snmp-exporter-cyberpower-ups\"}[$__range])) * 730 / 1000 * ${rate}",
+              "legendFormat": "rack-ups",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 2,
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "basic",
+            "showUnfilled": true,
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
+          },
+          "description": "Average watts over the range x 730 h/month x rate. A projection, not a bill: pick a range of a day or more so fridge and freezer cycles average out."
+        },
+        {
+          "id": 16,
+          "type": "row",
+          "title": "Plug health",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 40,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 17,
           "type": "timeseries",
           "title": "Mains voltage",
           "datasource": {
@@ -595,7 +747,7 @@ data:
           },
           "gridPos": {
             "x": 0,
-            "y": 34,
+            "y": 41,
             "w": 12,
             "h": 7
           },
@@ -628,7 +780,7 @@ data:
           "options": {}
         },
         {
-          "id": 15,
+          "id": 18,
           "type": "timeseries",
           "title": "Plug temperature",
           "datasource": {
@@ -637,7 +789,7 @@ data:
           },
           "gridPos": {
             "x": 12,
-            "y": 34,
+            "y": 41,
             "w": 12,
             "h": 7
           },
