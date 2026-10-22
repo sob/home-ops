@@ -18,10 +18,10 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    # Multus becomes the primary CNI on every node it runs on (it delegates to
-    # Cilium), so keep it to the nodes that need a second network: those whose
-    # switch port tags VLAN 99 and that have eno1.99 (talos/nodes: metal-08,
-    # metal-09, metal-11, all on GARAGE-PRO-16).
+    # Every node's switch port tags VLAN 99 (LAN-IOT) and Talos gives each a
+    # VLAN 99 link, but the "iot" attachment uses master eno1.99, so Multus runs
+    # only on nodes labeled as having eno1.99 (talos/nodes). That leaves out
+    # metal-07, whose NIC is enp86s0 (it is also tainted for media).
     nodeSelector:
       network.56kbps.io/iot-vlan: "true"
     resources:

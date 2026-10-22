@@ -2,6 +2,8 @@
 machine:
   nodeLabels:
     topology.kubernetes.io/zone: basement
+    # Has eno1.99 (LAN-IOT) for Multus macvlan attachments (kube-system/multus).
+    network.56kbps.io/iot-vlan: "true"
   type: controlplane
   network:
     hostname: metal-01
@@ -16,6 +18,11 @@ machine:
         dhcp: false
         vip:
           ip: 10.1.100.100
+        # LAN-IOT, tagged on the switch port (LAN-METAL is native). No address:
+        # the node stays off LAN-IOT; only Multus macvlan pods get one.
+        vlans:
+          - vlanId: 99
+            dhcp: false
   install:
     diskSelector:
       model: 'Micron_1100_MTFD*'

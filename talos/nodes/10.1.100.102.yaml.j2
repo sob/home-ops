@@ -2,6 +2,8 @@
 machine:
   nodeLabels:
     topology.kubernetes.io/zone: basement
+    # Has eno1.99 (LAN-IOT) for Multus macvlan attachments (kube-system/multus).
+    network.56kbps.io/iot-vlan: "true"
   type: controlplane
   network:
     hostname: metal-02
@@ -16,6 +18,11 @@ machine:
         dhcp: false
         vip:
           ip: 10.1.100.100
+        # LAN-IOT, tagged on the switch port (LAN-METAL is native). No address:
+        # the node stays off LAN-IOT; only Multus macvlan pods get one.
+        vlans:
+          - vlanId: 99
+            dhcp: false
   install:
     # Boot disk replaced 2026-09 (Micron 1100 256GB M.2 SATA -> Samsung 990 PRO 1TB
     # NVMe). The old drive hit 100% rated life with ~3.4x write amplification under
