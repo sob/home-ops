@@ -11,7 +11,7 @@ spec:
   targets:
     staticConfig:
       static:
-        - doom.stonehedges.net
+        - doom.${SECRET_INTERNAL_DOMAIN}
         # Kubernetes nodes
         - 10.1.100.101  # metal-01
         - 10.1.100.102  # metal-02
@@ -21,14 +21,14 @@ spec:
         - 10.1.100.106  # metal-06
         - 10.1.100.107  # metal-07
         # IoT devices
-        - hue.stonehedges.net        # Philips Hue bridge
-        - lutron.stonehedges.net     # Lutron Caseta hub
+        - hue.${SECRET_INTERNAL_DOMAIN}        # Philips Hue bridge
+        - lutron.${SECRET_INTERNAL_DOMAIN}     # Lutron Caseta hub
         # Chamberlain MyQ monitored via UniFi Poller instead (doesn't respond to ICMP)
         # Sonos devices
-        - sonos-back-deck.stonehedges.net
-        - sonos-fire-pit.stonehedges.net
-        - sonos-hottub.stonehedges.net
-        - sonos-kitchen.stonehedges.net
-        - sonos-livingroom.stonehedges.net
-        - sonos-office.stonehedges.net
-        - sonos-trampoline.stonehedges.net
+        - sonos-back-deck.${SECRET_INTERNAL_DOMAIN}
+        - sonos-fire-pit.${SECRET_INTERNAL_DOMAIN}
+        - sonos-hottub.${SECRET_INTERNAL_DOMAIN}
+        - sonos-kitchen.${SECRET_INTERNAL_DOMAIN}
+        - sonos-livingroom.${SECRET_INTERNAL_DOMAIN}
+        - sonos-office.${SECRET_INTERNAL_DOMAIN}
+        - sonos-trampoline.${SECRET_INTERNAL_DOMAIN}

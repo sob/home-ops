@@ -10,21 +10,21 @@ resource "grafana_dashboard" "power_ups" {
       from = "now-6h"
       to = "now"
     }
-    
+
     templating = {
       list = []
     }
-    
+
     panels = [
       # UPS Section Header
       {
         gridPos = { h = 1, w = 24, x = 0, y = 0 }
         id = 200
         type = "row"
-        title = "UPS - CyberPower OR1500PFCLCD (rack-ups.stonehedges.net)"
+        title = "UPS - CyberPower OR1500PFCLCD (rack-ups)"
         collapsed = false
       },
-      
+
       # UPS Status Row
       {
         gridPos = { h = 4, w = 4, x = 0, y = 1 }
@@ -47,11 +47,11 @@ resource "grafana_dashboard" "power_ups" {
               {
                 type = "value"
                 options = {
-                  "0" = { 
+                  "0" = {
                     text = "Offline"
                     index = 0
                   }
-                  "1" = { 
+                  "1" = {
                     text = "Online"
                     index = 1
                   }
@@ -312,7 +312,7 @@ resource "grafana_dashboard" "power_ups" {
           justifyMode = "auto"
         }
       },
-      
+
       # UPS Charts Row
       {
         gridPos = { h = 8, w = 8, x = 0, y = 5 }
@@ -426,16 +426,16 @@ resource "grafana_dashboard" "power_ups" {
           }
         }
       },
-      
+
       # PDU Section Header
       {
         gridPos = { h = 1, w = 24, x = 0, y = 13 }
         id = 202
         type = "row"
-        title = "PDU - CyberPower PDU41005 (rack-pdu.stonehedges.net)"
+        title = "PDU - CyberPower PDU41005 (rack-pdu)"
         collapsed = false
       },
-      
+
       # PDU Status Row
       {
         gridPos = { h = 4, w = 4, x = 0, y = 14 }
@@ -458,11 +458,11 @@ resource "grafana_dashboard" "power_ups" {
               {
                 type = "value"
                 options = {
-                  "0" = { 
+                  "0" = {
                     text = "Offline"
                     index = 0
                   }
-                  "1" = { 
+                  "1" = {
                     text = "Online"
                     index = 1
                   }
@@ -571,7 +571,7 @@ resource "grafana_dashboard" "power_ups" {
           }
         }
       },
-      
+
       # PDU Charts Row
       {
         gridPos = { h = 8, w = 14, x = 0, y = 18 }
@@ -612,6 +612,6 @@ resource "grafana_dashboard" "power_ups" {
       },
     ]
   })
-  
+
   folder = grafana_folder.infrastructure.id
 }
