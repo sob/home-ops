@@ -1,17 +1,17 @@
 # terraform/cloudflare
 
-Cloudflare WAF rules for `56kbps.io`. Currently one rule: only the countries in
-`local.login_allowed_countries` (firewall.tf) can reach `login.56kbps.io`
+Cloudflare WAF rules for the public zone (`SECRET_DOMAIN` in 1Password `cluster-secrets`). Currently one rule: only the countries in
+`local.login_allowed_countries` (firewall.tf) can reach the login host
 (Tinyauth and its bridge); everyone else gets Cloudflare's block page.
 
-Only `login.56kbps.io` is restricted. Apps with their own clients (Plex,
+Only the login host is restricted. Apps with their own clients (Plex,
 Jellyfin, Seerr, the Home Assistant app, *arr API paths) keep working while
 travelling. `halfduplex.io` is a separate zone and isn't touched.
 
 ## Credentials
 - `CLOUDFLARE_WAF_API_TOKEN` in the 1Password `cloudflare` item: a Cloudflare
   API token with **Zone → Zone WAF: Edit** and **Zone → Zone: Read**, for the
-  `56kbps.io` zone only
+  the public zone only
 - State: R2 (`stone-terraform-state/cloudflare/terraform.tfstate`), with the
   `AWS_*` credentials from `terraform/.mise.toml`
 

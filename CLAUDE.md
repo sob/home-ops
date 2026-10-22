@@ -5,10 +5,10 @@
 - **Cluster**: Single cluster running Talos Linux on bare metal Intel NUC devices
 - **Nodes**: 3 control plane nodes, 4 worker nodes (10.1.1.x subnet)
 - **Storage**: no StorageClass and no PVCs (Rook-Ceph and OpenEBS have been removed). App state is on `emptyDir` restored from R2 (Litestream, file-sync) or on a node-local `hostPath` under `/var/local-storage` (Plex on metal-07, enigma-bbs on metal-04, SABnzbd's queue). On Talos the kubelet can't see `/var/local-storage`, so never `subPath` into a hostPath: use one hostPath volume per directory. Media is on NFS
-- **Networking**: Cilium CNI. Production L7 is **Envoy Gateway** — internal gateway `10.1.100.200`, external `10.1.100.201`. External path is Cloudflare Tunnel → cloudflared → gateway service. Tinyauth forward-auth runs as an Envoy `SecurityPolicy` ext-auth (via the tinyauth sidecar's adapter on :8082); Tinyauth is also the OIDC provider (login.56kbps.io) (ingress-nginx has been removed).
+- **Networking**: Cilium CNI. Production L7 is **Envoy Gateway** — internal gateway `10.1.100.200`, external `10.1.100.201`. External path is Cloudflare Tunnel → cloudflared → gateway service. Tinyauth forward-auth runs as an Envoy `SecurityPolicy` ext-auth (via the tinyauth sidecar's adapter on :8082); Tinyauth is also the OIDC provider (`login.${SECRET_DOMAIN}`) (ingress-nginx has been removed).
 - **DNS**: Blocky for internal DNS, external-dns for managing records
 - **Secrets**: External-secrets with OnePassword, SOPS for sensitive data
-- **Domain**: 56kbps.io (using Cloudflare for external access)
+- **Domain**: `${SECRET_DOMAIN}` (public, Cloudflare) and `${SECRET_INTERNAL_DOMAIN}` (LAN), both from 1Password `cluster-secrets`. Never write either domain literally in the repo
 - **Backup**: no volsync. SQLite apps use Litestream (`components/litestream`) and small config files use rclone (`components/file-sync`), both to R2 `stone-volsync`; Plex (hostPath on metal-07) backs up with a restic CronJob, enigma-bbs (hostPath on metal-04) with a tarball sidecar
 
 ## Working Guidelines
