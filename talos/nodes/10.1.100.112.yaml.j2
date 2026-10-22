@@ -16,6 +16,11 @@ machine:
           - network: 0.0.0.0/0
             gateway: 10.1.100.1
         dhcp: false
+        # LAN-IOT, tagged on the switch port (LAN-METAL is native). No address.
+        # Add the iot-vlan label once the NIC is confirmed eno1.
+        vlans:
+          - vlanId: 99
+            dhcp: false
   install:
     # Boot disk only. The Ceph OSD disk (separate device) is declared in the
     # Rook CephCluster `storage.nodes` list, not here.

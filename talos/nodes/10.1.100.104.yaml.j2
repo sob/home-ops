@@ -2,6 +2,9 @@
 machine:
   nodeLabels:
     topology.kubernetes.io/zone: basement
+    # Has eno1.99 (LAN-IOT) for Multus macvlan attachments (kube-system/multus).
+    # The prefix is the cluster domain, which `op inject` fills in at render time.
+    network.{% raw %}{{ op://STONEHEDGES/cluster-secrets/SECRET_INTERNAL_DOMAIN }}{% endraw %}/iot-vlan: "true"
   type: worker
   network:
     hostname: metal-04
@@ -14,6 +17,11 @@ machine:
           - network: 0.0.0.0/0
             gateway: 10.1.100.1
         dhcp: false
+        # LAN-IOT, tagged on the switch port (LAN-METAL is native). No address:
+        # the node stays off LAN-IOT; only Multus macvlan pods get one.
+        vlans:
+          - vlanId: 99
+            dhcp: false
   install:
     diskSelector:
       serial: S4P2NF0M400765R

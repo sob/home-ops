@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: multus
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: multus
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Every node's switch port tags VLAN 99 (LAN-IOT) and Talos gives each a
+    # VLAN 99 link, but the "iot" attachment uses master eno1.99, so Multus runs
+    # only on nodes labeled as having eno1.99 (talos/nodes). That leaves out
+    # metal-07, whose NIC is enp86s0 (it is also tainted for media).
+    nodeSelector:
+      network.${SECRET_INTERNAL_DOMAIN}/iot-vlan: "true"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 512Mi
