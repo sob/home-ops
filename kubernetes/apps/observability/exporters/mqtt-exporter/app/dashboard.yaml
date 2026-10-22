@@ -1,0 +1,672 @@
+---
+# Shelly smart plugs (shelly/<plug>/... -> mqtt-exporter). Plug names come from
+# the MQTT topic prefix set on each plug (shelly/<plug>), so a new plug shows up
+# here once its prefix is set. Rack UPS output is the CyberPower's SNMP reading.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-shelly-plugs
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Home"
+    # Grafana variables ($__range) and {{plug}} aren't Flux postBuild variables.
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+data:
+  shelly-plugs.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "schemaVersion": 39,
+      "tags": [
+        "shelly",
+        "power",
+        "mqtt"
+      ],
+      "title": "Power \u2014 Shelly Plugs",
+      "uid": "shelly-plugs",
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "refresh": "1m",
+      "templating": {
+        "list": []
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "Now",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Plugs",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 1,
+            "w": 6,
+            "h": 5
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(mqtt_online{topic=~\"shelly_.*\"}, \"plug\", \"$1\", \"topic\", \"shelly_(.*)\"))",
+              "legendFormat": "{{plug}}",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "Offline",
+                      "color": "red"
+                    },
+                    "1": {
+                      "text": "Online",
+                      "color": "green"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "justifyMode": "auto",
+            "orientation": "horizontal"
+          },
+          "description": "shelly/<plug>/online: false once the plug misses its MQTT keepalive (power or Wi-Fi lost)."
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Power now",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 6,
+            "y": 1,
+            "w": 6,
+            "h": 5
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(mqtt_apower{topic=~\"shelly_.*_status_switch:0\"}, \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\"))",
+              "legendFormat": "{{plug}}",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "watt",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "decimals": 1
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "justifyMode": "auto",
+            "orientation": "horizontal"
+          }
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Total",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 1,
+            "w": 4,
+            "h": 5
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(max by (plug) (label_replace(mqtt_apower{topic=~\"shelly_.*_status_switch:0\"}, \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\")))",
+              "legendFormat": "Plugs",
+              "instant": true
+            },
+            {
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(upsAdvanceOutputPower{job=\"snmp-exporter-cyberpower-ups\"})",
+              "legendFormat": "Rack UPS",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "watt",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "justifyMode": "auto",
+            "orientation": "horizontal"
+          },
+          "description": "Rack UPS is the rack CyberPower's own output reading (cluster, NAS, network gear)."
+        },
+        {
+          "id": 5,
+          "type": "bargauge",
+          "title": "Energy in range",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 1,
+            "w": 8,
+            "h": 5
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(increase(mqtt_aenergy_total{topic=~\"shelly_.*_status_switch:0\"}[$__range]), \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\")) / 1000",
+              "legendFormat": "{{plug}}",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "kwatth",
+              "decimals": 2,
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "basic",
+            "showUnfilled": true,
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
+          },
+          "description": "aenergy_total is the plug's lifetime Wh counter; this is its increase over the dashboard range."
+        },
+        {
+          "id": 6,
+          "type": "row",
+          "title": "Power",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 6,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Power by plug",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 7,
+            "w": 24,
+            "h": 9
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(mqtt_apower{topic=~\"shelly_.*_status_switch:0\"}, \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\"))",
+              "legendFormat": "{{plug}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "watt",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {},
+          "description": "Plugs publish on change, so flat stretches are real (no new reading)."
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Energy per hour",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 16,
+            "w": 24,
+            "h": 8
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(increase(mqtt_aenergy_total{topic=~\"shelly_.*_status_switch:0\"}[1h]), \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\")) / 1000",
+              "legendFormat": "{{plug}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "kwatth",
+              "custom": {
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "stacking": {
+                  "mode": "normal"
+                },
+                "lineWidth": 0,
+                "showPoints": "never"
+              },
+              "decimals": 3
+            },
+            "overrides": []
+          },
+          "options": {},
+          "interval": "1h"
+        },
+        {
+          "id": 9,
+          "type": "row",
+          "title": "Sump pump",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 24,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "Sump pump power",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 25,
+            "w": 16,
+            "h": 8
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(label_replace(mqtt_apower{topic=~\"shelly_.*_status_switch:0\",topic=~\"shelly_sump-pump_.*\"}, \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\"))",
+              "legendFormat": "Sump pump"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "watt",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {}
+        },
+        {
+          "id": 11,
+          "type": "stat",
+          "title": "Pump run time in range",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 25,
+            "w": 8,
+            "h": 4
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum_over_time((max(mqtt_apower{topic=\"shelly_sump-pump_status_switch:0\"}) > bool 20)[$__range:1m])",
+              "legendFormat": "Minutes running",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "m",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value",
+            "justifyMode": "auto",
+            "orientation": "horizontal"
+          },
+          "description": "Minutes the pump drew more than 20 W, sampled each minute."
+        },
+        {
+          "id": 12,
+          "type": "stat",
+          "title": "Sump plug",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 29,
+            "w": 8,
+            "h": 4
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(mqtt_online{topic=\"shelly_sump-pump\"})",
+              "legendFormat": "Sump plug",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OFFLINE",
+                      "color": "red"
+                    },
+                    "1": {
+                      "text": "Online",
+                      "color": "green"
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "value",
+            "justifyMode": "auto",
+            "orientation": "horizontal"
+          }
+        },
+        {
+          "id": 13,
+          "type": "row",
+          "title": "Plug health",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 33,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 14,
+          "type": "timeseries",
+          "title": "Mains voltage",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 34,
+            "w": 12,
+            "h": 7
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(mqtt_voltage{topic=~\"shelly_.*_status_switch:0\"}, \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\"))",
+              "legendFormat": "{{plug}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "volt",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "decimals": 1
+            },
+            "overrides": []
+          },
+          "options": {}
+        },
+        {
+          "id": 15,
+          "type": "timeseries",
+          "title": "Plug temperature",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 34,
+            "w": 12,
+            "h": 7
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (plug) (label_replace(mqtt_temperature_tC{topic=~\"shelly_.*_status_switch:0\"}, \"plug\", \"$1\", \"topic\", \"shelly_(.*)_status_switch:0\"))",
+              "legendFormat": "{{plug}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {}
+        }
+      ]
+    }
