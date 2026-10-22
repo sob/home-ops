@@ -44,54 +44,54 @@ ingress:
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
       originServerName: "bbs.${SECRET_DOMAIN}"
-  - hostname: "echo-server.56kbps.io"
+  - hostname: "echo-server.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "echo-server.56kbps.io"
-  - hostname: "bazarr.56kbps.io"
+      originServerName: "echo-server.${SECRET_DOMAIN}"
+  - hostname: "bazarr.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "bazarr.56kbps.io"
-  - hostname: "lidarr.56kbps.io"
+      originServerName: "bazarr.${SECRET_DOMAIN}"
+  - hostname: "lidarr.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "lidarr.56kbps.io"
-  - hostname: "prowlarr.56kbps.io"
+      originServerName: "lidarr.${SECRET_DOMAIN}"
+  - hostname: "prowlarr.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "prowlarr.56kbps.io"
-  - hostname: "radarr.56kbps.io"
+      originServerName: "prowlarr.${SECRET_DOMAIN}"
+  - hostname: "radarr.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "radarr.56kbps.io"
-  - hostname: "books.56kbps.io"
+      originServerName: "radarr.${SECRET_DOMAIN}"
+  - hostname: "books.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "books.56kbps.io"
-  - hostname: "bbs-edit.56kbps.io"
+      originServerName: "books.${SECRET_DOMAIN}"
+  - hostname: "bbs-edit.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "bbs-edit.56kbps.io"
-  - hostname: "bbs-draw.56kbps.io"
+      originServerName: "bbs-edit.${SECRET_DOMAIN}"
+  - hostname: "bbs-draw.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "bbs-draw.56kbps.io"
-  - hostname: "sonarr.56kbps.io"
+      originServerName: "bbs-draw.${SECRET_DOMAIN}"
+  - hostname: "sonarr.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "sonarr.56kbps.io"
-  - hostname: "tautulli.56kbps.io"
+      originServerName: "sonarr.${SECRET_DOMAIN}"
+  - hostname: "tautulli.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "tautulli.56kbps.io"
-  - hostname: "qbittorrent.56kbps.io"
+      originServerName: "tautulli.${SECRET_DOMAIN}"
+  - hostname: "qbittorrent.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "qbittorrent.56kbps.io"
-  - hostname: "sab.56kbps.io"
+      originServerName: "qbittorrent.${SECRET_DOMAIN}"
+  - hostname: "sab.${SECRET_DOMAIN}"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:
-      originServerName: "sab.56kbps.io"
+      originServerName: "sab.${SECRET_DOMAIN}"
   - hostname: "halfduplex.io"
     service: https://external-gateway.network.svc.cluster.local:443
     originRequest:

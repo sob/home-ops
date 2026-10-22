@@ -64,9 +64,9 @@ spec:
               FLOWS_REPO: git@github.com:sob/flows.git
               GIT_SSH_COMMAND: ssh -i /data/.ssh/flows -o IdentitiesOnly=yes -o UserKnownHostsFile=/data/.ssh/known_hosts -o StrictHostKeyChecking=yes
               GIT_AUTHOR_NAME: Node-RED
-              GIT_AUTHOR_EMAIL: node-red@56kbps.io
+              GIT_AUTHOR_EMAIL: node-red@${SECRET_DOMAIN}
               GIT_COMMITTER_NAME: Node-RED
-              GIT_COMMITTER_EMAIL: node-red@56kbps.io
+              GIT_COMMITTER_EMAIL: node-red@${SECRET_DOMAIN}
               HOME: /tmp
               npm_config_cache: /tmp/npm
             envFrom: &envFrom

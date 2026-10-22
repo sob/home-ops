@@ -4,7 +4,7 @@
 # appends the original path to `path`, so the check URL is
 # /api/auth/envoy?path=/original/path; the tinyauth sidecar on :8082 turns
 # that into a forward-auth check (see tinyauth's nginx.conf). Signed-out
-# browsers get a 302 to login.56kbps.io; access is the "echo" entry in
+# browsers get a 302 to login.${SECRET_DOMAIN}; access is the "echo" entry in
 # Tinyauth's config.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
