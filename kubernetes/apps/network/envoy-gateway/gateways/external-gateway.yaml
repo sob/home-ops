@@ -6,7 +6,7 @@ metadata:
   # Took over the cilium external-gateway's name + IP (.201) during the
   # Cilium->Envoy L7 cutover. external-dns (cloudflare) filters on
   # --gateway-name=external-gateway, so this name is load-bearing for DNS.
-  # target matches the old cilium external gateway (external.56kbps.io).
+  # target matches the old cilium external gateway (external.${SECRET_DOMAIN}).
   name: external-gateway
   namespace: network
   annotations:

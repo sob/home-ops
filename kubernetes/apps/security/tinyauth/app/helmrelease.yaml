@@ -143,9 +143,9 @@ spec:
     route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["login.56kbps.io"]
+        hostnames: ["login.${SECRET_DOMAIN}"]
         parentRefs:
           - name: external-gateway
             namespace: network

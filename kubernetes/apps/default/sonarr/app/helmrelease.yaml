@@ -41,7 +41,7 @@ spec:
               SONARR__LOG__LEVEL: debug
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
-              SONARR__APPLICATION_URL: https://sonarr.56kbps.io
+              SONARR__APPLICATION_URL: https://sonarr.${SECRET_DOMAIN}
               TZ: America/Chicago
             envFrom: &envFrom
               - secretRef:
@@ -145,9 +145,9 @@ spec:
     route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["sonarr.56kbps.io"]
+        hostnames: ["sonarr.${SECRET_DOMAIN}"]
         parentRefs:
           - name: external-gateway
             namespace: network

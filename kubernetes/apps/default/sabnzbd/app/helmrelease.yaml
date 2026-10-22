@@ -149,7 +149,7 @@ spec:
                 sabnzbd.default.svc,
                 sabnzbd.default.svc.cluster,
                 sabnzbd.default.svc.cluster.local,
-                sab.56kbps.io
+                sab.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -246,9 +246,9 @@ spec:
     route:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           external-dns.alpha.kubernetes.io/is-public: "true"
-        hostnames: ["sab.56kbps.io"]
+        hostnames: ["sab.${SECRET_DOMAIN}"]
         parentRefs:
           - name: external-gateway
             namespace: network

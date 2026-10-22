@@ -10,7 +10,7 @@ import os
 import urllib.error
 import urllib.request
 
-DOMAIN = os.environ.get("DOMAIN", "56kbps.io")
+DOMAIN = os.environ["DOMAIN"]
 VARNISH = os.environ.get("VARNISH_URL", "http://varnish.default.svc.cluster.local").rstrip("/")
 
 APPS = [

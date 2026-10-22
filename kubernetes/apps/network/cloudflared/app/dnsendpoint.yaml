@@ -14,24 +14,24 @@ spec:
     - dnsName: "external.halfduplex.io"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "enigma.56kbps.io"
+    - dnsName: "enigma.${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "ssh.56kbps.io"
+    - dnsName: "ssh.${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "wss.56kbps.io"
+    - dnsName: "wss.${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "mailer.56kbps.io"
+    - dnsName: "mailer.${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "56kbps.io"
+    - dnsName: "${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "edit.56kbps.io"
+    - dnsName: "edit.${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]
-    - dnsName: "draw.56kbps.io"
+    - dnsName: "draw.${SECRET_DOMAIN}"
       recordType: CNAME
       targets: ["${SECRET_CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com"]

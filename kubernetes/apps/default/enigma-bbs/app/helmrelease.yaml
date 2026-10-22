@@ -170,9 +170,9 @@ spec:
                   echo "Patching ENiGMA config for halfduplex.io..."
                   sed -i "s|boardName: 56kbps|boardName: halfduplex|" "$CONFIG_FILE"
                   sed -i "s#prettyBoardName : '|0856kbps'#prettyBoardName : '|08halfduplex'#" "$CONFIG_FILE"
-                  sed -i "s|website         : 'https://56kbps.io'|website         : 'https://halfduplex.io'|" "$CONFIG_FILE"
+                  sed -i "s|website         : 'https://${SECRET_DOMAIN}'|website         : 'https://halfduplex.io'|" "$CONFIG_FILE"
                   sed -i "s|menuFile: /enigma-bbs/menus/56kbps-main.hjson|menuFile: /enigma-bbs/menus/halfduplex-main.hjson|" "$CONFIG_FILE"
-                  sed -i "s|domain: 56kbps.io|domain: halfduplex.io|" "$CONFIG_FILE"
+                  sed -i "s|domain: ${SECRET_DOMAIN}|domain: halfduplex.io|" "$CONFIG_FILE"
                 else
                   echo "No config.hjson found yet; skipping patch"
                 fi
@@ -366,15 +366,15 @@ spec:
             protocol: TCP
             targetPort: 3000
     route:
-      # Sysop tools on 56kbps.io names so Tinyauth's session cookie covers them;
+      # Sysop tools on ${SECRET_DOMAIN} names so Tinyauth's session cookie covers them;
       # securitypolicy.yaml puts both behind Tinyauth (bbs-sysop group).
       # code-server editor.
       code:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           external-dns.alpha.kubernetes.io/is-public: "true"
         hostnames:
-          - bbs-edit.56kbps.io
+          - bbs-edit.${SECRET_DOMAIN}
         parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway
@@ -397,10 +397,10 @@ spec:
       # Draw app.
       draw:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.56kbps.io
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           external-dns.alpha.kubernetes.io/is-public: "true"
         hostnames:
-          - bbs-draw.56kbps.io
+          - bbs-draw.${SECRET_DOMAIN}
         parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway

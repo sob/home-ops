@@ -241,7 +241,7 @@ spec:
         # local admin login (grafana-admin-secret) is Grafana's break-glass.
         auth.generic_oauth:
           enabled: true
-          name: 56kbps.io
+          name: ${SECRET_DOMAIN}
           scopes: openid email profile groups
           auth_url: "https://login.${SECRET_DOMAIN}/authorize"
           token_url: "https://login.${SECRET_DOMAIN}/api/oidc/token"

@@ -54,7 +54,7 @@ spec:
               # identity, but securitypolicy.yaml gates access (media group).
               MULTIUSER: enabled
               OIDC_ISSUER: "https://login.${SECRET_DOMAIN}"
-              OIDC_NAME: 56kbps.io
+              OIDC_NAME: ${SECRET_DOMAIN}
               FORCE_OIDC: enabled
             envFrom:
               - secretRef:

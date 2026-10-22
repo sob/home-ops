@@ -66,12 +66,12 @@ spec:
           - name: forward
             parameters: ${SECRET_INTERNAL_DOMAIN} 10.1.0.1
       - zones:
-          - zone: 56kbps.io
+          - zone: ${SECRET_DOMAIN}
             scheme: dns://
         port: 53
         plugins:
           - name: forward
-            parameters: 56kbps.io 10.1.0.1
+            parameters: ${SECRET_DOMAIN} 10.1.0.1
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

@@ -8,7 +8,7 @@ stringData:
   alertmanager.yaml: |
     global:
       smtp_smarthost: 'localhost:587'
-      smtp_from: 'homeops@56kbps.io'
+      smtp_from: 'homeops@${SECRET_DOMAIN}'
 
     # Template definitions
     templates:
