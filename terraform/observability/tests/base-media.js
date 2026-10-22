@@ -5,7 +5,7 @@ import { check, sleep } from 'k6';
 // Uses k6 built-in metrics with tags for Prometheus export
 // Required ENV vars:
 // - SERVICE_NAME: Name of the service (e.g., "jellyseerr")
-// - SERVICE_URL: Full URL to test (e.g., "https://jellyseerr.56kbps.io")
+// - SERVICE_URL: Full URL to test (e.g., "https://jellyseerr.example.com")
 // Optional ENV vars:
 // - API_ENDPOINT: API endpoint to test (default: "/api/v1/status", set to "none" to skip)
 // - HEALTH_ENDPOINT: Health check endpoint (default: "/", set to "none" to skip)
@@ -42,24 +42,24 @@ export default function () {
   const checkString = __ENV.CHECK_STRING || serviceName;
   const sleepDuration = parseInt(__ENV.SLEEP_DURATION || '10');
   const apiKey = __ENV.API_KEY;
-  
+
   // Common request tags
   const tags = {
     service: serviceName,
   };
-  
+
   // Health check
   if (healthEndpoint && healthEndpoint !== 'none') {
     const healthResponse = http.get(`${serviceUrl}${healthEndpoint}`, {
       tags: Object.assign({}, tags, { endpoint_type: 'health' })
     });
-    
+
     check(healthResponse, {
       'health_status_ok': (r) => r.status === 200,
       'health_has_content': (r) => r.body && (checkString ? r.body.includes(checkString) : r.body.length > 0),
     }, tags);
   }
-  
+
   // API endpoint check
   if (apiEndpoint && apiEndpoint !== 'none') {
     const headers = apiKey ? { 'X-Api-Key': apiKey } : {};
@@ -67,7 +67,7 @@ export default function () {
       headers: headers,
       tags: Object.assign({}, tags, { endpoint_type: 'api' })
     });
-    
+
     const apiChecks = check(apiResponse, {
       'api_status_ok': (r) => r.status === 200,
       'api_has_expected_content': (r) => {
@@ -83,7 +83,7 @@ export default function () {
       },
     }, tags);
   }
-  
+
   // Test additional endpoints if provided
   const additionalEndpoints = __ENV.ADDITIONAL_ENDPOINTS;
   if (additionalEndpoints && additionalEndpoints !== 'none') {
@@ -92,12 +92,12 @@ export default function () {
       const response = http.get(`${serviceUrl}${endpoint}`, {
         tags: Object.assign({}, tags, { endpoint_type: 'additional', endpoint: endpoint })
       });
-      
+
       check(response, {
         'additional_endpoint_ok': (r) => r.status === 200,
       }, tags);
     });
   }
-  
+
   sleep(sleepDuration);
 }

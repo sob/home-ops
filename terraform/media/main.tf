@@ -1,28 +1,28 @@
 terraform {
   required_providers {
     prowlarr = {
-      source = "devopsarr/prowlarr"
+      source  = "devopsarr/prowlarr"
       version = "3.2.2"
     }
     radarr = {
-      source = "devopsarr/radarr"
+      source  = "devopsarr/radarr"
       version = "2.5.0"
     }
     sonarr = {
-      source = "devopsarr/sonarr"
+      source  = "devopsarr/sonarr"
       version = "3.5.0"
     }
     readarr = {
-      source = "devopsarr/readarr"
+      source  = "devopsarr/readarr"
       version = "2.1.0"
     }
 
     lidarr = {
-      source = "devopsarr/lidarr"
+      source  = "devopsarr/lidarr"
       version = "1.13.0"
     }
     onepassword = {
-      source = "1password/onepassword"
+      source  = "1password/onepassword"
       version = "3.4.0"
     }
     restapi = {
@@ -38,6 +38,11 @@ provider "onepassword" {
 
 module "secrets" {
   source = "./modules/onepassword"
-  vault = "STONEHEDGES"
-  items = ["lidarr", "prowlarr", "sonarr", "radarr", "readarr", "sabnzbd", "cluster-secrets", "plex"]
+  vault  = "STONEHEDGES"
+  items  = ["lidarr", "prowlarr", "sonarr", "radarr", "readarr", "sabnzbd", "cluster-secrets", "plex"]
+}
+
+locals {
+  # Public domain, kept out of git
+  domain = nonsensitive(module.secrets.items["cluster-secrets"].SECRET_DOMAIN)
 }

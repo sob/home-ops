@@ -1,7 +1,7 @@
 module "sabnzbd" {
   source = "./modules/sabnzbd"
 
-  url     = "https://sab.56kbps.io"
+  url     = "https://sab.${local.domain}"
   api_key = module.secrets.items["sabnzbd"].SABNZBD_API_KEY
 
   download_dir = "/media/Downloads/sabnzbd/incomplete"
@@ -73,7 +73,7 @@ module "sabnzbd" {
       "sabnzbd.default.svc",
       "sabnzbd.default.svc.cluster",
       "sabnzbd.default.svc.cluster.local",
-      "sab.${module.secrets.items["cluster-secrets"].SECRET_DOMAIN}"
+      "sab.${local.domain}"
     ]
   }
 
