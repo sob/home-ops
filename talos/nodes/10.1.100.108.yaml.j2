@@ -4,7 +4,8 @@ machine:
     # Garage rack / failure domain (existing rack = zone "basement")
     topology.kubernetes.io/zone: garage
     # Has eno1.99 (LAN-IOT) for Multus macvlan attachments (kube-system/multus).
-    iot-vlan: "true"
+    # The prefix is the cluster domain, which `op inject` fills in at render time.
+    network.{% raw %}{{ op://STONEHEDGES/cluster-secrets/SECRET_INTERNAL_DOMAIN }}{% endraw %}/iot-vlan: "true"
   type: controlplane
   network:
     hostname: metal-08
