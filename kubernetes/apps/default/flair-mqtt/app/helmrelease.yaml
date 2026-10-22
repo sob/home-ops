@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/flair-mqtt
-              tag: main@sha256:a15cd41a59c8add106346601d81300ee04aadee0a5fc915810d40565d41d289e
+              tag: main@sha256:ee3bad3778cae7a5efd94b9607bef89570c75796e43ed0cb581d8bb0f13bbbba
             envFrom:
               - secretRef:
                   name: flair-mqtt-secret
