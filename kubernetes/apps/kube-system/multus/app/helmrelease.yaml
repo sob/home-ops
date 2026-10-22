@@ -23,7 +23,7 @@ spec:
     # only on nodes labeled as having eno1.99 (talos/nodes). That leaves out
     # metal-07, whose NIC is enp86s0 (it is also tainted for media).
     nodeSelector:
-      network.56kbps.io/iot-vlan: "true"
+      iot-vlan: "true"
     resources:
       requests:
         cpu: 10m

@@ -19,7 +19,7 @@ machine:
             gateway: 10.1.100.1
         dhcp: false
         # LAN-IOT, tagged on the switch port (LAN-METAL is native). No address:
-        # the node stays off LAN-IOT. Not labeled network.56kbps.io/iot-vlan:
+        # the node stays off LAN-IOT. Not labeled iot-vlan:
         # this NIC is enp86s0, so the link is enp86s0.99 and the "iot"
         # NetworkAttachmentDefinition (master eno1.99) can't attach here.
         vlans:
