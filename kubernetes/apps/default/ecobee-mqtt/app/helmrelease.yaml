@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/ecobee-mqtt
-              tag: main@sha256:2fb131f770268f2ef558261f25d0853f27412da70836b55d51186c1a899e5993
+              tag: main@sha256:cab0b7e675829af5f783ffa0e1ac5fb06d49322a7b20b2154903069e3ca101a2
             envFrom:
               - secretRef:
                   name: ecobee-mqtt-secret

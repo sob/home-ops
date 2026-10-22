@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/smarttub-mqtt
-              tag: main@sha256:25503bddc288db2ea5fa38d229062e3bc9d44db1f2aefe10c479cfa37560142a
+              tag: main@sha256:5637a3bc32c8b154bc97bd467f36747b1ff584f064b9ffe8b4339434e632e409
             envFrom:
               - secretRef:
                   name: smarttub-mqtt-secret
