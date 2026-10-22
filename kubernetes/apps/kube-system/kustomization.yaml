@@ -14,6 +14,7 @@ resources:
   - ./kubelet-csr-approver/ks.yaml
   - ./mcp-readonly/ks.yaml
   - ./metrics-server/ks.yaml
+  - ./multus/ks.yaml
   - ./node-feature-discovery/ks.yaml
   - ./node-local-dns/ks.yaml
   - ./nut-upsd/ks.yaml

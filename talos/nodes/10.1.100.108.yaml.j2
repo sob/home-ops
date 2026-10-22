@@ -3,6 +3,9 @@ machine:
   nodeLabels:
     # Garage rack / failure domain (existing rack = zone "basement")
     topology.kubernetes.io/zone: garage
+    # GARAGE-PRO-16 port 1 tags VLAN 99 (LAN-IOT): eno1.99 below carries Multus
+    # macvlan attachments (kube-system/multus), which runs only on these nodes.
+    network.56kbps.io/iot-vlan: "true"
   type: controlplane
   network:
     hostname: metal-08
@@ -19,6 +22,10 @@ machine:
         # Requires this node on the SAME L2 subnet (10.1.100.0/24) as the other CPs.
         vip:
           ip: 10.1.100.100
+        # No address: the node stays off LAN-IOT; only macvlan pods get one.
+        vlans:
+          - vlanId: 99
+            dhcp: false
   install:
     # Boot disk is a Samsung 970 EVO 500GB NVMe (was an ADATA SU800 M.2 SATA,
     # which is no longer present). Matched on serial like metal-09 — unambiguous

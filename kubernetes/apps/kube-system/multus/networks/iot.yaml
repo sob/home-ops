@@ -1,0 +1,27 @@
+---
+# LAN-IOT (VLAN 99, 10.1.99.0/24) for pods that must be on the same L2 as IoT
+# devices, e.g. to receive their broadcasts. macvlan on the node's eno1.99, with
+# the address chosen per pod from 10.1.99.2-5 (below the UniFi DHCP pool, which
+# starts at .6):
+#   k8s.v1.cni.cncf.io/networks: '[{"name":"iot","namespace":"kube-system","ips":["10.1.99.5/24"]}]'
+# No gateway: the pod's default route stays on the cluster network (eth0), so
+# only traffic to 10.1.99.0/24 leaves through this interface.
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: iot
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "iot",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "master": "eno1.99",
+          "mode": "bridge",
+          "capabilities": { "ips": true },
+          "ipam": { "type": "static" }
+        }
+      ]
+    }

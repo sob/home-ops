@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/refs/heads/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: multus
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: multus
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Multus becomes the primary CNI on every node it runs on (it delegates to
+    # Cilium), so keep it to the nodes that need a second network: those whose
+    # switch port tags VLAN 99 and that have eno1.99 (talos/nodes: metal-08,
+    # metal-09, metal-11, all on GARAGE-PRO-16).
+    nodeSelector:
+      network.56kbps.io/iot-vlan: "true"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 512Mi
