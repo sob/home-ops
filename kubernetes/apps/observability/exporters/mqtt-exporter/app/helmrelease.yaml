@@ -32,7 +32,11 @@ spec:
               MQTT_ADDRESS: mosquitto.database.svc.cluster.local
               # zigbee2mqtt/bridge/* is device definitions and config, not readings;
               # flattened, it fills MAX_METRICS (2000) and new topics get dropped.
-              MQTT_IGNORED_TOPICS: zigbee2mqtt/bridge/*
+              # Shelly plugs: keep status/switch:0 (output, apower, aenergy) and
+              # online; events/rpc repeats the same readings with changing
+              # params, and sys/cloud/mqtt are device housekeeping.
+              MQTT_IGNORED_TOPICS: >-
+                zigbee2mqtt/bridge/*,shelly/*/events/rpc,shelly/*/status/sys,shelly/*/status/cloud,shelly/*/status/mqtt
               MQTT_V5_PROTOCOL: false
               PROMETHEUS_PORT: &port 3321
               TZ: America/Chicago
@@ -61,13 +65,14 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
+            # No CPU limit: rendering ~2000 series took 18 s throttled at 20m,
+            # past the 10 s scrape timeout, so Prometheus saw it as down.
             resources:
               requests:
-                cpu: 10m
+                cpu: 20m
                 memory: 32Mi
               limits:
-                cpu: 20m
-                memory: 100.14Mi
+                memory: 128Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
