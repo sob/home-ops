@@ -10,6 +10,8 @@ machine:
       # TODO: set to the MAC of the NIC you cable in metal-12 (verify via `get links`)
       - deviceSelector:
           hardwareAddr: 'REPLACE_WITH_MAC'
+          # VLAN links share the parent's MAC; without this they match too.
+          physical: true
         addresses:
           - 10.1.100.112/24
         routes:

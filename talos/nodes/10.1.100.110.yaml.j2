@@ -11,6 +11,8 @@ machine:
       # Verify against `talosctl -n <ip> get links --insecure` before applying.
       - deviceSelector:
           hardwareAddr: 'REPLACE_WITH_MAC'
+          # VLAN links share the parent's MAC; without this they match too.
+          physical: true
         addresses:
           - 10.1.100.110/24
         routes:

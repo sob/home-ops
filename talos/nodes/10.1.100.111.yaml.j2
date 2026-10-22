@@ -13,6 +13,8 @@ machine:
       # Confirmed MAC for metal-11 (the 1c:69:7a box).
       - deviceSelector:
           hardwareAddr: 1c:69:7a:63:d6:4a
+          # VLAN links share the parent's MAC; without this they match too.
+          physical: true
         addresses:
           - 10.1.100.111/24
         routes:

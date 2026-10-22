@@ -11,6 +11,8 @@ machine:
     interfaces:
       - deviceSelector:
           hardwareAddr: 94:c6:91:a4:0a:61
+          # VLAN links share the parent's MAC; without this they match too.
+          physical: true
         addresses:
           - 10.1.100.103/24
         routes:
