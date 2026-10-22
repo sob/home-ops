@@ -127,110 +127,110 @@ data:
 
     // Scrape IoT device probes for monitoring
     prometheus.scrape "blackbox_iot_hue" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "hue.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "hue.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_iot.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["hue.stonehedges.net"],
+        "target" = ["hue.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     prometheus.scrape "blackbox_iot_lutron" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "lutron.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "lutron.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_iot.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["lutron.stonehedges.net"],
+        "target" = ["lutron.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     // Scrape Sonos device probes
     prometheus.scrape "blackbox_sonos_back_deck" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-back-deck.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-back-deck.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["sonos-back-deck.stonehedges.net"],
+        "target" = ["sonos-back-deck.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     prometheus.scrape "blackbox_sonos_fire_pit" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-fire-pit.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-fire-pit.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["sonos-fire-pit.stonehedges.net"],
+        "target" = ["sonos-fire-pit.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     prometheus.scrape "blackbox_sonos_hottub" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-hottub.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-hottub.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["sonos-hottub.stonehedges.net"],
+        "target" = ["sonos-hottub.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     prometheus.scrape "blackbox_sonos_kitchen" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-kitchen.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-kitchen.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["sonos-kitchen.stonehedges.net"],
+        "target" = ["sonos-kitchen.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     prometheus.scrape "blackbox_sonos_livingroom" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-livingroom.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-livingroom.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["sonos-livingroom.stonehedges.net"],
+        "target" = ["sonos-livingroom.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     prometheus.scrape "blackbox_sonos_office" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-office.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-office.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["sonos-office.stonehedges.net"],
+        "target" = ["sonos-office.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }
 
     prometheus.scrape "blackbox_sonos_trampoline" {
-      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-trampoline.stonehedges.net"}]
+      targets = [{"__address__" = "blackbox-exporter.observability.svc.cluster.local:9115", "instance" = "sonos-trampoline.${SECRET_INTERNAL_DOMAIN}"}]
       forward_to = [prometheus.relabel.blackbox_sonos.receiver]
       scrape_interval = "60s"
       scrape_timeout = "10s"
       metrics_path = "/probe"
       params = {
-        "target" = ["sonos-trampoline.stonehedges.net"],
+        "target" = ["sonos-trampoline.${SECRET_INTERNAL_DOMAIN}"],
         "module" = ["icmp"],
       }
     }

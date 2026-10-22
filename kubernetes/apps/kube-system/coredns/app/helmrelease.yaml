@@ -59,12 +59,12 @@ spec:
           - name: reload
           - name: loadbalance
       - zones:
-          - zone: stonehedges.net
+          - zone: ${SECRET_INTERNAL_DOMAIN}
             scheme: dns://
         port: 53
         plugins:
           - name: forward
-            parameters: stonehedges.net 10.1.0.1
+            parameters: ${SECRET_INTERNAL_DOMAIN} 10.1.0.1
       - zones:
           - zone: 56kbps.io
             scheme: dns://
