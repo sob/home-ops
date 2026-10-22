@@ -112,6 +112,17 @@
       },
       "separateMinorPatch": true
     },
+    {
+      // sob/home-bridges builds every bridge from one commit and publishes
+      // ghcr.io/sob/<bridge>:main; each HelmRelease pins main@sha256:<digest>,
+      // so one bridges commit is one PR here instead of fourteen.
+      "description": "home-bridges images",
+      "groupName": "home-bridges",
+      "matchPackageNames": ["/^ghcr\\.io/sob/[a-z0-9-]+-mqtt$/"],
+      "group": {
+        "commitMessageTopic": "home-bridges"
+      }
+    },
 
     // Observability Stack
     {

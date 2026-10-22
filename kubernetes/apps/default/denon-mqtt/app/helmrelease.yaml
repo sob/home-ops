@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/denon-mqtt
-              tag: sha-7fb63b4
+              tag: main@sha256:c052b5222cf9a4859a78a47af49db0cafdca3af5db5e7d6a5dfd319ad80e0b90
             envFrom:
               - secretRef:
                   name: denon-mqtt-secret
