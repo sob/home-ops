@@ -25,7 +25,7 @@ This Terraform module manages observability infrastructure including synthetic m
 The module pulls configuration from 1Password. Required items:
 
 **k6 item** in STONEHEDGES vault:
-- `DOMAIN`: Your domain name (e.g., "56kbps.io")
+- `DOMAIN`: Your domain name (defaults to the 1Password item)
 
 **grafana-cloud item** in STONEHEDGES vault:
 - `GRAFANA_URL`: Grafana Cloud URL
@@ -210,7 +210,7 @@ terraform/observability/
 We need to test that our Grafana alert notifications are working correctly, specifically:
 
 1. **Template Processing** - Verify Grafana's template engine processes our notification templates correctly
-2. **RESOLVED Prefix** - Confirm that resolved alerts show `✅ RESOLVED:` prefix via template logic  
+2. **RESOLVED Prefix** - Confirm that resolved alerts show `✅ RESOLVED:` prefix via template logic
 3. **Variable Substitution** - Ensure `{{ $value }}` shows actual metric values instead of template code
 4. **Real Metric Values** - Test with actual current metrics, not simulated data
 5. **New Messages** - Each test should create fresh notifications, not reuse existing ones
@@ -221,12 +221,12 @@ We need to test that our Grafana alert notifications are working correctly, spec
 - **Problem**: Bypasses Grafana's template engine entirely
 - **Issue**: Doesn't test the actual notification pipeline we're using in production
 
-### ❌ Grafana API Endpoints  
+### ❌ Grafana API Endpoints
 - **Problem**: Contact point test APIs return 404/500 errors
 - **Issue**: Grafana Cloud may not expose these endpoints or requires different authentication
 
 ### ❌ Separate Test Alerts
-- **Problem**: Duplicate logic maintenance  
+- **Problem**: Duplicate logic maintenance
 - **Issue**: If we change alert logic, we have to update it in two places (violates DRY)
 
 ## Proposed Solution: Single-Condition Manual Trigger
@@ -248,7 +248,7 @@ expr = "((avg(avg_over_time(k6_checks_rate{service=\"jellyseerr\"}[10m])) * 100)
    - Notification shows actual success rate (e.g., "success rate: 97%")
    - Goes through Grafana's complete template system
 
-2. **Resolve Alert**: `kubectl delete pod test-trigger-jellyseerr`  
+2. **Resolve Alert**: `kubectl delete pod test-trigger-jellyseerr`
    - Assuming real metrics are healthy (≥95%), alert resolves
    - Notification shows "✅ RESOLVED:" prefix via template
    - Tests the complete resolved notification flow
@@ -273,20 +273,20 @@ expr = "((avg(avg_over_time(k6_checks_rate{service=\"jellyseerr\"}[10m])) * 100)
    ```bash
    # Fire alert with real current metrics
    kubectl run test-trigger-jellyseerr --image=nginx --restart=Never
-   
+
    # Wait for Slack notification, verify it shows real values
    # Verify template processing works correctly
-   
-   # Resolve alert  
+
+   # Resolve alert
    kubectl delete pod test-trigger-jellyseerr
-   
+
    # Wait for resolved notification with "✅ RESOLVED:" prefix
    ```
 
 ### Phase 2: Task Automation
 Create `task alerting:test:trigger ALERT=SyntheticTestsFailing-jellyseerr` that:
 - Creates trigger pod
-- Waits for alert to fire  
+- Waits for alert to fire
 - Deletes trigger pod
 - Waits for alert to resolve
 - Provides status feedback
@@ -302,6 +302,6 @@ Create `task alerting:test:trigger ALERT=SyntheticTestsFailing-jellyseerr` that:
 
 ## Next Steps
 1. Implement Phase 1 with jellyseerr alert
-2. Test manually to verify approach works  
+2. Test manually to verify approach works
 3. Create automated task for testing
 4. Expand to other alerts if successful
