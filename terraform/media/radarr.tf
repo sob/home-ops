@@ -26,44 +26,6 @@ resource "radarr_remote_path_mapping" "sabnzbd" {
   local_path  = "/media/Downloads/sabnzbd/complete/"
 }
 
-resource "radarr_host" "radarr" {
-  depends_on = [ radarr_root_folder.movies, radarr_download_client_sabnzbd.sabnzbd ]
-  launch_browser = true
-  port = 80
-  url_base = ""
-  bind_address = "*"
-  application_url = ""
-  instance_name = "Radarr"
-
-  authentication = {
-    method = "external"
-  }
-  proxy = {
-    enabled = false
-    bypass_local_addresses = true
-    port = 8080
-  }
-  ssl = {
-    enabled = false
-    certificate_validation = "enabled"
-    port = 9898
-  }
-  logging = {
-    log_level = "info"
-    analytics_enabled = false
-    log_size_limit = 1
-  }
-  backup = {
-    folder = "Backups"
-    interval = 7
-    retention = 28
-  }
-  update = {
-    mechanism = "docker"
-    branch = "develop"
-    update_automatically = false
-  }
-}
 
 resource "radarr_naming" "movies" {
   rename_movies = true

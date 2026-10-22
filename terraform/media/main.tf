@@ -1,4 +1,19 @@
 terraform {
+  backend "s3" {
+    bucket = "stone-terraform-state"
+    key    = "media/terraform.tfstate"
+    endpoints = {
+      s3 = "https://c22e00d98ac0a9cf99b28d585113a449.r2.cloudflarestorage.com"
+    }
+    region                      = "auto"
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_s3_checksum            = true
+    use_path_style              = true
+  }
+
   required_providers {
     prowlarr = {
       source  = "devopsarr/prowlarr"
@@ -11,10 +26,6 @@ terraform {
     sonarr = {
       source  = "devopsarr/sonarr"
       version = "3.5.0"
-    }
-    readarr = {
-      source  = "devopsarr/readarr"
-      version = "2.1.0"
     }
 
     lidarr = {
@@ -39,7 +50,7 @@ provider "onepassword" {
 module "secrets" {
   source = "./modules/onepassword"
   vault  = "STONEHEDGES"
-  items  = ["lidarr", "prowlarr", "sonarr", "radarr", "readarr", "sabnzbd", "cluster-secrets", "plex"]
+  items  = ["lidarr", "prowlarr", "sonarr", "radarr", "sabnzbd", "cluster-secrets", "plex"]
 }
 
 locals {

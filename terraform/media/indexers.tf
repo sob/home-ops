@@ -8,9 +8,11 @@ resource "prowlarr_indexer" "nzbplanet" {
   implementation = "Newznab"
   config_contract = "NewznabSettings"
   protocol       = "usenet"
+  # Prowlarr requires redirect for Usenet indexers.
+  redirect       = true
   app_profile_id = 1
   priority       = 25
-  
+
   fields = [
     {
       name = "baseUrl"
@@ -68,9 +70,11 @@ resource "prowlarr_indexer" "nzbgeek" {
   implementation = "Newznab"
   config_contract = "NewznabSettings"
   protocol       = "usenet"
+  # Prowlarr requires redirect for Usenet indexers.
+  redirect       = true
   app_profile_id = 1
   priority       = 25
-  
+
   fields = [
     {
       name = "baseUrl"
@@ -128,9 +132,11 @@ resource "prowlarr_indexer" "nzbfinder" {
   implementation = "Newznab"
   config_contract = "NewznabSettings"
   protocol       = "usenet"
+  # Prowlarr requires redirect for Usenet indexers.
+  redirect       = true
   app_profile_id = 1
   priority       = 25
-  
+
   fields = [
     {
       name = "baseUrl"
