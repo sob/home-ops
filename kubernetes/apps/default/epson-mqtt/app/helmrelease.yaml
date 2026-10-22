@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/epson-mqtt
-              tag: sha-7fb63b4
+              tag: main@sha256:58d167b1fe135f3ee8b6e8729ecdda776f63be2ec06b4c199e5e72dcab8e05d9
             envFrom:
               - secretRef:
                   name: epson-mqtt-secret

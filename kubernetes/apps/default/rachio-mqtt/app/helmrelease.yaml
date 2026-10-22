@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/rachio-mqtt
-              tag: sha-7fb63b4
+              tag: main@sha256:449c44ffce9dcfda165d0d2514c19a115222d936c73b298ccf588cf9e415fc9b
             envFrom:
               - secretRef:
                   name: rachio-mqtt-secret
