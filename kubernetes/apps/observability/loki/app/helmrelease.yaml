@@ -87,6 +87,9 @@ spec:
           - selector: '{source="network"}'
             priority: 10
             period: 6480h # 270d
+          - selector: '{namespace="database", container="audit"}'
+            priority: 10
+            period: 6480h # 270d
           - selector: '{namespace=~"kube-system|flux-system|security"}'
             priority: 5
             period: 6480h # 270d

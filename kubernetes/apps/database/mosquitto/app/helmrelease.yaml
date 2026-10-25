@@ -67,12 +67,39 @@ spec:
               readOnlyRootFilesystem: true
               capabilities:
                 drop: ["ALL"]
-            resources:
+            resources: &sidecarResources
               requests:
                 cpu: 1m
                 memory: 8Mi
               limits:
                 memory: 32Mi
+          # Audit log: every command and every device-reported state change, to
+          # stdout and from there to Loki ({container="audit"}). MQTT doesn't
+          # carry the publisher, so attribution comes from the payload: Shelly
+          # RPC requests name their "src", and Shelly state changes name their
+          # "source" (button, SHC = Shelly cloud/app, http, mqtt, ...).
+          # Power-only NotifyStatus updates are dropped as noise.
+          audit:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.22
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                while true; do
+                  mosquitto_sub -h 127.0.0.1 -i mqtt-audit -R -v -t '#' \
+                    -u "$(cat /secret/EXPORTER_USER)" -P "$(cat /secret/EXPORTER_PASS)" |
+                    awk '
+                      $1 ~ /\/events\/rpc$/ {
+                        if (!/"NotifyStatus"/ || /"(output|source|state)"/) { print; fflush() }
+                        next
+                      }
+                      $1 ~ /\/(set|command)(\/|$)/ || $1 ~ /\/rpc$/ { print; fflush() }
+                    '
+                  sleep 5
+                done
+            securityContext: *securityContext
+            resources: *sidecarResources
           app:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
@@ -122,6 +149,7 @@ spec:
               - path: /secret
                 readOnly: true
             passwd-sync: *secret
+            audit: *secret
       passwd:
         type: emptyDir
         globalMounts:
