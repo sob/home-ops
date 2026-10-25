@@ -8,5 +8,6 @@ components:
 resources:
   - ./controller/ks.yaml
   - ./gradle-cache/ks.yaml
+  - ./runner-reaper/ks.yaml
   - ./runners/ks.yaml
   - ./runners-slim/ks.yaml

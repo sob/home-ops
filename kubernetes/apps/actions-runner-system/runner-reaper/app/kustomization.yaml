@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./rbac.yaml
+  - ./cronjob.yaml
+configMapGenerator:
+  - name: runner-reaper-script
+    files:
+      - reap.sh=./resources/reap.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    # The script uses shell ${vars}; keep Flux from substituting them.
+    kustomize.toolkit.fluxcd.io/substitute: disabled
