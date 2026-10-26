@@ -6,7 +6,7 @@
 # version (exit 7 -> ARC marked the scale set Outdated and deleted it).
 variable "VERSION" {
   // renovate: datasource=docker depName=ghcr.io/actions/actions-runner
-  default = "2.338.1"
+  default = "2.338.2"
 }
 
 variable "PLATFORMS" {
