@@ -39,7 +39,7 @@ spec:
             dependsOn: file-sync-restore
             image: &pgImage
               repository: docker.io/library/postgres
-              tag: 18.6-bookworm@sha256:cb2693589d73c629f95f45a625aa48aad00ccab0fdb124ed9ba47e8bb9dd16de
+              tag: 18.6-bookworm@sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8
             command: ["/bin/bash", "-c"]
             # Script variables are $var, not ${var}, so Flux postBuild leaves
             # them alone.
