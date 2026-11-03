@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: synology-doom-tls
+spec:
+  secretName: synology-doom-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: doom.${SECRET_INTERNAL_DOMAIN}
+  dnsNames:
+    - doom.${SECRET_INTERNAL_DOMAIN}
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    rotationPolicy: Always
+  duration: 2160h # 90 days
+  renewBefore: 720h # 30 days
