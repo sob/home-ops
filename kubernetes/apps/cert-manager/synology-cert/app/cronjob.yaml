@@ -1,0 +1,72 @@
+---
+# Installs the cert-manager certificate on the Synology NAS. Let's Encrypt
+# validates over DNS-01 (Cloudflare), so the NAS needs no public DNS record or
+# open port. Weekly is plenty: cert-manager renews 30 days before expiry.
+#
+# The job verifies DSM's TLS certificate, so the first import is manual: export
+# tls.crt/tls.key from the synology-doom-tls secret, split tls.crt into the
+# leaf and the chain, and import them in DSM (Security > Certificate > Add >
+# Import) with the CERT_DESC below as the description, set as default.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: synology-cert
+spec:
+  schedule: "17 4 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 300
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: deploy
+              image: docker.io/alpine/k8s:1.37.1@sha256:712dc5385d1c1a3f83b747fa9e40f64d433a97f72ff42f9755ff7dd1f62846e4
+              command: ["/bin/sh", "/scripts/deploy.sh"]
+              env:
+                - name: DSM_URL
+                  value: https://doom.${SECRET_INTERNAL_DOMAIN}:5001
+                - name: CERT_DESC
+                  value: doom.${SECRET_INTERNAL_DOMAIN} (cert-manager)
+              envFrom:
+                - secretRef:
+                    name: synology-cert-secret
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 64Mi
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: tls
+                  mountPath: /tls
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: scripts
+              configMap:
+                name: synology-cert-script
+            - name: tls
+              secret:
+                secretName: synology-doom-tls
+            - name: tmp
+              emptyDir: {}
