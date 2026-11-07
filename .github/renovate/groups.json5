@@ -47,9 +47,10 @@
       "groupName": "cilium-all",
       "matchPackageNames": [
         "cilium",
-        "cilium/cilium"
+        "cilium/cilium",
+        "quay.io/cilium/charts/cilium"
       ],
-      "matchDatasources": ["helm"],
+      "matchDatasources": ["helm", "docker"],
       "commitMessageTopic": "cilium"
     },
     {
@@ -205,7 +206,7 @@
       "description": "Intel Device Plugins Group",
       "groupName": "intel-device-plugins",
       "matchPackagePatterns": ["intel-device-plugins"],
-      "matchDatasources": ["helm"],
+      "matchDatasources": ["helm", "docker"],
       "group": {
         "commitMessageTopic": "Intel device plugins"
       },
