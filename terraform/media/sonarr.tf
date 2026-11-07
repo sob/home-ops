@@ -31,7 +31,7 @@ resource "sonarr_naming" "series" {
   rename_episodes = true
   replace_illegal_characters = true
   colon_replacement_format = 4  # Replace with Space Dash Space
-  multi_episode_style = 0  # Extend
+  multi_episode_style = 5  # Prefixed Range: S01E05-E06, the multi-episode form Plex recognizes
 
   # Series Folder Format
   # Creates: /media/Library/series/Series Title (2024) {tvdb-12345}
