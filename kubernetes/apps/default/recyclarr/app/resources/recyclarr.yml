@@ -68,6 +68,11 @@ sonarr:
       - name: Ultra-HD
         reset_unmatched_scores:
           enabled: true
+          # Created in Sonarr, not by Recyclarr (TRaSH has no generic MULTI
+          # format), so keep Recyclarr from zeroing its score. See the
+          # language block under custom_formats.
+          except:
+            - Multi-language
         upgrade:
           allowed: true  # grab best available (1080p), upgrade to 4K when a release appears
           until_quality: Web-2160p
@@ -152,6 +157,18 @@ sonarr:
       # handles Dolby Vision natively. Boost DV and HDR there only — the other
       # profiles are 1080p and below, where these formats are rare and scoring
       # them would shuffle rankings for no viewing benefit.
+      # Language. Nothing scored language, so Ultra-HD took French-only and
+      # Spanish-only releases (The Loud House S10E05/E08, Star Trek S01E22).
+      # Not English rejects any release without English. Releases that carry
+      # English plus French or Spanish are preferred over English-only, which
+      # is the fallback: the "Multi-language" format (title matches MULTI or
+      # DUAL) is defined in Sonarr and scored there at +2000, enough to beat
+      # the WEB tier scores, and excluded from reset_unmatched_scores above.
+      - trash_ids:
+          - 69aa1e159f97d860440b04cd6d590c4f  # Language: Not English
+        assign_scores_to:
+          - name: Ultra-HD
+            score: -10000
       - trash_ids:
           - 7c3a61a9c6cb04f52f1544be6d44a026  # DV Boost
           - 505d871304820ba7106b693be6fe4a9e  # HDR
