@@ -42,6 +42,8 @@ sonarr:
       - name: Any
         reset_unmatched_scores:
           enabled: true
+          except:
+            - Multi-language  # created in Sonarr; see the language block
         upgrade:
           allowed: true
           until_quality: Web-1080p
@@ -162,12 +164,16 @@ sonarr:
       # Not English rejects any release without English. Releases that carry
       # English plus French or Spanish are preferred over English-only, which
       # is the fallback: the "Multi-language" format (title matches MULTI or
-      # DUAL) is defined in Sonarr and scored there at +2000, enough to beat
-      # the WEB tier scores, and excluded from reset_unmatched_scores above.
+      # DUAL) is defined in Sonarr and scored there at +2000 on Ultra-HD and
+      # Any, enough to beat the WEB tier scores, and excluded from
+      # reset_unmatched_scores on both.
       - trash_ids:
           - 69aa1e159f97d860440b04cd6d590c4f  # Language: Not English
         assign_scores_to:
           - name: Ultra-HD
+            score: -10000
+          # Shows only released in SD (DS9, Voyager, She-Ra) live on Any.
+          - name: Any
             score: -10000
       - trash_ids:
           - 7c3a61a9c6cb04f52f1544be6d44a026  # DV Boost
