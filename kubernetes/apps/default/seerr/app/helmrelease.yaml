@@ -32,7 +32,7 @@ spec:
           restore:
             image: &litestream
               repository: docker.io/litestream/litestream
-              tag: 0.5.17@sha256:4b02b9859a6b6b4087d8b8944e15f7e984bd7957cba322bbeee38b0e27b9656a
+              tag: 0.5.18@sha256:513bff62a88fc0c86c73d27333c41c54c89fe890a7c32a551600adff9309b11b
             # No fallback seed: the pre-migration DB left on the Ceph PVC is frozen,
             # and silently restoring it would lose everything since. With no
             # replica in R2 this starts Seerr empty, which is obvious.
