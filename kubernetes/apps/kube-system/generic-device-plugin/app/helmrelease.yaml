@@ -1,0 +1,70 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: generic-device-plugin
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Advertises host USB devices as extended resources, so a pod can request
+    # one (squat.ai/rtlsdr: 1) and get just that device node instead of
+    # running privileged. This plugin is the one privileged piece: it needs
+    # the host's /dev and the kubelet's device-plugin socket.
+    controllers:
+      generic-device-plugin:
+        type: daemonset
+        pod:
+          priorityClassName: system-node-critical
+          # Only where a device it serves can be plugged in.
+          nodeSelector:
+            nesdr.feature.node.kubernetes.io/rtlamr: "true"
+          tolerations:
+            - operator: Exists
+        containers:
+          app:
+            image:
+              repository: ghcr.io/squat/generic-device-plugin
+              tag: f7c3291@sha256:8dc84958301f054bf72d9753a7a2c9af3d6642a9844b34d1171b3f2cdb4a15f6
+            args:
+              - --domain
+              - squat.ai
+              # Nooelec NESDR (RTL2838) for rtlamr2mqtt's water meters.
+              - --device
+              - |
+                name: rtlsdr
+                groups:
+                  - usb:
+                      - vendor: "0bda"
+                        product: "2838"
+            securityContext:
+              privileged: true
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+    persistence:
+      dev:
+        type: hostPath
+        hostPath: /dev
+        globalMounts:
+          - path: /dev
+      device-plugins:
+        type: hostPath
+        hostPath: /var/lib/kubelet/device-plugins
+        globalMounts:
+          - path: /var/lib/kubelet/device-plugins
