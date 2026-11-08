@@ -1,2 +1,0 @@
-# Allow all topics (matching EMQX behavior)
-pattern readwrite #
