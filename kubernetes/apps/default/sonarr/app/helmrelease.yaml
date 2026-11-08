@@ -39,6 +39,10 @@ spec:
               SONARR__LOG__ANALYTICSENABLED: "False"
               SONARR__LOG__DBENABLED: "False"
               SONARR__LOG__LEVEL: debug
+              # Host headers Sonarr answers to: the gateway hostname and the
+              # in-cluster service names other apps use. localhost, 127.0.0.1 and
+              # the pod hostname are always allowed; the probes send Host: localhost.
+              SONARR__SERVER__ALLOWEDHOSTS: sonarr.${SECRET_DOMAIN},sonarr,sonarr.default,sonarr.default.svc,sonarr.default.svc.cluster.local
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
               SONARR__APPLICATION_URL: https://sonarr.${SECRET_DOMAIN}
@@ -54,6 +58,9 @@ spec:
                   httpGet:
                     path: /ping
                     port: *port
+                    httpHeaders:
+                      - name: Host
+                        value: localhost
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
