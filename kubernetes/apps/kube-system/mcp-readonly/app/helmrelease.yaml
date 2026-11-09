@@ -28,12 +28,8 @@ spec:
             image:
               repository: ghcr.io/containers/kubernetes-mcp-server
               tag: v0.1.2
-            args:
-              - --read-only
-              - --port
-              - "8080"
-              - --stateless
-              - --disable-multi-cluster
+            # v0.1 dropped the per-setting flags; settings live in TOML.
+            args: ["--config", "/config/config.toml"]
             probes:
               liveness: &probes
                 enabled: true
@@ -73,3 +69,19 @@ spec:
         ports:
           http:
             port: *port
+    configMaps:
+      config:
+        data:
+          config.toml: |
+            port = "8080"
+            read_only = true
+            stateless = true
+            # Only this cluster; was --disable-multi-cluster.
+            cluster_provider_strategy = "in-cluster"
+    persistence:
+      config:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /config
+            readOnly: true

@@ -35,8 +35,10 @@ spec:
               image: docker.io/alpine/k8s:1.37.2@sha256:dcb7185e112a453aa72f426754849a97357727ef8f40168fb208c8cf59952042
               command: ["/bin/sh", "/scripts/deploy.sh"]
               env:
+                # DSM's Login Portal custom domain serves this name on 443
+                # only; :5001 answers 404 for it.
                 - name: DSM_URL
-                  value: https://doom.${SECRET_INTERNAL_DOMAIN}:5001
+                  value: https://doom.${SECRET_INTERNAL_DOMAIN}
                 - name: CERT_DESC
                   value: doom.${SECRET_INTERNAL_DOMAIN} (cert-manager)
               envFrom:
