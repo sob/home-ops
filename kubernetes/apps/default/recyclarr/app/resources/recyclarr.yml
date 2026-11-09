@@ -42,8 +42,6 @@ sonarr:
       - name: Any
         reset_unmatched_scores:
           enabled: true
-          except:
-            - Multi-language  # created in Sonarr; see the language block
         upgrade:
           allowed: true
           until_quality: Web-1080p
@@ -70,11 +68,6 @@ sonarr:
       - name: Ultra-HD
         reset_unmatched_scores:
           enabled: true
-          # Created in Sonarr, not by Recyclarr (TRaSH has no generic MULTI
-          # format), so keep Recyclarr from zeroing its score. See the
-          # language block under custom_formats.
-          except:
-            - Multi-language
         upgrade:
           allowed: true  # grab best available (1080p), upgrade to 4K when a release appears
           until_quality: Web-2160p
@@ -155,26 +148,31 @@ sonarr:
           - name: Web 720p
           - name: Any
           - name: Ultra-HD
-      # Ultra-HD is the 4K profile watched on the Shield downstairs, which
-      # handles Dolby Vision natively. Boost DV and HDR there only — the other
-      # profiles are 1080p and below, where these formats are rare and scoring
-      # them would shuffle rankings for no viewing benefit.
       # Language. Nothing scored language, so Ultra-HD took French-only and
       # Spanish-only releases (The Loud House S10E05/E08, Star Trek S01E22).
       # Not English rejects any release without English. Releases that carry
-      # English plus French or Spanish are preferred over English-only, which
-      # is the fallback: the "Multi-language" format (title matches MULTI or
-      # DUAL) is defined in Sonarr and scored there at +2000 on Ultra-HD and
-      # Any, enough to beat the WEB tier scores, and excluded from
-      # reset_unmatched_scores on both.
+      # English plus other audio (MULTI/DUAL) stay acceptable but score the
+      # same as English-only: a +2000 multi-language bonus was tried and it
+      # pulled in Turkish and Portuguese dual releases and re-downloaded
+      # English files already in the library as "upgrades".
+      #
+      # Bad Dual Groups is TRaSH's list of dual-audio groups to avoid; it
+      # includes C76, the Portuguese "A.Diplomata" The Diplomat. TSRG (Turkish
+      # dual) and SKST (posts obfuscated 7z that SABnzbd can't unpack) aren't
+      # on it, so a global Sonarr release profile blocks them.
       - trash_ids:
           - 69aa1e159f97d860440b04cd6d590c4f  # Language: Not English
+          - 32b367365729d530ca1c124a0b180c64  # Bad Dual Groups
         assign_scores_to:
           - name: Ultra-HD
             score: -10000
           # Shows only released in SD (DS9, Voyager, She-Ra) live on Any.
           - name: Any
             score: -10000
+      # Ultra-HD is the 4K profile watched on the Shield downstairs, which
+      # handles Dolby Vision natively. Boost DV and HDR there only — the other
+      # profiles are 1080p and below, where these formats are rare and scoring
+      # them would shuffle rankings for no viewing benefit.
       - trash_ids:
           - 7c3a61a9c6cb04f52f1544be6d44a026  # DV Boost
           - 505d871304820ba7106b693be6fe4a9e  # HDR
