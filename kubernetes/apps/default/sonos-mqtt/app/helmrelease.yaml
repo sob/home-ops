@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/sonos-mqtt
-              tag: main@sha256:51a2716c00a24ed0885d74e4d45a277fb6f1642d4f0790300800555b14af25f7
+              tag: main@sha256:c3fd63990de6ab56165c2259f8c6e8a2253167e7d3670cafeff14b30c03021be
             envFrom:
               - secretRef:
                   name: sonos-mqtt-secret

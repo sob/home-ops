@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/uinetwork-mqtt
-              tag: main@sha256:63de7878699cc60ba4384d006fe329df4e9b27a9cc9adcd0578b6cddc9630e77
+              tag: main@sha256:ed7ee60974cc8e141ee55d52d0a1c68eda963eb7952ec6f8d448a625eef5879b
             envFrom:
               - secretRef:
                   name: uinetwork-mqtt-secret
