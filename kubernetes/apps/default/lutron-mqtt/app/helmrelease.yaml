@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/lutron-mqtt
-              tag: main@sha256:77f47dea751b96c50123c8f663cf6ce9d92d8cc5ad42b78f6a261deee8b95741
+              tag: main@sha256:cccfabf3d5a76b2a857f70e64ff4642049042ed7546a8af52d4865714bbbd851
             envFrom:
               - secretRef:
                   name: lutron-mqtt-secret

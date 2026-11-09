@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/hue-mqtt
-              tag: main@sha256:f0ad83970a69c0c625da42617d5d232ca054b82ffb32a36aab83f3725009d37d
+              tag: main@sha256:b67a1a66ab3fcc17b3be11a8d6682f6525044999795d9f56c2e14b4e53da3019
             envFrom:
               - secretRef:
                   name: hue-mqtt-secret

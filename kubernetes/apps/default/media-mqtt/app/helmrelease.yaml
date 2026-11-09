@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/media-mqtt
-              tag: main@sha256:c44a6351064eec13416548626154088befb11b74a4cd9d7a129a43c8ac9d14ad
+              tag: main@sha256:3f442f1c58e7c8bad164080be35d7bb45a3ae0134e7b34424504f53bb5f70683
             envFrom:
               - secretRef:
                   name: media-mqtt-secret

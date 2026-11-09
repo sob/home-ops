@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/uiprotect-mqtt
-              tag: main@sha256:0506ccdc1e4060db1a0d80404ca75542e96aaae57a4120b47d21d25237474079
+              tag: main@sha256:188f82184dd29120e9f89793137d05faa2ed8c8b29e54e52b9cde8ca84e11dbc
             envFrom:
               - secretRef:
                   name: uiprotect-mqtt-secret

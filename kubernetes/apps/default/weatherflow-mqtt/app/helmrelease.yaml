@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sob/weatherflow-mqtt
-              tag: main@sha256:00d2fb4c83342ed1a782af25d4e0ff96e68919e3fbd500894ba6c17c1814d557
+              tag: main@sha256:2ccf0d329628f70ae0cdd4d394f15fcf0e9b71efde53606569fb78118f80c05b
             envFrom:
               - secretRef:
                   name: weatherflow-mqtt-secret
