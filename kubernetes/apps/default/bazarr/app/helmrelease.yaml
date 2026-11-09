@@ -81,6 +81,9 @@ spec:
               GITSYNC_REF: master
               GITSYNC_PERIOD: 24h
               GITSYNC_ROOT: /add-ons
+              # The volume is fsGroup-owned, not owned by this uid, and git
+              # 2.47 (git-sync 4.8) refuses such repos as "dubious ownership".
+              GITSYNC_GIT_CONFIG: safe.directory:/add-ons
             resources:
               requests:
                 cpu: 10m
