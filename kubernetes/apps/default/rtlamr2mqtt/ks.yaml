@@ -17,6 +17,8 @@ spec:
       namespace: external-secrets
     - name: node-feature-discovery-rules
       namespace: kube-system
+    - name: generic-device-plugin
+      namespace: kube-system
   path: ./kubernetes/apps/default/rtlamr2mqtt/app
   prune: true
   sourceRef:

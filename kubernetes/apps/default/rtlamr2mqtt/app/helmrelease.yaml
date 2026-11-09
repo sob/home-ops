@@ -30,14 +30,18 @@ spec:
             image:
               repository: docker.io/allangood/rtlamr2mqtt
               tag: 2026.11.8@sha256:43da30d4af9c06aaaa14917003949c0c4761f4ad352e9b7c6cd3f3e5cfe688ed
+            # The NESDR comes from generic-device-plugin as an extended
+            # resource (just its /dev/bus/usb node), so no privileged mode.
             securityContext:
-              privileged: true
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 493m
                 memory: 32Mi
               limits:
                 memory: 256Mi
+                squat.ai/rtlsdr: 1
     defaultPodOptions:
       nodeSelector:
         nesdr.feature.node.kubernetes.io/rtlamr: "true"
