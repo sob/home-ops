@@ -17,7 +17,7 @@ terraform {
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "5.28.1"
+      version = "5.29.0"
     }
     onepassword = {
       source = "1password/onepassword"
