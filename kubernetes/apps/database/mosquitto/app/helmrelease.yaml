@@ -39,13 +39,13 @@ spec:
           init-passwords:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.22
+              tag: 2.0.23
             command: ["/bin/sh", "/scripts/passwd.sh"]
         containers:
           passwd-sync:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.22
+              tag: 2.0.23
             command: ["/bin/sh", "-c"]
             args:
               - |
@@ -82,7 +82,7 @@ spec:
           audit:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.22
+              tag: 2.0.23
             command: ["/bin/sh", "-c"]
             args:
               - |
@@ -103,7 +103,7 @@ spec:
           app:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.22
+              tag: 2.0.23
             probes:
               liveness:
                 enabled: true
